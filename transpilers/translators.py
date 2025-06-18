@@ -158,24 +158,21 @@ def translate(circuit, translating_method, gate_set=None):
         qiskit_circuit = transpile(
             circuit,
             basis_gates=gate_set_obj,
-            optimization_level=0, # TODO: 3 just for experiments!
+            optimization_level=0,
         )
         return qiskit_circuit
 
     elif translating_method == "bqskit":
         bqskit_circuit = qiskit_to_bqskit(circuit)
         model = MachineModel(bqskit_circuit.num_qudits, gate_set=gate_set_obj)
-        print(model.gate_set)
         bqskit_circuit = compile(bqskit_circuit, model=model, optimization_level=1)
-        #return bqskit_to_qiskit(bqskit_circuit)
-        return bqskit_circuit
+        return bqskit_to_qiskit(bqskit_circuit)
 
     elif translating_method == "tket":
         tket_circuit = qiskit_to_tk(circuit)
         rebase_pass = AutoRebase(set(gate_set_obj))
         rebase_pass.apply(tket_circuit)
-        #return tk_to_qiskit(tket_circuit)
-        return tket_circuit
+        return tk_to_qiskit(tket_circuit)
 
     else:
         logging.error(f"Unknown translate method: {translating_method}")
