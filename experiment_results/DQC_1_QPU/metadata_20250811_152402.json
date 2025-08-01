@@ -1,11 +1,8 @@
 {
-    "name": "Real_topology_01.07",
+    "name": "DQC_1_QPU",
     "num_samples": 1000,
     "backends": [
-        "real_willow",
-        "real_apollo",
-        "real_infleqtion",
-        "real_nsinfleqtion"
+        "real_flamingo"
     ],
     "codes": [
         "surface",
@@ -16,10 +13,7 @@
         "bacon"
     ],
     "error_types": [
-        "modsi1000"
-    ],
-    "error_probabilities": [
-        0.004
+        "real_flamingo"
     ],
     "decoders": [
         "bposd"
