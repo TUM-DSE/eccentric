@@ -9,7 +9,9 @@ marker_styles = {
     'bacon': 's',
     'hh': '^',
     'surface': 'D',
-    'other': 'X'
+    'steane': 'X',
+    'color': '*',
+    'other': ''
 }
 
 code_rename_map = {
@@ -23,6 +25,13 @@ error_type_map = {
     'SI1000': 'modsi1000'
 }
 
+backend_rename_map = {
+    "real_willow": "Willow",
+    "real_infleqtion": "Infleqtion",
+    "real_nsinfleqtion": "Infleqtion\nWithout\nShuttling",
+    "real_apollo": "Apollo",
+    "real_flamingo": "Flamingo"
+}
 
 code_palette = sns.color_palette("pastel", n_colors=6)
 code_hatches = ["", "o", "//", "++", "xx", "**"]
@@ -116,7 +125,6 @@ def generate_size_plot(df_path):
 def generate_connectivity_plot(df_path):
     df = pd.read_csv(df_path)
     df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
-
     backend_order = ['custom_grid', 'custom_cube', 'custom_full']
     df["backend"] = pd.Categorical(df["backend"], categories=backend_order, ordered=True)
     df["std"] = np.sqrt(df["logical_error_rate"] * (1 - df["logical_error_rate"]) / df["num_samples"])
@@ -158,19 +166,156 @@ def generate_connectivity_plot(df_path):
     plt.xlabel("Backend Connectivity")
     plt.ylabel("Logical Error Rate (Log Scale)")
     plt.title("Logical Error Rate by Backend")
-    plt.legend(title="Code")
     plt.yscale("log")
     plt.grid(True, which="both", axis="y", linestyle="--", linewidth=0.5)
+    plt.legend(
+        loc='lower center',
+        bbox_to_anchor=(0.5, -0.2),
+        ncol=len(codes),
+        fontsize='small',
+        frameon=False
+    )
     plt.text(-0.05, 1.05, 'Lower is better ↓', transform=plt.gca().transAxes,
              fontsize=10, fontweight='bold', va='top', ha='left')
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/connectivity.pdf", format="pdf")
     plt.close()
 
+def generate_topology_plot(df_path):
+    df = pd.read_csv(df_path)
+    df["backend"] = df["backend"].replace(backend_rename_map)
+    df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
+    df["std"] = np.sqrt(df["logical_error_rate"] * (1 - df["logical_error_rate"]) / df["num_samples"])
+
+    sns.set(style="whitegrid")
+    plt.figure(figsize=(14, 6))
+
+    backends = sorted(df["backend"].unique())
+    codes = sorted(df["code"].unique())
+    x = np.arange(len(backends))
+    bar_width = 0.15
+
+    for i, code in enumerate(codes):
+        subset = df[df["code"] == code]
+        means = []
+        stds = []
+
+        for backend in backends:
+            row = subset[subset["backend"] == backend]
+            if not row.empty:
+                means.append(row["logical_error_rate"].values[0])
+                stds.append(row["std"].values[0])
+            else:
+                means.append(0)
+                stds.append(0)
+
+        plt.bar(
+            x + i * bar_width,
+            means,
+            yerr=stds,
+            width=bar_width,
+            color=code_palette[i % len(code_palette)],
+            hatch=code_hatches[i % len(code_hatches)],
+            edgecolor="black",
+            label=code
+        )
+
+    plt.xticks(x + bar_width * (len(codes) - 1) / 2, backends, rotation=45, ha="right")
+    #plt.xlabel("Backend")
+    plt.ylabel("Logical Error Rate (Log Scale)")
+    plt.title("Logical Error Rate by Backend Topology")
+    plt.yscale("log")
+    plt.grid(True, which="both", axis="y", linestyle="--", linewidth=0.5)
+    plt.legend(
+        loc='lower center',
+        bbox_to_anchor=(0.5, -0.5),
+        ncol=len(codes),
+        fontsize='small',
+        frameon=False
+    )
+    plt.text(-0.05, 1.05, 'Lower is better ↓', transform=plt.gca().transAxes,
+             fontsize=10, fontweight='bold', va='top', ha='left')
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
+    os.makedirs("data", exist_ok=True)
+    plt.savefig("data/topology.pdf", format="pdf")
+    plt.close()
+
+def generate_technology_plot(path):
+    technologies = ["Willow", "Apollo", "Infleqtion", "DQC"]
+    dfs = []
+
+    for tech in technologies:
+        tech_path = os.path.join(path, tech, "results.csv")
+        df = pd.read_csv(tech_path)
+        df["backend"] = df["backend"].replace(backend_rename_map)
+        dfs.append(df)
+
+    df = pd.concat(dfs, ignore_index=True)
+
+    # Normalize code labels
+    df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
+
+    # Ensure consistent order
+    backends = sorted(df["backend"].unique())
+    codes = sorted(df["code"].unique())
+
+    df["backend"] = pd.Categorical(df["backend"], categories=backends, ordered=True)
+    df["code"] = pd.Categorical(df["code"], categories=codes, ordered=True)
+
+    sns.set(style="whitegrid")
+    plt.figure(figsize=(14, 6))
+
+    x = np.arange(len(backends))
+    bar_width = 0.8 / len(codes)
+
+    for i, code in enumerate(codes):
+        means = []
+        for backend in backends:
+            subset = df[(df["backend"] == backend) & (df["code"] == code)]
+            if not subset.empty:
+                means.append(subset["logical_error_rate"].values[0])
+            else:
+                means.append(0)
+
+        plt.bar(
+            x + i * bar_width,
+            means,
+            width=bar_width,
+            color=code_palette[i % len(code_palette)],
+            hatch=code_hatches[i % len(code_hatches)],
+            edgecolor="black",
+            label=code
+        )
+
+    plt.xticks(x + bar_width * (len(codes) - 1) / 2, backends, rotation=45, ha="right")
+    #plt.xlabel("Backend")
+    plt.ylabel("Logical Error Rate (Log Scale)")
+    plt.title("Logical Error Rate by Backend and QEC Code")
+    plt.yscale("log")
+    plt.legend(
+        title="QEC Code",
+        loc='lower center',
+        bbox_to_anchor=(0.5, -0.5),
+        ncol=len(codes),
+        fontsize='small',
+        frameon=False
+    )
+
+    plt.text(-0.05, 1.05, 'Lower is better ↓', transform=plt.gca().transAxes,
+             fontsize=10, fontweight='bold', va='top', ha='left')
+
+    plt.subplots_adjust(bottom=0.3)  # Reserve space for rotated labels + legend
+    os.makedirs("data", exist_ok=True)
+    plt.savefig("data/technologies.pdf", format="pdf")
+    plt.close()
 
 if __name__ == '__main__':
     size = "experiment_results/Size_full/results.csv"
     connectivity = "experiment_results/Connectivity_small/results.csv"
+    topology = "experiment_results/Topology/results.csv"
+    path = "experiment_results"
     generate_size_plot(size)
     generate_connectivity_plot(connectivity)
+    generate_topology_plot(topology)
+    generate_technology_plot(path)
