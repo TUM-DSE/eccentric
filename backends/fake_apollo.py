@@ -13,6 +13,7 @@ class FakeQuantinuumApolloBackend(BackendV2):
         super().__init__(name="FakeQuantinuumApollo", backend_version=2)
         # if 192 probably 12 x 16
         # then 1000s could be 1728 (36*48) or 3072 (48*64)
+        # slightly smaller to keep a reasonable size
         self.rows = 24
         self.columns = 32
         self._coupling_map = CouplingMap.from_grid(self.rows, self.columns)
