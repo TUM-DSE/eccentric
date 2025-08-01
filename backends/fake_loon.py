@@ -10,8 +10,9 @@ class FakeIBMLoon(BackendV2):
     def __init__(self):
         super().__init__(name="FakeIBMLoon", backend_version="2")
 
-        # self._coupling_map = self.get_coupling_map()
-        self._remote_gates, self._coupling_map = self.get_distributed_coupling_map()
+        self._coupling_map = self.get_coupling_map()
+        self._remote_gates = []
+        #self._remote_gates, self._coupling_map = self.get_distributed_coupling_map()
         self._num_qubits = self._coupling_map.size()
 
         # TODO: hardware limitations
@@ -59,13 +60,14 @@ class FakeIBMLoon(BackendV2):
 
         Information taken from:
         - https://www.ibm.com/quantum/blog/large-scale-ftqc
+        - https://www.ibm.com/quantum/blog/nature-qldpc-error-correction
 
         TODO: Add variable amount of c_couplers. Currently only the first row can have distant connections.
         """
         
         # Nighthawk specific configuration for 120 qubits
-        rows = 11
-        cols = 11
+        rows = 17 #10
+        cols = 17 #12
 
         # Vertical and horizontal distance of c_couplers
         c_coupler_distance = 6
@@ -90,11 +92,8 @@ class FakeIBMLoon(BackendV2):
 
                 if add_c_couplers:
                     # C-coupler connections
-                    if r + c_coupler_distance < rows and c + c_coupler_distance/2 < cols and r == 0:
-                        edges.append((q, idx(r + c_coupler_distance, c + int(c_coupler_distance/2))))
-                    
-                    if r + c_coupler_distance/2 < rows and c + c_coupler_distance < cols and r == 0:
-                        edges.append((q, idx(r + int(c_coupler_distance/2), c + c_coupler_distance)))
+                    edges.append((q, idx((r + c_coupler_distance) % rows, (c + int(c_coupler_distance/2)) % cols)))
+                    edges.append((q, idx((r + int(c_coupler_distance/2))%rows, (c + c_coupler_distance)%cols)))
 
         return CouplingMap(edges)
     
@@ -122,12 +121,15 @@ class FakeIBMLoon(BackendV2):
         TODO: Check if the specified endpoints make sense 
         """
 
-        endpoints, coupling_map_two = self.DQCCouplingMap(self.squareLatticeCouplingMap(add_c_couplers=True),
+        endpoints, map_interm = self.DQCCouplingMap(self.squareLatticeCouplingMap(add_c_couplers=True),
                                                     self.squareLatticeCouplingMap(add_c_couplers=True),
                                                     [[32, 18], [51, 37], [70, 56], [89, 75]]
                                                     )
 
-        return endpoints, coupling_map_two
+        endpoints_new, map_large = self.DQCCouplingMap(map_interm, self.squareLatticeCouplingMap(add_c_couplers=True), [[165, 18], [184, 37], [203, 56], [222, 75]])
+        all_endpoints = endpoints + endpoints_new
+
+        return all_endpoints, map_large
 
     def addStateOfTheArtQubits(self):
         qubit_props = []
