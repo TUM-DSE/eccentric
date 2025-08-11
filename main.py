@@ -102,9 +102,9 @@ def run_experiment(
             "num_samples": num_samples,
             "error_type": error_type,
             "error_probability": error_prob,
-            "raw_error_rate": f"{raw_error:.6f}",
-            "idle_error_rate": f"{idle_error:.6f}",
-            "corrected_error_rate": f"{corrected_error:.6f}",
+            "raw_error_rate": f"{raw_error:.5f}",
+            "idle_error_rate": f"{idle_error:.5f}",
+            "corrected_error_rate": f"{corrected_error:.5f}",
         }
 
         with lock:
