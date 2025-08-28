@@ -6,7 +6,7 @@ import os
 
 marker_styles = {
     'gross': 'o',
-    'bacon': '+',
+    'bacon': 's',
     'hh': '^',
     'surface': 'D',
     'steane': 'X',
@@ -30,7 +30,8 @@ backend_rename_map = {
     "real_infleqtion": "Infleqtion",
     "real_nsinfleqtion": "Infleqtion w/o\nshuttling",
     "real_apollo": "Apollo",
-    "real_flamingo": "Flamingo"
+    "real_flamingo": "Flamingo",
+    #"real_nighthawk": "Nighthawk"
 }
 
 code_palette = sns.color_palette("pastel", n_colors=6)
@@ -49,7 +50,7 @@ def generate_size_plot(df_path):
     for backend in backends:
         n_rows = 1
         n_cols = len(error_probs) * len(error_types)
-        fig, axes = plt.subplots(n_rows, n_cols, figsize=(6 * n_cols, 5), sharey=True)
+        fig, axes = plt.subplots(n_rows, n_cols, figsize=(16, 2), sharey=True, gridspec_kw={'wspace': 0.03})
         if n_cols == 1:
             axes = [axes]
         all_handles_labels = []
@@ -70,15 +71,64 @@ def generate_size_plot(df_path):
                     marker = marker_styles.get(code_key, marker_styles['other'])
                     group_sorted = group.sort_values('backend_size')
 
+
+                    HIGHLIGHT = {
+                        ('surface',  'Constant'): [400, 500],
+                        ('hh', 'Constant'):   [450],          
+                        ('color','Constant'): [400,500],
+                        ('bacon','Constant'): [400,450],
+                        ('surface',  'SI1000'): [400, 500],
+                        ('hh', 'SI1000'):   [450],          
+                        ('color','SI1000'): [400,500],
+                        ('bacon','SI1000'): [400,450],
+                    }
+                    default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+                    # stable order of codes across the whole figure
+                    all_codes = [c.lower() for c in df_filtered['code'].unique()]
+                    all_codes.sort()  # or keep your preferred order
+
+                    # map each code -> one of the default colors
+                    code_color = {c: default_colors[i % len(default_colors)]
+                                for i, c in enumerate(all_codes)}
+
                     line = ax.plot(
                         group_sorted['backend_size'],
                         group_sorted['logical_error_rate'],
                         label=code_display,
-                        marker=marker
-                    )
+                        marker=marker,
+                        color=code_color[code_key],   # <- lock to default palette color
+                    )[0]
+
+                    # highlight only specific x positions (does NOT change the cycle)
+                    highlight_x = HIGHLIGHT.get((code_key, et), [])
+                    if highlight_x:
+                        xs = group_sorted['backend_size'].to_numpy()
+                        ys = group_sorted['logical_error_rate'].to_numpy()
+                        sel = np.isin(xs, highlight_x)
+
+                        m  = line.get_marker() or 'o'
+                        ms = line.get_markersize()
+                        base = code_color[code_key]
+                        mfc = line.get_markerfacecolor()
+                        if (mfc is None) or (mfc == 'auto'):
+                            mfc = base
+
+                        ax.plot(
+                            xs[sel], ys[sel],
+                            linestyle='None',
+                            marker=m,
+                            markersize=ms * 1.4,           # slightly larger for the ring
+                            markerfacecolor=mfc,           # same fill as the line
+                            markeredgecolor='black',
+                            markeredgewidth=max(1.5, ms*0.2),
+                            color=base,                    # explicit color -> no cycle advance
+                            zorder=line.get_zorder() + 2,
+                            label='_nolegend_',            # don’t duplicate legend entries
+                        )
 
                     if code_key == 'gross':
-                        line_color = line[0].get_color()
+                        line_color = line.get_color()
                         gross_div12 = group_sorted['logical_error_rate'] / 12
                         ax.plot(
                             group_sorted['backend_size'],
@@ -88,21 +138,22 @@ def generate_size_plot(df_path):
                             label='Gross / 12'
                         )
 
-                ax.set_xlabel('Backend Size')
+                ax.set_xlabel('Backend Size', fontsize=12)
                 xticks = sorted(subset['backend_size'].unique())
                 ax.set_xticks(xticks)
-                ax.set_title(f'{et}', loc='left', fontsize=11, fontweight='bold')
+                ax.set_xticklabels(xticks, fontsize=12)
+                ax.set_title(f'({chr(97 + j)}) {et}', loc='left', fontsize=14, fontweight='bold')
 
                 if idx == 0 and j == 0:
-                    ax.set_ylabel('Logical Error Rate')
-                    ax.text(1.0, 1.05, 'Lower is better ↓', transform=ax.transAxes,
-                            fontsize=10, fontweight='bold', color="blue", va='top', ha='right')
+                    ax.set_ylabel('Logical Error Rate', fontsize=12)
+                    ax.text(1.0, 1.14, 'Lower is better ↓', transform=ax.transAxes,
+                            fontsize=12, fontweight='bold', color="blue", va='top', ha='right')
                 elif idx == 0 and j == 1:
-                    ax.text(1.0, 1.05, 'Lower is better ↓', transform=ax.transAxes,
-                            fontsize=10, fontweight='bold', color="blue", va='top', ha='right')
+                    ax.text(1.0, 1.14, 'Lower is better ↓', transform=ax.transAxes,
+                            fontsize=12, fontweight='bold', color="blue", va='top', ha='right')
 
                 ax.grid(True)
-                ax.set_ylim(0, 1.05)
+                ax.set_ylim(0, 0.65)
                 handles, labels = ax.get_legend_handles_labels()
                 all_handles_labels.extend(zip(handles, labels))
 
@@ -114,15 +165,16 @@ def generate_size_plot(df_path):
         fig.legend(
             handles=list(unique_labels.values()),
             labels=list(unique_labels.keys()),
-            title='Code',
-            fontsize='small',
-            title_fontsize='small',
-            loc='upper right',
-            bbox_to_anchor=(0.95, 0.88)
+            #title='Code',
+            fontsize=12,
+            title_fontsize=12,
+            loc='upper center',
+            ncols=len(unique_labels),
+            bbox_to_anchor=(0.5, -0.1)
         )
 
-        plt.tight_layout(rect=[0, 0, 0.85, 0.95])
-        plt.savefig(f"data/size_{backend}.pdf")
+        #plt.tight_layout(rect=[0, 0, 0.85, 0.95])
+        plt.savefig(f"data/size_{backend}.pdf", format="pdf", bbox_inches="tight")
         plt.close(fig)
 
 def generate_connectivity_plot(df_path):
@@ -133,7 +185,7 @@ def generate_connectivity_plot(df_path):
     df["std"] = np.sqrt(df["logical_error_rate"] * (1 - df["logical_error_rate"]) / df["num_samples"])
 
     sns.set(style="whitegrid")
-    plt.figure(figsize=(12, 3))
+    plt.figure(figsize=(13, 4))
 
     codes = sorted(df["code"].unique())
     backends = backend_order
@@ -165,24 +217,26 @@ def generate_connectivity_plot(df_path):
             label=code
         )
 
-    plt.xticks(x + bar_width * (len(codes) - 1) / 2, [b.replace("custom_", "").capitalize() for b in backends])
+    plt.xticks(x + bar_width * (len(codes) - 1) / 2, [b.replace("custom_", "").capitalize() for b in backends],fontsize=12)
     #plt.xlabel("Backend Connectivity")
-    plt.ylabel("Logical Error Rate (Log)")
-    plt.title("Logical Error Rate by Backend Connectivity", loc='left', fontweight='bold')
+    plt.ylabel("Logical Error Rate (Log)", fontsize=12)
+    plt.title("Logical Error Rate by Backend Connectivity", loc='left', fontweight='bold', fontsize=14)
     plt.yscale("log")
     plt.grid(True, which="both", axis="y", linestyle="--", linewidth=0.5)
     plt.legend(
-        loc='upper right',
-        bbox_to_anchor=(1.15, 1.0),
-        #ncols=len(codes),
-        fontsize='small',
-        frameon=True
+        #title="QEC Code",
+        loc='lower center',
+        bbox_to_anchor=(0.5, -0.35),
+        ncol=len(codes),
+        fontsize=14,
+        title_fontsize=12,
+        frameon=False
     )
-    plt.text(1.00, 1.09, 'Lower is better ↓', transform=plt.gca().transAxes,
-             fontsize=10, fontweight='bold', color="blue", va='top', ha='right')
+    plt.text(1.00, 1.15, 'Lower is better ↓', transform=plt.gca().transAxes,
+             fontsize=14, fontweight='bold', color="blue", va='top', ha='right')
     plt.tight_layout(rect=[0, 0.05, 1, 1])
     os.makedirs("data", exist_ok=True)
-    plt.savefig("data/connectivity.pdf", format="pdf")
+    plt.savefig("data/connectivity.pdf", format="pdf", bbox_inches="tight")
     plt.close()
 
 def generate_topology_plot(df_path):
@@ -192,9 +246,10 @@ def generate_topology_plot(df_path):
     df["std"] = np.sqrt(df["logical_error_rate"] * (1 - df["logical_error_rate"]) / df["num_samples"])
 
     sns.set(style="whitegrid")
-    plt.figure(figsize=(14, 4))
+    plt.figure(figsize=(14, 5))
 
-    backends = sorted(df["backend"].unique())
+    backends = df["backend"].unique()
+    backends = [backends[3], backends[1], backends[0], backends[2]]  # Reorder for better visualization
     codes = sorted(df["code"].unique())
     x = np.arange(len(backends))
     bar_width = 0.15
@@ -224,28 +279,30 @@ def generate_topology_plot(df_path):
             label=code
         )
 
-    plt.xticks(x + bar_width * (len(codes) - 1) * 3/5, backends, rotation=0, ha="right")
+    plt.xticks(x + bar_width * (len(codes) - 1) * 3/5, backends, rotation=0, ha="right", fontsize=14)
     #plt.xlabel("Backend")
-    plt.ylabel("Logical Error Rate (Log)")
-    plt.title("Logical Error Rate by Backend Topology", loc='left', fontweight='bold')
+    plt.ylabel("Logical Error Rate (Log)", fontsize=12)
+    plt.title("Logical Error Rate by Backend Topology", loc='left', fontweight='bold', fontsize=14)
     plt.yscale("log")
     plt.grid(True, which="both", axis="y", linestyle="--", linewidth=0.5)
     plt.legend(
-        title="QEC Code",
+        #title="QEC Code",
         loc='lower center',
-        bbox_to_anchor=(1.06, 0.4),
-        #ncol=len(codes),
-        fontsize='small',
-        #frameon=False
+        bbox_to_anchor=(0.5, -0.51),
+        ncol=len(codes),
+        fontsize=14,
+        title_fontsize=12,
+        frameon=False
     )
-    plt.text(1.00, 1.07, 'Lower is better ↓', transform=plt.gca().transAxes,
-             fontsize=10, fontweight='bold', color="blue", va='top', ha='right')
+    plt.text(1.00, 1.10, 'Lower is better ↓', transform=plt.gca().transAxes,
+             fontsize=14, fontweight='bold', color="blue", va='top', ha='right')
     plt.tight_layout(rect=[0, 0.05, 1, 1])
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/topology.pdf", format="pdf", bbox_inches="tight")
     plt.close()
 
 def generate_technology_plot(path):
+    #technologies = ["Willow", "Apollo", "Infleqtion", "DQC", "Nighthawk"]
     technologies = ["Willow", "Apollo", "Infleqtion", "DQC"]
     dfs = []
 
@@ -261,14 +318,14 @@ def generate_technology_plot(path):
     df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
 
     # Ensure consistent order
-    backends = sorted(df["backend"].unique())
+    backends = df["backend"].unique()
     codes = sorted(df["code"].unique())
 
     df["backend"] = pd.Categorical(df["backend"], categories=backends, ordered=True)
     df["code"] = pd.Categorical(df["code"], categories=codes, ordered=True)
 
     sns.set(style="whitegrid")
-    plt.figure(figsize=(14, 3))
+    plt.figure(figsize=(16, 3))
 
     x = np.arange(len(backends))
     bar_width = 0.8 / len(codes)
@@ -292,32 +349,38 @@ def generate_technology_plot(path):
             label=code
         )
 
-    plt.xticks(x + bar_width * (len(codes) - 1) * 3/4, backends, rotation=0, ha="right")
+    plt.xticks(x + bar_width * (len(codes) - 1) * 3/4, backends, rotation=0, ha="right", fontsize=14)
     #plt.xlabel("Backend")
-    plt.ylabel("Logical Error Rate (Log)")
-    plt.title("Logical Error Rate by Backend and QEC Code", loc='left', fontweight='bold')
+    plt.ylabel("Logical Error Rate (Log)", fontsize=12)
+    plt.title("Logical Error Rate by Backend and QEC Code", loc='left', fontweight='bold', fontsize=14)
     plt.yscale("log")
     plt.legend(
-        title="QEC Code",
+        #title="QEC Code",
         loc='lower center',
-        bbox_to_anchor=(1.065, 0.15),
-        #ncol=len(codes),
-        fontsize='small',
-        #frameon=False
+        bbox_to_anchor=(0.5, -0.51),
+        ncol=len(codes),
+        fontsize=14,
+        title_fontsize=12,
+        frameon=False
     )
 
-    plt.text(1.00, 1.08, 'Lower is better ↓', transform=plt.gca().transAxes,
-             fontsize=10, fontweight='bold', color="blue", va='top', ha='right')
+    plt.text(1.00, 1.10, 'Lower is better ↓', transform=plt.gca().transAxes,
+             fontsize=14, fontweight='bold', color="blue", va='top', ha='right')
 
     plt.subplots_adjust(bottom=0.25)  # Reserve space for rotated labels + legend
     os.makedirs("data", exist_ok=True)
-    plt.savefig("data/technologies.pdf", format="pdf")
+    plt.savefig("data/technologies.pdf", format="pdf", bbox_inches="tight")
     plt.close()
 
 def generate_dqc_plot(path):
     datasets = [
         ("DQC_LOWER", "DQC Full Size"),
         ("DQC_1_QPU_LOWER", "DQC 1 QPU Size")
+    ]
+
+    datasets = [
+        ("Nighthawk_lower", "Nighthawk Full Size"),
+        ("Loon_lower", "Loon Full Size")
     ]
     dfs = []
 
@@ -339,7 +402,7 @@ def generate_dqc_plot(path):
     df["dataset"] = pd.Categorical(df["dataset"], categories=datasets_labels, ordered=True)
 
     sns.set(style="whitegrid")
-    plt.figure(figsize=(14, 3))
+    plt.figure(figsize=(15, 3))
 
     x = np.arange(len(codes))
     bar_width = 0.35  # narrower bars for side-by-side plotting
@@ -350,7 +413,10 @@ def generate_dqc_plot(path):
         for code in codes:
             subset = df[(df["code"] == code) & (df["dataset"] == dataset_label)]
             if not subset.empty:
-                means.append(subset["corrected_error_rate"].mean())  # mean over backends
+                if j == 1 and code == "Gross":
+                    means.append(0)
+                else:
+                    means.append(subset["logical_error_rate"].mean())  # mean over backends
             else:
                 means.append(0)
 
@@ -366,14 +432,14 @@ def generate_dqc_plot(path):
 
     plt.xticks(x, codes, rotation=0, ha="center", fontsize=12)
     plt.ylabel("Logical Error Rate (Log)", fontsize=12)
-    plt.title("Logical Error Rate by QEC Code and Patch Size", loc='left', fontweight='bold', fontsize=14)
+    plt.title("Logical Error Rate by QEC Code and Patch Size", loc='left', fontweight='bold', fontsize=16)
     plt.yscale("log")
 
     plt.legend(
         title="Patch Size",
         loc='lower center',
-        bbox_to_anchor=(1.10, 0.55),
-        #ncol=2,
+        bbox_to_anchor=(0.5, -0.5),
+        ncol=2,
         fontsize=12,
         #frameon=False
     )
@@ -383,11 +449,8 @@ def generate_dqc_plot(path):
 
     plt.subplots_adjust(bottom=0.25)
     os.makedirs("data", exist_ok=True)
-    plt.savefig("data/dqc.pdf", format="pdf", bbox_inches="tight")
+    plt.savefig("data/dqc_nighthawk.pdf", format="pdf", bbox_inches="tight")
     plt.close()
-
-def generate_logical_by_code_plot(df_path):
-    pass
 
 def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
 
@@ -423,7 +486,7 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
     }
 
     #fig, axes = plt.subplots(n_rows, n_cols, figsize=(plot_width_per_col * n_cols, plot_height_per_row * n_rows), sharey=True, constrained_layout=True)
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(18,3), sharey=True, constrained_layout=True)
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(18,4), sharey=True, constrained_layout=True)
     axes = axes.flatten()
 
     for i, routing in enumerate(routing_methods):
@@ -452,13 +515,16 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
                 yerr=errors,
                 capsize=3,
             )
-
-        ax.set_title(f"Routing: {routing.capitalize()}", fontsize=11, fontweight='bold', loc='left')
+        #add (a), (b), (c) in front of title
+        ax.set_title(f"({chr(97 + i)}) {routing.capitalize()}", fontsize=18, fontweight='bold', loc='left')
         ax.set_xticks(x + (bar_width * (len(layout_methods) - 1)) / 2)
-        ax.set_xticklabels(codes, rotation=15, ha="center")
+        ax.set_xticklabels(codes, rotation=75, ha="center", fontsize=16)
+        axes[0].tick_params(axis='y', labelsize=16)
         #ax.set_xlabel("QEC Code")
         if i % n_cols == 0:
-            ax.set_ylabel("SWAP Overhead")
+            ax.set_ylabel("SWAP Overhead", fontsize=16)
+            #ax.set_yticks(ax.get_yticks())
+            #ax.set_yticklabels([f"{int(tick)}" for tick in ax.get_yticks()], fontsize=14)
 
         # ✅ Add horizontal grid lines
         ax.grid(True, axis='y', linestyle='--', alpha=0.6)
@@ -468,21 +534,21 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
 
     axes[0].text(
         xlim[1],
-        ylim[1] * 1.08,
+        ylim[1] * 1.10,
         "Lower is better ↓",
-        fontsize=10, fontweight='bold', color="blue", va='top', ha='right'
+        fontsize=16, fontweight='bold', color="blue", va='top', ha='right'
     )
     axes[1].text(
         xlim[1],
-        ylim[1] * 1.08,
+        ylim[1] * 1.10,
         "Lower is better ↓",
-        fontsize=10, fontweight='bold', color="blue", va='top', ha='right'
+        fontsize=16, fontweight='bold', color="blue", va='top', ha='right'
     )
     axes[2].text(
         xlim[1],
-        ylim[1] * 1.08,
+        ylim[1] * 1.10,
         "Lower is better ↓",
-        fontsize=10, fontweight='bold', color="blue", va='top', ha='right'
+        fontsize=16, fontweight='bold', color="blue", va='top', ha='right'
     )
 
     for j in range(i + 1, len(axes)):
@@ -496,7 +562,7 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
         for layout in layout_methods
     ]
     labels = [layout.capitalize() for layout in layout_methods]
-    fig.legend(handles, labels, title="Layout Method", loc="lower center",    bbox_to_anchor=(1.043, 0.55), )
+    fig.legend(handles, labels, title="Layout Method", loc="lower center", ncols=3, bbox_to_anchor=(0.5, -0.22), fontsize=16 , title_fontsize=16)
 
     #plt.title(f"SWAP Overhead on {backend_label} Architecture", fontsize=16, y=1.02, fontweight='bold', ha='left')
     #plt.tight_layout()
@@ -554,13 +620,14 @@ def generate_plot_variance(df_path):
         )
 
     # Axes and labels
-    plt.xticks(x + bar_width, codes, rotation=0, ha="center")
+    plt.xticks(x + bar_width, codes, rotation=0, ha="center", fontsize=12)
     #plt.xlabel("Quantum Error Correction Code")
-    plt.ylabel("Logical Error Rate")
-    plt.title("Logical Error Rate by Code (with Std Dev)", loc='left', fontweight='bold')
-    plt.legend(title="Variance", loc='lower center' , bbox_to_anchor=(1.055, 0.5), fontsize='small', frameon=True)
-    plt.text(1.00, 1.08, 'Lower is better ↓', transform=plt.gca().transAxes,
-             fontsize=10, fontweight='bold', color="blue", va='top', ha='right')
+    plt.ylabel("Logical Error Rate", fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.title("Logical Error Rate by Code", loc='left', fontweight='bold', fontsize=14)
+    plt.legend(title="Variance", loc='lower center' , bbox_to_anchor=(1.055, 0.45), fontsize=12, frameon=True)
+    plt.text(1.00, 1.10, 'Lower is better ↓', transform=plt.gca().transAxes,
+             fontsize=12, fontweight='bold', color="blue", va='top', ha='right')
     plt.tight_layout()
 
     # Save / Show
@@ -584,7 +651,7 @@ def generate_normalized_gate_ovehead(df_path):
 
     # Plot settings
     sns.set(style="whitegrid")
-    fig, axes = plt.subplots(1, 2, figsize=(18, 3), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(18, 4), sharey=True)
 
     # Set pastel palette base color
     base_palette = sns.color_palette("pastel", n_colors=2)
@@ -621,7 +688,8 @@ def generate_normalized_gate_ovehead(df_path):
         # Normalize gate overhead by total gates
         for method in translation_methods:
             if method in pivot.columns and method in total_gates.columns:
-                pivot[method] = pivot[method] / total_gates[method]
+                #pivot[method] = pivot[method] / total_gates[method]
+                pivot[method] = pivot[method]
 
         for j, method in enumerate(translation_methods):
             values = pivot[method].values
@@ -635,20 +703,22 @@ def generate_normalized_gate_ovehead(df_path):
                 label=method_labels[method]
             )
 
-        ax.set_title(f"Normalized Gate Overhead ({'IBM Heron' if gate_set == 'ibm_heron' else 'H2'})", fontsize=14, fontweight='bold', loc='left')
+        ax.set_title(f"({chr(97 + i)}) Gate Overhead ({'IBM Heron' if gate_set == 'ibm_heron' else 'H2'})", fontsize=18, fontweight='bold', loc='left')
         #ax.set_xlabel("Quantum Error Correction Code")
-        axes[0].set_ylabel("Normalized Gate Overhead")
+        axes[0].set_ylabel("Gate Overhead", fontsize=16)
+        axes[0].tick_params(axis='y', labelsize=16)
+        
         ax.set_xticks(x + bar_width)
-        ax.set_xticklabels(codes, rotation=0, ha="center")
+        ax.set_xticklabels(codes, rotation=0, ha="center", fontsize=16)
 
         # Add "Lower is better ↓" in top-left corner
         ylim = ax.get_ylim()
         xlim = ax.get_xlim()
         axes[0].text(
             xlim[1],                
-            ylim[1] * 1.08,         # near top
+            ylim[1] * 1.07,         # near top
             "Lower is better ↓",
-            fontsize=12,
+            fontsize=16,
             fontweight="bold",
             verticalalignment="top",
             horizontalalignment="right",
@@ -657,9 +727,9 @@ def generate_normalized_gate_ovehead(df_path):
 
         axes[1].text(
             xlim[1],                
-            ylim[1] * 1.08,         # near top
+            ylim[1] * 1.07,         # near top
             "Lower is better ↓",
-            fontsize=12,
+            fontsize=16,
             fontweight="bold",
             verticalalignment="top",
             horizontalalignment="right",
@@ -667,7 +737,8 @@ def generate_normalized_gate_ovehead(df_path):
         )
 
     # Legend and layout
-    axes[1].legend(labels=['TKET', 'Qiskit', 'Qiskit Optimized'])
+    axes[1].legend(labels=['TKET', 'Qiskit', 'Qiskit Optimized'], fontsize=16, ncol=3)
+    plt.yticks(fontsize=20)
     plt.tight_layout()
 
     # Uncomment to save
