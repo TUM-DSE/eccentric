@@ -39,8 +39,8 @@ code_hatches = ["/", "\\", "//", "++", "xx", "**"]
 
 def generate_size_plot(df_path):
     df = pd.read_csv(df_path)
-    error_types = ['Constant', 'SI1000']
-    error_probs = [0.004]
+    error_types = ['Constant']
+    error_probs = [0.002, 0.004, 0.008]
     df_filtered = df[~df['code'].str.contains('heavyhex', case=False, na=False)]
     df_filtered = df_filtered[~df_filtered['backend'].str.contains('heavyhex', case=False, na=False)]
     backends = df_filtered['backend'].unique()
@@ -127,27 +127,17 @@ def generate_size_plot(df_path):
                             label='_nolegend_',            # don’t duplicate legend entries
                         )
 
-                    if code_key == 'gross':
-                        line_color = line.get_color()
-                        gross_div12 = group_sorted['logical_error_rate'] / 12
-                        ax.plot(
-                            group_sorted['backend_size'],
-                            gross_div12,
-                            linestyle='--',
-                            color=line_color,
-                            label='Gross / 12'
-                        )
+
 
                 ax.set_xlabel('Backend Size', fontsize=12)
                 xticks = sorted(subset['backend_size'].unique())
                 ax.set_xticks(xticks)
                 ax.set_xticklabels(xticks, fontsize=12)
-                ax.set_title(f'({chr(97 + j)}) {et}', loc='left', fontsize=14, fontweight='bold')
-
+                ax.set_title(f'({chr(100 + j)}) {et} ({p})', loc='left', fontsize=14, fontweight='bold')
+                ax.text(1.0, 1.14, 'Lower is better ↓', transform=ax.transAxes,
+                            fontsize=12, fontweight='bold', color="blue", va='top', ha='right')
                 if idx == 0 and j == 0:
                     ax.set_ylabel('Logical Error Rate', fontsize=12)
-                    ax.text(1.0, 1.14, 'Lower is better ↓', transform=ax.transAxes,
-                            fontsize=12, fontweight='bold', color="blue", va='top', ha='right')
                 elif idx == 0 and j == 1:
                     ax.text(1.0, 1.14, 'Lower is better ↓', transform=ax.transAxes,
                             fontsize=12, fontweight='bold', color="blue", va='top', ha='right')
@@ -174,7 +164,7 @@ def generate_size_plot(df_path):
         )
 
         #plt.tight_layout(rect=[0, 0, 0.85, 0.95])
-        plt.savefig(f"data/size_{backend}.pdf", format="pdf", bbox_inches="tight")
+        plt.savefig(f"data/size_{backend}_{error_types}.pdf", format="pdf", bbox_inches="tight")
         plt.close(fig)
 
 def generate_connectivity_plot(df_path):
