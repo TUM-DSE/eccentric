@@ -777,6 +777,8 @@ def generate_plot_variance(df_path):
     plt.savefig("data/plot_variance.pdf", format="pdf", bbox_inches="tight")
     plt.close()
 
+from matplotlib.ticker import ScalarFormatter
+
 def generate_normalized_gate_ovehead(df_path):
     df = pd.read_csv(df_path)
     method_label_map = {
@@ -794,7 +796,24 @@ def generate_normalized_gate_ovehead(df_path):
 
     # Plot settings
     sns.set(style="whitegrid")
-    fig, axes = plt.subplots(1, 2, figsize=(18, 4), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(18, 3), sharey=True)
+
+    # ---- Custom scientific formatter ----
+    from matplotlib.ticker import FuncFormatter
+    def sci_notation(y, _):
+        if y == 0:
+            return r"$0$"
+        exp = int(np.floor(np.log10(abs(y))))
+        mant = y / 10**exp
+        return r"${:.0f}\times 10^{{{}}}$".format(mant, exp)
+
+
+    for ax in axes:
+        #ax.yaxis.set_major_formatter(FuncFormatter(sci_notation))
+        ax.tick_params(axis='y', labelsize=16)
+        ax.yaxis.grid(True, which="major", linestyle="--", alpha=0.7)
+        ax.xaxis.grid(False)
+    # -------------------------------------
 
     # Set pastel palette base color
     base_palette = sns.color_palette("pastel", n_colors=2)
@@ -829,10 +848,9 @@ def generate_normalized_gate_ovehead(df_path):
         total_gates = subset.pivot(index="code", columns="translating_method", values="original_total_gates")
 
         # Normalize gate overhead by total gates
-        for method in translation_methods:
-            if method in pivot.columns and method in total_gates.columns:
-                #pivot[method] = pivot[method] / total_gates[method]
-                pivot[method] = pivot[method]
+        for method in translation_methods: 
+            if method in pivot.columns and method in total_gates.columns: 
+                pivot[method] = (pivot[method] / total_gates[method]) #* 100 pivot[method] = pivot[method]
 
         for j, method in enumerate(translation_methods):
             values = pivot[method].values
@@ -846,9 +864,9 @@ def generate_normalized_gate_ovehead(df_path):
                 label=method_labels[method]
             )
 
-        ax.set_title(f"({chr(97 + i)}) Gate Overhead ({'IBM Heron' if gate_set == 'ibm_heron' else 'H2'})", fontsize=18, fontweight='bold', loc='left')
-        #ax.set_xlabel("Quantum Error Correction Code")
-        axes[0].set_ylabel("Gate Overhead", fontsize=16)
+        ax.set_title(f"({chr(99 + i)}) Gate Overhead ({'IBM Heron' if gate_set == 'ibm_heron' else 'H2'})", 
+                     fontsize=18, fontweight='bold', loc='left')
+        axes[0].set_ylabel("Norm. Gate Overhead", fontsize=16)
         axes[0].tick_params(axis='y', labelsize=16)
         
         ax.set_xticks(x + bar_width)
@@ -859,7 +877,7 @@ def generate_normalized_gate_ovehead(df_path):
         xlim = ax.get_xlim()
         axes[0].text(
             xlim[1],                
-            ylim[1] * 1.07,         # near top
+            ylim[1] * 1.12,         
             "Lower is better ↓",
             fontsize=16,
             fontweight="bold",
@@ -867,10 +885,9 @@ def generate_normalized_gate_ovehead(df_path):
             horizontalalignment="right",
             color="blue"
         )
-
         axes[1].text(
             xlim[1],                
-            ylim[1] * 1.07,         # near top
+            ylim[1] * 1.12,         
             "Lower is better ↓",
             fontsize=16,
             fontweight="bold",
@@ -885,7 +902,7 @@ def generate_normalized_gate_ovehead(df_path):
     plt.tight_layout()
 
     # Uncomment to save
-    plt.savefig("data/translation.pdf", format="pdf", bbox_inches="tight")
+    plt.savefig("data/translation_norm.pdf", format="pdf", bbox_inches="tight")
     plt.close()
 
 if __name__ == '__main__':
@@ -902,8 +919,8 @@ if __name__ == '__main__':
     #generate_topology_plot(topology)
     #generate_technology_plot(path)
     #generate_dqc_plot(path)
-    generate_swap_overhead_plot(df_grid, "Grid")
+    #generate_swap_overhead_plot(df_grid, "Grid")
     #generate_swap_overhead_norm_plot(df_grid, "Grid")
     #generate_swap_overhead_plot(df_hh, "Heavy-Hex")
     #generate_plot_variance(plot_variance)
-    #generate_normalized_gate_ovehead(gate_overhead)
+    generate_normalized_gate_ovehead(gate_overhead)
