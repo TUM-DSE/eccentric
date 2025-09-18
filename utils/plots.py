@@ -275,7 +275,7 @@ def generate_topology_plot(df_path):
 
 def generate_technology_plot(path):
     #technologies = ["Willow", "Apollo", "Infleqtion", "DQC", "Nighthawk"]
-    technologies = ["Willow", "Apollo", "Infleqtion", "DQC"]
+    technologies = ["Willow", "Apollo", "Infleqtion"]
     dfs = []
 
     for tech in technologies:
@@ -327,14 +327,16 @@ def generate_technology_plot(path):
     plt.title("Logical Error Rate by Backend and QEC Code", loc='left', fontweight='bold', fontsize=14)
     plt.yscale("log")
     plt.legend(
-        #title="QEC Code",
-        loc='lower center',
-        bbox_to_anchor=(0.5, -0.51),
-        ncol=len(codes),
+        # title="QEC Code",
+        loc="center left",
+        bbox_to_anchor=(1.02, 0.5),  # just outside the right side, vertically centered
         fontsize=14,
         title_fontsize=12,
         frameon=False
     )
+
+    plt.grid(axis="y", linewidth=0.7, alpha=0.7)   # only horizontal lines
+    plt.gca().grid(False, axis="x")  # make sure no vertical grid lines are drawn
 
     plt.text(1.00, 1.10, 'Lower is better ↓', transform=plt.gca().transAxes,
              fontsize=14, fontweight='bold', color="blue", va='top', ha='right')
@@ -1157,11 +1159,11 @@ if __name__ == '__main__':
     #generate_connectivity_plot(connectivity)
     #generate_topology_plot(topology)
     #generate_connectivity_topology_plots(connectivity, topology)
-    #generate_technology_plot(path)
+    generate_technology_plot(path)
     #generate_dqc_plot(path)
     #generate_swap_overhead_plot(df_grid, "Grid")
     #generate_swap_overhead_norm_plot(df_grid, "Grid")
     #generate_swap_overhead_plot(df_hh, "Heavy-Hex")
     #generate_plot_variance(plot_variance)
-    generate_plot_variance_two(low_noise_csv=variance_low, high_noise_csv=variance_high)
+    #generate_plot_variance_two(low_noise_csv=variance_low, high_noise_csv=variance_high)
     #generate_normalized_gate_ovehead(gate_overhead)
