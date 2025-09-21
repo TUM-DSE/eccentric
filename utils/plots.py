@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
+# Marker styles for different codes
 marker_styles = {
     'gross': 'o',
     'bacon': 's',
@@ -14,158 +15,189 @@ marker_styles = {
     'other': ''
 }
 
+# Code display names
 code_rename_map = {
     'bacon': 'Bacon-Shor',
     'hh': 'Heavy-hex',
     'gross': 'Gross'
 }
 
+# Error type mapping
 error_type_map = {
     'Constant': 'constant',
     'SI1000': 'modsi1000'
 }
 
+# Backend display names
 backend_rename_map = {
     "real_willow": "Willow",
     "real_infleqtion": "Infleqtion",
     "real_nsinfleqtion": "Infleqtion w/o\nshuttling",
     "real_apollo": "Apollo",
     "real_flamingo": "Flamingo",
-    #"real_nighthawk": "Nighthawk"
+    # "real_nighthawk": "Nighthawk"
 }
 
+# Color palette and hatches for bars
 code_palette = sns.color_palette("pastel", n_colors=6)
 code_hatches = ["/", "\\", "//", "++", "xx", "**"]
 
+# Figure sizes and font
+WIDE_FIGSIZE = 6
+HEIGHT_FIGSIZE = 2.5
+FONTSIZE = 12
+
+# Highlight backend sizes for specific codes and error types
+HIGHLIGHT = {
+    ('surface', 'Constant'): [400, 500],
+    ('hh', 'Constant'): [450],
+    ('color', 'Constant'): [400, 500],
+    ('bacon', 'Constant'): [400, 450],
+    ('surface', 'SI1000'): [400, 500],
+    ('hh', 'SI1000'): [450],
+    ('color', 'SI1000'): [400, 500],
+    ('bacon', 'SI1000'): [400, 450],
+}
+
+
+# Matplotlib rcParams settings
+tex_fonts = {
+    # Use LaTeX to write all text
+    # "text.usetex": True,
+    "font.family": "serif",
+    # Font sizes
+    "axes.labelsize": FONTSIZE,
+    "font.size": FONTSIZE,
+    "legend.fontsize": FONTSIZE - 2,
+    "xtick.labelsize": FONTSIZE - 2,
+    "ytick.labelsize": FONTSIZE - 2,
+    "axes.titlesize": 10,
+    # Line and marker styles
+    "lines.linewidth": 2,
+    "lines.markersize": 6,
+    "lines.markeredgewidth": 1.5,
+    "lines.markeredgecolor": "black",
+    # Error bar cap size
+    "errorbar.capsize": 3,
+}
+
+plt.rcParams.update(tex_fonts)
+plt.rcParams['pdf.fonttype'] = 42
+plt.rcParams['ps.fonttype'] = 42
+
 def generate_size_plot(df_path):
     df = pd.read_csv(df_path)
-    error_types = ['Constant']
+    error_types = ["Constant", "SI1000"]
     error_probs = [0.002, 0.004, 0.008]
-    df_filtered = df[~df['code'].str.contains('heavyhex', case=False, na=False)]
-    df_filtered = df_filtered[~df_filtered['backend'].str.contains('heavyhex', case=False, na=False)]
-    backends = df_filtered['backend'].unique()
+    backend = "custom_full"
 
-    os.makedirs("../data", exist_ok=True)
+    default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    all_codes = sorted([c.lower() for c in df['code'].unique()])
+    code_color = {c: default_colors[i % len(default_colors)] for i, c in enumerate(all_codes)}
 
-    for backend in backends:
-        n_rows = 1
-        n_cols = len(error_probs) * len(error_types)
-        fig, axes = plt.subplots(n_rows, n_cols, figsize=(16, 2), sharey=True, gridspec_kw={'wspace': 0.03})
+    letters = ["(a)", "(b)", "(c)", "(d)", "(e)", "(f)"]
+
+    # one figure per error type
+    for et in error_types:
+        original_et = error_type_map.get(et, et.lower())
+
+        n_rows, n_cols = 1, len(error_probs)
+        fig, axes = plt.subplots(
+            n_rows, n_cols,
+            figsize=(WIDE_FIGSIZE * len(error_probs), HEIGHT_FIGSIZE),
+            sharey=True,
+            gridspec_kw={'wspace': 0.05}
+        )
         if n_cols == 1:
             axes = [axes]
-        all_handles_labels = []
 
-        for idx, (i, p) in enumerate(enumerate(error_probs)):
-            for j, et in enumerate(error_types):
-                ax = axes[idx * len(error_types) + j]
-                original_et = error_type_map.get(et, et.lower())
-                subset = df_filtered[
-                    (df_filtered['backend'] == backend) &
-                    (df_filtered['error_type'] == original_et) &
-                    (df_filtered['error_probability'] == p)
-                ]
+        for col, p in enumerate(error_probs):
+            ax = axes[col]
 
-                for code, group in subset.groupby('code'):
-                    code_key = code.lower()
-                    code_display = code_rename_map.get(code_key, code.capitalize())
-                    marker = marker_styles.get(code_key, marker_styles['other'])
-                    group_sorted = group.sort_values('backend_size')
+            subset = df[
+                (df['backend'] == backend) &
+                (df['error_type'] == original_et) &
+                (df['error_probability'] == p)
+            ]
 
+            for code, group in subset.groupby('code'):
+                code_key = code.lower()
+                code_display = code_rename_map.get(code_key, code.capitalize())
+                marker = marker_styles.get(code_key, marker_styles['other'])
+                group_sorted = group.sort_values('backend_size')
 
-                    HIGHLIGHT = {
-                        ('surface',  'Constant'): [400, 500],
-                        ('hh', 'Constant'):   [450],          
-                        ('color','Constant'): [400,500],
-                        ('bacon','Constant'): [400,450],
-                        ('surface',  'SI1000'): [400, 500],
-                        ('hh', 'SI1000'):   [450],          
-                        ('color','SI1000'): [400,500],
-                        ('bacon','SI1000'): [400,450],
-                    }
-                    default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+                xs = group_sorted['backend_size'].to_numpy()
+                ys = group_sorted['logical_error_rate'].to_numpy()
 
-                    # stable order of codes across the whole figure
-                    all_codes = [c.lower() for c in df_filtered['code'].unique()]
-                    all_codes.sort()  # or keep your preferred order
+                # --- base line + plain markers (no outline) ---
+                line = ax.plot(
+                    xs, ys,
+                    label=code_display,
+                    marker=marker,
+                    color=code_color[code_key],
+                    markeredgecolor="none",   # plain markers
+                )[0]
 
-                    # map each code -> one of the default colors
-                    code_color = {c: default_colors[i % len(default_colors)]
-                                for i, c in enumerate(all_codes)}
-
-                    line = ax.plot(
-                        group_sorted['backend_size'],
-                        group_sorted['logical_error_rate'],
-                        label=code_display,
+                # --- overlay highlighted markers with black outline ---
+                highlight_x = HIGHLIGHT.get((code_key, et), [])
+                if highlight_x:
+                    sel = np.isin(xs, highlight_x)
+                    ax.plot(
+                        xs[sel], ys[sel],
+                        linestyle="None",
                         marker=marker,
-                        color=code_color[code_key],   # <- lock to default palette color
-                    )[0]
+                        markersize=line.get_markersize() * 1.4,
+                        markerfacecolor=code_color[code_key],
+                        markeredgecolor="black",   # outline only for highlights
+                        markeredgewidth=1.5,
+                        color=code_color[code_key],
+                        zorder=line.get_zorder() + 2,
+                        label="_nolegend_",        # don’t duplicate in legend
+                    )
 
-                    # highlight only specific x positions (does NOT change the cycle)
-                    highlight_x = HIGHLIGHT.get((code_key, et), [])
-                    if highlight_x:
-                        xs = group_sorted['backend_size'].to_numpy()
-                        ys = group_sorted['logical_error_rate'].to_numpy()
-                        sel = np.isin(xs, highlight_x)
+            # axes formatting
+            ax.set_xlabel("Backend Size", fontsize=FONTSIZE)
+            xticks = sorted(subset['backend_size'].unique())
+            ax.set_xticks(xticks)
+            ax.set_xticklabels(xticks, fontsize=FONTSIZE - 2)
 
-                        m  = line.get_marker() or 'o'
-                        ms = line.get_markersize()
-                        base = code_color[code_key]
-                        mfc = line.get_markerfacecolor()
-                        if (mfc is None) or (mfc == 'auto'):
-                            mfc = base
+            # title in top-left corner
+            ax.set_title(f"{letters[col]} {et} (p={p})", loc="left", fontsize=12, fontweight="bold")
 
-                        ax.plot(
-                            xs[sel], ys[sel],
-                            linestyle='None',
-                            marker=m,
-                            markersize=ms * 1.4,           # slightly larger for the ring
-                            markerfacecolor=mfc,           # same fill as the line
-                            markeredgecolor='black',
-                            markeredgewidth=max(1.5, ms*0.2),
-                            color=base,                    # explicit color -> no cycle advance
-                            zorder=line.get_zorder() + 2,
-                            label='_nolegend_',            # don’t duplicate legend entries
-                        )
+            if col == 0:
+                ax.set_ylabel("Logical Error Rate", fontsize=FONTSIZE)
 
+            # separate "Lower is better ↓" text, same height as title
+            ax.text(
+                1.0, 1.14, "Lower is better ↓",
+                transform=ax.transAxes,
+                fontsize=12, fontweight="bold",
+                color="blue", va="top", ha="right"
+            )
 
+            ax.grid(True)
+            ax.set_ylim(0, 0.65)
 
-                ax.set_xlabel('Backend Size', fontsize=12)
-                xticks = sorted(subset['backend_size'].unique())
-                ax.set_xticks(xticks)
-                ax.set_xticklabels(xticks, fontsize=12)
-                ax.set_title(f'({chr(100 + j)}) {et} ({p})', loc='left', fontsize=14, fontweight='bold')
-                ax.text(1.0, 1.14, 'Lower is better ↓', transform=ax.transAxes,
-                            fontsize=12, fontweight='bold', color="blue", va='top', ha='right')
-                if idx == 0 and j == 0:
-                    ax.set_ylabel('Logical Error Rate', fontsize=12)
-                elif idx == 0 and j == 1:
-                    ax.text(1.0, 1.14, 'Lower is better ↓', transform=ax.transAxes,
-                            fontsize=12, fontweight='bold', color="blue", va='top', ha='right')
+            # legend below each subplot
+            handles, labels = ax.get_legend_handles_labels()
+            unique_labels = {}
+            for h, l in zip(handles, labels):
+                if l not in unique_labels and l != "_nolegend_":
+                    unique_labels[l] = h
 
-                ax.grid(True)
-                ax.set_ylim(0, 0.65)
-                handles, labels = ax.get_legend_handles_labels()
-                all_handles_labels.extend(zip(handles, labels))
-
-        unique_labels = {}
-        for h, l in all_handles_labels:
-            if l not in unique_labels:
-                unique_labels[l] = h
-
+        plt.subplots_adjust(bottom=0.3)  # leave room at bottom for legend
         fig.legend(
             handles=list(unique_labels.values()),
             labels=list(unique_labels.keys()),
-            #title='Code',
-            fontsize=12,
-            title_fontsize=12,
-            loc='upper center',
-            ncols=len(unique_labels),
-            bbox_to_anchor=(0.5, -0.1)
+            loc="lower center",
+            bbox_to_anchor=(0.5, -0.03),  # legend sits just above the bottom
+            ncol=len(unique_labels),
+            frameon=False
         )
 
-        #plt.tight_layout(rect=[0, 0, 0.85, 0.95])
-        plt.savefig(f"data/size_{backend}_{error_types}.pdf", format="pdf", bbox_inches="tight")
+        plt.savefig(f"data/size_{backend}_{et}.pdf", format="pdf")
         plt.close(fig)
+
 
 def generate_connectivity_plot(df_path):
     df = pd.read_csv(df_path)
@@ -1156,10 +1188,10 @@ if __name__ == '__main__':
     variance_low = "experiment_results/Variance_noise_10/results.csv"
     gate_overhead = "experiment_results/Translation/results.csv"
     #generate_size_plot(size)
-    #generate_connectivity_plot(connectivity)
+    generate_connectivity_plot(connectivity)
     #generate_topology_plot(topology)
     #generate_connectivity_topology_plots(connectivity, topology)
-    generate_technology_plot(path)
+    #generate_technology_plot(path)
     #generate_dqc_plot(path)
     #generate_swap_overhead_plot(df_grid, "Grid")
     #generate_swap_overhead_norm_plot(df_grid, "Grid")
