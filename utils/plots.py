@@ -398,10 +398,16 @@ def generate_technology_plot(path):
         if subset_df.empty:
             continue  # skip empty subset
 
-        # Now map backend names, normalize codes, calculate std
+        # Now map backend names, normalize codes
         subset_df["backend"] = subset_df["backend"].replace(backend_rename_map)
-        subset_df["code"] = subset_df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
-        subset_df["std"] = np.sqrt(subset_df["logical_error_rate"] * (1 - subset_df["logical_error_rate"]) / subset_df["num_samples"])
+        subset_df["code"] = subset_df["code"].apply(
+            lambda x: code_rename_map.get(x.lower(), x.capitalize())
+        )
+        # subset_df["std"] = np.sqrt(
+        #     subset_df["logical_error_rate"]
+        #     * (1 - subset_df["logical_error_rate"])
+        #     / subset_df["num_samples"]
+        # )
 
         backends = subset_df["backend"].unique()
         codes = sorted(subset_df["code"].unique())
@@ -415,21 +421,21 @@ def generate_technology_plot(path):
 
         for i, code in enumerate(codes):
             code_subset = subset_df[subset_df["code"] == code]
-            means, stds = [], []
+            means = []  # stds removed
 
             for backend in backends:
                 row = code_subset[code_subset["backend"] == backend]
                 if not row.empty:
                     means.append(row["logical_error_rate"].values[0])
-                    stds.append(row["std"].values[0])
+                    # stds.append(row["std"].values[0])
                 else:
                     means.append(0)
-                    stds.append(0)
+                    # stds.append(0)
 
             ax.bar(
                 x + i * BAR_WIDTH,
                 means,
-                yerr=stds,
+                # yerr=stds,
                 width=BAR_WIDTH,
                 color=code_palette[i % len(code_palette)],
                 hatch=code_hatches[i % len(code_hatches)],
@@ -450,9 +456,11 @@ def generate_technology_plot(path):
         ax.set_title(plot_title, loc="left", fontsize=12, fontweight="bold")
 
         # "Lower is better ↓"
-        ax.text(1.0, 1.14, "Lower is better ↓", transform=ax.transAxes,
-                fontsize=12, fontweight="bold", color="blue",
-                va="top", ha="right")
+        ax.text(
+            1.0, 1.14, "Lower is better ↓", transform=ax.transAxes,
+            fontsize=12, fontweight="bold", color="blue",
+            va="top", ha="right"
+        )
 
         # legend
         handles, labels = ax.get_legend_handles_labels()
@@ -467,13 +475,14 @@ def generate_technology_plot(path):
             labels=list(unique_labels.keys()),
             loc="lower center",
             bbox_to_anchor=(0.5, -0.03),
-            ncol=(len(unique_labels) + 1) // 2,  # two rows if needed
+            ncol=len(unique_labels) // 2,  # two rows if needed
             frameon=False
         )
 
         os.makedirs("data", exist_ok=True)
         plt.savefig(f"data/technologies_{key}.pdf", format="pdf")
         plt.close(fig)
+
 
 
 
