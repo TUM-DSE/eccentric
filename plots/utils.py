@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import matplotlib.ticker as mtick
+from matplotlib.ticker import ScalarFormatter
 
 # Marker styles for different codes
 marker_styles = {
@@ -36,9 +38,9 @@ backend_rename_map = {
     "real_nsinfleqtion": "Infleqtion",
     "real_nsapollo": "Apollo (w/o s.)",
     "real_apollo": "Apollo",
-    "real_flamingo": "Entire device",
+    "real_flamingo": "DQC",
     "real_flamingo_1_qpu": "1 QPU",
-    "real_nighthawk": "Entire device",
+    "real_nighthawk": "DQC",
     "real_nighthawk_1_qpu": "1 QPU"
 }
 
