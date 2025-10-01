@@ -78,11 +78,10 @@ def generate_size_plot(df_path):
 
             if et == "Constant":
                 title_et = "Const."
+                ax.set_title(f"{chr(100 + col)}) {title_et} ({p})", loc="left", fontsize=12, fontweight="bold")
             else:
                 title_et = et
-
-            # title in top-left corner
-            ax.set_title(f"{chr(97 + col)}) {title_et} ({p})", loc="left", fontsize=12, fontweight="bold")
+                ax.set_title(f"{chr(97 + col)}) {title_et} ({p})", loc="left", fontsize=12, fontweight="bold")
 
             if col == 0:
                 ax.set_ylabel("Logical Error Rate", fontsize=FONTSIZE)
@@ -116,14 +115,16 @@ def generate_size_plot(df_path):
         for ax in axes:
             ax.margins(x=0)  # no extra padding for the plotted data
 
-        fig.legend(
-            handles=list(unique_labels.values()),
-            labels=list(unique_labels.keys()),
-            loc="lower center",
-            bbox_to_anchor=(0.5, -0.03),
-            ncol=len(unique_labels),
-            frameon=False
-        )
+
+        if et == "Constant":
+            fig.legend(
+                handles=list(unique_labels.values()),
+                labels=list(unique_labels.keys()),
+                loc="lower center",
+                bbox_to_anchor=(0.5, -0.03),
+                ncol=len(unique_labels),
+                frameon=False
+            )
 
         os.makedirs("data", exist_ok=True)
         plt.savefig(f"data/size_{backend}_{et}.pdf", format="pdf")
@@ -502,23 +503,23 @@ def generate_dqc_plot(csv_path):
     df["backend"] = df["backend"].replace(backend_rename_map)
     df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
 
-    codes = sorted(df["code"].unique())
-    df["code"] = pd.Categorical(df["code"], categories=codes, ordered=True)
-
-    backends = sorted(df["backend"].unique())
-    n_backends = len(backends)
-    n_codes = len(codes)
-
     fig, axes = plt.subplots(1, 2, figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE), sharey=True)
+
+    device = csv_path.split("/")[1].split("_")[1]
+
+    print(df)
 
     for i, err_prob in enumerate([1, 10]):
         ax = axes[i]
         sub_df = df[df["error_probability"] == err_prob]
-        if sub_df.empty:
-            print(f"⚠️ No data for error_probability={err_prob}, skipping.")
-            continue
 
-        # X positions for codes
+        # subset-specific codes and backends
+        codes = sorted(sub_df["code"].unique())
+        backends = sorted(sub_df["backend"].unique())
+        n_codes = len(codes)
+        n_backends = len(backends)
+
+        # X positions
         x = np.arange(n_codes)
         total_bar_width = BAR_WIDTH * n_backends
         offsets = np.linspace(-total_bar_width/2 + BAR_WIDTH/2,
@@ -553,16 +554,18 @@ def generate_dqc_plot(csv_path):
         ax.set_xticklabels(codes, fontsize=FONTSIZE - 2)
         if i == 0:
             ax.set_ylabel("Log. Err. Rate (Log)", fontsize=FONTSIZE)
-
         ax.set_yscale("log")
-        ax.grid(axis="y")
+        ax.grid(axis="y", linestyle="--", linewidth=0.5)
         ax.set_axisbelow(True)
+        ax.spines['top'].set_color('black')
+        ax.spines['bottom'].set_color('black')
+        ax.spines['left'].set_color('black')
+        ax.spines['right'].set_color('black')
 
         # Title
-        device = csv_path.split("/")[1].split("_")[1]
         plot_label = "a)" if err_prob == 1 else "b)"
-        ax.set_title(f"{plot_label} IBM {device} ({"100" if err_prob == 1 else "10"}%)", loc="left",
-                     fontsize=12, fontweight="bold")
+        ax.set_title(f"{plot_label} IBM {device} ({100 if err_prob == 1 else 10}%)",
+                     loc="left", fontsize=12, fontweight="bold")
 
         # "Lower is better ↓"
         ax.text(
@@ -585,6 +588,7 @@ def generate_dqc_plot(csv_path):
     os.makedirs("data", exist_ok=True)
     plt.savefig(f"data/dqc_{device}.pdf", format="pdf")
     plt.close(fig)
+
 
 
 
@@ -1051,7 +1055,7 @@ def generate_normalized_gate_overhead(df_path):
         ax.set_xticklabels(codes, fontsize=FONTSIZE - 2, rotation=30, ha="right")
         ax.tick_params(axis="y", labelsize=FONTSIZE - 2)
         if i == 0:
-            ax.set_ylabel("Norm. Gate Overhead", fontsize=FONTSIZE)
+            ax.set_ylabel("Norm. Overhead", fontsize=FONTSIZE)
 
         ax.grid(axis="y")
         ax.set_ylim(0, 12)
@@ -1059,11 +1063,13 @@ def generate_normalized_gate_overhead(df_path):
 
         # "Lower is better"
         ax.text(
-            1.0, 1.2, "Lower is better ↓",
+            1.0, 1.14, "Lower is better ↓",
             transform=ax.transAxes,
             fontsize=12, fontweight="bold", color="blue",
             va="top", ha="right"
         )
+
+    plt.subplots_adjust(left=0.08, bottom=0.3, right=0.86, wspace=0.15)
 
     # ✅ Shared vertical legend on the right
     handles = [
@@ -1077,12 +1083,11 @@ def generate_normalized_gate_overhead(df_path):
     fig.legend(
         handles, labels,
         loc="center left",
-        bbox_to_anchor=(0.83, 0.55),
+        bbox_to_anchor=(0.86, 0.55),
         fontsize=FONTSIZE,
-        frameon=False
+        frameon=False,
     )
 
-    plt.tight_layout(rect=[0, 0, 0.85, 1])  # leave space for legend
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/gate_overhead_normalized.pdf", format="pdf")
     plt.close(fig)
@@ -1182,11 +1187,13 @@ def generate_gate_overhead(df_path):
 
         # "Lower is better"
         ax.text(
-            1.0, 1.2, "Lower is better ↓",
+            1.0, 1.14, "Lower is better ↓",
             transform=ax.transAxes,
             fontsize=12, fontweight="bold", color="blue",
             va="top", ha="right"
         )
+
+    plt.subplots_adjust(left=0.08, bottom=0.3, right=0.86, wspace=0.15)
 
     # ✅ Shared vertical legend on the right
     handles = [
@@ -1200,12 +1207,11 @@ def generate_gate_overhead(df_path):
     fig.legend(
         handles, labels,
         loc="center left",
-        bbox_to_anchor=(0.83, 0.55),
+        bbox_to_anchor=(0.87, 0.55),
         fontsize=FONTSIZE,
-        frameon=False
+        frameon=False,
     )
 
-    plt.tight_layout(rect=[0, 0, 0.85, 1])  # leave space for legend
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/gate_overhead.pdf", format="pdf")
     plt.close(fig)
@@ -1309,18 +1315,18 @@ if __name__ == '__main__':
     dqc_flamingo = "experiment_results/DQC_Flamingo/results.csv"
     dqc_nighthawk = "experiment_results/DQC_Nighthawk/results.csv"
     generate_size_plot(size)
-    generate_connectivity_plot(connectivity)
-    generate_topology_plot(topology)
-    generate_connectivity_topology_plot(connectivity, topology)
+    #generate_connectivity_plot(connectivity)
+    #generate_topology_plot(topology)
+    #generate_connectivity_topology_plot(connectivity, topology)
     #generate_plot_variance(variance_high)
     #generate_plot_variance(variance_low)
-    generate_technology_plot(path)
-    generate_dqc_plot(dqc_flamingo)
-    generate_dqc_plot(dqc_nighthawk)
-    generate_swap_overhead_plot(df_grid, "Grid")
-    generate_swap_overhead_norm_plot(df_grid, "Grid")
-    generate_swap_overhead_norm_plot(df_hh, "Heavy-Hex")
-    generate_swap_overhead_plot(df_hh, "Heavy-Hex")
-    generate_plot_variance_two(low_noise_csv=variance_low, high_noise_csv=variance_high)
-    generate_gate_overhead(gate_overhead)
-    generate_normalized_gate_overhead(gate_overhead)
+    #generate_technology_plot(path)
+    #generate_dqc_plot(dqc_flamingo)
+    #generate_dqc_plot(dqc_nighthawk)
+    #generate_swap_overhead_plot(df_grid, "Grid")
+    #generate_swap_overhead_norm_plot(df_grid, "Grid")
+    #generate_swap_overhead_norm_plot(df_hh, "Heavy-Hex")
+    #generate_swap_overhead_plot(df_hh, "Heavy-Hex")
+    #generate_plot_variance_two(low_noise_csv=variance_low, high_noise_csv=variance_high)
+    #generate_gate_overhead(gate_overhead)
+    #generate_normalized_gate_overhead(gate_overhead)
