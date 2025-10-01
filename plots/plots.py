@@ -498,6 +498,7 @@ def generate_dqc_plot(csv_path):
     """
     df = pd.read_csv(csv_path)
     df = df[df["routing_method"] != "basic"]
+    df = df[df["code"] != "gross"]
 
     # Standard renaming
     df["backend"] = df["backend"].replace(backend_rename_map)
@@ -1321,8 +1322,8 @@ if __name__ == '__main__':
     #generate_plot_variance(variance_high)
     #generate_plot_variance(variance_low)
     #generate_technology_plot(path)
-    #generate_dqc_plot(dqc_flamingo)
-    #generate_dqc_plot(dqc_nighthawk)
+    generate_dqc_plot(dqc_flamingo)
+    generate_dqc_plot(dqc_nighthawk)
     #generate_swap_overhead_plot(df_grid, "Grid")
     #generate_swap_overhead_norm_plot(df_grid, "Grid")
     #generate_swap_overhead_norm_plot(df_hh, "Heavy-Hex")
