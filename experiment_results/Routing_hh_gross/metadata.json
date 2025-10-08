@@ -8,12 +8,10 @@
         291
     ],
     "codes": [
-        "color",
-        "surface",
         "hh"
     ],
     "routing_methods": [
-        "stochastic"
+        "basic"
     ],
     "layout_methods": [
         "dense",
