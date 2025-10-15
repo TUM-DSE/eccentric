@@ -1,0 +1,22 @@
+{
+    "name": "get_circuit",
+    "num_samples": 1,
+    "backends": [
+        "custom_full"
+    ],
+    "distances": [
+        5
+    ],
+    "codes": [
+        "surface"
+    ],
+    "error_types": [
+        "sd6"
+    ],
+    "error_probabilities": [
+        0.01
+    ],
+    "decoders": [
+        "bposd"
+    ]
+}

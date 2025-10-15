@@ -1,0 +1,11 @@
+backend,backend_size,code,decoder,distance,cycles,num_samples,error_type,error_probability,logical_error_rate,layout_method,routing_method,translating_method
+custom_full,26,surface,bposd,3,3,1,sd6,0.01,0.000000,N/A,N/A,N/A
+custom_full,26,surface,bposd,3,3,1,sd6,0.01,0.000000,N/A,N/A,N/A
+custom_full,26,surface,bposd,3,3,1,sd6,0.01,0.000000,N/A,N/A,N/A
+custom_full,26,surface,bposd,3,3,1,sd6,0.01,0.000000,N/A,N/A,N/A
+custom_full,26,surface,bposd,3,3,1,sd6,0.01,0.000000,N/A,N/A,N/A
+custom_full,26,surface,bposd,3,3,1,sd6,0.01,0.000000,N/A,N/A,N/A
+custom_full,26,surface,bposd,3,3,1,sd6,0.01,0.000000,N/A,N/A,N/A
+custom_full,64,surface,bposd,5,5,1,sd6,0.01,0.000000,N/A,N/A,N/A
+custom_full,118,surface,bposd,7,7,1,sd6,0.01,0.000000,N/A,N/A,N/A
+custom_full,188,surface,bposd,9,9,1,sd6,0.01,0.000000,N/A,N/A,N/A

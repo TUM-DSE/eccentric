@@ -1,0 +1,19 @@
+{
+    "name": "DQC_30.06",
+    "num_samples": 1000,
+    "backends": [
+        "custom_full"
+    ],
+    "backends_sizes": [
+        17
+    ],
+    "codes": [
+        "surface"
+    ],
+    "error_types": [
+        "real_flamingo"
+    ],
+    "decoders": [
+        "bposd"
+    ]
+}

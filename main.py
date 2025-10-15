@@ -12,6 +12,7 @@ from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import Manager
 from qiskit.compiler import transpile
 from qiskit_qec.utils import get_stim_circuits
+from qiskit import qasm3
 from backends import get_backend, QubitTracking
 from codes import get_code, get_max_d, get_min_n
 from noise import get_noise_model
@@ -76,6 +77,11 @@ def run_experiment(
             print("After transpiler")
             qt = QubitTracking(backend, code.qc)
             print("After QT")
+
+            print(qasm3.dumps(code.qc))
+            #write to file:
+            with open(f"circuit_d{d}_cycle{cycles}_sample{i}.qasm", "w") as f:
+                f.write(qasm3.dumps(code.qc))
             stim_circuit = get_stim_circuits(
                 code.qc, detectors=detectors, logicals=logicals
             )[0][0]
