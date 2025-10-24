@@ -30,14 +30,14 @@ def get_noise_model(error_type: str, qt: QubitTracking, p: float = None, backend
         return WillowNoise.get_noise(qt)
     elif error_type.startswith("real_flamingo") and backend:
         m_error_multiplier = error_type.split("_")[2] if error_type != "real_flamingo" else 1
-        m_time_reducer = error_type.split("_")[3] if error_type != "real_flamingo" else 1
-        return FlamingoNoise.get_noise(qt, backend, m_error_multiplier, m_time_reducer)
+        m_time_multiplier = error_type.split("_")[3] if error_type != "real_flamingo" else 1
+        return FlamingoNoise.get_noise(qt, backend, m_error_multiplier, m_time_multiplier)
     elif error_type == "real_infleqtion" and backend:
         return InfleqtionNoise.get_noise(qt, backend)
     elif error_type == "real_apollo":
         return ApolloNoise.get_noise(qt)
     elif error_type.startswith("real_heron"):
         m_error_multiplier = error_type.split("_")[2] if error_type != "real_heron" else 1
-        m_time_reducer = error_type.split("_")[3] if error_type != "real_heron" else 1
-        return HeronNoise.get_noise(qt, backend, m_error_multiplier, m_time_reducer)
+        m_time_multiplier = error_type.split("_")[3] if error_type != "real_heron" else 1
+        return HeronNoise.get_noise(qt, backend, m_error_multiplier, m_time_multiplier)
     raise NotImplementedError

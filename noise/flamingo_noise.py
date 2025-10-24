@@ -9,7 +9,7 @@ class FlamingoNoise(NoiseModel):
         qt: QubitTracking,
         backend: FakeIBMFlamingo,
         m_error_multiplier = 1,
-        m_time_reducer = 1
+        m_time_multiplier = 1
     ) -> 'NoiseModel':
         return NoiseModel(
             sq=0.00025,
@@ -19,7 +19,7 @@ class FlamingoNoise(NoiseModel):
             gate_times={
                 "SQ": 50 * 1e-9,
                 "TQ": 70 * 1e-9,
-                "M": 70 * 1e-9 / m_time_reducer,
+                "M": 70 * 1e-9 / m_time_multiplier,
                 "REMOTE": round((300 * 1e-9) / (2.2222222222222221e-10 * 1e9)) * (2.2222222222222221e-10 * 1e9),
                 "R": 1.2942222222222222e-06
             },
