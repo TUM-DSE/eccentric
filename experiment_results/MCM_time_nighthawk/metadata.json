@@ -20,10 +20,11 @@
     ],
     "error_types": [
         "real_flamingo_1_1",
-        "real_flamingo_1_5",
-        "real_flamingo_1_10",
-        "real_flamingo_1_20",
-        "real_flamingo_1_40"
+        "real_flamingo_1_2",
+        "real_flamingo_1_3",
+        "real_flamingo_1_4",
+        "real_flamingo_1_6",
+        "real_flamingo_1_8"
     ],
     "decoders": [
         "mwpm"
