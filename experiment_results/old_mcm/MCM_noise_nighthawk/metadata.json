@@ -1,6 +1,6 @@
 {
-    "name": "MCM_time_nighthawk",
-    "num_samples": 100000,
+    "name": "MCM_noise_nighthawk",
+    "num_samples": 1000,
     "backends": [
         "real_loon"
     ],
@@ -20,10 +20,10 @@
     ],
     "error_types": [
         "real_flamingo_1_1",
-        "real_flamingo_1_5",
-        "real_flamingo_1_10",
-        "real_flamingo_1_20",
-        "real_flamingo_1_40"
+        "real_flamingo_2_1",
+        "real_flamingo_4_1",
+        "real_flamingo_6_1",
+        "real_flamingo_8_1"
     ],
     "decoders": [
         "mwpm"

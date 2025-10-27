@@ -1,6 +1,6 @@
 {
     "name": "MCM_noise_nighthawk",
-    "num_samples": 1000,
+    "num_samples": 100000,
     "backends": [
         "real_loon"
     ],
