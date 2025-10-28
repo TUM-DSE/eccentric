@@ -187,7 +187,7 @@ class NoiseModel:
             else:
                 p = self.measure
             pre.append_operation("Z_ERROR" if op.name.endswith("X") else "X_ERROR", targets, p)
-            #self.add_qubit_error(post, targets, self.get_gate_time(op))
+            self.add_qubit_error(post, targets, self.get_gate_time(op))
         elif op.name == "MPP":
             # Our circuits never contain MPP after translations
             assert len(targets) % 3 == 0 and all(t.is_combiner for t in targets[1::3]), repr(op)
