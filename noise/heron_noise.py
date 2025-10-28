@@ -13,9 +13,9 @@ class HeronNoise(NoiseModel):
         m_error_multiplier = float(m_error_multiplier)
         m_time_multiplier = float(m_time_multiplier)
         return NoiseModel(
-            sq=0, #0.00025,
-            tq=0, #0.002,
-            measure=0, #0.01 * m_error_multiplier,
+            sq=0.00025,
+            tq=0.002,
+            measure=0.01 * m_error_multiplier,
             gate_times={
                 "SQ": 50 * 1e-9,
                 "TQ": 70 * 1e-9,

@@ -7,13 +7,10 @@
     "distances": [
         3,
         5,
-        7,
-        9,
-        11
+        7
     ],
     "cycles": [
-        7,
-        11
+        7
     ],
     "codes": [
         "surface"

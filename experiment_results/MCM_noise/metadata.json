@@ -2,8 +2,7 @@
     "name": "MCM_noise",
     "num_samples": 100000,
     "backends": [
-        "real_heron",
-        "real_mcm_ideal"
+        "real_heron"
     ],
     "distances": [
         3,
