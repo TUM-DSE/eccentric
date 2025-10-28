@@ -23,11 +23,11 @@ experiments:
 #    codes: [ "surface"]
 #    error_types: ["real_flamingo_1_1", "real_flamingo_2_1", "real_flamingo_4_1", "real_flamingo_6_1", "real_flamingo_8_1"]
 #    decoders: ["mwpm"]
-  - name: "MCM_time_nighthawk"
-    num_samples: 100000
-    backends: ["real_loon"]
-    distances: [3, 5, 7, 9, 11]
-    cycles: [100, 200, 500]
-    codes: [ "surface"]
-    error_types: ["real_flamingo_1_1", "real_flamingo_1_2", "real_flamingo_1_3", "real_flamingo_1_4", "real_flamingo_1_6", "real_flamingo_1_8"]
-    decoders: ["mwpm"]
+#  - name: "MCM_time_nighthawk"
+#    num_samples: 100000
+#    backends: ["real_loon"]
+#    distances: [3, 5, 7, 9, 11]
+#    cycles: [100, 200, 500]
+#    codes: [ "surface"]
+#    error_types: ["real_flamingo_1_1", "real_flamingo_1_2", "real_flamingo_1_3", "real_flamingo_1_4", "real_flamingo_1_6", "real_flamingo_1_8"]
+#    decoders: ["mwpm"]
