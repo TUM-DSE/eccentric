@@ -72,6 +72,8 @@ class NoiseModel:
             p_y = 0.25 * (1 - np.exp(-gate_duration / t1))
             p_z = (1 - np.exp(-gate_duration / t2)) / 2 - (1 - np.exp(-gate_duration / t1)) / 4
 
+            #t2 = min(t1, t2)
+            #p_z = (1 - 4*p_x) * (1 - np.exp(-gate_duration / (1/t2 - 1/t1)))/2
             p_x = np.clip(p_x, 0.0, 1.0)
             p_y = np.clip(p_y, 0.0, 1.0)
             p_z = np.clip(p_z, 0.0, 1.0)

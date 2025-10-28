@@ -1,17 +1,13 @@
 {
-    "name": "MCM_time_noiseless",
+    "name": "MCM_time_noiseless_2",
     "num_samples": 100000,
     "backends": [
         "real_heron"
     ],
     "distances": [
-        3,
-        5,
         7
     ],
     "cycles": [
-        100,
-        200,
         500
     ],
     "codes": [
