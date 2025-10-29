@@ -19,7 +19,7 @@ class HeronNoise(NoiseModel):
             gate_times={
                 "SQ": 50 * 1e-9,
                 "TQ": 70 * 1e-9,
-                "M": 250 * 1e-9 * m_time_multiplier, 
+                "M": 1000 * 1e-9 * m_time_multiplier, 
                 "R": 1.2942222222222222e-06
             },
             qt=qt,
