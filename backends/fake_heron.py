@@ -66,14 +66,16 @@ class FakeIBMHeron(BackendV2):
         qubit_props = []
         
         for i in range(self._num_qubits):
-            t1 = np.random.normal(190, 120, 1)
-            t1 = np.clip(t1, 50, 500)
-            t1 = t1 * 1e-6
+            #t1 = np.random.normal(190, 120, 1)
+            #t1 = np.clip(t1, 50, 500)
+            #t1 = t1 * 1e-6
 
-            t2 = np.random.normal(130, 120, 1)
-            t2 = np.clip(t2, 50, 650)
-            t2 = t2 * 1e-6
+            #t2 = np.random.normal(130, 120, 1)
+            #t2 = np.clip(t2, 50, 650)
+            #t2 = t2 * 1e-6
 
+            t1 = 190 * 1e-6
+            t2 = 130 * 1e-6
             qubit_props.append(QubitProperties(t1=t1, t2=t2, frequency=5.0e9))
 
         self.target.qubit_properties = qubit_props
