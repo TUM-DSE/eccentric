@@ -1,5 +1,5 @@
 experiments:
-  - name: "MCM_nighthawk"
+  - name: "MCM_nighthawk_tq_10"
     num_samples: 100000
     backends: ["real_loon"]
     distances: [3, 5, 7]
