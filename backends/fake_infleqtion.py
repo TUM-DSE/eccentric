@@ -19,7 +19,7 @@ class FakeInfleqtionBackend(BackendV2):
             self.rows = 16
             self.columns = 24
         else:
-            # rescaled 3x each side
+            # rescaled 4x each side
             self.rows = 4
             self.columns = 6
         self._coupling_map = CouplingMap.from_grid(self.rows, self.columns)

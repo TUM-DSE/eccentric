@@ -1,12 +1,13 @@
 {
     "name": "Translation",
+    "num_samples": 1000,
     "codes": [
         "surface",
         "hh",
         "gross",
         "color",
-        "bacon",
-        "steane"
+        "steane",
+        "bacon"
     ],
     "backends": [
         "custom_full"
@@ -16,11 +17,9 @@
     ],
     "translating_methods": [
         "qiskit",
-        "bqskit",
         "tket"
     ],
     "gate_sets": [
-        "stim",
         "h2",
         "ibm_heron"
     ]
