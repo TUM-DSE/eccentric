@@ -1787,7 +1787,7 @@ def generate_decoder_plot(df_path):
     # Read data
     df = pd.read_csv(df_path)
     if "error_type" in df.columns:
-        df = df[df["error_type"] == "constant"]
+        df = df[df["error_type"] == "modsi1000"]
 
     # Optional renaming if you have a mapping
     if "code_rename_map" in globals():
@@ -1866,7 +1866,7 @@ def generate_decoder_plot(df_path):
     ax.set_ylabel("Log. Err. Rate", fontsize=FONTSIZE)
     ax.grid(axis="y")
     ax.legend(loc="upper right", frameon=False)
-    plt.savefig("data/decoder_general_constant.pdf", format="pdf")
+    plt.savefig("data/decoder_general.pdf", format="pdf")
     plt.close(fig)
 
 
@@ -2115,5 +2115,5 @@ if __name__ == '__main__':
     #generate_normalized_gate_overhead(gate_overhead)
     #generate_overhead_2x2(gate_overhead)
     generate_decoder_plot(decoder_general)
-    generate_decoder_plot_time(decoder_general)
-    generate_decoder_error_barplot(decoder_special)
+    #generate_decoder_plot_time(decoder_general)
+    #generate_decoder_error_barplot(decoder_special)
