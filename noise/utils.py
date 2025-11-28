@@ -25,9 +25,9 @@ def get_noise_model(error_type: str,
         elif error_type == "si1000":
             return ArtificialNoise.SI1000(p, qt, remote=remote)
         elif error_type == "modsi1000":
-            return ArtificialNoise.modSI1000(p, qt)
+            return ArtificialNoise.modSI1000(p, qt, remote=remote)
         elif error_type == "constant":
-            return ArtificialNoise.constant(p, qt)
+            return ArtificialNoise.constant(p, qt, remote=remote)
         elif error_type == "variance":
             return ArtificialVarianceNoise.get_noise(p, qt, backend)
     if error_type == "real_willow":

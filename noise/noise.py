@@ -61,6 +61,10 @@ class NoiseModel:
     
     def add_qubit_error(self, circuit: stim.Circuit, qubits: List[stim.GateTarget], gate_duration: float) -> None:
         # https://arxiv.org/pdf/1404.3747
+        circuit.append_operation("Depolarize1", qubits, self.idle)
+        return
+        if self.backend == None:
+            circuit.append_operation("Depolarize1", qubits, self.idle)
         if self.backend == None or self.idle != 0:
             return
         for qubit in qubits:
@@ -117,7 +121,7 @@ class NoiseModel:
         #    return False
         
         if self.qt == None:
-            if isinstance(self.remote, (int, float)): return False
+            if self.remote == None or isinstance(self.remote, (int, float)): return False
             else:
                 # pair is a list, but remote needs this as pair
                 return tuple(pair) in self.remote
@@ -189,6 +193,7 @@ class NoiseModel:
                         
                     else:
                         post.append_operation("DEPOLARIZE2", pair, p)
+            #print("asd")
                 self.add_qubit_error(post, targets, self.get_gate_time(op, pair))
         elif op.name in RESET_OPS:
             for q in targets:
@@ -205,7 +210,7 @@ class NoiseModel:
             else:
                 p = self.measure
             pre.append_operation("Z_ERROR" if op.name.endswith("X") else "X_ERROR", targets, p)
-            #self.add_qubit_error(post, targets, self.get_gate_time(op))
+            self.add_qubit_error(post, targets, self.get_gate_time(op))
         elif op.name == "MPP":
             # Our circuits never contain MPP after translations
             assert len(targets) % 3 == 0 and all(t.is_combiner for t in targets[1::3]), repr(op)
