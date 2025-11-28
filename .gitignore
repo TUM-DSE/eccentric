@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 
 #experiment_results/
+.nix_env
