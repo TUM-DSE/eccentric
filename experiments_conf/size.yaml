@@ -1,0 +1,9 @@
+experiments:
+  - name: "Size"
+    num_samples: 1000
+    backends: ["custom_full"] # custom_line, custom_grid, custom_cube, custom_full
+    backends_sizes: [300, 350, 400, 450, 500]
+    codes: ["surface", "gross", "color", "bacon", "hh", "steane"]
+    error_types: ["constant", "modsi1000"]
+    error_probabilities: [0.002, 0.004, 0.008] 
+    decoders: ["bposd"]
