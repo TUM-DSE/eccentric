@@ -65,26 +65,16 @@ def run_experiment(
         detectors, logicals = code.stim_detectors()
         print("Before translating")
 
-        error_count = 0
-
-        for i in range(num_samples):
-            if translating_method:
-                code.qc = translate(code.qc, translating_method)
-            code.qc = run_transpiler(code.qc, backend, layout_method, routing_method)
-            qt = QubitTracking(backend, code.qc)
-            stim_circuit = get_stim_circuits(
-                code.qc, detectors=detectors, logicals=logicals
-            )[0][0]
-            noise_model = get_noise_model(error_type, qt, error_prob, backend)
-            stim_circuit = noise_model.noisy_circuit(stim_circuit)
-            error_occured = decode(code_name, stim_circuit, 1, decoder, backend_name, error_type)
-
-            if error_occured == None:
-                exit(1)
-
-            error_count += error_occured
-
-        logical_error_rate = error_count / num_samples
+        if translating_method:
+            code.qc = translate(code.qc, translating_method)
+        code.qc = run_transpiler(code.qc, backend, layout_method, routing_method)
+        qt = QubitTracking(backend, code.qc)
+        stim_circuit = get_stim_circuits(
+            code.qc, detectors=detectors, logicals=logicals
+        )[0][0]
+        noise_model = get_noise_model(error_type, qt, error_prob, backend)
+        stim_circuit = noise_model.noisy_circuit(stim_circuit)
+        logical_error_rate = decode(code_name, stim_circuit, num_samples, decoder, backend_name, error_type)
 
         result_data = {
             "backend": backend_name,
