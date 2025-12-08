@@ -122,13 +122,13 @@ class NoiseModel:
             else:
                 # pair is a list, but remote needs this as pair
                 return tuple(pair) in self.remote
-            
-        phy_q1 = self.qt.get_layout_postion(pair[0])
-        phy_q2 = self.qt.get_layout_postion(pair[1])
-        if (phy_q1, phy_q2) in self.backend.get_remote_gates or (phy_q2, phy_q1) in self.backend.get_remote_gates:
-            return True
-        else:
-            return False
+
+        if hasattr(self.backend, 'get_remote_gates'):
+            phy_q1 = self.qt.get_layout_postion(pair[0])
+            phy_q2 = self.qt.get_layout_postion(pair[1])
+            if (phy_q1, phy_q2) in self.backend.get_remote_gates or (phy_q2, phy_q1) in self.backend.get_remote_gates:
+                return True
+        return False
 
     def get_gate_time(self, op: stim.CircuitInstruction, pair: Optional[List[int]] = None) -> Union[float, None]:
         if self.gate_times == {}:
