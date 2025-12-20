@@ -37,16 +37,11 @@ def run_experiment(
     translating_method=None,
 ):
     try:
-        print(f"Starting experiment")
+        print("Starting experiment")
         backend = get_backend(backend_name, backend_size)
         print("Got backend")
         if d == None:
-            if backend_name == "real_flamingo_1_qpu":
-                d = get_max_d(code_name, 133)
-            elif backend_name == "real_loon_1_qpu":
-                d = get_max_d(code_name, 120)
-            else:
-                d = get_max_d(code_name, backend.coupling_map.size())
+            d = get_max_d(code_name, backend.coupling_map.size())
             print(f"Max distance for {code_name} on backend {backend_name} is {d}")
             if d < 3:
                 logging.info(

@@ -21,7 +21,7 @@ def get_backend(backend: str, backend_size: int):
         name = backend.split("_")[1]
         if name == "flamingo":
             backend = FakeIBMFlamingo()
-        if name == "loon":
+        elif name == "loon":
             backend = FakeIBMLoon()
         elif name == "willow":
             # By default we allow extension as otherwise codes are limited

@@ -10,9 +10,9 @@ class FlamingoNoiseDownscaled(NoiseModel):
         backend: FakeIBMFlamingo
     ) -> 'NoiseModel':
         return NoiseModel(
-            sq=0.00025,
-            tq=0.002,
-            measure=0.01,
+            sq=0.00025 / 10,
+            tq=0.002 / 10,
+            measure=0.01 / 10,
             remote=0.03 / 10,
             gate_times={
                 "SQ": 50 * 1e-9,

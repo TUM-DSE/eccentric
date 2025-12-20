@@ -1,0 +1,22 @@
+{
+    "name": "DQC_Nighthawk",
+    "num_samples": 1000,
+    "backends": [
+        "real_loon",
+        "real_loon_1_qpu"
+    ],
+    "codes": [
+        "surface",
+        "color",
+        "bacon",
+        "hh",
+        "steane"
+    ],
+    "error_types": [
+        "real_flamingo",
+        "real_flamingo_downscaled"
+    ],
+    "decoders": [
+        "bposd"
+    ]
+}
