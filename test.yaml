@@ -1,7 +1,7 @@
 experiments:
   - name: "New"
     num_samples: 5000
-    backends: ["ibm_torino"] # custom_line, custom_grid, custom_cube, custom_full
+    backends: ["real_torino"] # custom_line, custom_grid, custom_cube, custom_full
     distances: [3]
     cycles: 1
     codes: ["surface"]

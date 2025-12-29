@@ -29,7 +29,7 @@ import stim
 def load_API_key():
  
     QiskitRuntimeService.save_account(
-    token="<token>", # Use the 44-character API_KEY you created and saved from the IBM Quantum Platform Home dashboard
+    token="8pocbpOS-ra1aLAH2bowls6UBvyy56EZ30t9YeaQB5Eh", # Use the 44-character API_KEY you created and saved from the IBM Quantum Platform Home dashboard
     instance="open-instance", # Optional
     overwrite=True
     )
@@ -52,12 +52,12 @@ def run_on_real_device(circuit):
     
     sampler = Sampler(mode=backend)
 
-    observables_labels = ["IIZIIIIIIZIZIZZIZIZIIIIIIZ"]
-    observables = [SparsePauliOp(label) for label in observables_labels]
+    #observables_labels = ["IIZIIIIIIZIZIZZIZIZIIIIIIZ"]
+    #observables = [SparsePauliOp(label) for label in observables_labels]
 
-    mapped_observables = [
-    observable.apply_layout(isa_circuit.layout) for observable in observables
-    ]
+    #mapped_observables = [
+    #observable.apply_layout(isa_circuit.layout) for observable in observables
+    #]
  
     #job = estimator.run([(isa_circuit, mapped_observables)])
     job = sampler.run([(isa_circuit, None)], shots=5000)
@@ -120,7 +120,7 @@ def run_experiment(
             code.qc = translate(code.qc, translating_method)
         code.qc = run_transpiler(code.qc, backend, layout_method, routing_method)
 
-        print(code.qc)
+        #print(code.qc)
 
         #from qiskit.primitives import StatevectorSampler
         #sampler = StatevectorSampler()
