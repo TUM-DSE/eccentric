@@ -1731,7 +1731,7 @@ def generate_variance_two(decoherence_csv, readout_csv):
 
     # --- Blue bounding box around entire figure ---
     fig.patch.set_edgecolor("blue")
-    fig.patch.set_linewidth(6)
+    fig.patch.set_linewidth(3)
     fig.patch.set_facecolor("none")
 
     #plt.tight_layout(rect=[0,0,0.95,1])
@@ -1743,23 +1743,27 @@ def generate_variance_two(decoherence_csv, readout_csv):
 
 
 def generate_decoder_plot(df_path):
-    # Read data
     df = pd.read_csv(df_path)
     if "error_type" in df.columns:
         df = df[df["error_type"] == "modsi1000"]
 
-    # Optional renaming if you have a mapping
+    # Optional renaming
     if "code_rename_map" in globals():
-        df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
+        df["code"] = df["code"].apply(
+            lambda x: code_rename_map.get(x.lower(), x.capitalize())
+        )
     else:
         df["code"] = df["code"].apply(lambda x: x.capitalize())
 
     if "decoder_map" in globals():
         df["decoder"] = df["decoder"].apply(lambda x: decoder_map.get(x, x))
 
-
-    # Compute binomial std error (optional)
-    df["std"] = np.sqrt(df["logical_error_rate"] * (1 - df["logical_error_rate"]) / df["num_samples"])
+    # Binomial std error (only used for logical_error_rate)
+    df["std"] = np.sqrt(
+        df["logical_error_rate"]
+        * (1 - df["logical_error_rate"])
+        / df["num_samples"]
+    )
 
     # Unique codes and decoders
     codes = sorted(df["code"].unique())
@@ -1769,173 +1773,209 @@ def generate_decoder_plot(df_path):
 
     # Layout constants
     colors = code_palette
-
-    # Create figure
-    fig, ax = plt.subplots(figsize=(WIDE_FIGSIZE, HEIGHT_FIGSIZE))
     x = np.arange(n_codes)
     offsets = np.linspace(-BAR_WIDTH, BAR_WIDTH, n_decoders)
 
-    # Plot bars for each decoder
-    for i, decoder in enumerate(decoders):
-        means, stds = [], []
-        for code in codes:
-            subset = df[(df["code"] == code) & (df["decoder"] == decoder)]
-            if not subset.empty:
-                means.append(subset["logical_error_rate"].values[0])
-                stds.append(subset["std"].values[0])
-            else:
-                # mark missing data visually
-                means.append(0)
-                stds.append(0)
+    panels = [
+        ("logical_error_rate", "Log. Err. Rate", True),
+        ("time_decode", "Time [s] (log)", False),
+        ("mem_decode_full_MB", "Memory [MB]", False),
+    ]
 
-                # position where the bar would have been
-                xpos = x[codes.index(code)] + offsets[i]
-                ax.text(
-                    xpos,                     # x-position
-                    -0.02,                     # y-position (choose something above 0)
-                    "×",                      # red X symbol
-                    color="red",
-                    fontsize=18,
-                    ha="center",
-                    va="bottom",
-                    fontweight="bold"
-                )
-
-
-        ax.bar(
-            x + offsets[i],
-            means,
-            yerr=stds,
-            width=BAR_WIDTH,
-            label=decoder,
-            color=colors[i % len(colors)],
-            edgecolor="black"
-        )
-        ax.text(
-            1.0, 1.1, 'Lower is better ↓',
-            transform=ax.transAxes,
-            fontsize=FONTSIZE, fontweight='bold', color="blue",
-            va='top', ha='right'
-        )
-        ax.set_title("General decoders", loc="left", fontsize=FONTSIZE, fontweight="bold")
-
-    # Formatting
-    ax.set_xticks(x)
-    ax.set_xticklabels(codes, fontsize=FONTSIZE - 2)
-    ax.set_ylabel("Log. Err. Rate", fontsize=FONTSIZE)
-    ax.grid(axis="y")
-    ax.legend(loc="upper right", frameon=False)
-    plt.savefig("data/decoder_general.pdf", format="pdf")
-    plt.close(fig)
-
-
-def generate_decoder_error_barplot(df_path):
-    # Load data
-    df = pd.read_csv(df_path)
-
-    # ✅ Keep only modsi1000 error type
-    if "error_type" in df.columns:
-        df = df[df["error_type"] == "phenomenological"]
-
-    # Optional mappings
-    if "decoder_map" in globals():
-        df["decoder"] = df["decoder"].apply(lambda x: decoder_map.get(x, x))
-    if "code_rename_map" in globals():
-        df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
-    else:
-        df["code"] = df["code"].apply(lambda x: x.capitalize())
-
-    # Expect only one code
-    code_name = df["code"].iloc[0]
-
-    # Unique variables
-    decoders = sorted(df["decoder"].unique())
-    error_probs = sorted(df["error_probability"].unique())
-    distances = sorted(df["distance"].unique())
-
-    n_decoders = len(decoders)
-    n_probs = len(error_probs)
-    n_dist = len(distances)
-
-    colors = code_palette if "code_palette" in globals() else plt.cm.Set2.colors
-
-    # ✅ Create only one row (modsi1000), one column per decoder
     fig, axes = plt.subplots(
-        1, n_decoders,
+        1, 3,
         figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE),
-        sharey=True
+        sharex=True
     )
 
-    # If only one decoder, axes might not be iterable
-    if n_decoders == 1:
-        axes = [axes]
+    for ax, (column, ylabel, use_errorbars) in zip(axes, panels):
 
-    for col, decoder in enumerate(decoders):
-        ax = axes[col]
-        subset = df[df["decoder"] == decoder]
+        for i, decoder in enumerate(decoders):
+            means, stds = [], []
 
-        # x positions for error probabilities
-        x = np.arange(n_probs)
-        group_width = BAR_WIDTH * n_dist
-        offsets = np.linspace(-group_width / 2 + BAR_WIDTH / 2,
-                              group_width / 2 - BAR_WIDTH / 2, n_dist)
+            for code in codes:
+                subset = df[(df["code"] == code) & (df["decoder"] == decoder)]
 
-        for i, dist in enumerate(distances):
-            values = []
-            for p in error_probs:
-                sub = subset[(subset["distance"] == dist) & (subset["error_probability"] == p)]
-                if not sub.empty:
-                    values.append(sub["logical_error_rate"].values[0])
+                if not subset.empty:
+                    means.append(subset[column].values[0])
+                    stds.append(subset["std"].values[0] if use_errorbars else 0)
                 else:
-                    values.append(0)
-                    # Mark missing data
+                    means.append(0)
+                    stds.append(0)
+
+                    xpos = x[codes.index(code)] + offsets[i]
                     ax.text(
-                        x[error_probs.index(p)] + offsets[i], 1e-3, "×",
-                        color="red", fontsize=14, fontweight="bold",
-                        ha="center", va="bottom"
+                        xpos,
+                        0.08,                          
+                        "×",
+                        transform=ax.get_xaxis_transform(),
+                        color="red",
+                        fontsize=18,
+                        ha="center",
+                        va="top",
+                        fontweight="bold",
+                        clip_on=False,
                     )
 
             ax.bar(
                 x + offsets[i],
-                values,
+                means,
+                yerr=stds if use_errorbars else None,
                 width=BAR_WIDTH,
-                label=f"d={dist}",
+                label=decoder,
                 color=colors[i % len(colors)],
-                edgecolor="black"
+                edgecolor="black",
             )
 
-        # Axes settings
-        ax.set_yscale("log")
+        ax.set_ylabel(ylabel, fontsize=FONTSIZE, labelpad=2)
         ax.grid(axis="y")
-        ax.set_xticks(x)
-        ax.set_xticklabels([str(p) for p in error_probs])
-        ax.set_xlabel("Physical Error Probability", fontsize=FONTSIZE)
-        if col == 0:
-            ax.set_ylabel("Log. Err. Rate (Log)", fontsize=FONTSIZE)
-
-        # Titles and annotations
-        ax.set_title(f"{chr(97 + col)}) {decoder}", fontsize=FONTSIZE, fontweight="bold", loc="left")
 
         ax.text(
-            0.85, 1, "Lower is better ↓",
+            1.0, 1.15,
+            "Lower is better ↓",
             transform=ax.transAxes,
-            fontsize=FONTSIZE, fontweight="bold", color="blue",
-            ha="center", va="bottom"
+            fontsize=FONTSIZE,
+            fontweight="bold",
+            color="blue",
+            va="top",
+            ha="right",
         )
 
-        # Legend only on first plot
-        if col == 1:
-            ax.legend(
-                loc="upper left",
-                bbox_to_anchor=(-0.01, 1.08),  # (x, y) relative to the axes
-                frameon=False
+    # Titles and scales
+    axes[0].set_title("a) Effectiveness", loc="left",
+                      fontsize=FONTSIZE, fontweight="bold")
+    axes[1].set_title("b) Time", loc="left",
+                      fontsize=FONTSIZE, fontweight="bold")
+    axes[2].set_title("c) Memory", loc="left",
+                      fontsize=FONTSIZE, fontweight="bold")
+
+    axes[1].set_yscale("log")
+
+    for ax in axes:
+        ax.set_xticks(x)
+        ax.set_xticklabels(codes, fontsize=FONTSIZE - 2, rotation=20, ha="right")
+
+    axes[-1].legend(loc="upper right", frameon=True)
+
+    # Figure styling & spacing
+    fig.patch.set_edgecolor("blue")
+    fig.patch.set_linewidth(3)
+    fig.patch.set_facecolor("none")
+
+    plt.subplots_adjust(left=0.06, right=0.99, bottom=0.25, wspace=0.25)
+    plt.savefig("data/decoder_general.pdf", format="pdf")
+    plt.close(fig)
+
+
+
+
+def generate_decoder_error_barplot(df_path):
+    for err_name in ["phenomenological", "modsi1000"]:
+        df = pd.read_csv(df_path)
+        if "error_type" in df.columns:
+            df = df[df["error_type"] == err_name]
+
+        # Optional mappings
+        if "decoder_map" in globals():
+            df["decoder"] = df["decoder"].apply(lambda x: decoder_map.get(x, x))
+        if "code_rename_map" in globals():
+            df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
+        else:
+            df["code"] = df["code"].apply(lambda x: x.capitalize())
+
+        # Expect only one code
+        code_name = df["code"].iloc[0]
+
+        # Unique variables
+        decoders = sorted(df["decoder"].unique())
+        error_probs = sorted(df["error_probability"].unique())
+        distances = sorted(df["distance"].unique())
+
+        n_decoders = len(decoders)
+        n_probs = len(error_probs)
+        n_dist = len(distances)
+
+        colors = code_palette if "code_palette" in globals() else plt.cm.Set2.colors
+
+        # Create only one row (modsi1000), one column per decoder
+        fig, axes = plt.subplots(
+            1, n_decoders,
+            figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE),
+            sharey=True
+        )
+
+        # If only one decoder, axes might not be iterable
+        if n_decoders == 1:
+            axes = [axes]
+
+        for col, decoder in enumerate(decoders):
+            ax = axes[col]
+            subset = df[df["decoder"] == decoder]
+
+            # x positions for error probabilities
+            x = np.arange(n_probs)
+            group_width = BAR_WIDTH * n_dist
+            offsets = np.linspace(-group_width / 2 + BAR_WIDTH / 2,
+                                group_width / 2 - BAR_WIDTH / 2, n_dist)
+
+            for i, dist in enumerate(distances):
+                values = []
+                for p in error_probs:
+                    sub = subset[(subset["distance"] == dist) & (subset["error_probability"] == p)]
+                    if not sub.empty:
+                        values.append(sub["logical_error_rate"].values[0])
+                    else:
+                        values.append(0)
+                        # Mark missing data
+                        ax.text(
+                            x[error_probs.index(p)] + offsets[i], 1e-3, "×",
+                            color="red", fontsize=14, fontweight="bold",
+                            ha="center", va="bottom"
+                        )
+
+                ax.bar(
+                    x + offsets[i],
+                    values,
+                    width=BAR_WIDTH,
+                    label=f"d={dist}",
+                    color=colors[i % len(colors)],
+                    edgecolor="black"
+                )
+
+            # Axes settings
+            ax.set_yscale("log")
+            ax.grid(axis="y")
+            ax.set_xticks(x)
+            ax.set_xticklabels([str(p) for p in error_probs])
+            ax.set_xlabel("Physical Error Probability", fontsize=FONTSIZE)
+            if col == 0:
+                ax.set_ylabel("Log. Err. Rate (Log)", fontsize=FONTSIZE)
+
+            # Titles and annotations
+            ax.set_title(f"{chr(97 + col)}) {decoder}", fontsize=FONTSIZE, fontweight="bold", loc="left")
+
+            ax.text(
+                0.85, 1, "Lower is better ↓",
+                transform=ax.transAxes,
+                fontsize=FONTSIZE, fontweight="bold", color="blue",
+                ha="center", va="bottom"
             )
 
+            # Legend only on first plot
+            if col == 1:
+                ax.legend(
+                    loc="upper left",
+                    bbox_to_anchor=(-0.01, 1.08),  # (x, y) relative to the axes
+                    frameon=False
+                )
+        fig.patch.set_edgecolor("blue")
+        fig.patch.set_linewidth(3)
+        fig.patch.set_facecolor("none")
 
-    plt.tight_layout(rect=[0, 0, 1, 1])
-    os.makedirs("data", exist_ok=True)
-    plt.savefig("data/decoder_special_ph.pdf", format="pdf")
-    plt.close(fig)
+        plt.tight_layout(rect=[0, 0, 1, 1])
+        os.makedirs("data", exist_ok=True)
+        plt.savefig(f"data/decoder_special_{err_name}.pdf", format="pdf")
+        plt.close(fig)
 
 
 def generate_decoder_plot_time(df_path):
@@ -2051,12 +2091,10 @@ if __name__ == '__main__':
     dqc_flamingo = "experiment_results/DQC_Flamingo/results.csv"
     dqc_nighthawk = "experiment_results/DQC_Nighthawk/results.csv"
     dqc = [dqc_flamingo, dqc_nighthawk]
-    decoder_general = "experiment_results/Decoders/results_general.csv"
-    decoder_special = "experiment_results/Decoders/results_special.csv"
+    decoder_general = "experiment_results/Decoder/results.csv"
+    decoder_special = "experiment_results/Decoder_Chromobius/results.csv"
     #generate_size_plot_two(size)
     #generate_connectivity_topology_plot(connectivity, topology)
-    #generate_plot_variance(variance_high)
-    #generate_plot_variance(variance_low)
     #generate_technology_plot(path)
     #generate_dqc_plot(dqc)
     #generate_swap_overhead_plot(df_grid, "Grid")
@@ -2069,6 +2107,6 @@ if __name__ == '__main__':
     #generate_gate_overhead(gate_overhead)
     #generate_normalized_gate_overhead(gate_overhead)
     #generate_overhead_2x2(gate_overhead)
-    #generate_decoder_plot(decoder_general)
+    generate_decoder_plot(decoder_general)
+    generate_decoder_error_barplot(decoder_special)
     #generate_decoder_plot_time(decoder_general)
-    #generate_decoder_error_barplot(decoder_special)

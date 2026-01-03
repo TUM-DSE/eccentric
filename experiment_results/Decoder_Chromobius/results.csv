@@ -1,3 +1,4 @@
+code,distance,cycles,decoder,num_samples,error_type,error_probability,logical_error_rate,layout_method,routing_method,translating_method
 color,3,3,chromobius,1000,phenomenological,0.002,0.000000,N/A,N/A,N/A
 color,3,3,chromobius,1000,phenomenological,0.003,0.001000,N/A,N/A,N/A
 color,5,5,chromobius,1000,phenomenological,0.001,0.000000,N/A,N/A,N/A
