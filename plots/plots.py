@@ -1611,7 +1611,6 @@ def generate_variance_two(decoherence_csv, readout_csv):
     group_spacing = 0.25
     hatches = ['/', '\\', '//', 'o']
 
-    # --- Preprocess decoherence ---
     def preprocess_deco(df):
         df = df[df["error_type"] == "variance"].copy()
         df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
@@ -1619,125 +1618,97 @@ def generate_variance_two(decoherence_csv, readout_csv):
         df["backend_plot"] = df["backend"].str.replace(r"_\d+$", "", regex=True)
         return df
 
-    # --- Preprocess readout ---
     def preprocess_readout(df):
         df = df.dropna(subset=["error_type", "logical_error_rate"]).copy()
-        df["backend_plot"] = df["error_type"]  # use error_type as backend
+        df["backend_plot"] = df["error_type"]
         df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
         df["std"] = np.sqrt(df["logical_error_rate"] * (1 - df["logical_error_rate"]) / df["num_samples"])
         return df
 
-    # --- Read CSVs ---
-    df_deco_raw = pd.read_csv(decoherence_csv)
-    df_read_raw = pd.read_csv(readout_csv)
-    df_deco = preprocess_deco(df_deco_raw)
-    df_read = preprocess_readout(df_read_raw)
+    df_deco = preprocess_deco(pd.read_csv(decoherence_csv))
+    df_read = preprocess_readout(pd.read_csv(readout_csv))
 
-    # Split decoherence by noise level
     df_high = df_deco[df_deco["backend"].str.endswith("_1", na=False)]
-    df_low  = df_deco[df_deco["backend"].str.endswith("_10", na=False)]
+    df_low = df_deco[df_deco["backend"].str.endswith("_10", na=False)]
 
     codes = sorted(set(df_deco["code"]).union(df_read["code"]))
 
-    # --- Baseline for "None" ---
-    baseline_rows = df_deco[df_deco["backend"] == "variance_none_1"]
-    baseline_dict = dict(zip(baseline_rows["code"], baseline_rows["logical_error_rate"]))
+    # Baseline for readout from variance_none decoherence
+    baseline_rows = df_deco[df_deco["backend_plot"] == "variance_none"]
+    if baseline_rows.empty:
+        raise ValueError("No variance_none baseline found in decoherence CSV")
 
-    # Add "None" bar for decoherence
-    def add_none_backend(df_plot):
-        df_none = pd.DataFrame({
-            "code": codes,
-            "backend_plot": ["None"]*len(codes),
-            "logical_error_rate": [baseline_dict.get(c, 0) for c in codes],
-            "std": [0]*len(codes)
+    baseline_mean = baseline_rows.groupby("code")["logical_error_rate"].mean()
+    baseline_std = baseline_rows.groupby("code")["std"].apply(lambda x: np.sqrt((x**2).sum()))
+
+    # Inject baseline into readout
+    rows = []
+    for c in codes:
+        if c not in baseline_mean:
+            raise ValueError(f"No baseline measured for code '{c}'")
+        rows.append({
+            "code": c,
+            "backend_plot": "variance_none",
+            "logical_error_rate": baseline_mean[c],
+            "std": baseline_std[c]
         })
-        return pd.concat([df_none, df_plot], ignore_index=True)  # prepend to ensure leftmost
+    df_read = pd.concat([pd.DataFrame(rows), df_read], ignore_index=True)
 
-    df_high_plot = add_none_backend(df_high)
-    df_low_plot  = add_none_backend(df_low)
+    backend_order = ["variance_none", "variance_low", "variance_mid", "variance_high"]
+    backend_labels = {"variance_none": "None", "variance_low": "Low", "variance_mid": "Mid", "variance_high": "High"}
 
-    # Add "None" bar for readout
-    df_none_read = pd.DataFrame({
-        "code": codes,
-        "backend_plot": ["None"]*len(codes),
-        "logical_error_rate": [baseline_dict.get(c, 0) for c in codes],
-        "std": [0]*len(codes)
-    })
-    df_read_plot = pd.concat([df_none_read, df_read], ignore_index=True)  # prepend
+    fig, axes = plt.subplots(1, 3, figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE), sharey=True, gridspec_kw={"wspace": 0.1})
 
-    # --- Backend plotting order ---
-    deco_order = ["None", "variance_low", "variance_mid", "variance_high"]  # None leftmost
-    read_order = ["None", "variance_low", "variance_mid", "variance_high"]
-
-    # --- Create figure ---
-    n_subplots = 3
-    fig, axes = plt.subplots(1, n_subplots, figsize=(2*WIDE_FIGSIZE, HEIGHT_FIGSIZE), sharey=True,
-        gridspec_kw={'wspace': 0.1}
-    )      
-    axes = np.array(axes).reshape(-1)  # flatten
-
-    palette = code_palette
-
-    # --- Plot helper ---
-    def plot_subplot(ax, df_plot, backend_list, title, show_labels=False):
-        n_backends = len(backend_list)
-        x = np.arange(len(codes)) * (bar_width * n_backends + group_spacing)
-        for i, backend in enumerate(backend_list):
-            subset = df_plot[df_plot["backend_plot"] == backend]
+    def plot_subplot(ax, df, title, show_labels=False):
+        n_b = len(backend_order)
+        x = np.arange(len(codes)) * (bar_width * n_b + group_spacing)
+        for i, backend in enumerate(backend_order):
+            sub = df[df["backend_plot"] == backend]
             means, stds = [], []
             for code in codes:
-                row = subset[subset["code"] == code]
-                if not row.empty:
-                    val = row["logical_error_rate"].values[0]
-                    val = max(val, 1e-8)  # log-safe minimal value
-                    means.append(val)
-                    stds.append(row["std"].values[0])
-                else:
-                    means.append(1e-8)
-                    stds.append(0)
+                r = sub[sub["code"] == code]
+                if r.empty:
+                    raise ValueError(f"Missing value for code '{code}' and backend '{backend}'")
+                # Aggregate multiple rows if they exist
+                mean_val = r["logical_error_rate"].mean()
+                std_val = np.sqrt((r["std"]**2).sum())
+                means.append(mean_val)
+                stds.append(std_val)
             ax.bar(
-                x + i*bar_width,
+                x + i * bar_width,
                 means,
                 yerr=stds,
                 width=bar_width,
-                color=palette[i % len(palette)],
+                color=code_palette[i % len(code_palette)],
                 hatch=hatches[i % len(hatches)],
                 edgecolor="black",
-                label=backend.replace("variance_", "").capitalize() if show_labels else None
+                label=backend_labels[backend] if show_labels else None
             )
-        ax.set_xticks(x + bar_width * (n_backends - 1)/2)
+        ax.set_xticks(x + bar_width * (n_b - 1) / 2)
         ax.set_xticklabels(codes, fontsize=FONTSIZE - 2, rotation=30, ha="right")
         ax.set_yscale("log")
         ax.grid(axis="y")
         ax.set_axisbelow(True)
         ax.set_title(title, loc="left", fontsize=12, fontweight="bold", y=0.97)
+        ax.text(1.0, 1.16, "Lower is better ↓", transform=ax.transAxes, fontsize=12, fontweight="bold", color="blue", ha="right", va="top")
 
-        ax.text(1.0, 1.16, 'Lower is better ↓', transform=ax.transAxes,
-                fontsize=12, fontweight='bold', color='blue', va='top', ha='right')
-
-    plt.subplots_adjust(left=0.06, right=0.94, bottom=0.4)
-
-    # --- Plot subplots ---
-    plot_subplot(axes[0], df_high_plot, deco_order, "a) Deco.", show_labels=True)
+    plot_subplot(axes[0], df_high, "a) Deco.", show_labels=True)
     axes[0].set_ylabel("Log. Error Rate (log)", fontsize=FONTSIZE, labelpad=2, y=0.3)
+    plot_subplot(axes[1], df_low, "b) Deco. (10×)")
+    plot_subplot(axes[2], df_read, "c) Readout")
 
-
-    plot_subplot(axes[1], df_low_plot, deco_order, "b) Deco. (10x)")
-    plot_subplot(axes[2], df_read_plot, read_order, "c) Readout")
-    
-    # --- Shared legend ---
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='lower center', ncol=len(handles), fontsize=FONTSIZE-2, frameon=False)
+    fig.legend(handles, labels, loc="lower center", ncol=len(handles), fontsize=FONTSIZE - 2, frameon=False)
 
-    # --- Blue bounding box around entire figure ---
     fig.patch.set_edgecolor("blue")
-    fig.patch.set_linewidth(3)
+    fig.patch.set_linewidth(6)
     fig.patch.set_facecolor("none")
 
-    #plt.tight_layout(rect=[0,0,0.95,1])
+    plt.subplots_adjust(left=0.06, right=0.94, bottom=0.4)
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/variance.pdf", format="pdf")
     plt.close(fig)
+
 
 
 
