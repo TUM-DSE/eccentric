@@ -19,6 +19,338 @@ from noise.heron_noise import HeronNoise
 from backends import QubitTracking
 
 
+# ========================= IBM CLOUD UTILITIES =========================
+
+def get_available_ibm_backends(
+    min_qubits: int = 2,
+    operational_only: bool = True
+) -> List[Dict[str, Any]]:
+    """Get list of available IBM backends with their properties."""
+    try:
+        service = QiskitRuntimeService()
+        backends = service.backends()
+        
+        available = []
+        for backend in backends:
+            if backend.num_qubits >= min_qubits:
+                status = backend.status()
+                if not operational_only or status.operational:
+                    backend_info = {
+                        'name': backend.name,
+                        'num_qubits': backend.num_qubits,
+                        'operational': status.operational,
+                        'pending_jobs': status.pending_jobs,
+                        'status_msg': status.status_msg
+                    }
+                    try:
+                        backend_info['queue_length'] = getattr(status, 'queue_length', 'N/A')
+                    except:
+                        backend_info['queue_length'] = 'N/A'
+                    available.append(backend_info)
+        
+        # Sort by queue length (if available) and number of qubits
+        available.sort(key=lambda x: (
+            x['pending_jobs'] if x['pending_jobs'] is not None else 999,
+            -x['num_qubits']
+        ))
+        
+        return available
+    
+    except Exception as e:
+        print(f"Error fetching IBM backends: {e}")
+        return []
+
+
+def select_best_ibm_backend(
+    min_qubits: int = 2,
+    preferred_backends: List[str] = None
+) -> Optional[str]:
+    """Select the best available IBM backend based on queue and preferences."""
+    
+    if preferred_backends is None:
+        preferred_backends = ["ibm_torino", "ibm_heron", "ibm_flamingo"]
+    
+    available = get_available_ibm_backends(min_qubits=min_qubits)
+    
+    if not available:
+        print("No available IBM backends found")
+        return None
+    
+    print("\nAvailable IBM backends:")
+    for backend in available:
+        print(f"  {backend['name']}: {backend['num_qubits']} qubits, "
+              f"queue: {backend['pending_jobs']}, operational: {backend['operational']}")
+    
+    # First try preferred backends
+    for preferred in preferred_backends:
+        for backend in available:
+            if backend['name'] == preferred and backend['operational']:
+                print(f"\nSelected preferred backend: {preferred}")
+                return preferred
+    
+    # Fall back to best available (lowest queue, operational)
+    for backend in available:
+        if backend['operational']:
+            print(f"\nSelected best available backend: {backend['name']}")
+            return backend['name']
+    
+    print("No operational backends found")
+    return None
+
+
+def estimate_job_cost(
+    num_circuits: int,
+    shots_per_circuit: int,
+    backend_name: str = "ibm_torino"
+) -> Dict[str, Any]:
+    """Estimate the cost/time for an IBM cloud job."""
+    
+    total_shots = num_circuits * shots_per_circuit
+    
+    # Rough estimates - these would need to be updated with current pricing
+    cost_estimates = {
+        'total_shots': total_shots,
+        'estimated_queue_time_minutes': 'depends on queue',
+        'estimated_execution_time_minutes': total_shots / 1000,  # Very rough estimate
+        'recommendation': []
+    }
+    
+    if total_shots > 100000:
+        cost_estimates['recommendation'].append("Consider reducing shots or splitting into multiple jobs")
+    
+    if shots_per_circuit < 512:
+        cost_estimates['recommendation'].append("Very low shots may give poor statistics")
+    elif shots_per_circuit > 2048:
+        cost_estimates['recommendation'].append("High shots - ensure necessary for your analysis")
+    
+    return cost_estimates
+
+
+# ========================= IBM CLOUD FUNCTIONS =========================
+
+def submit_circuits_to_ibm_cloud(
+    circuits: List[QuantumCircuit],
+    backend_name: str = "ibm_torino",
+    shots_per_circuit: int = 1024,
+    optimization_level: int = 1,
+    job_name: Optional[str] = None,
+    save_job_info: bool = True,
+    max_shots_per_job: int = 100000  # IBM cloud limit
+) -> Dict[str, Any]:
+    """
+    Submit a batch of circuits to IBM cloud as a single job.
+    
+    Parameters:
+    -----------
+    circuits : List[QuantumCircuit]
+        List of circuits to execute
+    backend_name : str
+        IBM backend name (e.g., "ibm_torino", "ibm_heron")
+    shots_per_circuit : int
+        Number of shots per circuit
+    optimization_level : int
+        Transpilation optimization level (0-3)
+    job_name : str, optional
+        Custom job name for tracking
+    save_job_info : bool
+        Whether to save job information to file
+    max_shots_per_job : int
+        Maximum total shots per IBM job (to respect limits)
+        
+    Returns:
+    --------
+    Dict with job information including job_id for later retrieval
+    """
+    
+    # Initialize runtime service
+    try:
+        service = QiskitRuntimeService()
+        backend = service.backend(backend_name)
+    except Exception as e:
+        print(f"Error connecting to IBM cloud: {e}")
+        raise
+    
+    print(f"Using IBM backend: {backend_name}")
+    print(f"Backend status: {backend.status()}")
+    
+    # Calculate optimal batch size to respect shot limits
+    total_requested_shots = len(circuits) * shots_per_circuit
+    if total_requested_shots > max_shots_per_job:
+        # Reduce shots per circuit to fit within limits
+        adjusted_shots = max_shots_per_job // len(circuits)
+        print(f"WARNING: Reducing shots from {shots_per_circuit} to {adjusted_shots} to fit IBM limits")
+        shots_per_circuit = adjusted_shots
+    
+    print(f"Submitting {len(circuits)} circuits with {shots_per_circuit} shots each")
+    print(f"Total shots for this job: {len(circuits) * shots_per_circuit}")
+    
+    # Ensure all circuits have measurements
+    measured_circuits = []
+    for i, circuit in enumerate(circuits):
+        if not any(instr.operation.name == 'measure' for instr in circuit.data):
+            circuit_with_measurements = circuit.copy()
+            if not circuit_with_measurements.cregs:
+                circuit_with_measurements.add_register('c', circuit.num_qubits)
+            circuit_with_measurements.measure_all()
+            circuit = circuit_with_measurements
+        measured_circuits.append(circuit)
+    
+    # Transpile all circuits for the target backend
+    print("Transpiling circuits for IBM backend...")
+    transpiled_circuits = transpile(
+        measured_circuits,
+        backend=backend,
+        optimization_level=optimization_level
+    )
+    
+    # Create job name with timestamp if not provided
+    if job_name is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        job_name = f"noise_comparison_{len(circuits)}circuits_{timestamp}"
+    
+    # Submit job using current IBM Runtime API
+    print(f"Submitting job '{job_name}' to {backend_name}...")
+    
+    try:
+        # Use the current Sampler primitive
+        sampler = Sampler(backend)
+        job = sampler.run(transpiled_circuits, shots=shots_per_circuit)
+    except Exception as e:
+        raise RuntimeError(f"Could not submit job to {backend_name}. Error: {e}")
+    
+    job_info = {
+        'job_id': job.job_id(),
+        'backend_name': backend_name,
+        'job_name': job_name,
+        'num_circuits': len(circuits),
+        'shots_per_circuit': shots_per_circuit,
+        'total_shots': len(circuits) * shots_per_circuit,
+        'submission_time': datetime.now().isoformat(),
+        'optimization_level': optimization_level,
+        'circuit_depths': [c.depth() for c in transpiled_circuits],
+        'circuit_sizes': [c.size() for c in transpiled_circuits],
+        'transpiled_circuits': transpiled_circuits  # Store for later analysis
+    }
+    
+    print(f"Job submitted successfully!")
+    print(f"Job ID: {job.job_id()}")
+    print(f"Job status: {job.status()}")
+    
+    # Save job information to file for later retrieval
+    if save_job_info:
+        job_file = f"job_info_{job.job_id()}.json"
+        # Convert circuits to serializable format
+        serializable_job_info = job_info.copy()
+        del serializable_job_info['transpiled_circuits']  # Can't serialize circuits directly
+        try:
+            serializable_job_info['circuit_qasm'] = [c.qasm() for c in transpiled_circuits]
+        except AttributeError:
+            # Fallback for older qiskit versions
+            serializable_job_info['circuit_qasm'] = [str(c) for c in transpiled_circuits]
+        
+        with open(job_file, 'w') as f:
+            json.dump(serializable_job_info, f, indent=2)
+        print(f"Job information saved to: {job_file}")
+    
+    return job_info
+
+
+def get_ibm_job_results(
+    job_id: str,
+    wait_for_completion: bool = True,
+    timeout: int = 3600
+) -> Dict[str, Any]:
+    """
+    Retrieve results from an IBM cloud job.
+    
+    Parameters:
+    -----------
+    job_id : str
+        IBM job ID
+    wait_for_completion : bool
+        Whether to wait for job completion
+    timeout : int
+        Maximum time to wait for completion (seconds)
+        
+    Returns:
+    --------
+    Dict with job results and metadata
+    """
+    
+    # Initialize runtime service
+    service = QiskitRuntimeService()
+    
+    try:
+        job = service.job(job_id)
+        print(f"Retrieved job {job_id}")
+        
+        # Handle different ways job status might be returned
+        job_status = job.status()
+        if hasattr(job_status, 'name'):
+            status_name = job_status.name
+        else:
+            status_name = str(job_status)  # Handle case where status is already a string
+        
+        print(f"Job status: {status_name}")
+        
+        if wait_for_completion:
+            print(f"Waiting for job completion (timeout: {timeout}s)...")
+            result = job.result(timeout=timeout)
+        else:
+            if status_name not in ['DONE', 'CANCELLED', 'ERROR']:
+                print("Job not completed yet. Set wait_for_completion=True to wait.")
+                return {'status': status_name, 'job_id': job_id}
+            result = job.result()
+        
+        # Extract counts for each circuit
+        counts_list = []
+        if hasattr(result, '__len__'):  # Multiple circuits
+            for i in range(len(result)):
+                counts_list.append(result[i].data.meas.get_counts())
+        else:  # Single circuit
+            counts_list.append(result.data.meas.get_counts())
+        
+        # Get job metadata
+        metadata = {
+            'job_id': job_id,
+            'status': status_name,
+            'backend_name': job.backend().name,
+            'creation_time': job.creation_date.isoformat() if job.creation_date else None,
+            'completion_time': datetime.now().isoformat(),
+            'num_circuits': len(counts_list),
+        }
+        
+        # Try to get additional metadata
+        try:
+            metadata.update({
+                'queue_position': getattr(job, 'queue_position', None),
+                'execution_time': getattr(job, 'time_taken', None),
+            })
+        except:
+            pass
+        
+        return {
+            'metadata': metadata,
+            'counts': counts_list,
+            'raw_result': result
+        }
+        
+    except Exception as e:
+        print(f"Error retrieving job results: {e}")
+        return {'error': str(e), 'job_id': job_id}
+
+
+def load_job_info_from_file(job_id: str) -> Dict[str, Any]:
+    """Load job information from saved JSON file."""
+    job_file = f"job_info_{job_id}.json"
+    if os.path.exists(job_file):
+        with open(job_file, 'r') as f:
+            return json.load(f)
+    else:
+        print(f"Job info file not found: {job_file}")
+        return {}
+
+
 def compare_circuit_execution(
     circuit: QuantumCircuit,
     shots: int = 1024,
@@ -178,6 +510,190 @@ def compare_circuit_execution(
     return results
 
 
+def compare_circuit_execution_with_ibm_cloud(
+    circuit: QuantumCircuit,
+    ibm_job_results: Dict[str, int],
+    circuit_index: int = 0,
+    shots: int = 1024,
+    noise_type: str = "heron",
+    noise_param: float = 0.001,
+    custom_backend=None,
+    custom_noise_model=None,
+    ibm_backend_name: str = "ibm_torino"
+) -> Dict[str, Any]:
+    """
+    Compare circuit execution using IBM cloud results instead of FakeTorino.
+    
+    This function compares:
+    1. Noiseless simulator
+    2. IBM cloud real hardware results (provided)
+    3. Custom backend with provided noise model
+    
+    Parameters:
+    -----------
+    circuit : QuantumCircuit
+        The quantum circuit that was executed
+    ibm_job_results : Dict[str, int]
+        The counts from IBM cloud execution for this circuit
+    circuit_index : int
+        Index of this circuit in the batch (for reference)
+    shots : int
+        Number of shots used (for validation/reference)
+    noise_type : str
+        Type of noise model for custom backend
+    noise_param : float
+        Noise parameter for custom backend
+    custom_backend : BackendV2, optional
+        Custom backend to use (defaults to FakeTorino architecture)
+    custom_noise_model : NoiseModel, optional
+        Custom noise model to override default
+    ibm_backend_name : str
+        Name of IBM backend used (for metadata)
+        
+    Returns:
+    --------
+    Dict containing results from all three backends with execution statistics
+    """
+    
+    results = {}
+    
+    # Ensure circuit has measurements (should already have them)
+    if not any(instr.operation.name == 'measure' for instr in circuit.data):
+        circuit_with_measurements = circuit.copy()
+        if not circuit_with_measurements.cregs:
+            circuit_with_measurements.add_register('c', circuit.num_qubits)
+        circuit_with_measurements.measure_all()
+        circuit = circuit_with_measurements
+    
+    # Use FakeTorino for transpilation consistency (or could use the actual IBM backend)
+    fake_torino = FakeTorino()
+    
+    # Transpile circuit for comparison consistency
+    common_transpiled = transpile(
+        circuit,
+        fake_torino,
+        basis_gates=['sx', 'x', 'rz', 'cz', 'id'],
+        optimization_level=1
+    )
+    
+    print(f"\nComparing circuit {circuit_index} (depth: {common_transpiled.depth()})")
+    
+    # 1. Noiseless Simulator
+    print("Running on noiseless simulator...")
+    noiseless_simulator = AerSimulator()
+    noiseless_job = noiseless_simulator.run(common_transpiled, shots=shots)
+    noiseless_result = noiseless_job.result()
+    
+    results['noiseless'] = {
+        'backend': 'AerSimulator (noiseless)',
+        'counts': noiseless_result.get_counts(),
+        'fidelity': 1.0,
+        'execution_time': getattr(noiseless_result, 'time_taken', 'N/A')
+    }
+    
+    # 2. IBM Cloud Real Hardware Results
+    print(f"Using IBM cloud results from {ibm_backend_name}...")
+    
+    # Calculate fidelity relative to noiseless
+    ibm_fidelity = _calculate_fidelity(
+        results['noiseless']['counts'],
+        ibm_job_results
+    )
+    
+    results['ibm_hardware'] = {
+        'backend': f'{ibm_backend_name} (IBM Cloud)',
+        'counts': ibm_job_results,
+        'fidelity': ibm_fidelity,
+        'execution_time': 'N/A',  # Would need to extract from job metadata
+        'circuit_index': circuit_index
+    }
+    
+    # 3. Custom Backend with Custom Noise Model
+    print(f"Running on custom backend with {noise_type} noise...")
+    
+    # Set up backend
+    if custom_backend is None:
+        custom_backend = fake_torino
+    
+    # Set up QubitTracking
+    qt = QubitTracking(custom_backend, common_transpiled)
+    
+    # Get noise model
+    if noise_type == "heron":
+        noise_model = HeronNoise.get_noise(qt, custom_backend)
+    else:
+        noise_model = get_noise_model(noise_type, qt, noise_param, custom_backend)
+    
+    if custom_noise_model is not None:
+        noise_model = custom_noise_model
+    
+    # Create Qiskit noise model approximation
+    qiskit_custom_noise = _create_qiskit_noise_approximation(noise_model, custom_backend, use_cz=True)
+    custom_simulator = AerSimulator(noise_model=qiskit_custom_noise)
+    
+    custom_job = custom_simulator.run(common_transpiled, shots=shots)
+    custom_result = custom_job.result()
+    
+    # Calculate fidelity relative to noiseless
+    custom_fidelity = _calculate_fidelity(
+        results['noiseless']['counts'],
+        custom_result.get_counts()
+    )
+    
+    results['custom_noise'] = {
+        'backend': f'Custom backend with {noise_type} noise',
+        'counts': custom_result.get_counts(),
+        'fidelity': custom_fidelity,
+        'execution_time': getattr(custom_result, 'time_taken', 'N/A'),
+        'noise_parameters': {
+            'sq_error': getattr(noise_model, 'sq', 'N/A'),
+            'tq_error': getattr(noise_model, 'tq', 'N/A'),
+            'measure_error': getattr(noise_model, 'measure', 'N/A'),
+            'reset_error': getattr(noise_model, 'reset', 'N/A')
+        }
+    }
+    
+    # Summary comparison
+    results['comparison'] = _generate_comparison_summary_ibm(results)
+    
+    return results
+
+
+def _generate_comparison_summary_ibm(results: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate comparison summary for IBM cloud results."""
+    summary = {
+        'fidelities': {},
+        'best_performing': None,
+        'worst_performing': None,
+        'analysis': {}
+    }
+    
+    # Extract fidelities
+    for backend_key in ['noiseless', 'ibm_hardware', 'custom_noise']:
+        if backend_key in results:
+            summary['fidelities'][backend_key] = results[backend_key]['fidelity']
+    
+    # Find best/worst performing (excluding noiseless which is always 1.0)
+    noisy_fidelities = {k: v for k, v in summary['fidelities'].items() if k != 'noiseless'}
+    if noisy_fidelities:
+        summary['best_performing'] = max(noisy_fidelities.keys(), key=lambda k: noisy_fidelities[k])
+        summary['worst_performing'] = min(noisy_fidelities.keys(), key=lambda k: noisy_fidelities[k])
+    
+    # Analysis
+    if 'ibm_hardware' in summary['fidelities'] and 'custom_noise' in summary['fidelities']:
+        ibm_fid = summary['fidelities']['ibm_hardware']
+        custom_fid = summary['fidelities']['custom_noise']
+        diff = abs(ibm_fid - custom_fid)
+        
+        summary['analysis'] = {
+            'fidelity_difference': diff,
+            'relative_error': diff / max(ibm_fid, custom_fid) if max(ibm_fid, custom_fid) > 0 else 0,
+            'custom_vs_ibm': 'better' if custom_fid > ibm_fid else 'worse' if custom_fid < ibm_fid else 'equal'
+        }
+    
+    return summary
+
+
 def _calculate_success_probability(counts: Dict[str, int]) -> float:
     """Calculate success probability. For Bell states, success is '00' or '11'."""
     total_shots = sum(counts.values())
@@ -207,6 +723,47 @@ def _calculate_success_probability(counts: Dict[str, int]) -> float:
     return success_count / total_shots
 
 
+def _normalize_counts_format(counts: Dict[str, int]) -> Dict[str, int]:
+    """
+    Normalize count dictionary format to handle different classical register formats.
+    
+    IBM hardware returns: {'00': 100, '01': 200, ...}
+    Simulators may return: {'00 00': 100, '01 00': 200, ...}
+    
+    This function extracts only the meaningful measurement bits.
+    """
+    if not counts:
+        return counts
+    
+    # Check if we have space-separated registers
+    sample_key = list(counts.keys())[0]
+    if ' ' in sample_key:
+        # Multiple classical registers - extract the non-zero register
+        normalized = {}
+        
+        for bitstring, count in counts.items():
+            parts = bitstring.split()
+            
+            # Find which register has varying bits (not all zeros)
+            active_register = None
+            for part in parts:
+                if part != '0' * len(part):  # Not all zeros
+                    active_register = part
+                    break
+            
+            # If no active register found, use the first one
+            if active_register is None:
+                active_register = parts[0]
+            
+            normalized[active_register] = normalized.get(active_register, 0) + count
+        
+        return normalized
+    
+    else:
+        # Single register format - return as is
+        return counts
+
+
 def _calculate_fidelity(ideal_counts: Dict[str, int], noisy_counts: Dict[str, int]) -> float:
     """Calculate fidelity between two count distributions using Total Variation distance.
     
@@ -220,21 +777,26 @@ def _calculate_fidelity(ideal_counts: Dict[str, int], noisy_counts: Dict[str, in
     Returns:
         Fidelity between 0 and 1 (1 = identical distributions)
     """
+    
+    # Normalize both count dictionaries to handle different classical register formats
+    ideal_normalized = _normalize_counts_format(ideal_counts)
+    noisy_normalized = _normalize_counts_format(noisy_counts)
+    
     # Get total shots for normalization
-    total_ideal = sum(ideal_counts.values())
-    total_noisy = sum(noisy_counts.values())
+    total_ideal = sum(ideal_normalized.values())
+    total_noisy = sum(noisy_normalized.values())
     
     if total_ideal == 0 or total_noisy == 0:
         return 0.0
     
     # Get all possible outcomes
-    all_outcomes = set(ideal_counts.keys()) | set(noisy_counts.keys())
+    all_outcomes = set(ideal_normalized.keys()) | set(noisy_normalized.keys())
     
     # Calculate Total Variation distance
     tv_distance = 0.0
     for outcome in all_outcomes:
-        p_ideal = ideal_counts.get(outcome, 0) / total_ideal
-        p_noisy = noisy_counts.get(outcome, 0) / total_noisy
+        p_ideal = ideal_normalized.get(outcome, 0) / total_ideal
+        p_noisy = noisy_normalized.get(outcome, 0) / total_noisy
         tv_distance += abs(p_ideal - p_noisy)
     
     # Convert TV distance to fidelity
@@ -763,21 +1325,799 @@ def compare_random_circuits(
     return all_results
 
 
+def compare_random_circuits_with_ibm_cloud(
+    num_qubits: int = 3,
+    depth: int = 5,
+    num_circuits: int = None,  # Will default to 10 * num_qubits
+    shots: int = 1000,
+    noise_type: str = "heron",
+    noise_param: float = 0.001,
+    seed: int = 42,
+    backend_name: str = None,
+    submit_only: bool = False,
+    job_id: str = None
+) -> Dict[str, Any]:
+    """
+    Generate random circuits and compare execution between IBM cloud and custom noise model.
+    
+    This function can work in two modes:
+    1. Submit mode (submit_only=True): Generate circuits and submit to IBM cloud
+    2. Analysis mode (job_id provided): Retrieve results and perform comparison
+    
+    Parameters:
+    -----------
+    num_qubits : int
+        Number of qubits per circuit
+    depth : int 
+        Depth of each random circuit
+    num_circuits : int, optional
+        Number of random circuits to test (defaults to 10 * num_qubits)
+    shots : int
+        Shots per circuit execution (default: 1000)
+    noise_type : str
+        Type of custom noise model for comparison
+    noise_param : float
+        Noise parameter
+    seed : int
+        Random seed for reproducibility
+    backend_name : str, optional
+        IBM backend name (auto-selected if None)
+    submit_only : bool
+        If True, only submit job and return job info
+    job_id : str, optional
+        If provided, retrieve results from this job instead of submitting
+        
+    Returns:
+    --------
+    Dict with job info (submit mode) or comparison results (analysis mode)
+    """
+    
+    if job_id is not None:
+        # Analysis mode: retrieve and process existing job
+        return _process_ibm_job_results(
+            job_id=job_id,
+            noise_type=noise_type,
+            noise_param=noise_param
+        )
+    
+    # Submit mode: generate circuits and submit
+    
+    # Set default num_circuits to 10 per qubit if not specified
+    if num_circuits is None:
+        num_circuits = num_qubits * 10
+    
+    print(f"\n{'='*60}")
+    print(f"RANDOM CIRCUIT IBM CLOUD COMPARISON")
+    print(f"Generating {num_circuits} random circuits ({num_qubits} qubits, depth {depth})")
+    print(f"Using 10 circuits per qubit (configurable)")
+    print(f"Seed: {seed}")
+    print(f"{'='*60}")
+    
+    # Set the random seed for reproducibility
+    random.seed(seed)
+    np.random.seed(seed)
+    
+    # Generate random circuits with fixed seed
+    circuits = []
+    for i in range(num_circuits):
+        circuit = generate_random_circuit_with_torino_gates(
+            num_qubits=num_qubits,
+            depth=depth,
+            seed=seed + i  # Different seed for each circuit but deterministic
+        )
+        circuits.append(circuit)
+        print(f"Generated circuit {i+1}: depth={circuit.depth()}, size={circuit.size()}")
+    
+    # Select IBM backend if not specified
+    if backend_name is None:
+        backend_name = select_best_ibm_backend(min_qubits=num_qubits)
+        if backend_name is None:
+            raise RuntimeError("No suitable IBM backend available")
+    
+    # Estimate job cost
+    cost_estimate = estimate_job_cost(num_circuits, shots, backend_name)
+    print(f"\nJob cost estimate:")
+    print(f"  Total shots: {cost_estimate['total_shots']}")
+    print(f"  Est. execution time: {cost_estimate['estimated_execution_time_minutes']:.1f} min")
+    for rec in cost_estimate['recommendation']:
+        print(f"  Recommendation: {rec}")
+    
+    # Submit to IBM cloud
+    job_info = submit_circuits_to_ibm_cloud(
+        circuits=circuits,
+        backend_name=backend_name,
+        shots_per_circuit=shots,
+        job_name=f"random_circuits_{num_circuits}x{num_qubits}q_seed{seed}"
+    )
+    
+    if submit_only:
+        print(f"\nJob submitted! Use job_id '{job_info['job_id']}' to retrieve results later.")
+        print(f"To analyze results: compare_random_circuits_with_ibm_cloud(job_id='{job_info['job_id']}')")
+        return {
+            'mode': 'submit',
+            'job_info': job_info,
+            'circuits': circuits,  # Store for later reference
+            'parameters': {
+                'num_qubits': num_qubits,
+                'depth': depth,
+                'num_circuits': num_circuits,
+                'shots': shots,
+                'seed': seed,
+                'noise_type': noise_type,
+                'noise_param': noise_param
+            }
+        }
+    
+    # If not submit_only, wait for results and analyze
+    print(f"\nWaiting for IBM job completion...")
+    ibm_results = get_ibm_job_results(job_info['job_id'], wait_for_completion=True)
+    
+    if 'error' in ibm_results:
+        print(f"Error retrieving results: {ibm_results['error']}")
+        return {'error': ibm_results['error'], 'job_info': job_info}
+    
+    # Process results
+    return _process_ibm_job_results(
+        job_id=job_info['job_id'],
+        ibm_results=ibm_results,
+        circuits=circuits,
+        noise_type=noise_type,
+        noise_param=noise_param
+    )
+
+
+def _process_ibm_job_results(
+    job_id: str,
+    noise_type: str = "heron",
+    noise_param: float = 0.001,
+    ibm_results: Dict = None,
+    circuits: List[QuantumCircuit] = None
+) -> Dict[str, Any]:
+    """Process IBM job results and compare with custom noise model."""
+    
+    # Retrieve results if not provided
+    if ibm_results is None:
+        print(f"Retrieving results for job {job_id}...")
+        ibm_results = get_ibm_job_results(job_id)
+        
+        if 'error' in ibm_results:
+            print(f"Error retrieving results: {ibm_results['error']}")
+            return {'error': ibm_results['error']}
+    
+    # Try to load job info and circuits if not provided
+    if circuits is None:
+        job_info = load_job_info_from_file(job_id)
+        if 'circuit_qasm' in job_info:
+            circuits = [QuantumCircuit.from_qasm_str(qasm) for qasm in job_info['circuit_qasm']]
+        else:
+            print("Warning: Could not load original circuits. Analysis will be limited.")
+            circuits = []
+    
+    counts_list = ibm_results['counts']
+    backend_name = ibm_results['metadata'].get('backend_name', 'unknown')
+    
+    print(f"\n{'='*60}")
+    print(f"PROCESSING IBM CLOUD RESULTS")
+    print(f"Job ID: {job_id}")
+    print(f"Backend: {backend_name}")
+    print(f"Circuits: {len(counts_list)}")
+    print(f"{'='*60}")
+    
+    # Analyze each circuit
+    all_results = {
+        'noiseless': {'success_probs': [], 'avg_fidelity': 0},
+        'ibm_hardware': {'success_probs': [], 'avg_fidelity': 0},
+        'custom_noise': {'success_probs': [], 'avg_fidelity': 0},
+        'circuits': circuits,
+        'job_metadata': ibm_results['metadata']
+    }
+    
+    for i, ibm_counts in enumerate(counts_list):
+        print(f"\n--- Circuit {i+1}/{len(counts_list)} ---")
+        
+        if i < len(circuits):
+            circuit = circuits[i]
+            # Compare this circuit's execution
+            comparison_results = compare_circuit_execution_with_ibm_cloud(
+                circuit=circuit,
+                ibm_job_results=ibm_counts,
+                circuit_index=i,
+                noise_type=noise_type,
+                noise_param=noise_param,
+                ibm_backend_name=backend_name
+            )
+            
+            # Extract success probabilities (ground state fidelities)
+            for backend_key in ['noiseless', 'ibm_hardware', 'custom_noise']:
+                if backend_key in comparison_results:
+                    success_prob = _calculate_ground_state_fidelity(comparison_results[backend_key]['counts'])
+                    all_results[backend_key]['success_probs'].append(success_prob)
+            
+            print(f"  Noiseless: {all_results['noiseless']['success_probs'][-1]:.4f}")
+            print(f"  IBM Hardware: {all_results['ibm_hardware']['success_probs'][-1]:.4f}")
+            print(f"  Custom Noise: {all_results['custom_noise']['success_probs'][-1]:.4f}")
+        
+        else:
+            print(f"  Warning: No circuit available for index {i}")
+            # Just analyze IBM results vs ground state
+            ibm_success = _calculate_ground_state_fidelity(ibm_counts)
+            all_results['ibm_hardware']['success_probs'].append(ibm_success)
+            print(f"  IBM Hardware: {ibm_success:.4f}")
+    
+    # Calculate summary statistics
+    for backend_key in ['noiseless', 'ibm_hardware', 'custom_noise']:
+        if all_results[backend_key]['success_probs']:
+            all_results[backend_key]['avg_fidelity'] = np.mean(all_results[backend_key]['success_probs'])
+            all_results[backend_key]['std_fidelity'] = np.std(all_results[backend_key]['success_probs'])
+    
+    # Print final summary
+    print(f"\n{'='*60}")
+    print(f"SUMMARY ACROSS {len(counts_list)} CIRCUITS")
+    print(f"{'='*60}")
+    
+    backend_names = {
+        'noiseless': 'Noiseless',
+        'ibm_hardware': f'IBM {backend_name}',
+        'custom_noise': f'Custom ({noise_type})'
+    }
+    
+    for backend_key in ['noiseless', 'ibm_hardware', 'custom_noise']:
+        if all_results[backend_key]['success_probs']:
+            avg = all_results[backend_key]['avg_fidelity']
+            std = all_results[backend_key]['std_fidelity']
+            name = backend_names[backend_key]
+            print(f"{name}: {avg:.4f} ± {std:.4f}")
+    
+    # Add comparison analysis
+    if all_results['ibm_hardware']['success_probs'] and all_results['custom_noise']['success_probs']:
+        ibm_avg = all_results['ibm_hardware']['avg_fidelity']
+        custom_avg = all_results['custom_noise']['avg_fidelity']
+        
+        print(f"\nModel Comparison:")
+        print(f"  Custom model {'overestimates' if custom_avg > ibm_avg else 'underestimates'} hardware performance")
+        print(f"  Difference: {abs(custom_avg - ibm_avg):.4f}")
+        print(f"  Relative error: {abs(custom_avg - ibm_avg) / ibm_avg * 100:.1f}%")
+    
+    return all_results
+
+
+def run_full_noise_experiment_ibm_cloud(
+    qubit_range: Tuple[int, int] = (2, 7),
+    circuits_per_qubit_size: int = 10,
+    circuit_depth: int = 100,
+    shots: int = 1000,
+    seed: int = 42,
+    backend_name: str = None,
+    submit_only: bool = False,
+    job_id: str = None
+) -> Dict[str, Any]:
+    """
+    Run the complete noise model experiment: 60 circuits across qubit sizes 2-7.
+    
+    This creates 10 circuits each for qubit sizes 2, 3, 4, 5, 6, 7 (60 total circuits)
+    with depth 100, comparing IBM hardware vs. Heron noise model.
+    
+    Parameters:
+    -----------
+    qubit_range : Tuple[int, int]
+        Range of qubit sizes to test (default: 2 to 7 inclusive)
+    circuits_per_qubit_size : int
+        Number of circuits per qubit size (default: 10)
+    circuit_depth : int
+        Depth of each circuit (default: 100)
+    shots : int
+        Shots per circuit (default: 1000)
+    seed : int
+        Random seed for reproducibility
+    backend_name : str, optional
+        IBM backend name (auto-selected if None)
+    submit_only : bool
+        If True, only submit job and return job info
+    job_id : str, optional
+        If provided, analyze results from existing job
+        
+    Returns:
+    --------
+    Dict with job info (submit mode) or complete experimental results (analysis mode)
+    """
+    
+    if job_id is not None:
+        # Analysis mode: retrieve and process existing job
+        return _process_full_experiment_results(job_id=job_id)
+    
+    # Calculate total circuits
+    qubit_sizes = list(range(qubit_range[0], qubit_range[1] + 1))
+    total_circuits = len(qubit_sizes) * circuits_per_qubit_size
+    total_shots = total_circuits * shots
+    
+    print(f"\n{'='*70}")
+    print(f"FULL NOISE MODEL EXPERIMENT - IBM CLOUD")
+    print(f"{'='*70}")
+    print(f"Qubit sizes: {qubit_sizes}")
+    print(f"Circuits per qubit size: {circuits_per_qubit_size}")
+    print(f"Circuit depth: {circuit_depth}")
+    print(f"Total circuits: {total_circuits}")
+    print(f"Shots per circuit: {shots}")
+    print(f"Total shots: {total_shots:,}")
+    print(f"Seed: {seed}")
+    print(f"{'='*70}")
+    
+    # Set the random seed for reproducibility
+    random.seed(seed)
+    np.random.seed(seed)
+    
+    # Generate all circuits
+    all_circuits = []
+    circuit_metadata = []
+    
+    for qubit_size in qubit_sizes:
+        print(f"\nGenerating {circuits_per_qubit_size} circuits with {qubit_size} qubits...")
+        for i in range(circuits_per_qubit_size):
+            circuit = generate_random_circuit_with_torino_gates(
+                num_qubits=qubit_size,
+                depth=circuit_depth,
+                seed=seed + qubit_size * 1000 + i  # Ensure unique but deterministic seeds
+            )
+            all_circuits.append(circuit)
+            circuit_metadata.append({
+                'qubit_size': qubit_size,
+                'circuit_index': i,
+                'depth': circuit.depth(),
+                'size': circuit.size()
+            })
+        
+        avg_depth = np.mean([c.depth() for c in all_circuits[-circuits_per_qubit_size:]])
+        avg_size = np.mean([c.size() for c in all_circuits[-circuits_per_qubit_size:]])
+        print(f"  {qubit_size}-qubit circuits: avg depth={avg_depth:.1f}, avg size={avg_size:.1f}")
+    
+    print(f"\n✓ Generated {len(all_circuits)} circuits total")
+    
+    # Select IBM backend if not specified
+    if backend_name is None:
+        backend_name = select_best_ibm_backend(min_qubits=max(qubit_sizes))
+        if backend_name is None:
+            raise RuntimeError(f"No suitable IBM backend available for {max(qubit_sizes)} qubits")
+    
+    # Estimate cost
+    print(f"\nEstimated resource usage:")
+    print(f"  Backend: {backend_name}")
+    print(f"  Total shots: {total_shots:,}")
+    print(f"  Estimated queue time: depends on current load")
+    print(f"  Estimated execution time: {total_shots / 1000:.1f} minutes")
+    
+    # Submit to IBM cloud
+    job_info = submit_circuits_to_ibm_cloud(
+        circuits=all_circuits,
+        backend_name=backend_name,
+        shots_per_circuit=shots,
+        job_name=f"noise_experiment_60circuits_depth{circuit_depth}_seed{seed}"
+    )
+    
+    # Add experiment metadata to job info
+    job_info['experiment_metadata'] = {
+        'qubit_range': qubit_range,
+        'circuits_per_qubit_size': circuits_per_qubit_size,
+        'circuit_depth': circuit_depth,
+        'circuit_metadata': circuit_metadata,
+        'qubit_sizes': qubit_sizes
+    }
+    
+    if submit_only:
+        print(f"\n{'='*70}")
+        print(f"EXPERIMENT SUBMITTED TO IBM CLOUD")
+        print(f"{'='*70}")
+        print(f"Job ID: {job_info['job_id']}")
+        print(f"Backend: {job_info['backend_name']}")
+        print(f"Total circuits: {total_circuits}")
+        print(f"Total shots: {total_shots:,}")
+        print(f"\nTo analyze results later:")
+        print(f"  run_full_noise_experiment_ibm_cloud(job_id='{job_info['job_id']}')")
+        print(f"  # OR")
+        print(f"  python ibm_demo.py analyze {job_info['job_id']}")
+        
+        return {
+            'mode': 'submit',
+            'job_info': job_info,
+            'circuits': all_circuits,
+            'circuit_metadata': circuit_metadata,
+            'experiment_parameters': {
+                'qubit_range': qubit_range,
+                'circuits_per_qubit_size': circuits_per_qubit_size,
+                'circuit_depth': circuit_depth,
+                'shots': shots,
+                'seed': seed
+            }
+        }
+    
+    # If not submit_only, wait for results and analyze
+    print(f"\nWaiting for IBM job completion...")
+    print(f"This may take a while for {total_circuits} circuits...")
+    
+    ibm_results = get_ibm_job_results(job_info['job_id'], wait_for_completion=True)
+    
+    if 'error' in ibm_results:
+        print(f"Error retrieving results: {ibm_results['error']}")
+        return {'error': ibm_results['error'], 'job_info': job_info}
+    
+    # Process results
+    return _process_full_experiment_results(
+        job_id=job_info['job_id'],
+        ibm_results=ibm_results,
+        circuits=all_circuits,
+        circuit_metadata=circuit_metadata
+    )
+
+
+def _process_full_experiment_results(
+    job_id: str,
+    ibm_results: Dict = None,
+    circuits: List[QuantumCircuit] = None,
+    circuit_metadata: List[Dict] = None
+) -> Dict[str, Any]:
+    """Process the full 60-circuit experiment results."""
+    
+    # Retrieve results if not provided
+    if ibm_results is None:
+        print(f"Retrieving results for experiment job {job_id}...")
+        ibm_results = get_ibm_job_results(job_id)
+        
+        if 'error' in ibm_results:
+            print(f"Error retrieving results: {ibm_results['error']}")
+            return {'error': ibm_results['error']}
+    
+    # Try to load job info if circuits not provided
+    if circuits is None or circuit_metadata is None:
+        job_info = load_job_info_from_file(job_id)
+        if 'circuit_qasm' in job_info:
+            try:
+                circuits = [QuantumCircuit.from_qasm_str(qasm) for qasm in job_info['circuit_qasm']]
+            except Exception as e:
+                print(f"Warning: Could not load circuits from QASM: {e}")
+                circuits = []
+        if 'experiment_metadata' in job_info:
+            circuit_metadata = job_info['experiment_metadata']['circuit_metadata']
+        else:
+            print("Warning: No circuit metadata found in job info.")
+            circuit_metadata = None
+    
+    # If we still don't have circuits, recreate them from the standard experimental parameters
+    if not circuits or not circuit_metadata:
+        print("Recreating original circuits using standard experimental parameters...")
+        circuits, circuit_metadata = _recreate_experimental_circuits(
+            qubit_range=(2, 7),
+            circuits_per_qubit_size=10,
+            circuit_depth=100,
+            seed=42  # Standard seed used in experiment
+        )
+        print(f"✓ Recreated {len(circuits)} circuits")
+    
+    counts_list = ibm_results['counts']
+    backend_name = ibm_results['metadata'].get('backend_name', 'unknown')
+    
+    print(f"\n{'='*70}")
+    print(f"PROCESSING FULL EXPERIMENT RESULTS")
+    print(f"{'='*70}")
+    print(f"Job ID: {job_id}")
+    print(f"Backend: {backend_name}")
+    print(f"Total circuits: {len(counts_list)}")
+    print(f"{'='*70}")
+    
+    # Organize results by qubit size
+    results_by_qubit_size = {}
+    overall_results = {
+        'noiseless': {'fidelities': [], 'avg_fidelity': 0},
+        'ibm_hardware': {'fidelities': [], 'avg_fidelity': 0},
+        'heron_model': {'fidelities': [], 'avg_fidelity': 0},
+        'job_metadata': ibm_results['metadata']
+    }
+    
+    for i, ibm_counts in enumerate(counts_list):
+        if i < len(circuits) and circuit_metadata and i < len(circuit_metadata):
+            # Full analysis with original circuits
+            circuit = circuits[i]
+            metadata = circuit_metadata[i]
+            qubit_size = metadata['qubit_size']
+            
+            print(f"Analyzing circuit {i+1}/{len(counts_list)}: {qubit_size} qubits (full comparison)")
+            
+            # Initialize qubit size results if needed
+            if qubit_size not in results_by_qubit_size:
+                results_by_qubit_size[qubit_size] = {
+                    'noiseless': {'fidelities': []},
+                    'ibm_hardware': {'fidelities': []},
+                    'heron_model': {'fidelities': []},
+                    'circuits': []
+                }
+            
+            # Compare this circuit's execution (using Heron noise model)
+            comparison_results = compare_circuit_execution_with_ibm_cloud(
+                circuit=circuit,
+                ibm_job_results=ibm_counts,
+                circuit_index=i,
+                noise_type="heron",  # Always use Heron
+                ibm_backend_name=backend_name
+            )
+            
+            # Extract fidelities - use proper calculation
+            for backend_key in ['noiseless', 'ibm_hardware', 'custom_noise']:
+                if backend_key in comparison_results:
+                    if backend_key == 'noiseless':
+                        # Noiseless is always 1.0 by definition
+                        fidelity = 1.0
+                    else:
+                        # Calculate fidelity relative to noiseless
+                        fidelity = _calculate_fidelity(
+                            comparison_results['noiseless']['counts'],
+                            comparison_results[backend_key]['counts']
+                        )
+                    
+                    # Debugging: print some details for first few circuits
+                    if i < 3:
+                        print(f"    {backend_key}: fidelity = {fidelity:.4f}")
+                        if backend_key in ['ibm_hardware', 'custom_noise']:
+                            # Show some sample counts
+                            counts = comparison_results[backend_key]['counts']
+                            normalized = _normalize_counts_format(counts)
+                            total = sum(counts.values())
+                            top_outcomes = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:3]
+                            top_normalized = sorted(normalized.items(), key=lambda x: x[1], reverse=True)[:3]
+                            print(f"      Raw outcomes: {[(outcome, count/total) for outcome, count in top_outcomes]}")
+                            print(f"      Normalized: {[(outcome, count/sum(normalized.values())) for outcome, count in top_normalized]}")
+                    
+                    # Map to our naming convention
+                    result_key = 'heron_model' if backend_key == 'custom_noise' else backend_key
+                    
+                    results_by_qubit_size[qubit_size][result_key]['fidelities'].append(fidelity)
+                    overall_results[result_key]['fidelities'].append(fidelity)
+            
+            results_by_qubit_size[qubit_size]['circuits'].append(circuit)
+        
+        else:
+            # This shouldn't happen now that we recreate circuits, but keep as fallback
+            print(f"Warning: Circuit {i+1}/{len(counts_list)}: falling back to limited analysis")
+            
+            # Just analyze IBM results vs ground state
+            ibm_fidelity = _calculate_ground_state_fidelity(ibm_counts)
+            overall_results['ibm_hardware']['fidelities'].append(ibm_fidelity)
+            
+            print(f"  IBM Hardware ground state prob: {ibm_fidelity:.4f}")
+    
+    # Calculate summary statistics
+    print(f"\n{'='*70}")
+    print(f"EXPERIMENTAL RESULTS SUMMARY")
+    print(f"{'='*70}")
+    
+    for qubit_size in sorted(results_by_qubit_size.keys()):
+        results = results_by_qubit_size[qubit_size]
+        
+        print(f"\n{qubit_size}-QUBIT CIRCUITS:")
+        print(f"{'Backend':<15} {'Avg Fidelity':<12} {'Std Dev':<10} {'Circuits'}")
+        print(f"{'-'*50}")
+        
+        for backend_key in ['noiseless', 'ibm_hardware', 'heron_model']:
+            fidelities = results[backend_key]['fidelities']
+            if fidelities:
+                avg_fid = np.mean(fidelities)
+                std_fid = np.std(fidelities)
+                results[backend_key]['avg_fidelity'] = avg_fid
+                results[backend_key]['std_fidelity'] = std_fid
+                
+                backend_name_map = {
+                    'noiseless': 'Noiseless',
+                    'ibm_hardware': f'IBM Hardware',
+                    'heron_model': 'Heron Model'
+                }
+                
+                print(f"{backend_name_map[backend_key]:<15} {avg_fid:<12.4f} {std_fid:<10.4f} {len(fidelities)}")
+    
+    # Overall statistics
+    print(f"\n{'='*70}")
+    print(f"OVERALL STATISTICS (ALL 60 CIRCUITS)")
+    print(f"{'='*70}")
+    
+    for backend_key in ['noiseless', 'ibm_hardware', 'heron_model']:
+        fidelities = overall_results[backend_key]['fidelities']
+        if fidelities:
+            overall_results[backend_key]['avg_fidelity'] = np.mean(fidelities)
+            overall_results[backend_key]['std_fidelity'] = np.std(fidelities)
+    
+    # Model performance analysis
+    if (overall_results['ibm_hardware']['fidelities'] and 
+        overall_results['heron_model']['fidelities']):
+        
+        ibm_avg = overall_results['ibm_hardware']['avg_fidelity']
+        heron_avg = overall_results['heron_model']['avg_fidelity']
+        
+        print(f"\nMODEL PERFORMANCE ANALYSIS:")
+        print(f"  IBM Hardware: {ibm_avg:.4f} ± {overall_results['ibm_hardware']['std_fidelity']:.4f}")
+        print(f"  Heron Model:  {heron_avg:.4f} ± {overall_results['heron_model']['std_fidelity']:.4f}")
+        print(f"  Difference:   {abs(heron_avg - ibm_avg):.4f}")
+        print(f"  Rel. Error:   {abs(heron_avg - ibm_avg) / ibm_avg * 100:.1f}%")
+        
+        if heron_avg > ibm_avg:
+            print(f"  → Heron model OVERESTIMATES hardware performance")
+        elif heron_avg < ibm_avg:
+            print(f"  → Heron model UNDERESTIMATES hardware performance")
+        else:
+            print(f"  → Heron model matches hardware performance!")
+    
+    return {
+        'results_by_qubit_size': results_by_qubit_size,
+        'overall_results': overall_results,
+        'job_metadata': ibm_results['metadata']
+    }
+
+
+def _recreate_experimental_circuits(
+    qubit_range: Tuple[int, int] = (2, 7),
+    circuits_per_qubit_size: int = 10,
+    circuit_depth: int = 100,
+    seed: int = 42
+) -> Tuple[List[QuantumCircuit], List[Dict]]:
+    """
+    Recreate the original experimental circuits using the same parameters.
+    
+    This generates exactly the same circuits that were originally submitted
+    by using the same deterministic seed sequence.
+    """
+    
+    print(f"Recreating circuits: qubits {qubit_range[0]}-{qubit_range[1]}, "
+          f"{circuits_per_qubit_size} per size, depth {circuit_depth}, seed {seed}")
+    
+    # Set the same random seed as used in original generation
+    random.seed(seed)
+    np.random.seed(seed)
+    
+    qubit_sizes = list(range(qubit_range[0], qubit_range[1] + 1))
+    circuits = []
+    circuit_metadata = []
+    
+    for qubit_size in qubit_sizes:
+        for i in range(circuits_per_qubit_size):
+            # Use the same seed pattern as in the original function
+            circuit_seed = seed + qubit_size * 1000 + i
+            
+            circuit = generate_random_circuit_with_torino_gates(
+                num_qubits=qubit_size,
+                depth=circuit_depth,
+                seed=circuit_seed
+            )
+            
+            circuits.append(circuit)
+            circuit_metadata.append({
+                'qubit_size': qubit_size,
+                'circuit_index': i,
+                'depth': circuit.depth(),
+                'size': circuit.size()
+            })
+    
+    print(f"✓ Generated {len(circuits)} circuits matching original experiment")
+    return circuits, circuit_metadata
+
+
+def plot_experimental_results(results: Dict[str, Any], save_path: str = None) -> str:
+    """Plot the experimental results comparing IBM hardware vs Heron model."""
+    
+    if 'results_by_qubit_size' not in results:
+        print("No qubit-wise results found for plotting")
+        return None
+    
+    import matplotlib.pyplot as plt
+    import numpy as np
+    
+    # Extract data for plotting
+    qubit_sizes = sorted(results['results_by_qubit_size'].keys())
+    
+    # Prepare data arrays
+    ibm_means = []
+    ibm_stds = []
+    heron_means = []
+    heron_stds = []
+    
+    for qubits in qubit_sizes:
+        data = results['results_by_qubit_size'][qubits]
+        
+        if 'ibm_hardware' in data and data['ibm_hardware']['fidelities']:
+            ibm_means.append(data['ibm_hardware'].get('avg_fidelity', 0))
+            ibm_stds.append(data['ibm_hardware'].get('std_fidelity', 0))
+        else:
+            ibm_means.append(0)
+            ibm_stds.append(0)
+            
+        if 'heron_model' in data and data['heron_model']['fidelities']:
+            heron_means.append(data['heron_model'].get('avg_fidelity', 0))
+            heron_stds.append(data['heron_model'].get('std_fidelity', 0))
+        else:
+            heron_means.append(0)
+            heron_stds.append(0)
+    
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    x = np.array(qubit_sizes)
+    width = 0.35
+    
+    # Create bars
+    bars1 = ax.bar(x - width/2, ibm_means, width, yerr=ibm_stds, 
+                   label='IBM Hardware', alpha=0.8, capsize=5,
+                   color='#1f77b4')  # Blue
+    bars2 = ax.bar(x + width/2, heron_means, width, yerr=heron_stds, 
+                   label='Heron Model', alpha=0.8, capsize=5,
+                   color='#ff7f0e')  # Orange
+    
+    # Customize the plot
+    ax.set_xlabel('Number of Qubits', fontsize=12)
+    ax.set_ylabel('Fidelity', fontsize=12)
+    ax.set_title('IBM Hardware vs Heron Noise Model\nFidelity Comparison (60 circuits, depth 100)', 
+                 fontsize=14, fontweight='bold')
+    ax.set_xticks(x)
+    ax.set_xticklabels(qubit_sizes)
+    ax.legend(fontsize=11)
+    ax.grid(True, alpha=0.3)
+    ax.set_ylim(0, 1.0)
+    
+    # Add value labels on bars
+    def add_value_labels(bars, means, stds):
+        for bar, mean, std in zip(bars, means, stds):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height + std + 0.01,
+                   f'{mean:.3f}±{std:.3f}',
+                   ha='center', va='bottom', fontsize=9)
+    
+    add_value_labels(bars1, ibm_means, ibm_stds)
+    add_value_labels(bars2, heron_means, heron_stds)
+    
+    # Add overall statistics as text
+    if 'overall_results' in results:
+        overall = results['overall_results']
+        if ('ibm_hardware' in overall and 'heron_model' in overall and 
+            overall['ibm_hardware']['fidelities'] and overall['heron_model']['fidelities']):
+            
+            ibm_overall = overall['ibm_hardware']['avg_fidelity']
+            heron_overall = overall['heron_model']['avg_fidelity']
+            
+            textstr = f'Overall Statistics:\n'
+            textstr += f'IBM Hardware: {ibm_overall:.4f} ± {overall["ibm_hardware"]["std_fidelity"]:.4f}\n'
+            textstr += f'Heron Model: {heron_overall:.4f} ± {overall["heron_model"]["std_fidelity"]:.4f}\n'
+            textstr += f'Difference: {abs(heron_overall - ibm_overall):.4f}'
+            
+            # Add text box
+            props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+            ax.text(0.02, 0.98, textstr, transform=ax.transAxes, fontsize=10,
+                   verticalalignment='top', bbox=props)
+    
+    plt.tight_layout()
+    
+    # Save plot
+    if save_path is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        save_path = f"experimental_results_{timestamp}.png"
+    
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.show()
+    
+    print(f"Plot saved to: {save_path}")
+    return save_path
+
+
 def _calculate_ground_state_fidelity(counts: Dict[str, int]) -> float:
     """Calculate fidelity to ground state (all zeros)."""
-    total_shots = sum(counts.values())
+    
+    # Normalize counts first to handle different register formats
+    normalized_counts = _normalize_counts_format(counts)
+    
+    total_shots = sum(normalized_counts.values())
     if total_shots == 0:
         return 0.0
     
-    # Look for ground state pattern
-    sample_key = list(counts.keys())[0] if counts else ""
-    
-    if ' ' in sample_key:  # Format like '000 000'  
-        ground_pattern = '0' * (len(sample_key.split()[0])) + ' ' + '0' * (len(sample_key.split()[1]))
-    else:
+    # Look for ground state pattern (all zeros)
+    if normalized_counts:
+        sample_key = list(normalized_counts.keys())[0]
         ground_pattern = '0' * len(sample_key)
+    else:
+        return 0.0
     
-    ground_count = counts.get(ground_pattern, 0)
+    ground_count = normalized_counts.get(ground_pattern, 0)
     return ground_count / total_shots
 
 
@@ -1085,15 +2425,92 @@ def medium_fidelity_test():
 # - Custom: run_complete_fidelity_study(num_qubits_range=(2,5), circuits_per_qubit=30)
 
 
-if __name__ == "__main__":
-    # Run the Bell state example
-    print("=== BELL STATE COMPARISON ===")
-    example_bell_state_comparison()
+def example_ibm_cloud_submission():
+    """Example: Submit random circuits to IBM cloud."""
+    print("=== IBM CLOUD SUBMISSION EXAMPLE ===")
     
-    print("\n\n=== RANDOM CIRCUIT COMPARISON ===")
-    # Run the random circuit example
-    example_random_circuit_comparison()
+    # Check available backends
+    print("Checking available IBM backends...")
+    backends = get_available_ibm_backends(min_qubits=3)
+    if not backends:
+        print("No IBM backends available. Make sure you're authenticated.")
+        return
+    
+    # Submit a small batch for testing
+    result = compare_random_circuits_with_ibm_cloud(
+        num_qubits=3,
+        depth=4, 
+        num_circuits=3,
+        shots=1024,
+        seed=42,
+        submit_only=True  # Only submit, don't wait for results
+    )
+    
+    print(f"\nJob submitted with ID: {result['job_info']['job_id']}")
+    print("Use this job ID to retrieve results later!")
+    return result['job_info']['job_id']
 
 
+def example_ibm_cloud_analysis(job_id: str):
+    """Example: Analyze results from IBM cloud job."""
+    print(f"=== IBM CLOUD ANALYSIS EXAMPLE ===")
+    print(f"Analyzing job: {job_id}")
+    
+    result = compare_random_circuits_with_ibm_cloud(
+        job_id=job_id,
+        noise_type="heron"
+    )
+    
+    if 'error' not in result:
+        print("Analysis completed successfully!")
+        return result
+    else:
+        print(f"Error: {result['error']}")
+        return None
 
+
+if __name__ == "__main__":
+    import sys
+    
+    if len(sys.argv) > 1:
+        mode = sys.argv[1]
+        
+        if mode == "ibm_submit":
+            # Submit jobs to IBM cloud
+            job_id = example_ibm_cloud_submission()
+            
+        elif mode == "ibm_analyze" and len(sys.argv) > 2:
+            # Analyze existing IBM job
+            job_id = sys.argv[2]
+            example_ibm_cloud_analysis(job_id)
+            
+        elif mode == "backends":
+            # List available backends
+            print("=== AVAILABLE IBM BACKENDS ===")
+            backends = get_available_ibm_backends()
+            for backend in backends:
+                print(f"{backend['name']}: {backend['num_qubits']} qubits, "
+                      f"queue: {backend['pending_jobs']}, "
+                      f"status: {'✓' if backend['operational'] else '✗'}")
+        
+        else:
+            print("Usage:")
+            print("  python noise_model_comparison.py ibm_submit     # Submit job to IBM")
+            print("  python noise_model_comparison.py ibm_analyze <job_id>  # Analyze results")
+            print("  python noise_model_comparison.py backends       # List IBM backends")
+    
+    else:
+        # Default: Run original examples
+        print("=== BELL STATE COMPARISON (Original) ===")
+        example_bell_state_comparison()
+        
+        print("\n\n=== RANDOM CIRCUIT COMPARISON (Original) ===")
+        example_random_circuit_comparison()
+        
+        print("\n\n" + "="*60)
+        print("NEW IBM CLOUD FUNCTIONALITY:")
+        print("  python noise_model_comparison.py ibm_submit     # Submit to IBM cloud")
+        print("  python noise_model_comparison.py ibm_analyze <job_id>  # Analyze results")  
+        print("  python noise_model_comparison.py backends       # List backends")
+        print("="*60)
 
