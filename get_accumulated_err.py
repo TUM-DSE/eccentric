@@ -57,7 +57,7 @@ def run_experiment(
         
         if cycles is None:
             cycles = d
-        
+       
         code = get_code(code_name, d, cycles)
         detectors, logicals = code.stim_detectors()
         if code_name == "gross":
@@ -102,9 +102,9 @@ def run_experiment(
             "num_samples": num_samples,
             "error_type": error_type,
             "error_probability": error_prob,
-            "raw_error_rate": f"{raw_error:.3f}",
-            "idle_error_rate": f"{idle_error:.3f}",
-            "corrected_error_rate": f"{corrected_error:.3f}",
+            "raw_error_rate": f"{raw_error:.5f}",
+            "idle_error_rate": f"{idle_error:.5f}",
+            "corrected_error_rate": f"{corrected_error:.5f}",
         }
 
         with lock:

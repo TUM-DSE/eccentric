@@ -1,0 +1,9 @@
+backend,backend_size,code,decoder,distance,cycles,num_samples,error_type,error_probability,raw_error_rate,idle_error_rate,corrected_error_rate
+custom_full,300,gross,bposd,12,12,100000,modsi1000,0.0001,0.36347,0.00000,0.00000
+custom_full,300,gross,bposd,12,12,100000,modsi1000,0.0002,0.59456,0.00000,0.00000
+custom_full,300,gross,bposd,12,12,100000,modsi1000,0.0005,0.89192,0.00000,0.00000
+custom_full,300,gross,bposd,12,12,100000,modsi1000,0.001,0.98463,0.00000,0.00000
+custom_full,300,gross,bposd,12,12,100000,modsi1000,0.002,0.99927,0.00000,0.00015
+custom_full,300,surface,bposd,11,11,100000,modsi1000,0.0001,0.02748,0.00000,0.00000
+custom_full,300,surface,bposd,11,11,100000,modsi1000,0.0002,0.05555,0.00000,0.00000
+custom_full,300,color,bposd,11,11,100000,modsi1000,0.0001,0.03914,0.00000,0.00000
