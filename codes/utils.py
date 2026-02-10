@@ -50,7 +50,7 @@ def get_code(code_name: str, d: int, cycles: int):
 def get_max_d(code_name: str, n: int):
     if code_name == "surface":
         if n < 26:
-            raise 1 #Note that a Error will be logged in the main.py
+            raise ValueError("Invalid size")
 
         d = int((-3 + math.isqrt(9 + 8*(n+1))) // 4)
         d = d - ((1 - d) % 2)

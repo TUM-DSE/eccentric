@@ -5,7 +5,7 @@ import json
 import datetime
 
 def create_experiment_directory(experiment_name):
-    directory = f"experiment_results/{experiment_name}"
+    directory = f"experiments_results/{experiment_name}"
     os.makedirs(directory, exist_ok=True)
     return directory
 

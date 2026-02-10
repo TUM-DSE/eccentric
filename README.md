@@ -43,29 +43,19 @@ Follow these steps to set up the project locally:
     git submodule update --init --recursive
     ```
 
+7. **Build qiskit-qec**
+    ```bash
+    cd external/qiskit_qec
+    python setup.py build_ext --inplace
+    ```
 
 ## Running the Project
 
 Once the environment is set up, you can run the project with:
 
 ```bash
-python3 main.py
+python3 main.py experiments_conf/size.yaml
 ```
 
-The results will be saved in the `qecc_benchmark.log`.
+The results will be saved in the `experiments_result/`.
 
-## Possible Erros
-
-**Qiskit-QEC:**
-If you encounter issues related to building C extension files in the qiskit-qec, run the following commands to build the necessary C files from source:
-
-```bash
-cd external/qiskit_qec
-python setup.py build_ext --inplace
-```
-
-**IBM API token:**
-
-    This project may require using an IBM API token, which should be saved in your working environment. Please follow the instructions from the IBM guide to set up the token:
-
-    [IBM Quantum API Setup Guide](https://docs.quantum.ibm.com/guides/setup-channel)
