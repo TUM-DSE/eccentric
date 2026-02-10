@@ -49,7 +49,7 @@ Follow these steps to set up the project locally:
     python setup.py build_ext --inplace
     ```
 
-## Running the Project
+## Execution
 
 Once the environment is set up, you can run the project with:
 
@@ -57,5 +57,21 @@ Once the environment is set up, you can run the project with:
 python3 main.py experiments_conf/size.yaml
 ```
 
+
 The results will be saved in the `experiments_result/`.
 
+## Directory Structure
+
+The repository is organized as follows:
+
+- **`backends/`**: Configuration files and definitions for pseudo-realistic and artificial quantum backends.
+- **`codes/`**: Scripts for generating Stim circuit files for Quantum Error Correction (QEC) codes.
+- **`data/`**: Generated plots.
+- **`decoders/`**: Implementations of decoding algorithms.
+- **`experiments_conf/`**: YAML configuration files used to define and control experiments.
+- **`experiments_results/`**: The default output directory where experiment results are saved.
+- **`experiments_scripts/`**: Scripts for running specific types of experiments and generating statistics.
+- **`metrics/`**: Scripts for calculating error correction metrics.
+- **`noise/`**: Configuration files for pseudo-realistic and artificial noise models.
+- **`plots/`**: Scripts for visualizing experiment results.
+- **`transpilers/`**: Modules for circuit transpilation and translation between formats.
