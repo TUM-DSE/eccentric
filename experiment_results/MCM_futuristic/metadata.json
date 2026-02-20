@@ -1,5 +1,5 @@
 {
-    "name": "MCM",
+    "name": "MCM_futuristic",
     "num_samples": 10000,
     "backends": [
         "real_mcm"
@@ -10,8 +10,7 @@
         13
     ],
     "cycles": [
-        100,
-        200
+        100
     ],
     "codes": [
         "surface"
