@@ -43,9 +43,9 @@ decoder_map = {
 backend_rename_map = {
     "real_willow": "Willow",
     "real_willow_ns": "Willow",
-    "real_infleqtion": "Infleqtion (w/ s.)",
+    "real_infleqtion": "Infleqtion\n(w/ s.)",
     "real_nsinfleqtion": "Infleqtion",
-    "real_nsapollo": "Apollo (w/o s.)",
+    "real_nsapollo": "Apollo\n(w/o s.)",
     "real_apollo": "Apollo",
     "real_flamingo": "DQC",
     "real_flamingo_1_qpu": "1 QPU",

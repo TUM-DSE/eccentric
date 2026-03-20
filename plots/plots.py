@@ -345,7 +345,7 @@ def generate_technology_plot(path):
     n_backends = len(backends)
     n_codes = len(codes)
     x = np.arange(n_backends) * (BAR_WIDTH * n_codes + group_spacing)
-    fig, ax = plt.subplots(1, 1, figsize=(WIDE_FIGSIZE, HEIGHT_FIGSIZE))
+    fig, ax = plt.subplots(1, 1, figsize=(1.2*WIDE_FIGSIZE, HEIGHT_FIGSIZE))
     for j, code in enumerate(codes):
         code_subset = df[df["code"] == code]
         means = []
@@ -375,11 +375,11 @@ def generate_technology_plot(path):
     fig.legend(
         handles, labels,
         loc="center right",
-        bbox_to_anchor=(0.98, 0.5),
-        fontsize=FONTSIZE,
+        bbox_to_anchor=(1.01, 0.52),
+        fontsize=FONTSIZE-2,
         frameon=False
     )
-    plt.tight_layout(rect=[0, 0, 0.85, 1])
+    plt.tight_layout(rect=[0, 0, 0.84, 1])
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/technologies.pdf", format="pdf")
     plt.close(fig)
