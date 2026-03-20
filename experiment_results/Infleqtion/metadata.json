@@ -1,20 +1,20 @@
 {
-    "name": "Apollo",
+    "name": "Infleqtion_07.07",
     "num_samples": 1000,
     "backends": [
-        "real_apollo",
-        "real_nsapollo"
+        "real_infleqtion",
+        "real_nsinfleqtion"
     ],
     "codes": [
         "surface",
+        "hh",
         "gross",
         "color",
-        "bacon",
-        "hh",
-        "steane"
+        "steane",
+        "bacon"
     ],
     "error_types": [
-        "real_apollo"
+        "real_infleqtion"
     ],
     "decoders": [
         "bposd"

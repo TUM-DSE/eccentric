@@ -325,8 +325,8 @@ def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
         frameon=False
     )
 
-    fig.patch.set_edgecolor("blue")
-    fig.patch.set_linewidth(3)
+    #fig.patch.set_edgecolor("blue")
+    #fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.08, right=0.85, top=0.85, bottom=0.12, wspace=0.1)
     #plt.tight_layout(rect=[0, 0, 0.82, 1])
     os.makedirs("data", exist_ok=True)
@@ -334,7 +334,59 @@ def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
     plt.close(fig)
 
 
+def generate_technology_plot(path):
+    technologies = ["Willow", "Apollo", "Infleqtion"]
+    raw_dfs = [pd.read_csv(os.path.join(path, tech, "results.csv")) for tech in technologies]
+    df = pd.concat(raw_dfs, ignore_index=True)
+    df["backend"] = df["backend"].replace(backend_rename_map)
+    df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
+    backends = sorted(df["backend"].unique())
+    codes = sorted(df["code"].unique())
+    n_backends = len(backends)
+    n_codes = len(codes)
+    x = np.arange(n_backends) * (BAR_WIDTH * n_codes + group_spacing)
+    fig, ax = plt.subplots(1, 1, figsize=(WIDE_FIGSIZE, HEIGHT_FIGSIZE))
+    for j, code in enumerate(codes):
+        code_subset = df[df["code"] == code]
+        means = []
+        for backend in backends:
+            row = code_subset[code_subset["backend"] == backend]
+            means.append(row["logical_error_rate"].values[0] if not row.empty else 0)
+        ax.bar(
+            x + j * BAR_WIDTH,
+            means,
+            width=BAR_WIDTH,
+            color=code_palette[j % len(code_palette)],
+            hatch=code_hatches[j % len(code_hatches)],
+            edgecolor="black",
+            label=code
+        )
+    ax.set_xticks(x + BAR_WIDTH * (n_codes - 1) / 2)
+    ax.set_xticklabels(backends, fontsize=FONTSIZE - 2)
+    ax.set_ylabel("Log. Err. Rate (Log)", fontsize=FONTSIZE)
+    ax.set_yscale("log")
+    ax.grid(axis="y")
+    ax.set_axisbelow(True)
+    ax.set_title("Technologies", loc="left", fontsize=12, fontweight="bold")
+    ax.text(1.0, 1.14, "Lower is better ↓", transform=ax.transAxes,
+            fontsize=12, fontweight="bold", color="blue",
+            va="top", ha="right")
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(
+        handles, labels,
+        loc="center right",
+        bbox_to_anchor=(0.98, 0.5),
+        fontsize=FONTSIZE,
+        frameon=False
+    )
+    plt.tight_layout(rect=[0, 0, 0.85, 1])
+    os.makedirs("data", exist_ok=True)
+    plt.savefig("data/technologies.pdf", format="pdf")
+    plt.close(fig)
 
+
+
+"""
 def generate_technology_plot(path):
     technologies = ["Willow", "Apollo", "Infleqtion"]
     raw_dfs = []
@@ -432,6 +484,7 @@ def generate_technology_plot(path):
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/technologies.pdf", format="pdf")
     plt.close(fig)
+"""
 
 
 def generate_dqc_plot(dqc_files):
@@ -535,8 +588,8 @@ def generate_dqc_plot(dqc_files):
         columnspacing=0.7
     )
 
-    fig.patch.set_edgecolor("blue")
-    fig.patch.set_linewidth(3)
+    #fig.patch.set_edgecolor("blue")
+    #fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.08, bottom=0.3, right=0.995, wspace=0.05)
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/dqc.pdf", format="pdf")
@@ -1489,9 +1542,9 @@ def generate_variance_two(decoherence_csv, readout_csv):
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=len(handles), fontsize=FONTSIZE - 2, frameon=False)
 
-    fig.patch.set_edgecolor("blue")
-    fig.patch.set_linewidth(6)
-    fig.patch.set_facecolor("none")
+    #fig.patch.set_edgecolor("blue")
+    #fig.patch.set_linewidth(6)
+    #fig.patch.set_facecolor("none")
 
     plt.subplots_adjust(left=0.06, right=0.94, bottom=0.4)
     os.makedirs("data", exist_ok=True)
@@ -1616,9 +1669,9 @@ def generate_decoder_plot(df_path):
         axes[-1].legend(loc="upper right", frameon=True)
 
         # Figure styling & spacing
-        fig.patch.set_edgecolor("blue")
-        fig.patch.set_linewidth(3)
-        fig.patch.set_facecolor("none")
+        #fig.patch.set_edgecolor("blue")
+        #fig.patch.set_linewidth(3)
+        #fig.patch.set_facecolor("none")
 
         plt.subplots_adjust(left=0.06, right=0.99, bottom=0.25, wspace=0.25)
         if err_name == "modsi1000":
@@ -1729,9 +1782,9 @@ def generate_decoder_error_barplot(df_path):
                     bbox_to_anchor=(-0.01, 1.08),  # (x, y) relative to the axes
                     frameon=False
                 )
-        fig.patch.set_edgecolor("blue")
-        fig.patch.set_linewidth(3)
-        fig.patch.set_facecolor("none")
+        #fig.patch.set_edgecolor("blue")
+        #fig.patch.set_linewidth(3)
+        #fig.patch.set_facecolor("none")
 
         plt.tight_layout(rect=[0, 0, 1, 1])
         os.makedirs("data", exist_ok=True)
@@ -1964,7 +2017,7 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
                     zorder=1)
         bottom += values
 
-    axes[1].set_title("b) Runtime (w/ Decoding)", loc="left", fontsize=FONTSIZE, fontweight="bold")
+    axes[1].set_title("b) Runtime (w/o Decoding)", loc="left", fontsize=FONTSIZE, fontweight="bold")
     axes[1].set_ylabel("Time [s]", fontsize=FONTSIZE)
     axes[1].text(1.0, 1.16, "Lower is better ↓", transform=axes[1].transAxes,
                  ha="right", va="top", fontsize=FONTSIZE, color="blue", fontweight="bold")
@@ -2013,8 +2066,8 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
     #           frameon=False, fontsize=FONTSIZE, bbox_to_anchor=(0.5, 0))
 
     # Figure styling
-    fig.patch.set_edgecolor("blue")
-    fig.patch.set_linewidth(3)
+    #fig.patch.set_edgecolor("blue")
+    #fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.13, right=0.99, top=0.94, bottom=0.1, hspace=0.35)
 
     os.makedirs("data", exist_ok=True)
@@ -2086,8 +2139,8 @@ def plot_threshold_per_code(csv_path):
         columnspacing=0.5
     )
     ax.set_title("Effectiveness of codes", loc="left", fontsize=FONTSIZE, fontweight="bold")
-    fig.patch.set_edgecolor("blue")
-    fig.patch.set_linewidth(3)
+    #fig.patch.set_edgecolor("blue")
+    #fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.15, right=0.99, top=0.85, bottom=0.2)
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/thresholds.pdf", format="pdf")
@@ -2164,8 +2217,8 @@ def plot_gross_shot_comparison(csv_1000, csv_more):
         ha="right"
     )
         
-    fig.patch.set_edgecolor("blue")
-    fig.patch.set_linewidth(3)
+    #fig.patch.set_edgecolor("blue")
+    #fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.15, right=0.99, top=0.85, bottom=0.2)
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/shot_comparison.pdf", format="pdf")
@@ -2196,7 +2249,7 @@ if __name__ == '__main__':
     threshold_shots = "experiment_results/Accumulated/results.csv"
     #generate_size_plot_two(size)
     generate_connectivity_topology_plot(connectivity, topology)
-    #generate_technology_plot(path)
+    generate_technology_plot(path)
     generate_dqc_plot(dqc)
     #generate_swap_overhead_plot(df_grid, "Grid")
     #generate_swap_overhead_norm_plot(df_grid, "Grid")
@@ -2204,7 +2257,7 @@ if __name__ == '__main__':
     #generate_swap_overhead_plot(df_hh, "Heavy-Hex")
     #generate_compact_swap_plots(df_grid, "Grid")
     #generate_compact_swap_plots(df_hh, "Heavy-Hex")
-    generate_variance_two(variance_decoherence, variance_readout)
+    #generate_variance_two(variance_decoherence, variance_readout)
     #generate_gate_overhead(gate_overhead)
     #generate_normalized_gate_overhead(gate_overhead)
     #generate_overhead_2x2(gate_overhead)
