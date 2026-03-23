@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 import random
 import os
@@ -15,11 +14,10 @@ from qiskit_aer.noise import NoiseModel, depolarizing_error, ReadoutError
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
-from qiskit_ibm_runtime import QiskitRuntimeService
+
 
 
 def load_results_from_file(job_id: str) -> Dict[str, Any]:
-    """Load IBM job results from local file."""
     results_file = f"job_results_{job_id}.json"
     if os.path.exists(results_file):
         print(f"Loading results from local file: {results_file}")
@@ -29,7 +27,6 @@ def load_results_from_file(job_id: str) -> Dict[str, Any]:
 
 
 def load_job_info_from_file(job_id: str) -> Dict[str, Any]:
-    """Load job information from saved JSON file."""
     job_file = f"job_info_{job_id}.json"
     if os.path.exists(job_file):
         with open(job_file, 'r') as f:
@@ -40,48 +37,30 @@ def load_job_info_from_file(job_id: str) -> Dict[str, Any]:
 
 
 def _normalize_counts_format(counts: Dict[str, int]) -> Dict[str, int]:
-    if not counts:
-        return counts
-    
-    # Check if we have space-separated registers
     sample_key = list(counts.keys())[0]
     if ' ' in sample_key:
-        # Multiple classical registers - extract the non-zero register
         normalized = {}
-        
         for bitstring, count in counts.items():
             parts = bitstring.split()
             
-            # Find which register has varying bits (not all zeros)
             active_register = None
             for part in parts:
-                if part != '0' * len(part):  # Not all zeros
+                if part != '0' * len(part):
                     active_register = part
                     break
-            
-            # If no active register found, use the first one
             if active_register is None:
                 active_register = parts[0]
-            
             normalized[active_register] = normalized.get(active_register, 0) + count
-        
         return normalized
-    
     else:
-        # Single register format - return as is
         return counts
 
 def _calculate_ground_state_fidelity(counts: Dict[str, int]) -> float:
-    """Calculate fidelity to ground state (all zeros)."""
-    
-    # Normalize counts first to handle different register formats
     normalized_counts = _normalize_counts_format(counts)
-    
     total_shots = sum(normalized_counts.values())
     if total_shots == 0:
         return 0.0
     
-    # Look for ground state pattern (all zeros)
     if normalized_counts:
         sample_key = list(normalized_counts.keys())[0]
         ground_pattern = '0' * len(sample_key)
@@ -98,7 +77,6 @@ def _recreate_experimental_circuits(
     seed: int = 42
 ) -> Tuple[List[QuantumCircuit], List[Dict]]:
 
-    # Set the same random seed as used in original generation
     random.seed(seed)
     np.random.seed(seed)
     
@@ -108,7 +86,6 @@ def _recreate_experimental_circuits(
     
     for qubit_size in qubit_sizes:
         for i in range(circuits_per_qubit_size):
-            # Use the same seed pattern as in the original function
             circuit_seed = seed + qubit_size * 1000 + i
             
             circuit = generate_random_circuit_with_torino_gates(
@@ -137,29 +114,21 @@ def generate_random_circuit_with_torino_gates(
         random.seed(seed)
         np.random.seed(seed)
     
-    # FakeTorino's native gate set (check target for exact gates)
-    fake_torino = FakeTorino()
-    
-    # Common IBM gate set - use CZ for Heron compatibility
-    single_qubit_gates = ['x', 'sx', 'rz', 'id']  # X, SX, RZ, Identity
-    two_qubit_gates = ['cz']  # Use CZ instead of CX for Heron compatibility
+
+    single_qubit_gates = ['x', 'sx', 'rz', 'id'] 
     
     circuit = QuantumCircuit(num_qubits, num_qubits)
     
     for layer in range(depth):
-        # Randomly choose qubits to apply gates to
         available_qubits = list(range(num_qubits))
         random.shuffle(available_qubits)
         
         used_qubits = set()
-        
-        # Apply some two-qubit gates first
         num_two_qubit = random.randint(0, min(2, num_qubits // 2))
         for _ in range(num_two_qubit):
             if len(available_qubits) < 2:
                 break
-                
-            # Choose two qubits that aren't already used
+
             available_pairs = [(i, j) for i in available_qubits 
                              for j in available_qubits 
                              if i != j and i not in used_qubits and j not in used_qubits]
@@ -168,12 +137,9 @@ def generate_random_circuit_with_torino_gates(
                 break
                 
             qubit1, qubit2 = random.choice(available_pairs)
-            
-            # Apply CZ gate (Heron-compatible)
             circuit.cz(qubit1, qubit2)
             used_qubits.update([qubit1, qubit2])
         
-        # Apply single-qubit gates to remaining qubits
         remaining_qubits = [q for q in available_qubits if q not in used_qubits]
         for qubit in remaining_qubits:
             if random.random() < 0.7:  # 70% chance to apply a gate
@@ -184,58 +150,45 @@ def generate_random_circuit_with_torino_gates(
                 elif gate_type == 'sx':
                     circuit.sx(qubit)
                 elif gate_type == 'rz':
-                    # Random rotation angle
                     angle = random.uniform(0, 2 * np.pi)
                     circuit.rz(angle, qubit)
                 elif gate_type == 'id':
                     circuit.id(qubit)
         
-        # Add a barrier between layers for clarity
         if layer < depth - 1:
             circuit.barrier()
-    
-    # Add measurements
     circuit.measure_all()
     
     return circuit
 
 def _calculate_fidelity(ideal_counts: Dict[str, int], noisy_counts: Dict[str, int]) -> float:
-    
-    # Normalize both count dictionaries to handle different classical register formats
     ideal_normalized = _normalize_counts_format(ideal_counts)
     noisy_normalized = _normalize_counts_format(noisy_counts)
     
-    # Get total shots for normalization
     total_ideal = sum(ideal_normalized.values())
     total_noisy = sum(noisy_normalized.values())
     
     if total_ideal == 0 or total_noisy == 0:
         return 0.0
     
-    # Get all possible outcomes
     all_outcomes = set(ideal_normalized.keys()) | set(noisy_normalized.keys())
     
-    # Calculate Total Variation distance
     tv_distance = 0.0
     for outcome in all_outcomes:
         p_ideal = ideal_normalized.get(outcome, 0) / total_ideal
         p_noisy = noisy_normalized.get(outcome, 0) / total_noisy
         tv_distance += abs(p_ideal - p_noisy)
     
-    # Convert TV distance to fidelity
     fidelity = 1.0 - 0.5 * tv_distance
-    return max(0.0, fidelity)  # Ensure non-negative
+    return max(0.0, fidelity)
 
 def _create_qiskit_noise_approximation(custom_noise_model, backend, use_cz=False):
 
     noise_model = NoiseModel()
-    
-    # Add single-qubit depolarizing error
     if hasattr(custom_noise_model, 'sq') and custom_noise_model.sq > 0:
         sq_error = depolarizing_error(custom_noise_model.sq, 1)
         noise_model.add_all_qubit_quantum_error(sq_error, ['sx', 'x', 'rz'])
     
-    # Add two-qubit depolarizing error (CZ for Heron, CX for others)
     if hasattr(custom_noise_model, 'tq') and custom_noise_model.tq > 0:
         tq_error = depolarizing_error(custom_noise_model.tq, 2)
         if use_cz:
@@ -243,13 +196,11 @@ def _create_qiskit_noise_approximation(custom_noise_model, backend, use_cz=False
         else:
             noise_model.add_all_qubit_quantum_error(tq_error, ['cx', 'cz'])
     
-    # Add measurement error
     if hasattr(custom_noise_model, 'measure') and custom_noise_model.measure > 0:
         measure_error = ReadoutError([[1-custom_noise_model.measure, custom_noise_model.measure],
                                     [custom_noise_model.measure, 1-custom_noise_model.measure]])
         noise_model.add_all_qubit_readout_error(measure_error)
-    
-    # Add reset error if available
+
     if hasattr(custom_noise_model, 'reset') and custom_noise_model.reset > 0:
         reset_error = depolarizing_error(custom_noise_model.reset, 1)
         noise_model.add_all_qubit_quantum_error(reset_error, ['reset'])
@@ -264,18 +215,15 @@ def _generate_comparison_summary_ibm(results: Dict[str, Any]) -> Dict[str, Any]:
         'analysis': {}
     }
     
-    # Extract fidelities
     for backend_key in ['noiseless', 'ibm_hardware', 'custom_noise']:
         if backend_key in results:
             summary['fidelities'][backend_key] = results[backend_key]['fidelity']
     
-    # Find best/worst performing (excluding noiseless which is always 1.0)
     noisy_fidelities = {k: v for k, v in summary['fidelities'].items() if k != 'noiseless'}
     if noisy_fidelities:
         summary['best_performing'] = max(noisy_fidelities.keys(), key=lambda k: noisy_fidelities[k])
         summary['worst_performing'] = min(noisy_fidelities.keys(), key=lambda k: noisy_fidelities[k])
     
-    # Analysis
     if 'ibm_hardware' in summary['fidelities'] and 'custom_noise' in summary['fidelities']:
         ibm_fid = summary['fidelities']['ibm_hardware']
         custom_fid = summary['fidelities']['custom_noise']
@@ -303,7 +251,6 @@ def compare_circuit_execution_with_ibm_cloud(
     
     results = {}
     
-    # Ensure circuit has measurements (should already have them)
     if not any(instr.operation.name == 'measure' for instr in circuit.data):
         circuit_with_measurements = circuit.copy()
         if not circuit_with_measurements.cregs:
@@ -311,10 +258,8 @@ def compare_circuit_execution_with_ibm_cloud(
         circuit_with_measurements.measure_all()
         circuit = circuit_with_measurements
     
-    # Use FakeTorino for transpilation consistency (or could use the actual IBM backend)
     fake_torino = FakeTorino()
     
-    # Transpile circuit for comparison consistency
     common_transpiled = transpile(
         circuit,
         fake_torino,
@@ -332,8 +277,7 @@ def compare_circuit_execution_with_ibm_cloud(
         'fidelity': 1.0,
         'execution_time': getattr(noiseless_result, 'time_taken', 'N/A')
     }
-    
-    # Calculate fidelity relative to noiseless
+
     ibm_fidelity = _calculate_fidelity(
         results['noiseless']['counts'],
         ibm_job_results
@@ -343,29 +287,23 @@ def compare_circuit_execution_with_ibm_cloud(
         'backend': f'{ibm_backend_name} (IBM Cloud)',
         'counts': ibm_job_results,
         'fidelity': ibm_fidelity,
-        'execution_time': 'N/A',  # Would need to extract from job metadata
+        'execution_time': 'N/A', 
         'circuit_index': circuit_index
     }
-    
-    # 3. Custom Backends with Multiple Noise Models
-    # Set up backend
+
     if custom_backend is None:
         custom_backend = fake_torino
     
-    # Set up QubitTracking
     qt = QubitTracking(custom_backend, common_transpiled)
-    
-    # Run each noise model
+
     for noise_type in noise_types:
-        # Extract noise type and parameter for ModSI1000 variants
         if ':' in noise_type:
             base_type, p_str = noise_type.split(':')
             p_value = float(p_str)
         else:
             base_type = noise_type
             p_value = noise_param
-            
-        # Get noise model
+
         if base_type == "heron":
             noise_model = HeronNoise.get_noise(qt, custom_backend)
         elif base_type == "modsi1000":
@@ -377,21 +315,18 @@ def compare_circuit_execution_with_ibm_cloud(
         
         if custom_noise_model is not None:
             noise_model = custom_noise_model
-        
-        # Create Qiskit noise model approximation
+
         qiskit_custom_noise = _create_qiskit_noise_approximation(noise_model, custom_backend, use_cz=True)
         custom_simulator = AerSimulator(noise_model=qiskit_custom_noise)
         
         custom_job = custom_simulator.run(common_transpiled, shots=shots)
         custom_result = custom_job.result()
-        
-        # Calculate fidelity relative to noiseless
+
         custom_fidelity = _calculate_fidelity(
             results['noiseless']['counts'],
             custom_result.get_counts()
         )
-        
-        # Store results with noise type key
+
         results[f'{noise_type}_noise'] = {
             'backend': f'Custom backend with {noise_type} noise',
             'counts': custom_result.get_counts(),
@@ -404,12 +339,10 @@ def compare_circuit_execution_with_ibm_cloud(
                 'reset_error': getattr(noise_model, 'reset', 'N/A')
             }
         }
-    
-    # Maintain backward compatibility - if 'heron' is in noise_types, also set 'custom_noise'
+
     if 'heron' in noise_types:
         results['custom_noise'] = results['heron_noise']
-    
-    # Summary comparison
+
     results['comparison'] = _generate_comparison_summary_ibm(results)
     
     return results
@@ -422,15 +355,12 @@ def _process_full_experiment_results(
 ) -> Dict[str, Any]:
 
     if ibm_results is None:
-        # Try to load from local file first
         ibm_results = load_results_from_file(job_id)
-        
-        # Fall back to IBM cloud if no local file
+
         if ibm_results is None:
             print(f"Retrieving results for experiment job {job_id}...")
             ibm_results = get_ibm_job_results(job_id)
-            
-            # Save results locally for future use
+
             results_file = f"job_results_{job_id}.json"
             with open(results_file, 'w') as f:
                 json.dump(ibm_results, f, indent=2)
@@ -439,8 +369,7 @@ def _process_full_experiment_results(
         if 'error' in ibm_results:
             print(f"Error retrieving results: {ibm_results['error']}")
             return {'error': ibm_results['error']}
-    
-    # Try to load job info if circuits not provided
+
     if circuits is None or circuit_metadata is None:
         job_info = load_job_info_from_file(job_id)
         if 'circuit_qasm' in job_info:
@@ -452,20 +381,18 @@ def _process_full_experiment_results(
             circuit_metadata = job_info['experiment_metadata']['circuit_metadata']
         else:
             circuit_metadata = None
-    
-    # If we still don't have circuits, recreate them from the standard experimental parameters
+
     if not circuits or not circuit_metadata:
         circuits, circuit_metadata = _recreate_experimental_circuits(
             qubit_range=(2, 7),
             circuits_per_qubit_size=10,
             circuit_depth=100,
-            seed=42  # Standard seed used in experiment
+            seed=42 
         )
     
     counts_list = ibm_results['counts']
     backend_name = ibm_results['metadata'].get('backend_name', 'unknown')
-    
-    # Organize results by qubit size
+
     results_by_qubit_size = {}
     overall_results = {
         'noiseless': {'fidelities': [], 'avg_fidelity': 0},
@@ -478,14 +405,12 @@ def _process_full_experiment_results(
     
     for i, ibm_counts in enumerate(counts_list):
         if i < len(circuits) and circuit_metadata and i < len(circuit_metadata):
-            # Full analysis with original circuits
             circuit = circuits[i]
             metadata = circuit_metadata[i]
             qubit_size = metadata['qubit_size']
             
             print(f"Analyzing circuit {i+1}/{len(counts_list)}: {qubit_size} qubits")
-            
-            # Initialize qubit size results if needed
+
             if qubit_size not in results_by_qubit_size:
                 results_by_qubit_size[qubit_size] = {
                     'noiseless': {'fidelities': []},
@@ -495,8 +420,7 @@ def _process_full_experiment_results(
                     'modsi1000_002_model': {'fidelities': []},
                     'circuits': []
                 }
-            
-            # Compare this circuit's execution (using multiple noise models)
+
             comparison_results = compare_circuit_execution_with_ibm_cloud(
                 circuit=circuit,
                 ibm_job_results=ibm_counts,
@@ -505,21 +429,17 @@ def _process_full_experiment_results(
                 noise_param=0.001,
                 ibm_backend_name=backend_name
             )
-            
-            # Extract fidelities - use proper calculation
+
             for backend_key in ['noiseless', 'ibm_hardware', 'heron_noise', 'modsi1000:0.001_noise', 'modsi1000:0.002_noise']:
                 if backend_key in comparison_results:
                     if backend_key == 'noiseless':
-                        # Noiseless is always 1.0 by definition
                         fidelity = 1.0
                     else:
-                        # Calculate fidelity relative to noiseless
                         fidelity = _calculate_fidelity(
                             comparison_results['noiseless']['counts'],
                             comparison_results[backend_key]['counts']
                         )
 
-                    # Map to our naming convention
                     if backend_key == 'heron_noise':
                         result_key = 'heron_model'
                     elif backend_key == 'modsi1000:0.001_noise':
@@ -536,7 +456,6 @@ def _process_full_experiment_results(
         
         else:
             
-            # Just analyze IBM results vs ground state
             ibm_fidelity = _calculate_ground_state_fidelity(ibm_counts)
             overall_results['ibm_hardware']['fidelities'].append(ibm_fidelity)
             
@@ -568,15 +487,7 @@ def _process_full_experiment_results(
 
 
 def plot_experimental_results(results: Dict[str, Any], save_path: str = None) -> str:
-    """Plot the experimental results comparing IBM hardware vs all noise models."""
-    
-    if 'results_by_qubit_size' not in results:
-        print("No qubit-wise results found for plotting")
-        return None
-    
 
-    
-    # Apply the same rcParams settings as in plots/utils.py
     tex_fonts = {
         "font.family": "serif",
         "axes.labelsize": 12,
@@ -593,10 +504,8 @@ def plot_experimental_results(results: Dict[str, Any], save_path: str = None) ->
     }
     plt.rcParams.update(tex_fonts)
     
-    # Extract data for plotting (only qubits 3-7)
     qubit_sizes = sorted([q for q in results['results_by_qubit_size'].keys() if q >= 3])
     
-    # Model configurations using seaborn pastel palette like in plots.py
     palette = sns.color_palette("pastel", n_colors=4)
     models = {
         'ibm_hardware': {'label': 'IBM Hardware', 'color': palette[0], 'alpha': 1.0},
@@ -605,7 +514,6 @@ def plot_experimental_results(results: Dict[str, Any], save_path: str = None) ->
         'modsi1000_002_model': {'label': 'SI1000 (p=0.002)', 'color': palette[3], 'alpha': 1.0}
     }
     
-    # Prepare data arrays
     data = {model: {'means': [], 'stds': []} for model in models}
     
     for qubits in qubit_sizes:
@@ -619,14 +527,13 @@ def plot_experimental_results(results: Dict[str, Any], save_path: str = None) ->
                 data[model_key]['means'].append(0)
                 data[model_key]['stds'].append(0)
     
-    # Create the plot with the same dimensions as their plots
-    fig, ax = plt.subplots(figsize=(5, 2.4))  # Using their HEIGHT_FIGSIZE * 2
+    
+    fig, ax = plt.subplots(figsize=(5, 2.4))  
     
     x = np.array(qubit_sizes)
     n_models = len(models)
-    bar_width = 0.15  # Match their BAR_WIDTH style
+    bar_width = 0.15  
     
-    # Create bars for each model with their styling
     bars = {}
     for i, (model_key, config) in enumerate(models.items()):
         offset = (i - (n_models-1)/2) * bar_width
@@ -636,29 +543,27 @@ def plot_experimental_results(results: Dict[str, Any], save_path: str = None) ->
                                 alpha=config['alpha'], 
                                 capsize=3,
                                 color=config['color'],
-                                edgecolor='black',  # Black edges like their plots
+                                edgecolor='black',  
                                 linewidth=1)
     
-    # Customize the plot to match their style
     ax.set_xlabel('Circuit Width', fontsize=12)
     ax.set_ylabel('Fidelity', fontsize=12)
     ax.set_title('Noise Comparison', 
-                 fontsize=12, fontweight='bold', loc='left')  # Left-aligned title like theirs
+                 fontsize=12, fontweight='bold', loc='left')  
     ax.set_xticks(x)
     ax.set_xticklabels(qubit_sizes)
     ax.legend(fontsize=10, loc='lower left', ncol=2)
-    ax.grid(axis='y', alpha=0.3)  # Only y-grid like their plots
-    ax.set_axisbelow(True)  # Grid behind bars
+    ax.grid(axis='y', alpha=0.3)  
+    ax.set_axisbelow(True)  
     ax.set_ylim(0, 1.0)
     
-    # Ensure axes spines are black like their plots
+
     for spine in ax.spines.values():
         spine.set_edgecolor('black')
         spine.set_linewidth(1)
     
     plt.tight_layout()
     
-    # Save plot
     if save_path is None:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         save_path = f"experimental_results_multi_model_{timestamp}.pdf"
