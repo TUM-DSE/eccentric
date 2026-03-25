@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 import matplotlib.ticker as mtick
+from matplotlib.ticker import LogLocator
 from matplotlib.ticker import ScalarFormatter
 from matplotlib.patches import Rectangle
 

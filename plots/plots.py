@@ -88,7 +88,7 @@ def generate_size_plot(df_path):
                          loc="left", fontsize=12, fontweight="bold")
 
             if col == 0:
-                ax.set_ylabel("Log. Err. Rate", fontsize=FONTSIZE)
+                ax.set_ylabel("Logical Err. Rate", fontsize=FONTSIZE)
 
             ax.text(
                 1.0, 1.16, "Lower is better ↓",
@@ -203,14 +203,14 @@ def generate_size_plot_two(df_path):
 
             # title
             letter = letters[col]
-            title_et = "Const." if et == "Constant" else et
-            ax.set_title(f"{letter} {title_et} p={error_prob}",
+            title_et = "Uniform" if et == "Constant" else et
+            ax.set_title(f"{letter} {title_et}, p={error_prob}",
                         loc="left", fontsize=12, fontweight="bold")
 
             # ylabel only on left plot
             if col == 0:
                 ax.set_ylabel("Logical Error Rate", fontsize=FONTSIZE)
-
+            ax.set_xlabel("Backend Size", fontsize=FONTSIZE)
             # blue annotation
             ax.text(
                 1.0, 1.12, "Lower is better ↓",
@@ -226,14 +226,14 @@ def generate_size_plot_two(df_path):
                     unique_labels[l] = h
 
         # adjust layout and legend
-        plt.subplots_adjust(left=0.08, right=0.88, bottom=0.18, top=0.9)
+        plt.subplots_adjust(left=0.08, right=0.88, bottom=0.2, top=0.88)
         fig.legend(
             handles=list(unique_labels.values()),
             labels=list(unique_labels.keys()),
             loc="lower center",
             bbox_to_anchor=(0.94, 0.2),
             #ncol=len(unique_labels),
-            frameon=True
+            frameon=False
         )
 
         os.makedirs("data", exist_ok=True)
@@ -242,28 +242,47 @@ def generate_size_plot_two(df_path):
 
 
 def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
+    import os
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    from matplotlib.ticker import LogLocator
+
     def preprocess(df_path, backend_order=None, reverse_backends=False):
         df = pd.read_csv(df_path)
         df = df[df["backend"] != "real_infleqtion"]
         df["code"] = df["code"].apply(lambda x: code_rename_map.get(x.lower(), x.capitalize()))
+
         if backend_order is not None:
             df["backend"] = pd.Categorical(df["backend"], categories=backend_order, ordered=True)
         else:
             df["backend"] = df["backend"].replace(backend_rename_map)
+
         if reverse_backends:
             backends = df["backend"].unique()[::-1]
         else:
             backends = df["backend"].unique()
-        df["std"] = np.sqrt(df["logical_error_rate"] * (1 - df["logical_error_rate"]) / df["num_samples"])
+
         codes = sorted(df["code"].unique())
         return df, codes, backends
 
-    df_conn, codes_conn, backends_conn = preprocess(connectivity_csv,
-                                                    backend_order=['custom_grid', 'custom_cube', 'custom_full'])
-    df_topo, codes_topo, backends_topo = preprocess(topology_csv, reverse_backends=True)
+    df_conn, codes_conn, backends_conn = preprocess(
+        connectivity_csv,
+        backend_order=['custom_grid', 'custom_cube', 'custom_full']
+    )
+    df_topo, codes_topo, backends_topo = preprocess(
+        topology_csv,
+        reverse_backends=True
+    )
 
     # --- Figure setup ---
-    fig, axes = plt.subplots(1, 2, figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE*0.9), sharey=True)
+    fig, axes = plt.subplots(
+        1, 2,
+        figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE * 0.9),
+        sharey=True
+    )
+
     bar_width = 0.2
     group_spacing = 0.25
     palette = sns.color_palette("pastel", n_colors=max(len(codes_conn), len(codes_topo)))
@@ -272,17 +291,30 @@ def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
     # --- Plot helper ---
     def plot_subplot(ax, df, codes, backends, title):
         x = np.arange(len(backends)) * (bar_width * len(codes) + group_spacing)
+
         for i, code in enumerate(codes):
             subset = df[df["code"] == code]
             means, stds = [], []
+
             for backend in backends:
                 row = subset[subset["backend"] == backend]
+
                 if not row.empty:
-                    means.append(row["logical_error_rate"].values[0])
-                    stds.append(row["std"].values[0])
+                    val = row["logical_error_rate"].values[0]
+                    n = row["num_samples"].values[0]
+
+                    # --- Reviewer fix: replace zero with 1/N ---
+                    if val == 0:
+                        val = 1 / n
+
+                    std = np.sqrt(val * (1 - val) / n)
+
+                    means.append(val)
+                    stds.append(std)
                 else:
-                    means.append(0)
+                    means.append(np.nan)
                     stds.append(0)
+
             ax.bar(
                 x + i * bar_width,
                 means,
@@ -295,17 +327,31 @@ def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
             )
 
         ax.set_xticks(x + bar_width * (len(codes) - 1) / 2)
-        ax.set_xticklabels([str(b).replace("custom_", "").capitalize() for b in backends], fontsize=FONTSIZE - 2)
+        ax.set_xticklabels(
+            [str(b).replace("custom_", "").capitalize() for b in backends],
+            fontsize=FONTSIZE - 2
+        )
+
         ax.set_yscale("log")
+        ax.set_ylim(1e-3, 1)
+
+        ax.yaxis.set_major_locator(LogLocator(base=10))
+        ax.yaxis.set_minor_locator(LogLocator(base=10, subs=np.arange(2, 10) * 0.1))
+
         ax.grid(axis="y")
         ax.set_axisbelow(True)
         ax.set_title(title, loc="left", fontsize=12, fontweight="bold")
+
         ax.text(
-            1.0, 1.14, "Lower is better ↓", transform=ax.transAxes,
-            fontsize=12, fontweight="bold", color="blue", va="top", ha="right"
+            1.0, 1.14, "Lower is better ↓",
+            transform=ax.transAxes,
+            fontsize=12,
+            fontweight="bold",
+            color="blue",
+            va="top",
+            ha="right"
         )
 
-        # Ensure axes spines are black
         for spine in ax.spines.values():
             spine.set_edgecolor("black")
             spine.set_linewidth(1)
@@ -313,9 +359,10 @@ def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
     # --- Plot left/right ---
     plot_subplot(axes[0], df_conn, codes_conn, backends_conn, "a) Artificial Topology")
     plot_subplot(axes[1], df_topo, codes_topo, backends_topo, "b) Real Topology")
-    axes[0].set_ylabel("Log. Err. Rate (Log)", fontsize=FONTSIZE)
 
-    # --- Shared vertical legend on the right ---
+    axes[0].set_ylabel("Logical Err. Rate (log)", fontsize=FONTSIZE)
+
+    # --- Shared legend ---
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(
         handles, labels,
@@ -325,10 +372,8 @@ def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
         frameon=False
     )
 
-    #fig.patch.set_edgecolor("blue")
-    #fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.08, right=0.85, top=0.85, bottom=0.12, wspace=0.1)
-    #plt.tight_layout(rect=[0, 0, 0.82, 1])
+
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/connectivity.pdf", format="pdf")
     plt.close(fig)
@@ -363,7 +408,7 @@ def generate_technology_plot(path):
         )
     ax.set_xticks(x + BAR_WIDTH * (n_codes - 1) / 2)
     ax.set_xticklabels(backends, fontsize=FONTSIZE - 2)
-    ax.set_ylabel("Log. Err. Rate (Log)", fontsize=FONTSIZE)
+    ax.set_ylabel("Logical Err. Rate (log)", fontsize=FONTSIZE)
     ax.set_yscale("log")
     ax.grid(axis="y")
     ax.set_axisbelow(True)
@@ -383,108 +428,6 @@ def generate_technology_plot(path):
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/technologies.pdf", format="pdf")
     plt.close(fig)
-
-
-
-"""
-def generate_technology_plot(path):
-    technologies = ["Willow", "Apollo", "Infleqtion"]
-    raw_dfs = []
-
-    # Load all data
-    for tech in technologies:
-        tech_path = os.path.join(path, tech, "results.csv")
-        df = pd.read_csv(tech_path)
-        raw_dfs.append(df)
-
-    df = pd.concat(raw_dfs, ignore_index=True)
-
-    # Split into two subsets BEFORE mapping backend names
-    subsets = {
-        "ns": df[df["backend"].str.contains("ns", case=False)].copy(),
-        "non_ns": df[~df["backend"].str.contains("ns", case=False)].copy()
-    }
-
-    # --- Figure with 2 subplots ---
-    fig, axes = plt.subplots(1, 2, figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE), sharey=True)
-
-    for i, (key, subset_df) in enumerate(subsets.items()):
-        ax = axes[i]
-        if subset_df.empty:
-            print(f"⚠️ No data for {key}, skipping.")
-            continue
-
-        # Map backend names, normalize codes
-        subset_df["backend"] = subset_df["backend"].replace(backend_rename_map)
-        subset_df["code"] = subset_df["code"].apply(
-            lambda x: code_rename_map.get(x.lower(), x.capitalize())
-        )
-
-        backends = subset_df["backend"].unique()
-        codes = sorted(subset_df["code"].unique())
-        n_backends = len(backends)
-        n_codes = len(codes)
-
-        # spacing between backend groups
-        x = np.arange(n_backends) * (BAR_WIDTH * n_codes + group_spacing)
-
-        for j, code in enumerate(codes):
-            code_subset = subset_df[subset_df["code"] == code]
-            means = []
-
-            for backend in backends:
-                row = code_subset[code_subset["backend"] == backend]
-                if not row.empty:
-                    means.append(row["logical_error_rate"].values[0])
-                else:
-                    means.append(0)
-
-            ax.bar(
-                x + j * BAR_WIDTH,
-                means,
-                width=BAR_WIDTH,
-                color=code_palette[j % len(code_palette)],
-                hatch=code_hatches[j % len(code_hatches)],
-                edgecolor="black",
-                label=code
-            )
-
-        # Axes formatting
-        ax.set_xticks(x + BAR_WIDTH * (n_codes - 1) / 2)
-        ax.set_xticklabels(backends, fontsize=FONTSIZE - 2)
-        if i == 0:
-            ax.set_ylabel("Log. Err. Rate (Log)", fontsize=FONTSIZE)
-
-        ax.set_yscale("log")
-        ax.grid(axis="y")
-        ax.set_axisbelow(True)
-
-        # Title
-        plot_title = "a) W/o Shuttling" if key == "ns" else "b) W/ Shuttling"
-        ax.set_title(plot_title, loc="left", fontsize=12, fontweight="bold")
-
-        # "Lower is better ↓"
-        ax.text(
-            1.0, 1.14, "Lower is better ↓", transform=ax.transAxes,
-            fontsize=12, fontweight="bold", color="blue",
-            va="top", ha="right"
-        )
-
-    # ✅ Shared vertical legend on the right
-    handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(
-        handles, labels,
-        loc="center right",
-        bbox_to_anchor=(0.98, 0.5),
-        fontsize=FONTSIZE,
-        frameon=False
-    )
-
-    plt.tight_layout(rect=[0, 0, 0.85, 1])  # leave space for legend
-    os.makedirs("data", exist_ok=True)
-    plt.savefig("data/technologies.pdf", format="pdf")
-    plt.close(fig)
-"""
 
 
 def generate_dqc_plot(dqc_files):
@@ -554,7 +497,7 @@ def generate_dqc_plot(dqc_files):
             ax.set_xticks(x)
             ax.set_xticklabels(codes, fontsize=FONTSIZE - 2, rotation=30, ha="right")
             if ax_idx == 0:
-                ax.set_ylabel("Log. Err. Rate (Log)", fontsize=FONTSIZE)
+                ax.set_ylabel("Logical Err. Rate (log)", fontsize=FONTSIZE)
             ax.set_yscale("log")
             ax.grid(axis="y")
             ax.set_axisbelow(True)
@@ -590,7 +533,7 @@ def generate_dqc_plot(dqc_files):
 
     #fig.patch.set_edgecolor("blue")
     #fig.patch.set_linewidth(3)
-    plt.subplots_adjust(left=0.08, bottom=0.3, right=0.995, wspace=0.05)
+    plt.subplots_adjust(left=0.08, bottom=0.27, right=0.995, wspace=0.05)
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/dqc.pdf", format="pdf")
     plt.close(fig)
@@ -605,7 +548,8 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
         return {
             "hh": "Heavy-Hex",
             "surface": "Surface",
-            "color": "Color"
+            "color": "Color",
+            "bacon": "Bacon-Shor"
         }.get(code, code.capitalize())
 
     df["code"] = df["code"].apply(format_code)
@@ -680,7 +624,7 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
             )
 
         # title with (a), (b), ...
-        ax.set_title(f"{chr(100 + i)}) {routing.capitalize()}", loc="left", fontsize=12, fontweight="bold")
+        ax.set_title(f"{chr(97 + i)}) {routing.capitalize()}", loc="left", fontsize=12, fontweight="bold")
         ax.set_xticks(x + (bar_width * (len(layout_methods) - 1)) / 2)
         ax.set_xticklabels(codes, fontsize=FONTSIZE - 2, rotation=30, ha="right")
 
@@ -749,7 +693,8 @@ def generate_swap_overhead_norm_plot(df_path, backend_label, total_columns=3):
         return {
             "hh": "Heavy-Hex",
             "surface": "Surface",
-            "color": "Color"
+            "color": "Color",
+            "bacon": "Bacon-Shor"
         }.get(code, code.capitalize())
 
     # Load main data
@@ -1292,13 +1237,6 @@ def generate_gate_overhead(df_path):
     plt.close(fig)
 
 def generate_overhead_2x2(df_path):
-    """
-    Generate one PDF with 2x2 plots:
-    (a,b)  Gate Overhead   [IBM Heron, H2]
-    (c,d)  Normalized Gate Overhead   [IBM Heron, H2]
-    Shared X-axes between rows and a shared vertical legend on the right.
-    """
-
     df = pd.read_csv(df_path)
     method_label_map = {
         "tket": "tket",
@@ -1338,22 +1276,21 @@ def generate_overhead_2x2(df_path):
 
     methods = ["qiskit", "qiskit_optimized", "tket", "tket_optimized"]
 
-    # --- Create figure with 2x2 layout ---
     fig, axes = plt.subplots(
         2, 2,
         figsize=(2 * WIDE_FIGSIZE, 1.7 * HEIGHT_FIGSIZE),
-        sharex="col",  # ✅ share x-axis per column
-        sharey="row"   # still share y per row
+        sharex="col",
+        sharey="row"
     )
 
-    letters = ["(a)", "(b)", "(c)", "(d)"]
+    letters = ["a)", "b)", "c)", "d)"]
 
     for row, mode in enumerate(["overhead", "normalized"]):
         for col, gate_set in enumerate(gate_sets):
             ax = axes[row, col]
             subset = df[df["gate_set"] == gate_set]
             if subset.empty:
-                print(f"⚠️ No data for {gate_set}, skipping.")
+                print(f"no data for {gate_set}, skipping.")
                 continue
 
             codes = sorted(subset["code"].unique())
@@ -1535,7 +1472,7 @@ def generate_variance_two(decoherence_csv, readout_csv):
         ax.text(1.0, 1.16, "Lower is better ↓", transform=ax.transAxes, fontsize=12, fontweight="bold", color="blue", ha="right", va="top")
 
     plot_subplot(axes[0], df_high, "a) Deco.", show_labels=True)
-    axes[0].set_ylabel("Log. Error Rate (log)", fontsize=FONTSIZE, labelpad=2, y=0.3)
+    axes[0].set_ylabel("Logical Error Rate (log)", fontsize=FONTSIZE, labelpad=2, y=0.3)
     plot_subplot(axes[1], df_low, "b) Deco. (10×)")
     plot_subplot(axes[2], df_read, "c) Readout")
 
@@ -1588,7 +1525,7 @@ def generate_decoder_plot(df_path):
         offsets = np.linspace(-BAR_WIDTH, BAR_WIDTH, n_decoders)
 
         panels = [
-            ("logical_error_rate", "Log. Err. Rate", True),
+            ("logical_error_rate", "Logical Err. Rate (log)", True),
             ("time_decode", "Time [s] (log)", False),
             ("mem_decode_full_MB", "Memory [MB]", False),
         ]
@@ -1653,6 +1590,7 @@ def generate_decoder_plot(df_path):
             )
 
         # Titles and scales
+        axes[0].set_yscale("log")
         axes[0].set_title("a) Effectiveness", loc="left",
                         fontsize=FONTSIZE, fontweight="bold")
         axes[1].set_title("b) Time", loc="left",
@@ -1763,7 +1701,7 @@ def generate_decoder_error_barplot(df_path):
             ax.set_xticklabels([str(p) for p in error_probs])
             ax.set_xlabel("Physical Error Probability", fontsize=FONTSIZE)
             if col == 0:
-                ax.set_ylabel("Log. Err. Rate (Log)", fontsize=FONTSIZE)
+                ax.set_ylabel("Logical Err. Rate (log)", fontsize=FONTSIZE)
 
             # Titles and annotations
             ax.set_title(f"{chr(97 + col)}) {decoder}", fontsize=FONTSIZE, fontweight="bold", loc="left")
@@ -1983,7 +1921,7 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
     axes[0].set_title("a) Runtime", loc="left", fontsize=FONTSIZE, fontweight="bold")
     axes[0].set_ylabel("Time [s]", fontsize=FONTSIZE)
     axes[0].yaxis.set_major_formatter(FuncFormatter(sci_formatter))
-    axes[0].text(1.0, 1.16, "Lower is better ↓", transform=axes[0].transAxes,
+    axes[0].text(1.01, 1.18, "Lower is better ↓", transform=axes[0].transAxes,
                  ha="right", va="top", fontsize=FONTSIZE, color="blue", fontweight="bold")
     axes[0].legend(
         loc="upper left",
@@ -2019,7 +1957,7 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
 
     axes[1].set_title("b) Runtime (w/o Decoding)", loc="left", fontsize=FONTSIZE, fontweight="bold")
     axes[1].set_ylabel("Time [s]", fontsize=FONTSIZE)
-    axes[1].text(1.0, 1.16, "Lower is better ↓", transform=axes[1].transAxes,
+    axes[1].text(1.01, 1.18, "Lower is better ↓", transform=axes[1].transAxes,
                  ha="right", va="top", fontsize=FONTSIZE, color="blue", fontweight="bold")
 
     # ======== c) MEMORY (PEAK RSS) ========
@@ -2043,10 +1981,10 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
         fontweight="bold"
     )
     axes[2].set_ylabel("Memory [MB]", fontsize=FONTSIZE)
-    axes[2].yaxis.set_major_formatter(FuncFormatter(sci_formatter))
+    #axes[2].yaxis.set_major_formatter(FuncFormatter(sci_formatter))
 
     axes[2].text(
-        1.0, 1.16,
+        1.01, 1.18,
         "Lower is better ↓",
         transform=axes[2].transAxes,
         ha="right",
@@ -2060,19 +1998,188 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
     axes[2].set_xticks(x)
     axes[2].set_xticklabels(labels, fontsize=FONTSIZE - 2, rotation=0, ha="center")
 
-    # -------- COMMON LEGEND UNDER FIGURE --------
-    #handles, legend_labels = axes[0].get_legend_handles_labels()
-    #fig.legend(handles, legend_labels, loc='lower center', ncol=len(handles) // 2,
-    #           frameon=False, fontsize=FONTSIZE, bbox_to_anchor=(0.5, 0))
-
-    # Figure styling
-    #fig.patch.set_edgecolor("blue")
-    #fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.13, right=0.99, top=0.94, bottom=0.1, hspace=0.35)
 
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/program_stats.pdf", format="pdf")
     plt.close(fig)
+
+def plot_time_and_memory(csv_common, csv_big, csv_more_shots):
+    def sci_formatter(y, _pos):
+        if y == 0:
+            return "0"
+        s = f"{y:.2e}"
+        mant, exp = s.split('e')
+        mant = mant.rstrip('0').rstrip('.')
+        exp_int = int(exp)
+        return f"{mant}e{exp_int}"
+
+    # Load CSVs
+    df_common = pd.read_csv(csv_common)
+    df_big = pd.read_csv(csv_big)
+    df_more = pd.read_csv(csv_more_shots)
+
+    # Select rows
+    row_baseline = df_common[df_common["backend"].str.contains("full", case=False)].iloc[0]
+    row_grid = df_common[df_common["backend"].str.contains("grid", case=False)].iloc[0]
+    row_big = df_big.iloc[0]
+    row_more = df_more.iloc[0]
+
+    # Ordered cases (capitalized)
+    cases = [
+        ("Baseline", row_baseline),
+        ("Bigger\nBackend", row_big),
+        ("Sparser\nBackend", row_grid),
+        ("More Shots", row_more),
+    ]
+
+    labels = [name for name, _ in cases]
+    rows = [row for _, row in cases]
+    x = np.arange(len(labels))
+    width = 0.65
+
+    # Time components
+    time_cols = [
+        "time_backend",
+        "time_circuit",
+        "time_transpile",
+        "time_repr",
+        "time_noise",
+        "time_decode",
+    ]
+    time_cols_no_decode = [
+        "time_backend",
+        "time_circuit",
+        "time_transpile",
+        "time_repr",
+        "time_noise",
+    ]
+    # Memory components (FULL)
+    mem_cols = [
+        "mem_backend_full_MB",
+        "mem_circuit_full_MB",
+        "mem_transpile_full_MB",
+        "mem_repr_full_MB",
+        "mem_noise_full_MB",
+        "mem_decode_full_MB",
+    ]
+
+    # -------- FIGURE: 3 rows, 1 column --------
+    fig, axes = plt.subplots(
+        1, 3,
+        figsize=(WIDE_FIGSIZE * 2.2, HEIGHT_FIGSIZE),
+        sharex=True
+    )
+
+    color_map = code_palette
+
+    # ======== a) TIME (WITH DECODE) ========
+    bottom = np.zeros(len(labels))
+    axes[0].grid(axis="y")  # Grid behind bars
+    for i, col in enumerate(time_cols):
+        label = col.replace("time_", "").capitalize()
+        # Rename legend entries
+        if label == "Repr":
+            label = "Repr. Change"
+        elif label == "Circuit":
+            label = "Circuit Gen."
+        elif label == "Backend":
+            label = "Backend Gen."
+
+        values = [row[col] for row in rows]
+        axes[0].bar(x, values, width, bottom=bottom,
+                    label=label,
+                    color=color_map[i % len(color_map)],
+                    edgecolor='black',
+                    zorder=1)
+        bottom += values
+
+    axes[0].set_title("a) Runtime", loc="left", fontsize=FONTSIZE, fontweight="bold")
+    axes[0].set_ylabel("Time [s]", fontsize=FONTSIZE)
+    axes[0].yaxis.set_major_formatter(FuncFormatter(sci_formatter))
+    axes[0].text(1.01, 1.14, "Lower is better ↓", transform=axes[0].transAxes,
+                 ha="right", va="top", fontsize=FONTSIZE, color="blue", fontweight="bold")
+    axes[0].legend(
+        loc="upper left",
+        fontsize=FONTSIZE-2,
+        frameon=True,
+        ncol=1,
+        labelspacing=0.3,      # vertical spacing between entries
+        handletextpad=0.4,     # space between marker and text
+        handlelength=1.2,      # length of color box
+        borderpad=0.18
+    )
+
+
+    # ======== b) TIME (NO DECODE) ========
+    bottom = np.zeros(len(labels))
+    axes[1].grid(axis="y")
+    for i, col in enumerate(time_cols_no_decode):
+        label = col.replace("time_", "").capitalize()
+        if label == "Repr":
+            label = "Repr. Change"
+        elif label == "Circuit":
+            label = "Circuit Gen."
+        elif label == "Backend":
+            label = "Backend Gen."
+
+        values = [row[col] for row in rows]
+        axes[1].bar(x, values, width, bottom=bottom,
+                    label=label,
+                    color=color_map[i % len(color_map)],
+                    edgecolor='black',
+                    zorder=1)
+        bottom += values
+
+    axes[1].set_title("b) Runtime (w/o Dec.)", loc="left", fontsize=FONTSIZE, fontweight="bold")
+    axes[1].set_ylabel("Time [s]", fontsize=FONTSIZE)
+    axes[1].text(1.01, 1.14, "Lower is better ↓", transform=axes[1].transAxes,
+                 ha="right", va="top", fontsize=FONTSIZE, color="blue", fontweight="bold")
+
+    # ======== c) MEMORY (PEAK RSS) ========
+    axes[2].grid(axis="y")
+
+    mem_values = [row["peak_memory_full_MB"] for row in rows]
+
+    axes[2].bar(
+        x,
+        mem_values,
+        width,
+        color=color_map[7],
+        edgecolor="black",
+        zorder=1
+    )
+
+    axes[2].set_title(
+        "c) Peak Mem. Usage",
+        loc="left",
+        fontsize=FONTSIZE,
+        fontweight="bold"
+    )
+    axes[2].set_ylabel("Memory [MB]", fontsize=FONTSIZE)
+    #axes[2].yaxis.set_major_formatter(FuncFormatter(sci_formatter))
+
+    axes[2].text(
+        1.01, 1.14,
+        "Lower is better ↓",
+        transform=axes[2].transAxes,
+        ha="right",
+        va="top",
+        fontsize=FONTSIZE,
+        color="blue",
+        fontweight="bold"
+    )
+
+    # -------- SHARED X-AXIS --------
+    axes[2].set_xticks(x)
+    axes[2].set_xticklabels(labels, fontsize=FONTSIZE - 2, rotation=0, ha="center")
+
+    plt.subplots_adjust(left=0.05, right=0.99, top=0.89, bottom=0.2, hspace=0.35)
+
+    os.makedirs("data", exist_ok=True)
+    plt.savefig("data/program_stats.pdf", format="pdf")
+    plt.close(fig)
+
 
 def plot_threshold_per_code(csv_path):
     df = pd.read_csv(csv_path)
@@ -2107,8 +2214,8 @@ def plot_threshold_per_code(csv_path):
     ax.set_xscale("log")
     # ax.set_yscale("log")  # optional
 
-    ax.set_xlabel("Physical error probability", fontsize=12, labelpad=0.01)
-    ax.set_ylabel("Logical error rate", fontsize=12)
+    ax.set_xlabel("Physical Error Probability", fontsize=12, labelpad=0.01)
+    ax.set_ylabel("Logical Error Rate", fontsize=12)
     ax.text(
         1.0, 1.12,
         "Lower is better ↓",
@@ -2138,7 +2245,7 @@ def plot_threshold_per_code(csv_path):
         handletextpad=0.2,
         columnspacing=0.5
     )
-    ax.set_title("Effectiveness of codes", loc="left", fontsize=FONTSIZE, fontweight="bold")
+    ax.set_title("Effectiveness of Codes", loc="left", fontsize=FONTSIZE, fontweight="bold")
     #fig.patch.set_edgecolor("blue")
     #fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.15, right=0.99, top=0.85, bottom=0.2)
@@ -2171,7 +2278,7 @@ def plot_gross_shot_comparison(csv_1000, csv_more):
 
 
     # Figure
-    fig, ax = plt.subplots(figsize=(0.8*WIDE_FIGSIZE, HEIGHT_FIGSIZE))
+    fig, ax = plt.subplots(figsize=(0.7*WIDE_FIGSIZE, HEIGHT_FIGSIZE))
 
     ax.plot(
         df_1000["error_probability"],
@@ -2195,8 +2302,8 @@ def plot_gross_shot_comparison(csv_1000, csv_more):
     ax.set_xscale("log")
     #ax.set_yscale("log")
 
-    ax.set_xlabel("Physical error probability", fontsize=FONTSIZE, labelpad=0.01)
-    ax.set_ylabel("Log. error rate", fontsize=FONTSIZE)
+    ax.set_xlabel("Physical Error Probability", fontsize=FONTSIZE, labelpad=0.01)
+    ax.set_ylabel("Logical Error Rate", fontsize=FONTSIZE)
     ax.set_title("Precision of #shots", loc="left", fontsize=FONTSIZE, fontweight="bold")
 
     ax.grid(True, which="both")
@@ -2207,7 +2314,7 @@ def plot_gross_shot_comparison(csv_1000, csv_more):
     )
 
     ax.text(
-        1.0, 1.14,
+        1.0, 1.145,
         "Lower is better ↓",
         transform=ax.transAxes,
         fontsize=12,
@@ -2223,6 +2330,105 @@ def plot_gross_shot_comparison(csv_1000, csv_more):
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/shot_comparison.pdf", format="pdf")
     plt.close(fig)
+
+def generate_size_plot_separate(df_path):
+    df = pd.read_csv(df_path)
+    err_prob = 0.004
+    backend = "custom_full"
+    error_types = ["SI1000", "Constant"]
+
+    default_colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    all_codes = sorted([c.lower() for c in df['code'].unique()])
+    code_color = {c: default_colors[i % len(default_colors)] for i, c in enumerate(all_codes)}
+
+    marker_styles_local = marker_styles if 'marker_styles' in globals() else {'other': 'o'}
+
+    for et in error_types:
+        original_et = error_type_map.get(et, et.lower())
+
+        all_xticks = sorted(df.loc[
+            (df['backend'] == backend) & (df['error_type'] == original_et),
+            'backend_size'
+        ].unique())
+
+        subset = df[
+            (df['backend'] == backend) &
+            (df['error_type'] == original_et) &
+            (df['error_probability'] == err_prob)
+        ]
+
+        fig, ax = plt.subplots(
+            1, 1,
+            figsize=(WIDE_FIGSIZE, HEIGHT_FIGSIZE)
+        )
+
+        for code, group in subset.groupby('code'):
+            code_key = code.lower()
+            code_display = code_rename_map.get(code_key, code.capitalize())
+            marker = marker_styles_local.get(code_key, marker_styles_local['other'])
+            group_sorted = group.sort_values('backend_size')
+
+            xs = group_sorted['backend_size'].to_numpy()
+            ys = group_sorted['logical_error_rate'].to_numpy()
+
+            line = ax.plot(
+                xs, ys,
+                label=code_display,
+                marker=marker,
+                color=code_color[code_key],
+                markeredgecolor="none",
+            )[0]
+
+            # Highlight selected points
+            highlight_x = HIGHLIGHT.get((code_key, et), [])
+            if highlight_x:
+                sel = np.isin(xs, highlight_x)
+                ax.plot(
+                    xs[sel], ys[sel],
+                    linestyle="None",
+                    marker=marker,
+                    markersize=line.get_markersize() * 1.4,
+                    markerfacecolor=code_color[code_key],
+                    markeredgecolor="black",
+                    markeredgewidth=1.5,
+                    color=code_color[code_key],
+                    zorder=line.get_zorder() + 2,
+                    label="_nolegend_",
+                )
+
+        ax.set_xticks(all_xticks)
+        ax.set_xticklabels(all_xticks, fontsize=FONTSIZE - 2)
+        ax.set_ylim(0, 0.65)
+        ax.grid(True)
+        ax.set_ylabel("Logical Error Rate", fontsize=FONTSIZE)
+        ax.set_xlabel("Backend Size", fontsize=FONTSIZE)
+        ax.set_title(f"Size",
+                     fontsize=12, fontweight="bold", loc="left")
+
+        ax.text(
+            1.0, 1.12, "Lower is better ↓",
+            transform=ax.transAxes,
+            fontsize=12, fontweight="bold",
+            color="blue", va="top", ha="right"
+        )
+
+        handles, labels = ax.get_legend_handles_labels()
+        unique_labels = dict(zip(labels, handles))
+
+        fig.legend(
+            handles=list(unique_labels.values()),
+            labels=list(unique_labels.keys()),
+            loc="center right",
+            bbox_to_anchor=(1.01, 0.5),
+            frameon=False
+        )
+
+        plt.subplots_adjust(left=0.15, right=0.78, top=0.85, bottom=0.2)
+
+        os.makedirs("data", exist_ok=True)
+        #plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+        plt.savefig(f"data/size_{et}_{err_prob}.pdf", format="pdf")
+        plt.close(fig)
 
 
 
@@ -2247,7 +2453,8 @@ if __name__ == '__main__':
     threshold = "experiment_results/Accumulated_Small/results.csv"
     threshold_more = "experiment_results/Accumulated_bck/results.csv"
     threshold_shots = "experiment_results/Accumulated/results.csv"
-    #generate_size_plot_two(size)
+    generate_size_plot_two(size)
+    #generate_size_plot_separate(size)
     generate_connectivity_topology_plot(connectivity, topology)
     generate_technology_plot(path)
     generate_dqc_plot(dqc)
@@ -2255,15 +2462,15 @@ if __name__ == '__main__':
     #generate_swap_overhead_norm_plot(df_grid, "Grid")
     #generate_swap_overhead_norm_plot(df_hh, "Heavy-Hex")
     #generate_swap_overhead_plot(df_hh, "Heavy-Hex")
-    #generate_compact_swap_plots(df_grid, "Grid")
-    #generate_compact_swap_plots(df_hh, "Heavy-Hex")
-    #generate_variance_two(variance_decoherence, variance_readout)
+    generate_compact_swap_plots(df_grid, "Grid")
+    generate_compact_swap_plots(df_hh, "Heavy-Hex")
+    generate_variance_two(variance_decoherence, variance_readout)
     #generate_gate_overhead(gate_overhead)
     #generate_normalized_gate_overhead(gate_overhead)
-    #generate_overhead_2x2(gate_overhead)
+    generate_overhead_2x2(gate_overhead)
     generate_decoder_plot(decoder_general)
     generate_decoder_error_barplot(decoder_special)
     #generate_decoder_plot_time(decoder_general)
-    plot_time_and_memory_stacked(program_topology, program_size, program_shots)
+    plot_time_and_memory(program_topology, program_size, program_shots)
     plot_threshold_per_code(threshold)
     plot_gross_shot_comparison(threshold_more, threshold_shots)
