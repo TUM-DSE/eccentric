@@ -1,4 +1,5 @@
 from qiskit_ibm_runtime import QiskitRuntimeService
+from qiskit_ibm_runtime.fake_provider import FakeTorino
 from .custom_topologies import get_custom_topology
 from .fake_apollo import FakeQuantinuumApolloBackend
 from .fake_apollo_no_shuttling import FakeQuantinuumApolloNoShuttlingBackend
@@ -12,7 +13,7 @@ from .variance_backend import VarianceBackend
 def get_backend(backend: str, backend_size: int):
     backend_type = backend.split("_")[0]
     if backend_type == "ibm":
-        service = QiskitRuntimeService(instance="ibm-q/open/main")
+        service = QiskitRuntimeService(instance="open-instance")
         backend = service.backend(backend)
     elif backend_type == "custom" and backend_size:
         shape = backend.split("_")[1]
@@ -23,6 +24,8 @@ def get_backend(backend: str, backend_size: int):
             backend = FakeIBMFlamingo()
         elif name == "loon":
             backend = FakeIBMLoon()
+        elif name == "torino":
+            backend = FakeTorino()
         elif name == "willow":
             # By default we allow extension as otherwise codes are limited
             backend = FakeGoogleWillowBackend(extended=True)

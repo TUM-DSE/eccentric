@@ -10,15 +10,61 @@ import logging
 from itertools import product
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import Manager
+from qiskit_ibm_runtime import QiskitRuntimeService
+from qiskit_ibm_runtime import EstimatorV2 as Estimator
+from qiskit_ibm_runtime import SamplerV2 as Sampler
+from qiskit.quantum_info import SparsePauliOp
+from qiskit.transpiler import generate_preset_pass_manager
 from qiskit.compiler import transpile
 from qiskit_qec.utils import get_stim_circuits
 from backends import get_backend, QubitTracking
 from codes import get_code, get_max_d, get_min_n
 from noise import get_noise_model
-from decoders import decode
+from decoders import decode, raw_error_rate
 from transpilers import run_transpiler, translate
 from utils import save_experiment_metadata, save_results_to_csv, setup_experiment_logging
 import stim
+
+
+def load_API_key():
+ 
+    QiskitRuntimeService.save_account(
+    token="8pocbpOS-ra1aLAH2bowls6UBvyy56EZ30t9YeaQB5Eh", # Use the 44-character API_KEY you created and saved from the IBM Quantum Platform Home dashboard
+    instance="open-instance", # Optional
+    overwrite=True
+    )
+
+def run_on_real_device(circuit):
+
+    service = QiskitRuntimeService()
+    #backend = service.least_busy(simulator=False, operational=True)
+    backend = service.backend("ibm_torino")
+ 
+    # Convert to an ISA circuit and layout-mapped observables.
+    pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
+    isa_circuit = pm.run(circuit)
+
+
+    #estimator = Estimator(mode=backend)
+    #estimator.options.resilience_level = 1
+    #estimator.options.default_shots = 5000
+
+    
+    sampler = Sampler(mode=backend)
+
+    #observables_labels = ["IIZIIIIIIZIZIZZIZIZIIIIIIZ"]
+    #observables = [SparsePauliOp(label) for label in observables_labels]
+
+    #mapped_observables = [
+    #observable.apply_layout(isa_circuit.layout) for observable in observables
+    #]
+ 
+    #job = estimator.run([(isa_circuit, mapped_observables)])
+    job = sampler.run([(isa_circuit, None)], shots=5000)
+ 
+    # Use the job ID to retrieve your job data later
+    print(f">>> Job ID: {job.job_id()}")
+    pass
 
 def run_experiment(
     experiment_name,
@@ -54,11 +100,11 @@ def run_experiment(
                 )
                 return
         
-        if cycles is not None and cycles <= 1:
-            logging.info(
-                f"{experiment_name} | Logical error rate for {code_name} with distance {d}, backend {backend_name}: Execution not possible, cycles must be greater than 1"
-            )
-            return
+        #if cycles is not None and cycles <= 1:
+        #    logging.info(
+        #        f"{experiment_name} | Logical error rate for {code_name} with distance {d}, backend {backend_name}: Execution not possible, cycles must be greater than 1"
+        #    )
+        #    return
         
         if cycles is None:
             cycles = d
@@ -73,13 +119,25 @@ def run_experiment(
         if translating_method:
             code.qc = translate(code.qc, translating_method)
         code.qc = run_transpiler(code.qc, backend, layout_method, routing_method)
+
+        #print(code.qc)
+
+        #from qiskit.primitives import StatevectorSampler
+        #sampler = StatevectorSampler()
+        #result = sampler.run([code.qc], shots=1024).result()
+        #print(result[0].data.meas.get_counts())
+
+        load_API_key()
+        run_on_real_device(code.qc)
+
         qt = QubitTracking(backend, code.qc)
         stim_circuit = get_stim_circuits(
             code.qc, detectors=detectors, logicals=logicals
         )[0][0]
         noise_model = get_noise_model(error_type, qt, error_prob, backend)
         stim_circuit = noise_model.noisy_circuit(stim_circuit)
-        logical_error_rate = decode(code_name, stim_circuit, num_samples, decoder, backend_name, error_type)
+        #logical_error_rate = decode(code_name, stim_circuit, num_samples, decoder, backend_name, error_type)
+        logical_error_rate = raw_error_rate(stim_circuit, num_samples) / num_samples
 
         result_data = {
             "backend": backend_name,
