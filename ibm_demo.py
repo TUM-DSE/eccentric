@@ -18,7 +18,7 @@ from datetime import datetime
 
 
 def load_results_from_file(job_id: str) -> Dict[str, Any]:
-    results_file = f"job_results_{job_id}.json"
+    results_file = f"experiment_results/ibm_runs/job_results_{job_id}.json"
     if os.path.exists(results_file):
         print(f"Loading results from local file: {results_file}")
         with open(results_file, 'r') as f:
@@ -27,7 +27,7 @@ def load_results_from_file(job_id: str) -> Dict[str, Any]:
 
 
 def load_job_info_from_file(job_id: str) -> Dict[str, Any]:
-    job_file = f"job_info_{job_id}.json"
+    job_file = f"experiment_results/ibm_runs/job_info_{job_id}.json"
     if os.path.exists(job_file):
         with open(job_file, 'r') as f:
             return json.load(f)
@@ -361,7 +361,7 @@ def _process_full_experiment_results(
             print(f"Retrieving results for experiment job {job_id}...")
             ibm_results = get_ibm_job_results(job_id)
 
-            results_file = f"job_results_{job_id}.json"
+            results_file = f"experiment_results/ibm_runs/job_results_{job_id}.json"
             with open(results_file, 'w') as f:
                 json.dump(ibm_results, f, indent=2)
             print(f"Results saved to: {results_file}")
