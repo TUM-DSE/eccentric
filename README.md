@@ -55,7 +55,7 @@ python setup.py build_ext --inplace
 Once the environment is set up, you can run the project with:
 
 ```bash
-python3 main.py
+python3 main.py <yaml_file>
 ```
 
 The Docker setup automatically runs a full suite of experiments (size, connectivity, variance, technology) and generates the corresponding plots. Results and logs will be saved throughout the project directory.

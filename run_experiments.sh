@@ -36,10 +36,11 @@ python3 get_chromobius.py experiments_conf/decoder_chromobius.yaml
 echo "Running program stats..."
 python3 get_program_stats.py experiments_conf/program_stats.yaml
 
+echo "Running real hardware comparison..."
+python3 ibm_submit.py
+
 echo "Generating plots..."
 python3 plots/plots.py
-
-echo "Running IBM demo..."
 python3 ibm_demo.py
 
 echo "All experiments and plots completed successfully!"
