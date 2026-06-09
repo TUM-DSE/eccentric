@@ -10,7 +10,8 @@ class MCMNoise(NoiseModel):
         backend,
         m_error_multiplier = 1,
         m_time_multiplier = 1,
-        decoding_time = 0
+        decoding_time = 0,
+        idle_multiplier: float = 1.0
     ) -> 'NoiseModel':
         m_error_multiplier = float(m_error_multiplier)
         m_time_multiplier = float(m_time_multiplier)
@@ -28,5 +29,6 @@ class MCMNoise(NoiseModel):
                 "R": 1.2942222222222222e-06
             },
             qt=qt,
-            backend=backend
+            backend=backend,
+            idle_multiplier=idle_multiplier
         )

@@ -12,7 +12,7 @@ from backends import QubitTracking
 class ApolloNoise(NoiseModel):
     # H2 rescaled according to roadmap: https://www.quantinuum.com/press-releases/quantinuum-unveils-accelerated-roadmap-to-achieve-universal-fault-tolerant-quantum-computing-by-2030
     @staticmethod
-    def get_noise(qt: QubitTracking) -> 'NoiseModel':
+    def get_noise(qt: QubitTracking, idle_multiplier: float = 1.0) -> 'NoiseModel':
         return NoiseModel(
             sq=8.0e-5 / 10,
             tq=1.4e-3 / 10,
@@ -29,7 +29,8 @@ class ApolloNoise(NoiseModel):
                 "R": 10 * 1e-6,
                 "REMOTE": 0,
             },
-            qt=qt
+            qt=qt,
+            idle_multiplier=idle_multiplier
         )
     
     # H2:    

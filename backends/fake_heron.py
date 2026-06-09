@@ -74,8 +74,8 @@ class FakeIBMHeron(BackendV2):
             #t2 = np.clip(t2, 50, 650)
             #t2 = t2 * 1e-6
 
-            t1 = 190 * 1e-6
-            t2 = 130 * 1e-6
+            t1 = 190 * 1e-6  # 190µs — realistic Heron
+            t2 = 130 * 1e-6  # 130µs
             qubit_props.append(QubitProperties(t1=t1, t2=t2, frequency=5.0e9))
 
         self.target.qubit_properties = qubit_props

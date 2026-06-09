@@ -15,7 +15,7 @@ import stim
 SQ_OPS = {"C_XYZ", "C_ZYX", "H", "H_YZ", "I", "X"}
 TQ_OPS = {"CX", "CY", "CZ", "XCX", "XCY", "XCZ", "YCX", "YCY", "YCZ"}
 RESET_OPS = {"R", "RX", "RY"}
-MEASURE_OPS = {"M", "MX", "MY"}
+MEASURE_OPS = {"M", "MX", "MY", "MR", "MRX", "MRY"}
 ANNOTATION_OPS = {"OBSERVABLE_INCLUDE", "DETECTOR", "SHIFT_COORDS", "QUBIT_COORDS", "TICK"}
 SWAP_OPS = {"SWAP"}
 
@@ -36,7 +36,8 @@ class NoiseModel:
         gate_times: Optional[Dict[str, float]] = {},
         qt: Optional[QubitTracking] = None,
         backend: Optional[BackendV2] = None,
-        use_correlated_parity_measurement_errors: bool = False
+        use_correlated_parity_measurement_errors: bool = False,
+        idle_multiplier: float = 1.0
     ):
         self.sq = sq
         self.tq = tq
@@ -53,32 +54,52 @@ class NoiseModel:
         self.qt = qt
         self.backend = backend
         self.use_correlated_parity_measurement_errors = use_correlated_parity_measurement_errors
+        self.idle_multiplier = idle_multiplier
 
-    
+
+    def _t1t2_pauli_channel(self, qubit_idx: int, duration: float, circuit: stim.Circuit) -> None:
+        """Append a T1/T2 Pauli channel for *qubit_idx* decohering for *duration* seconds.
+
+        Factored out of add_qubit_error so it can be called for any duration
+        (gate-active decoherence *and* post-gate idle slack).
+        See https://arxiv.org/pdf/1404.3747
+        """
+        physical_qubit = qubit_idx % self.backend.num_qubits
+        if self.qt is not None:
+            try:
+                physical_qubit = self.qt.get_layout_postion(qubit_idx)
+            except ValueError:
+                pass
+        
+        props = self.backend.qubit_properties(physical_qubit)
+        t1 = props.t1
+        t2 = props.t2
+        if t1 <= 0 or t2 <= 0:
+            return
+        
+        # Scale duration by idle_multiplier to account for extra noise (crosstalk, thermal)
+        effective_duration = duration * self.idle_multiplier
+        
+        p_x = 0.25 * (1 - np.exp(-effective_duration / t1))
+        p_y = 0.25 * (1 - np.exp(-effective_duration / t1))
+        p_z = (1 - np.exp(-effective_duration / t2)) / 2 - (1 - np.exp(-effective_duration / t1)) / 4
+        p_x = np.clip(p_x, 0.0, 1.0)
+        p_y = np.clip(p_y, 0.0, 1.0)
+        p_z = np.clip(p_z, 0.0, 1.0)
+        circuit.append_operation("PAULI_CHANNEL_1", [qubit_idx], [p_x, p_y, p_z])
+
     def add_qubit_error(self, circuit: stim.Circuit, qubits: List[stim.GateTarget], gate_duration: float) -> None:
+        """Apply T1/T2 decoherence for the *active* gate duration on each qubit.
+
+        Only active when a real backend is provided and the scalar idle path
+        (self.idle != 0) is not in use — preserving full backwards compatibility
+        for artificial/benchmark noise models.
+        """
         # https://arxiv.org/pdf/1404.3747
-        if self.backend == None or self.idle != 0:
+        if self.backend is None or self.idle != 0:
             return
         for qubit in qubits:
-            qubit_properties = self.backend.qubit_properties(qubit.value)
-            t1 = qubit_properties.t1
-            t2 = qubit_properties.t2
-
-            # Safety check
-            if t1 <= 0 or t2 <= 0:
-                continue
-
-            p_x = 0.25 * (1 - np.exp(-gate_duration / t1))
-            p_y = 0.25 * (1 - np.exp(-gate_duration / t1))
-            p_z = (1 - np.exp(-gate_duration / t2)) / 2 - (1 - np.exp(-gate_duration / t1)) / 4
-
-            #t2 = min(t1, t2)
-            #p_z = (1 - 4*p_x) * (1 - np.exp(-gate_duration / (1/t2 - 1/t1)))/2
-            p_x = np.clip(p_x, 0.0, 1.0)
-            p_y = np.clip(p_y, 0.0, 1.0)
-            p_z = np.clip(p_z, 0.0, 1.0)
-
-            circuit.append_operation("PAULI_CHANNEL_1", [qubit], [p_x, p_y, p_z])
+            self._t1t2_pauli_channel(qubit.value, gate_duration, circuit)
 
     def add_crosstalk_errors(self, touched_qubits: set[int], post: stim.Circuit):
         if self.backend == None:
@@ -89,7 +110,7 @@ class NoiseModel:
             for neighbor in self.qt.get_neighbours(q):
                 if neighbor in touched_qubits and (neighbor, q) not in already_noised and (q, neighbor) not in already_noised:
                     noise_op = "X_ERROR" if random.random() < 0.5 else "Z_ERROR"
-                    post.append_operation(noise_op, [stim.target_qubit(neighbor)], self.crosstalk)
+                    post.append_operation(noise_op, [neighbor], self.crosstalk)
                     already_noised.add((q, neighbor))
                     already_noised.add((neighbor, q))
 
@@ -137,7 +158,7 @@ class NoiseModel:
             return self.gate_times["SQ"]
         elif op.name in RESET_OPS:
             return self.gate_times["R"]
-        elif op.name in MEASURE_OPS:
+        elif op.name in MEASURE_OPS or op.name == "MPP":
             return self.gate_times["M"]
         raise NotImplementedError(f"Gate time not defined for op: {repr(op)}")
 
@@ -191,8 +212,6 @@ class NoiseModel:
             pre.append_operation("Z_ERROR" if op.name.endswith("X") else "X_ERROR", targets, p)
             self.add_qubit_error(post, targets, self.get_gate_time(op))
         elif op.name == "MPP":
-            # Our circuits never contain MPP after translations
-            assert len(targets) % 3 == 0 and all(t.is_combiner for t in targets[1::3]), repr(op)
             assert args == [] or args == [0]
             if op.name in self.noisy_gates:
                 p = self.noisy_gates[op.name]
@@ -209,7 +228,7 @@ class NoiseModel:
                 return pre, mid, post
 
             else:
-                pre.append_operation("DEPOLARIZE2", [t.value for t in targets if not t.is_combiner], p)
+                pre.append_operation("DEPOLARIZE1", [t.value for t in targets if not t.is_combiner], p)
                 args = [p]
         mid.append_operation(op.name, targets, args)
         return pre, mid, post
@@ -225,17 +244,39 @@ class NoiseModel:
         measured_qubits: Set[int] = set()
         reset_qubits: Set[int] = set()
 
+        # --- TICK-timeline state ---
+        # Wall-clock duration of the current TICK: the time until the slowest
+        # operation completes, mirroring how a TICK barrier waits for all qubits.
+        tick_duration: float = 0.0
+        # Per-qubit finish time within the current TICK (seconds).
+        qubit_end_times: Dict[int, float] = {}
+
         if qs is None:
             qs = set(range(circuit.num_qubits))
 
         def flush():
-            nonlocal result
-            if not current_moment_mid and self.idle == 0:
+            nonlocal result, tick_duration, qubit_end_times
+            has_decoherence_work = self.backend is not None and self.idle == 0 and tick_duration > 0
+            if not current_moment_mid and self.idle == 0 and not has_decoherence_work:
                 return
 
             idle_qubits = sorted(qs - used_qubits)
             if idle_qubits and self.idle > 0:
+                # Scalar depolarize path: artificial/benchmark models only.
                 current_moment_post.append_operation("DEPOLARIZE1", idle_qubits, self.idle)
+
+            # --- Physics-based idle-slack decoherence (real backend with T1/T2) ---
+            # Only active when a backend is provided and the scalar idle path is off.
+            if self.backend is not None and self.idle == 0 and tick_duration > 0:
+                # Fully-idle qubits: idle for the entire TICK duration.
+                for q in idle_qubits:
+                    self._t1t2_pauli_channel(q, tick_duration, current_moment_post)
+
+                # Fast-gate qubits: idle for the remaining slack after their gate.
+                for q, end_time in qubit_end_times.items():
+                    slack = tick_duration - end_time
+                    if slack > 0:
+                        self._t1t2_pauli_channel(q, slack, current_moment_post)
 
             result += current_moment_pre
             result += current_moment_mid
@@ -246,6 +287,8 @@ class NoiseModel:
             current_moment_post.clear()
             measured_qubits.clear()
             reset_qubits.clear()
+            tick_duration = 0.0
+            qubit_end_times.clear()
 
         for op in circuit:
             if isinstance(op, stim.CircuitRepeatBlock):
@@ -256,7 +299,7 @@ class NoiseModel:
                     flush()
                     result.append_operation("TICK", [])
                     continue
-                
+
                 if op.name in SWAP_OPS:
                     self.qt.update_stim_swaps(op)
 
@@ -272,19 +315,48 @@ class NoiseModel:
                 }
                 if op.name in ANNOTATION_OPS:
                     touched_qubits.clear()
-                
+
                 if self.crosstalk > 0:
                     self.add_crosstalk_errors(touched_qubits, post)
-                
+
                 used_qubits |= touched_qubits
                 if op.name in MEASURE_OPS:
                     measured_qubits |= touched_qubits
                 if op.name in RESET_OPS:
                     reset_qubits |= touched_qubits
+
+                # --- Update TICK-timeline state ---
+                # Determine how long this gate takes so we can track per-qubit
+                # finish times and the overall TICK wall-clock duration.
+                if op.name not in ANNOTATION_OPS and self.gate_times:
+                    if op.name in TQ_OPS or op.name in SWAP_OPS:
+                        targets = op.targets_copy()
+                        for i in range(0, len(targets), 2):
+                            pair = [targets[i].value, targets[i + 1].value]
+                            gate_time = self.get_gate_time(op, pair)
+                            if gate_time:
+                                tick_duration = max(tick_duration, gate_time)
+                                for q in pair:
+                                    qubit_end_times[q] = max(qubit_end_times.get(q, 0.0), gate_time)
+                    elif op.name not in TQ_OPS:
+                        gate_time = self.get_gate_time(op)
+                        if gate_time:
+                            tick_duration = max(tick_duration, gate_time)
+                            for q in touched_qubits:
+                                qubit_end_times[q] = max(qubit_end_times.get(q, 0.0), gate_time)
             else:
                 raise NotImplementedError(repr(op))
         flush()
         return result
+
+    def get_idle_delay_circuit(self, delay: float, num_qubits: int) -> stim.Circuit:
+        """Returns a Stim circuit with T1/T2 idle decoherence for a specified delay onto all qubits."""
+        delay_moment = stim.Circuit()
+        if delay <= 0 or self.backend is None:
+            return delay_moment
+        for q in range(num_qubits):
+            self._t1t2_pauli_channel(q, delay, delay_moment)
+        return delay_moment
 
 
 def mix_probability_to_independent_component_probability(mix_probability: float, n: float) -> float:

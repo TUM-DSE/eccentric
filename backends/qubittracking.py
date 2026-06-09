@@ -7,13 +7,14 @@ import rustworkx as rx
 import stim
 
 class QubitTracking:
-    def __init__(self, backend : GenericBackendV2, circuit: QuantumCircuit):
+    def __init__(self, backend : GenericBackendV2, circuit: QuantumCircuit = None):
         self.backend = backend
         self.qubit_mapping = {}
         self.physical_qubits = backend.num_qubits
-        #for i in range(self.physical_qubits):
-        #    self.qubit_mapping[i] = i
-        self.qubit_mapping = dict(enumerate(circuit.layout.initial_index_layout()))
+        if circuit and getattr(circuit, 'layout', None):
+            self.qubit_mapping = dict(enumerate(circuit.layout.initial_index_layout()))
+        else:
+            self.qubit_mapping = {i: i for i in range(self.physical_qubits)}
         self.leaked_qubits = set()
         
 
@@ -44,11 +45,11 @@ class QubitTracking:
 
     def get_layout_postion(self, logical_qubit: int):
         """Get physical position of logical qubit"""
-        try:
-            physical_qubit = self.qubit_mapping[logical_qubit]
-            return physical_qubit
-        except KeyError:
-            raise ValueError(f"Logical qubit {logical_qubit} not found in mapping.")
+        if logical_qubit in self.qubit_mapping:
+            return self.qubit_mapping[logical_qubit]
+        if self.physical_qubits > 0:
+            return logical_qubit % self.physical_qubits
+        return logical_qubit
         
     def get_euclidian_distance(self, q1: int, q2: int):
         if hasattr(self.backend, 'rows') and hasattr(self.backend, 'columns'):

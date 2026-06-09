@@ -4,7 +4,7 @@ from backends import QubitTracking, FakeInfleqtionBackend
 class InfleqtionNoise(NoiseModel):
 
     @staticmethod
-    def get_noise(qt: QubitTracking, backend: FakeInfleqtionBackend) -> 'NoiseModel':
+    def get_noise(qt: QubitTracking, backend: FakeInfleqtionBackend, idle_multiplier: float = 1.0) -> 'NoiseModel':
         return NoiseModel(
             # https://arxiv.org/pdf/2408.08288
             sq=0.00098, # Derived from local RZ gate fidelity of 99.902(8)%
@@ -21,5 +21,6 @@ class InfleqtionNoise(NoiseModel):
                 "REMOTE": 2.182e-4,
             },
             qt=qt,
-            backend=backend
+            backend=backend,
+            idle_multiplier=idle_multiplier
         )
