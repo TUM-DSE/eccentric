@@ -1,0 +1,21 @@
+# Keep the build context small and the image reproducible.
+.venv
+.git
+.gitignore
+**/__pycache__
+*.pyc
+*.pyo
+*.log
+
+# Experiment outputs: not baked into the image. Mount at runtime instead:
+#   docker run -v "$PWD/experiment_results:/qec/experiment_results" eccentric ...
+experiment_results/
+
+# Stale local build trees (the C extension is rebuilt inside the image).
+external/qiskit_qec/build/
+**/*.egg-info/
+
+# Editor / OS cruft
+.vscode/
+.idea/
+.DS_Store
