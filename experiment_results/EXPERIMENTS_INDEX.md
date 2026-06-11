@@ -1,0 +1,104 @@
+# Experiments index
+
+Index of every experiment run, with the exact setup (many differ only in subtle
+ways — readout model, coherence, idle multiplier, etc.). Two groups:
+
+1. **Six-code memory LER** — `experiment_results/noise_models/`
+2. **ECCentric vs lattice-sim logical-CNOT** — `experiment_results/readout_compare/`
+
+Unless stated otherwise, "ibm_boston gates" means SX error 1.637e-4, CZ error
+1.191e-3, SX latency 32 ns, CZ latency 68 ns, reset R = 0 (noiseless/instant).
+"HERQULES readout" = length-dependent flip error 1 − geomean(Q1,Q3,Q4,Q5)
+(Q2 excluded); the 1000 ns row was updated to (0.974,0.955,0.958,0.982) → 0.0328.
+
+---
+
+## Group 1 — Six-code memory LER vs readout length
+Runner: `run_ler_noise_models.py` (variants via `MODE=`). Mechanism test: `explore_readout.py`.
+
+**Shared setup.** Memory experiments for 6 codes — surface, bacon-shor, color,
+heavy-hex (hh), gross, steane. LER vs readout length (200/400/600/800/1000 ns).
+Distances: surface/bacon/color/hh = 5,7,9,11,13; **gross = 12 (fixed code)**;
+**steane = 9 (only d∈{3,9,27})**. Decoders: surface, hh → MWPM (20k shots);
+bacon, color, steane, gross → BP-OSD osd_0 (5k shots; gross 1k). Backend
+FakeIBMHeron topology, idle_multiplier = 1.0. rounds = d.
+
+**Base noise = EXACTLY ibm_boston, EXCEPT readout = HERQULES.** T1 = 284.95 µs,
+T2 = 322.68 µs. Three-way ablation (one CSV, three PDFs):
+
+| File | Noise model |
+|---|---|
+| `ler_noise_models.csv` | raw data for the 3 models below |
+| `RESULTS.md` | tables + key observations |
+| `noise_models_ler_heron_herqules.pdf` | **Model 1**: ibm_boston gates + HERQULES readout + T1/T2 decoherence |
+| `noise_models_ler_readout_decoherence.pdf` | **Model 2**: HERQULES readout + decoherence (gate errors = 0) |
+| `noise_models_ler_decoherence_only.pdf` | **Model 3**: decoherence only (readout flip = 0; readout still decoheres via its duration) |
+
+**Model-1 variants** (each = Model 1 with ONE change; own CSV + PDF):
+
+| CSV / PDF | Change vs Model 1 |
+|---|---|
+| `ler_noise_models_futuristic.csv` / `noise_models_ler_futuristic.pdf` | **Futuristic**: all errors /10 (gates AND readout flip), T1/T2 ×3 |
+| `ler_noise_models_highfid.csv` / `noise_models_ler_highfid.pdf` | **High-fidelity readout**: readout flip error /10 ONLY (gates & T1/T2 stay ibm_boston) |
+| `ler_noise_models_boston_lowt_backlog.csv` / `noise_models_ler_boston_lowt_backlog.pdf` | **boston_lowt_backlog**: ibm_boston gates, but T1/T2 = **190/130 µs** (default-Heron), readout = **FIXED 3.54e-3** (ibm_boston median, NOT HERQULES → no U-shape), and **decoder-backlog idle ON** (idle ∝ rounds×readout on all qubits) |
+| `ler_noise_models_futuristic_fixedreadout.csv` / `noise_models_ler_futuristic_fixedreadout.pdf` | **futuristic_fixedreadout**: futuristic gates (errors /10) + T1/T2 ×3, with readout = **ibm_boston median /10 = 3.54e-4 FIXED** (NOT HERQULES → removes the 200 ns cliff). Isolates "everything scaled down incl. a uniformly-tiny readout" |
+
+**Mechanism test — surface code only** (`explore_readout.py`), Model-1 base
+(ibm_boston + HERQULES + decoherence), 3 panels in one figure:
+
+| File | Panels |
+|---|---|
+| `surface_readout_mechanisms.csv` / `surface_readout_mechanisms.pdf` | (a) baseline rounds=d; (b) **backlog** idle = rounds×readout on all qubits; (c) **more rounds** = 5d |
+
+**Derived lookup** (post-processed from the CSVs above by `make_readout_tradeoff.py`):
+`readout_length_tradeoff.csv` / `readout_length_tradeoff.md` — for every (code,
+distance, noise model), the LER % difference of each readout length vs the slowest
+(1000 ns) baseline, with "% faster" alongside. Quick check: "how much worse/better
+is LER at a faster readout for distance d?" Covers all 6 noise models above.
+
+---
+
+## Group 2 — ECCentric vs lattice-sim logical CNOT vs readout length
+Runners: `compare_readout_eccentric.py`, `synchronization-artifact/compare_readout_artifact.py`.
+
+**Shared setup.** Surface-code lattice-surgery **logical CNOT**, LER vs readout
+length, two tools compared side-by-side. ECCentric = tqec-compiled CNOT;
+lattice-sim = the synchronization artifact's hand-built merge. Both MWPM; failure
+= any logical observable wrong. Noise = ibm_boston gates, T1 = 284.95 µs,
+T2 = 322.68 µs. **idle_multiplier = 1.0 for ECCentric, 3.0 for lattice-sim**
+(its IBM default). Distances 5,7,9,11,13. `current` and `futuristic` (errors/10, T1/T2×3).
+
+**Two readout models — the key subtle difference:**
+
+**(a) FIXED readout** = ibm_boston median 3.54e-3, constant across length
+(readout length acts only via decoherence — the "magically clean readout"
+counterfactual). Readout lengths 250–2000 ns. *(CSV only, not plotted.)*
+
+| File | Contents |
+|---|---|
+| `eccentric_readout_ler.csv` | ECCentric, fixed readout |
+| `artifact_readout_ler.csv` | lattice-sim, fixed readout |
+| `combined_readout_ler.csv` | both, merged |
+| `RESULTS.md` | tables + analysis (fixed readout) |
+
+**(b) HERQULES readout** = length-dependent flip error, 200–1000 ns (realistic;
+readout error and duration move together → U-shape with optimum ~600 ns).
+
+| File | Contents |
+|---|---|
+| `eccentric_readout_ler_herqules.csv` | ECCentric, HERQULES readout |
+| `artifact_readout_ler_herqules.csv` | lattice-sim, HERQULES readout |
+| `combined_readout_ler_herqules.csv` | both, merged |
+| `eccentric_readout_ler_herqules_nmr1.csv` | **control**: ECCentric with `num_memory_rounds=1` (minimal FT CNOT) to match lattice-sim's physical depth — tests whether the tool gap is "rounds" (it isn't) |
+| `RESULTS_herqules.md` | tables + analysis (HERQULES) |
+| `readout_ler_herqules_current.pdf` | 2-panel (a) ECCentric / (b) lattice-sim, **current** |
+| `readout_ler_herqules_futuristic.pdf` | 2-panel (a) ECCentric / (b) lattice-sim, **futuristic** |
+
+---
+
+## Referenced (pre-existing, not generated in this work)
+- `experiment_results/benchmark/mcm_latency_ler.csv` — ECCentric logical-CNOT vs
+  HERQULES readout length, current/futuristic, from `evaluate_mcm_latency.py`
+  (idle_multiplier = 3 → over threshold).
+- `synchronization-artifact/mcm_latency_ler_{ibm,ibm_futuristic,google}.csv` —
+  the artifact's own logical-CNOT vs MCM-latency results (distances 7,9,11).
