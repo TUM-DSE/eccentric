@@ -2,8 +2,8 @@
 evaluate_mcm_latency.py
 =======================
 Logical error rate (LER) of a lattice-surgery logical CNOT between two
-surface-code patches, as a function of MCM readout length, for two MCM decoder
-systems (HERQULES vs MCMit-CNN), on a realistic IBM Heron r3 noise model.
+surface-code patches, as a function of MCM readout length, for the CNN MCM decoder
+system (CNN), on a realistic IBM Heron r3 noise model.
 
 ECCentric analogue of the synchronization artifact's evaluate_mcm_latency.py.
 
@@ -64,25 +64,19 @@ from main import single_cnot_n_rounds  # tqec lattice-surgery logical CNOT build
 
 DISTANCES = [5, 7, 9, 11]
 READOUT_LENGTHS_NS = [200, 400, 600, 800, 1000]
-SYSTEMS = ["HERQULES"]
+SYSTEMS = ["CNN"]
 NOISE_MODELS = ["current", "futuristic"]
 
 # Per-qubit readout accuracies (Q1, Q3, Q4, Q5) -- Q2 excluded (problematic).
 # Measurement error = 1 - geomean(Q1, Q3, Q4, Q5).
+# CNN MCM decoder (replaces the buggy HERQULES numbers).
 SYSTEM_QUBIT_ACCURACIES = {
-    "HERQULES": {
-        200:  (0.7782, 0.8712, 0.7587, 0.7159),
-        400:  (0.9340, 0.9473, 0.9445, 0.9717),
-        600:  (0.9654, 0.9565, 0.9597, 0.9827),
-        800:  (0.9725, 0.9547, 0.9587, 0.9797),
-        1000: (0.9685, 0.9472, 0.9532, 0.9815),
-    },
-    "MCMit-CNN": {
-        200:  (0.7819, 0.8637, 0.7739, 0.7700),
-        400:  (0.9069, 0.9262, 0.9014, 0.9514),
-        600:  (0.9527, 0.9384, 0.9368, 0.9700),
-        800:  (0.9648, 0.9407, 0.9441, 0.9703),
-        1000: (0.9701, 0.9416, 0.9467, 0.9704),
+    "CNN": {
+        200:  (0.782, 0.864, 0.774, 0.770),
+        400:  (0.907, 0.926, 0.901, 0.951),
+        600:  (0.953, 0.938, 0.937, 0.970),
+        800:  (0.965, 0.941, 0.944, 0.970),
+        1000: (0.970, 0.942, 0.947, 0.970),
     },
 }
 
@@ -321,7 +315,7 @@ def main():
     print(f"Results saved to {OUTPUT_CSV}")
 
     # Plots: one per (distance, noise_model), LER vs readout length, line per system.
-    markers = {"HERQULES": "o", "MCMit-CNN": "s"}
+    markers = {"CNN": "o"}
     for d in DISTANCES:
         for nm in NOISE_MODELS:
             subset = [r for r in results if r[0] == d and r[3] == nm]

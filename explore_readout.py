@@ -3,7 +3,7 @@ explore_readout.py
 ==================
 Test mechanisms that should make readout LENGTH affect LER through decoherence
 (not just the readout flip error). Surface code, Model-1 base (ibm_boston gates +
-HERQULES readout + decoherence). Variants:
+CNN readout + decoherence). Variants:
 
   baseline   : Model 1, rounds = d (the original Plot-1 setup).
   backlog    : Model 1 + decoder-reaction idle = rounds x readout, applied to ALL
@@ -35,7 +35,7 @@ def build(d, readout_ns, variant):
     code = get_code("surface", d, rounds)
     backend = get_backend("real_heron", None)
     qt = QubitTracking(backend, None)
-    meas = R.herqules_measure_error(readout_ns)
+    meas = R.cnn_measure_error(readout_ns)
     nm = R.FastUniformNoise(
         sq=R.HERON_SQ, tq=R.HERON_TQ, measure=meas, reset=0.0,
         gate_times={"SQ": R.SQ_NS * 1e-9, "TQ": R.TQ_NS * 1e-9,

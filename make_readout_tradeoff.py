@@ -19,21 +19,21 @@ BASE = 1000  # slowest readout = baseline for "% faster" and "% LER diff"
 
 # csv file -> (noise_model key in that file, friendly label, readout note)
 SOURCES = [
-    ("ler_noise_models.csv", "heron_herqules",
-     "Model 1 (ibm_boston gates + HERQULES readout + decoherence)", "HERQULES readout"),
+    ("ler_noise_models.csv", "heron_cnn",
+     "Model 1 (ibm_boston gates + CNN readout + decoherence)", "CNN readout"),
     ("ler_noise_models.csv", "readout_decoherence",
-     "Model 2 (HERQULES readout + decoherence, no gate errors)", "HERQULES readout"),
+     "Model 2 (CNN readout + decoherence, no gate errors)", "CNN readout"),
     ("ler_noise_models.csv", "decoherence_only",
      "Model 3 (decoherence only, no readout flip)", "no readout flip (length acts via decoherence only)"),
-    ("ler_noise_models_futuristic.csv", "heron_herqules_futuristic",
-     "Futuristic (Model 1, all errors /10, T1/T2 x3)", "HERQULES readout /10"),
+    ("ler_noise_models_futuristic.csv", "heron_cnn_futuristic",
+     "Futuristic (Model 1, all errors /10, T1/T2 x3)", "CNN readout /10"),
     ("ler_noise_models_highfid.csv", "heron_highfid",
-     "High-fidelity readout (Model 1, readout error /10 only)", "HERQULES readout /10"),
+     "High-fidelity readout (Model 1, readout error /10 only)", "CNN readout /10"),
     ("ler_noise_models_boston_lowt_backlog.csv", "boston_lowt",
      "boston_lowt_backlog (ibm_boston gates, T1/T2=190/130us, fixed readout, backlog ON)",
      "FIXED readout 3.54e-3 (length acts via decoherence/backlog only)"),
     ("ler_noise_models_futuristic_fixedreadout.csv", "futuristic_fixedreadout",
-     "Futuristic gates (/10) + T1/T2 x3 + FIXED readout 3.54e-4 (boston/10, no HERQULES)",
+     "Futuristic gates (/10) + T1/T2 x3 + FIXED readout 3.54e-4 (boston/10, no CNN)",
      "FIXED readout 3.54e-4 (length acts via decoherence only)"),
 ]
 

@@ -2,20 +2,20 @@
 run_ler_noise_models.py
 =======================
 Logical error rate (LER) of six QEC codes under three Heron-based noise models,
-swept over HERQULES readout lengths and code distances.
+swept over CNN readout lengths and code distances.
 
 Codes        : surface, bacon (Bacon-Shor), color, hh (heavy-hex), gross, steane
 Distances    : surface/bacon/color/hh -> 5,7,9,11 ; gross -> 12 (fixed
                [[144,12,12]] code) ; steane -> 9 (only d in {3,9,27} supported)
 Noise models :
-  1) "heron_herqules" -- SOTA ibm_boston Heron r3 medians (sq=1.637e-4,
-     tq=1.191e-3) with the HERQULES readout error as the measurement-flip prob.
-  2) "readout_decoherence" -- gate errors zeroed (sq=tq=reset=0); only HERQULES
+  1) "heron_cnn" -- SOTA ibm_boston Heron r3 medians (sq=1.637e-4,
+     tq=1.191e-3) with the CNN readout error as the measurement-flip prob.
+  2) "readout_decoherence" -- gate errors zeroed (sq=tq=reset=0); only CNN
      readout flip error + T1/T2 decoherence remain (readout still decoheres via
      its M-gate duration).
   3) "decoherence_only" -- everything zeroed except T1/T2 decoherence; readout
      adds no flip error but its M-gate duration still drives decoherence.
-Readout      : HERQULES per-qubit accuracies (Q1,Q3,Q4,Q5; Q2 excluded),
+Readout      : CNN per-qubit accuracies (Q1,Q3,Q4,Q5; Q2 excluded),
                measure_error = 1 - geomean(.), swept over 200/400/600/800/1000 ns.
                The readout length sets BOTH the flip error (models 1,2) and the
                M-gate duration that drives readout decoherence (all models).
@@ -47,25 +47,25 @@ from ldpc import bposd_decoder
 from decoders.bp_osd import dem_to_check_matrices
 
 # ---------------------------------------------------------------------------
-# HERQULES readout (per-qubit accuracies Q1,Q3,Q4,Q5; Q2 excluded)
+# CNN readout (per-qubit accuracies Q1,Q3,Q4,Q5; Q2 excluded)
 # measure_error = 1 - geomean(Q1,Q3,Q4,Q5)            -- from evaluate_mcm_latency.py
 # ---------------------------------------------------------------------------
-HERQULES_ACC = {
-    200:  (0.7782, 0.8712, 0.7587, 0.7159),
-    400:  (0.9340, 0.9473, 0.9445, 0.9717),
-    600:  (0.9654, 0.9565, 0.9597, 0.9827),
-    800:  (0.9725, 0.9547, 0.9587, 0.9797),
-    1000: (0.974, 0.955, 0.958, 0.982),   # updated 1000ns row (Q2=0.732 excluded)
+CNN_ACC = {
+    200:  (0.782, 0.864, 0.774, 0.770),   # CNN per-qubit accuracies (Q2 excluded)
+    400:  (0.907, 0.926, 0.901, 0.951),
+    600:  (0.953, 0.938, 0.937, 0.970),
+    800:  (0.965, 0.941, 0.944, 0.970),
+    1000: (0.970, 0.942, 0.947, 0.970),
 }
 READOUT_LENGTHS_NS = [200, 400, 600, 800, 1000]
 
-def herqules_measure_error(readout_ns: int) -> float:
-    q1, q3, q4, q5 = HERQULES_ACC[readout_ns]
+def cnn_measure_error(readout_ns: int) -> float:
+    q1, q3, q4, q5 = CNN_ACC[readout_ns]
     return 1.0 - (q1 * q3 * q4 * q5) ** 0.25
 
 # ---------------------------------------------------------------------------
 # ibm_boston (Heron r3) noise -- EXACTLY the ibm_boston values, EXCEPT the
-# readout error/length which come from HERQULES (above). Sources:
+# readout error/length which come from CNN (above). Sources:
 #   - SX error, CZ error, T2  : ibm_boston dashboard image.
 #   - T1, gate latencies, reset: documented ibm_boston in evaluate_mcm_latency.py
 #     (the dashboard image does not list these): T1=284.95us, SX=32ns, CZ=68ns,
@@ -79,19 +79,19 @@ R_S = 0.0               # ibm_boston reset: noiseless & instantaneous
 T1_S, T2_S = 284.95e-6, 322.68e-6   # ibm_boston coherence (T2 from image, T1 from ref)
 IDLE_MULTIPLIER = 1.0               # no artifact x3 inflation
 
-NOISE_MODELS = ["heron_herqules", "readout_decoherence", "decoherence_only"]
+NOISE_MODELS = ["heron_cnn", "readout_decoherence", "decoherence_only"]
 
 # Which run to do (each writes its own CSV, leaving the others untouched):
 #   "current"    -> the 3 standard models.
 #   "futuristic" -> Model 1 with all errors /10 and T1/T2 x3.
 #   "highfid"    -> Model 1 with ONLY the readout flip error /10 (gates & T1/T2 current).
 #   "boston_lowt_backlog" -> ibm_boston gates, but T1/T2 = default-Heron 190/130us,
-#       FIXED ibm_boston readout 3.54e-3 (NOT HERQULES), and decoder-backlog idle ON.
+#       FIXED ibm_boston readout 3.54e-3 (NOT CNN), and decoder-backlog idle ON.
 #   "futuristic_fixedreadout" -> futuristic gates (/10) + T1/T2 x3, BUT readout =
-#       ibm_boston median /10 = 3.54e-4 FIXED (not HERQULES -> no 200ns cliff).
-MODE = "futuristic_fixedreadout"
+#       ibm_boston median /10 = 3.54e-4 FIXED (not CNN -> no 200ns cliff).
+MODE = os.environ.get("LER_MODE", "current")
 _MODE_MODELS = {"current": NOISE_MODELS,
-                "futuristic": ["heron_herqules_futuristic"],
+                "futuristic": ["heron_cnn_futuristic"],
                 "highfid": ["heron_highfid"],
                 "boston_lowt_backlog": ["boston_lowt"],
                 "futuristic_fixedreadout": ["futuristic_fixedreadout"]}
@@ -157,15 +157,15 @@ class FastUniformNoise(NoiseModel):
 def build_noisy_circuit(code_name, d, model, readout_ns, backend):
     code = get_code(code_name, d, d if code_name not in ("gross",) else None)
     qt = QubitTracking(backend, getattr(code, "qc", None))
-    measure = herqules_measure_error(readout_ns)
+    measure = cnn_measure_error(readout_ns)
     t1, t2 = T1_S, T2_S
-    if model == "heron_herqules":
+    if model == "heron_cnn":
         sq, tq, meas = HERON_SQ, HERON_TQ, measure
     elif model == "readout_decoherence":
         sq, tq, meas = 0.0, 0.0, measure
     elif model == "decoherence_only":
         sq, tq, meas = 0.0, 0.0, 0.0
-    elif model == "heron_herqules_futuristic":
+    elif model == "heron_cnn_futuristic":
         # Futuristic: all errors / 10 (gates AND readout flip), T1/T2 x3.
         sq, tq, meas = HERON_SQ / 10.0, HERON_TQ / 10.0, measure / 10.0
         t1, t2 = T1_S * 3.0, T2_S * 3.0
@@ -174,12 +174,12 @@ def build_noisy_circuit(code_name, d, model, readout_ns, backend):
         sq, tq, meas = HERON_SQ, HERON_TQ, measure / 10.0
     elif model == "boston_lowt":
         # ibm_boston gates, default-Heron coherence (190/130us), FIXED ibm_boston
-        # readout 3.54e-3 (no HERQULES, no U-shape).
+        # readout 3.54e-3 (no CNN, no U-shape).
         sq, tq, meas = HERON_SQ, HERON_TQ, BOSTON_READOUT
         t1, t2 = HERON_T1_LOW, HERON_T2_LOW
     elif model == "futuristic_fixedreadout":
         # Futuristic gates/coherence (errors/10, T1/T2 x3) with the ibm_boston
-        # median readout ALSO /10 = 3.54e-4, FIXED (no HERQULES 200ns cliff).
+        # median readout ALSO /10 = 3.54e-4, FIXED (no CNN 200ns cliff).
         sq, tq, meas = HERON_SQ / 10.0, HERON_TQ / 10.0, BOSTON_READOUT / 10.0
         t1, t2 = T1_S * 3.0, T2_S * 3.0
     else:
@@ -263,7 +263,7 @@ def run_one(args):
     print(f"done {code_name:8} d={d:2} {model:20} ro={readout_ns:4} "
           f"LER={ler:.5f} ({dt:.1f}s)", flush=True)
     return (code_name, d, model, readout_ns, DECODER[code_name],
-            herqules_measure_error(readout_ns), shots, ler, dt)
+            cnn_measure_error(readout_ns), shots, ler, dt)
 
 
 def main():

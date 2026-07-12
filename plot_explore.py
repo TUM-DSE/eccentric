@@ -34,7 +34,7 @@ for ax, (variant, title) in zip(axes, PANELS):
                 markeredgecolor="black", markeredgewidth=0.5, linewidth=1.8)
     ax.set_yscale("log"); ax.set_title(title, fontsize=TITLE_FS, fontweight="bold", pad=8)
     ax.set_xticks([200, 600, 1000]); ax.tick_params(labelsize=TICK_FS)
-    ax.set_xlabel("Readout length (ns)", fontsize=LABEL_FS)
+    ax.set_xlabel("Measurement duration (ns)", fontsize=LABEL_FS)
     ax.set_axisbelow(True); ax.grid(color="gray", ls="--", lw=0.4, alpha=0.55, which="both")
     if ax is axes[0]:
         ax.set_ylabel("Logical error rate (log)", fontsize=LABEL_FS)

@@ -39,32 +39,32 @@ from main import single_cnot_n_rounds
 
 # ---------------------------------------------------------------------------
 # Readout model
-#   "herqules" : length-dependent flip error from the HERQULES table (readout
+#   "cnn" : length-dependent flip error from the CNN table (readout
 #                error and readout duration move together -- the realistic case).
-#                Lengths capped at 1000 ns (HERQULES table range).
+#                Lengths capped at 1000 ns (CNN table range).
 #   "fixed"    : flip error fixed at ibm_boston median 3.54e-3; length only sets
 #                the M-gate duration (the "magically fast/clean readout" counterfactual).
 # ---------------------------------------------------------------------------
-READOUT_MODE = "herqules"
+READOUT_MODE = "cnn"
 
-# HERQULES per-qubit accuracies (Q1,Q3,Q4,Q5; Q2 excluded); measure_error =
+# CNN per-qubit accuracies (Q1,Q3,Q4,Q5; Q2 excluded); measure_error =
 # 1 - geomean(.)  (from evaluate_mcm_latency.py).
-HERQULES_ACC = {
-    200:  (0.7782, 0.8712, 0.7587, 0.7159),
-    400:  (0.9340, 0.9473, 0.9445, 0.9717),
-    600:  (0.9654, 0.9565, 0.9597, 0.9827),
-    800:  (0.9725, 0.9547, 0.9587, 0.9797),
-    1000: (0.974, 0.955, 0.958, 0.982),   # updated 1000ns row (Q2=0.732 excluded)
+CNN_ACC = {
+    200:  (0.782, 0.864, 0.774, 0.770),   # CNN per-qubit accuracies (Q2 excluded)
+    400:  (0.907, 0.926, 0.901, 0.951),
+    600:  (0.953, 0.938, 0.937, 0.970),
+    800:  (0.965, 0.941, 0.944, 0.970),
+    1000: (0.970, 0.942, 0.947, 0.970),
 }
-def herqules_measure_error(readout_ns):
-    q1, q3, q4, q5 = HERQULES_ACC[readout_ns]
+def cnn_measure_error(readout_ns):
+    q1, q3, q4, q5 = CNN_ACC[readout_ns]
     return 1.0 - (q1 * q3 * q4 * q5) ** 0.25
 
 # ---------------------------------------------------------------------------
 # Swept parameters
 # ---------------------------------------------------------------------------
 DISTANCES = [5, 7, 9, 11, 13]
-READOUT_LENGTHS_NS = ([200, 400, 600, 800, 1000] if READOUT_MODE == "herqules"
+READOUT_LENGTHS_NS = ([200, 400, 600, 800, 1000] if READOUT_MODE == "cnn"
                       else [250, 500, 750, 1000, 1500, 2000])
 NOISE_MODELS = ["current", "futuristic"]
 
@@ -90,20 +90,21 @@ BACKEND_NAME = "real_heron"
 SHOTS_BY_D = {5: 100_000, 7: 50_000, 9: 30_000, 11: 20_000, 13: 15_000}
 CHUNK_SIZE = 10_000
 
-# tqec logical-timestep "memory rounds". d+1 = the original (long) experiment;
-# 1 = minimal fault-tolerant CNOT (~2d physical rounds), to match lattice-sim's
-# physical depth for an apples-to-apples comparison.
-MEMORY_ROUNDS = 1
+# tqec logical-timestep "memory rounds". "dplus1" = d+1 = the original (long)
+# experiment and the canonical plotted file; "1" = minimal fault-tolerant CNOT
+# (~2d physical rounds), to match lattice-sim's physical depth (the nmr1 control).
+# Override with env MEMORY_ROUNDS=dplus1 | 1.
+MEMORY_ROUNDS = os.environ.get("MEMORY_ROUNDS", "dplus1")
 
 OUTPUT_DIR = "experiment_results/readout_compare"
-_base = "eccentric_readout_ler_herqules" if READOUT_MODE == "herqules" else "eccentric_readout_ler"
+_base = "eccentric_readout_ler_cnn" if READOUT_MODE == "cnn" else "eccentric_readout_ler"
 if MEMORY_ROUNDS != "dplus1":
     _base += f"_nmr{MEMORY_ROUNDS}"
 OUTPUT_CSV = os.path.join(OUTPUT_DIR, _base + ".csv")
 
 
 def memory_rounds_for(d):
-    return MEMORY_ROUNDS
+    return d + 1 if MEMORY_ROUNDS == "dplus1" else int(MEMORY_ROUNDS)
 
 
 class FastUniformNoise(NoiseModel):
@@ -155,7 +156,7 @@ def _decode_chunked(circuit, num_shots, chunk_size=CHUNK_SIZE):
 def _run_one(args):
     d, readout_ns, noise_model = args
     fut = (noise_model == "futuristic")
-    base_meas = herqules_measure_error(readout_ns) if READOUT_MODE == "herqules" else READOUT_ERROR
+    base_meas = cnn_measure_error(readout_ns) if READOUT_MODE == "cnn" else READOUT_ERROR
     cz, sx, meas = CZ_ERROR, SX_ERROR, base_meas
     t1, t2 = T1_S, T2_S
     if fut:

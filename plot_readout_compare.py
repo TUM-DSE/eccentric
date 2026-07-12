@@ -4,8 +4,8 @@ plot_readout_compare.py
 Side-by-side line plots of logical-CNOT LER vs readout length for the two tools
 (ECCentric vs lattice-sim), one line per code distance. One PDF per noise model.
 
-Uses the HERQULES (realistic) readout results:
-  experiment_results/readout_compare/{eccentric,artifact}_readout_ler_herqules.csv
+Uses the CNN (realistic) readout results:
+  experiment_results/readout_compare/{eccentric,artifact}_readout_ler_cnn.csv
 """
 
 import os
@@ -25,6 +25,9 @@ DISTANCES = [5, 7, 9, 11, 13]
 COLORS = {5: "#1f77b4", 7: "#ff7f0e", 9: "#2ca02c", 11: "#d62728", 13: "#9467bd"}
 MARKERS = {5: "o", 7: "s", 9: "^", 11: "D", 13: "v"}
 
+# Figure dimensions.
+PAPER_SIZE = (16, 4)
+
 # Fonts: titles deliberately LARGER than the in-plot text.
 TITLE_FS = 22
 LABEL_FS = 16
@@ -43,8 +46,8 @@ def load(path):
 
 
 DATA = {
-    "eccentric": load(os.path.join(OUTDIR, "eccentric_readout_ler_herqules.csv")),
-    "artifact":  load(os.path.join(OUTDIR, "artifact_readout_ler_herqules.csv")),
+    "eccentric": load(os.path.join(OUTDIR, "eccentric_readout_ler_cnn.csv")),
+    "artifact":  load(os.path.join(OUTDIR, "artifact_readout_ler_cnn.csv")),
 }
 
 
@@ -63,8 +66,8 @@ def series(tool, d, nm):
 
 
 def make_figure(nm):
-    fig, axes = plt.subplots(1, 2, figsize=(16, 4), sharey=True)
-    fig.subplots_adjust(top=0.80, wspace=0.06, left=0.06, right=0.90, bottom=0.20)
+    fig, axes = plt.subplots(1, 2, figsize=PAPER_SIZE, sharey=True)
+    fig.subplots_adjust(top=0.78, wspace=0.06, left=0.06, right=0.84, bottom=0.20)
 
     for ax, (tool, title) in zip(axes, TOOLS):
         for d in DISTANCES:
@@ -73,7 +76,7 @@ def make_figure(nm):
                     markeredgecolor="black", markeredgewidth=0.6, linewidth=2,
                     label=f"d = {d}")
         ax.set_yscale("log")
-        ax.set_xlabel("Readout length (ns)", fontsize=LABEL_FS)
+        ax.set_xlabel("Measurement duration (ns)", fontsize=LABEL_FS)
         if ax is axes[0]:                       # shared y-axis -> label once
             ax.set_ylabel("Logical error rate (log)", fontsize=LABEL_FS)
         ax.set_title(title, fontsize=TITLE_FS, fontweight="bold", pad=8)
@@ -88,10 +91,10 @@ def make_figure(nm):
                ncol=1, fontsize=LEGEND_FS, title="Distance", title_fontsize=LEGEND_FS)
 
     # Single "Lower is better" annotation, centered above both titles.
-    fig.text(0.5, 0.92, "Lower is better ↓", ha="center", va="top",
+    fig.text(0.5, 0.95, "Lower is better ↓", ha="center", va="top",
              fontsize=BETTER_FS, fontweight="bold", color="blue")
 
-    out = os.path.join(OUTDIR, f"readout_ler_herqules_{nm}.pdf")
+    out = os.path.join(OUTDIR, f"readout_ler_cnn_{nm}.pdf")
     fig.savefig(out)
     # also a PNG for quick visual inspection
     fig.savefig(out.replace(".pdf", ".png"), dpi=130)
