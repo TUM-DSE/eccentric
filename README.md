@@ -6,13 +6,19 @@ ECCentric is a benchmarking framework for evaluating Quantum Error Correction (Q
 > Aleksandra Świerkowska, Jannik Pflieger, Emmanouil Giortamis, Pramod Bhatotia.
 > [arXiv:2511.01062 (PDF)](https://arxiv.org/pdf/2511.01062)
 
+## Overview
+
+![ECCentric pipeline](docs/pipeline.png)
+
+An experiment is described in a YAML file listing the codes, backends, noise models and other parameters to sweep. For every combination, ECCentric generates the encoded memory circuit of the code and transpiles it with Qiskit onto the backend, applying gate translation, qubit mapping and routing. Stim then adds the noise model, simulates the stabilizer circuit and decodes the measurements. The resulting logical error rates are written to a CSV file. ([PDF version of the figure](docs/pipeline.pdf))
+
 ## Repository layout
 
 ```
 eccentric/                 the framework (Python package)
 ├── __main__.py            command-line entry point: python -m eccentric
 ├── runner.py              config loading, parameter sweeps, parallel execution, result saving
-├── experiments/           experiment types (one module each, see "Experiment types")
+├── experiments/           experiment types, one module each
 ├── backends/              fake hardware backends and custom topologies
 ├── codes/                 QEC code circuits: surface, heavy-hex, gross, color, Bacon-Shor, concatenated Steane
 ├── noise/                 artificial and hardware-inspired noise models
@@ -24,6 +30,7 @@ eccentric/                 the framework (Python package)
 configs/                   YAML configurations of all paper experiments, plus example.yaml
 experiment_results/        raw results used in the paper
 figures/                   generated figures
+docs/                      pipeline overview figure
 tests/                     unit and end-to-end tests
 external/                  submodules: qiskit-qec fork, more-bacon-less-threshold
 ```
@@ -93,7 +100,7 @@ experiments:
 | Field | Description |
 | --- | --- |
 | `name` | Experiment name; results go to `experiment_results/<name>/` |
-| `type` | Experiment type (see below). Defaults to `logical_error` |
+| `type` | Experiment type: `logical_error` (default), `decoder`, `program_stats`, `accumulated_error`, `chromobius`, `routing`, `translation` |
 | `num_samples` | Number of shots (or, for `routing` and `translation`, number of repetitions) |
 | `backends` | List of backends (see below) |
 | `codes` | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane) |
@@ -110,18 +117,6 @@ experiments:
 | `optimization_levels` | Translation optimization levels for `translation` (default `[0, 2, 3]`) |
 
 If neither `backends_sizes` nor `distances` is given, the backend's own size is used and the largest code distance that fits is chosen. Configurations whose code does not fit (distance < 3) are skipped and logged.
-
-### Experiment types
-
-| `type` | Required fields | Output columns (besides the configuration) |
-| --- | --- | --- |
-| `logical_error` | `backends`, `codes`, `decoders`, `error_types` | `logical_error_rate` |
-| `decoder` | same as `logical_error` | `logical_error_rate`, decoding time and memory |
-| `program_stats` | same as `logical_error` | `logical_error_rate`, time and memory of every pipeline stage |
-| `accumulated_error` | same as `logical_error` | error rate of the unencoded circuit, of idle qubits, and after decoding |
-| `chromobius` | `backends`, `codes`, `decoders`, `error_types`, `distances` | `logical_error_rate` on the Chromobius color-code circuits; also supports `error_types: ["phenomenological"]` |
-| `routing` | `backends`, `codes` | gate, two-qubit gate and SWAP overhead of routing |
-| `translation` | `backends`, `codes`, `translating_methods` | gate and two-qubit gate overhead of gate-set translation |
 
 ### Backends
 
@@ -218,13 +213,6 @@ Job metadata and results are stored in `experiment_results/ibm_runs/`. These scr
 - **New code, backend, noise model or decoder:** add it to the matching package and to its dispatcher (`get_code` in `eccentric/codes/utils.py`, `get_backend` in `eccentric/backends/utils.py`, `get_noise_model` in `eccentric/noise/utils.py`, `decode` in `eccentric/decoders/decode.py`). It then becomes available in every configuration under its new name.
 
 Run the tests with `pytest`.
-
-## Troubleshooting
-
-- **`ModuleNotFoundError: No module named 'qiskit_qec'` or missing compiled extensions**: the submodules are missing or `qiskit_qec` was not built. Run `git submodule update --init --recursive`, then `python setup.py build_ext --inplace` in `external/qiskit_qec`.
-- **`ModuleNotFoundError: No module named 'eccentric'`**: run from the repository root or install the package with `pip install -e .`.
-- **Workers killed / out of memory**: lower the number of parallel workers, e.g. `python -m eccentric -j 4 configs/size.yaml`.
-- **A configuration produces no row in `results.csv`**: check `experiment_results/<name>/experiment.log`. Configurations where the code does not fit on the backend (distance < 3) are skipped and logged.
 
 ## Citation
 
