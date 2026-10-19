@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eccentric"
+version = "1.0.0"
+description = "ECCentric: benchmarking quantum error correction codes under realistic hardware conditions"
+readme = "README.md"
+requires-python = ">=3.11"
+dynamic = ["dependencies"]
+
+[project.scripts]
+eccentric = "eccentric.__main__:main"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+include = ["eccentric*"]

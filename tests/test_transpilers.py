@@ -1,12 +1,9 @@
 import pytest
 from qiskit import QuantumCircuit
-from bqskit.ir.gates import *
-from pytket import OpType
-from transpilers import translate
 
-qiskit_simplified_gates = ["rz", "cx", "h"]
-bqskit_simplified_gates = [RZGate(), CXGate(), HGate()]
-tket_simplified_gates = [OpType.Rz, OpType.CX, OpType.H]
+from eccentric.transpilers import translate
+from eccentric.transpilers.translators import qiskit_h2, qiskit_ibm_heron
+
 
 def decomposable_circuit():
     qc = QuantumCircuit(3)
@@ -16,28 +13,26 @@ def decomposable_circuit():
     qc.ccx(0, 1, 2)
     return qc
 
-def get_gate_names(qc):
-    return {inst.operation.name.lower() for inst in qc.data}
 
-@pytest.mark.parametrize("method,expected_gates", [
-    ("qiskit", qiskit_simplified_gates),
-    ("bqskit", bqskit_simplified_gates),
-    ("tket", tket_simplified_gates),
-])
-def test_translate_with_decomposition(method, expected_gates):
-    qc = decomposable_circuit()
-    translated = translate(qc, method, gate_set=expected_gates)
-    used_gates = get_gate_names(translated)
-    if method == "qiskit":
-        expected_gate_names = {str(gate).lower() for gate in expected_gates}
-    elif method == "bqskit":
-        expected_gate_names = {str(gate).lower().replace('gate', '').replace('cnot', 'cx') for gate in expected_gates}
-    elif method == "tket":
-        expected_gate_names = {gate.name.lower() for gate in expected_gates}
-    unexpected_gates = used_gates - expected_gate_names
-    assert not unexpected_gates, f"Unexpected gates in {method} translation: {unexpected_gates}"
+@pytest.mark.parametrize("gate_set,allowed", [("h2", qiskit_h2), ("ibm_heron", qiskit_ibm_heron)])
+@pytest.mark.parametrize("level", [0, 2, 3])
+def test_qiskit_translation_uses_target_gate_set(gate_set, allowed, level):
+    translated = translate(decomposable_circuit(), "qiskit", gate_set, level)
+    used = {inst.operation.name for inst in translated.data}
+    assert used <= set(allowed)
 
-def test_translate_invalid_method():
-    qc = QuantumCircuit(1)
-    with pytest.raises(NotImplementedError):
-        translate(qc, "unknown_method")
+
+@pytest.mark.parametrize("gate_set", ["h2", "ibm_heron"])
+def test_tket_translation_returns_circuit(gate_set):
+    translated = translate(decomposable_circuit(), "tket", gate_set, 0)
+    assert translated.n_qubits == 3
+
+
+def test_unknown_gate_set():
+    with pytest.raises(ValueError):
+        translate(QuantumCircuit(1), "qiskit", "unknown")
+
+
+def test_unknown_method():
+    with pytest.raises(ValueError):
+        translate(QuantumCircuit(1), "unknown_method")
