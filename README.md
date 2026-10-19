@@ -2,6 +2,10 @@
 
 Eccentric Bench is a project focused on realistic benchmarking Quantum Error Correction Codes.
 
+This branch contains the code and results for the paper **MCMit: Hardware-Software Co-Design for Mid-Circuit Measurement Error Mitigation** ([arXiv:2604.25863 (PDF)](https://arxiv.org/pdf/2604.25863)).
+
+For the ECCentric benchmark from our SIGMETRICS'26 paper, see the `main` branch.
+
 ## Installation (Linux)
 
 Follow these steps to set up the project locally:
