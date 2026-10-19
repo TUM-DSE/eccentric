@@ -178,10 +178,7 @@ def detailed_gate_count_stim(circuit: stim.Circuit):
 
 
 def tableau_fidelity(t1: stim.Tableau, t2: stim.Tableau) -> float:
-    """Function by Craig Gidney
-        soruce: https://quantumcomputing.stackexchange.com/questions/38826/how-do-i-efficiently-compute-the-fidelity-between-two-stabilizer-tableau-states
-
-    """
+    # Taken from Craig Gidney: https://quantumcomputing.stackexchange.com/questions/38826/how-do-i-efficiently-compute-the-fidelity-between-two-stabilizer-tableau-states
     t3 = t2**-1 * t1
     sim = stim.TableauSimulator()
     sim.set_inverse_tableau(t3)

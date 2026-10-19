@@ -51,8 +51,6 @@ def select_best_ibm_backend(
     min_qubits: int = 2,
     preferred_backends: List[str] = None
 ) -> Optional[str]:
-    """Select the best available IBM backend based on queue and preferences."""
-
     if preferred_backends is None:
         preferred_backends = ["ibm_torino", "ibm_heron", "ibm_flamingo"]
 

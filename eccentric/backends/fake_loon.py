@@ -49,17 +49,7 @@ class FakeIBMLoon(BackendV2):
         raise NotImplementedError("This backend does not contain a run method")
 
     def squareLatticeCouplingMap(self, add_c_couplers: bool = False):
-        """ Construct coupling map of a square lattice for the Nighthawk processor
-
-        The coupling map consists of a simple square lattice connectivity, with additional special c_couplers
-        connecting distant nodes.
-
-        Information taken from:
-        - https://www.ibm.com/quantum/blog/large-scale-ftqc
-
-        TODO: Add variable amount of c_couplers. Currently only the first row can have distant connections.
-        """
-
+        # Taken from https://www.ibm.com/quantum/blog/large-scale-ftqc
         rows = 11
         cols = 11
 
