@@ -87,7 +87,7 @@ def test_logical_error_end_to_end():
         experiment="T",
         num_samples=200,
         backend="custom_full",
-        backend_size=17,
+        backend_size=26,
         code="surface",
         distance=3,
         decoder="mwpm",
