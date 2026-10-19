@@ -204,7 +204,7 @@ class NoiseModel:
             if op.name in self.noisy_gates:
                 p = self.noisy_gates[op.name]
             else:
-                p = self.measure()
+                p = self.measure_func()
 
             if self.use_correlated_parity_measurement_errors:
                 assert len(targets) % 3 == 0 and all(t.is_combiner for t in targets[1::3]), repr(op)
