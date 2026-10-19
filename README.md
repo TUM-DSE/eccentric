@@ -8,19 +8,25 @@ ECCentric is a benchmarking framework for evaluating Quantum Error Correction (Q
 
 ## Repository layout
 
-| Path | Contents |
-| --- | --- |
-| `main.py` | Main benchmark runner: computes logical error rates for every configuration in a YAML file |
-| `get_*.py` | Runners for the specialised experiments in the paper (DQC, decoders, routing, translation, program stats, accumulated error) |
-| `experiments_conf/` | YAML configurations used for the paper |
-| `backends/` | Fake hardware backends (IBM Flamingo/Loon, Google Willow, Quantinuum Apollo, Infleqtion) and custom topologies |
-| `codes/` | QEC code circuit generators (surface, heavy-hex, gross, color, Bacon-Shor, concatenated Steane) |
-| `noise/` | Artificial and hardware-inspired noise models |
-| `decoders/` | MWPM, BP-OSD and Chromobius decoders |
-| `transpilers/` | Routing, layout and gate-set translation (Qiskit, BQSKit, TKET) |
-| `plots/` | Plot generation for the paper figures (written to `data/`) |
-| `experiment_results/` | Raw results used for the paper |
-| `ibm_submit.py`, `ibm_demo.py` | Comparison of the noise models against real IBM hardware |
+```
+eccentric/                 the framework (Python package)
+├── __main__.py            command-line entry point: python -m eccentric
+├── runner.py              config loading, parameter sweeps, parallel execution, result saving
+├── experiments/           experiment types (one module each, see "Experiment types")
+├── backends/              fake hardware backends and custom topologies
+├── codes/                 QEC code circuits: surface, heavy-hex, gross, color, Bacon-Shor, concatenated Steane
+├── noise/                 artificial and hardware-inspired noise models
+├── decoders/              MWPM, BP-OSD and Chromobius
+├── transpilers/           layout/routing and gate-set translation (Qiskit, BQSKit, TKET)
+├── metrics/               gate and resource counting
+├── plots/                 paper figures: python -m eccentric.plots
+└── hardware/              comparison against real IBM hardware
+configs/                   YAML configurations of all paper experiments, plus example.yaml
+experiment_results/        raw results used in the paper
+figures/                   generated figures
+tests/                     unit and end-to-end tests
+external/                  submodules: qiskit-qec fork, more-bacon-less-threshold
+```
 
 ## Installation (Linux)
 
@@ -32,34 +38,38 @@ cd eccentric
 
 python3.11 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -e .
 
 cd external/qiskit_qec
 python setup.py build_ext --inplace
 cd ../..
 ```
 
-If you cloned without `--recurse-submodules`, fetch the submodules first:
+`pip install -e .` installs the dependencies from `requirements.txt` and adds an `eccentric` command, equivalent to `python -m eccentric`. If you cloned without `--recurse-submodules`, fetch the submodules first with `git submodule update --init --recursive`.
 
-```bash
-git submodule update --init --recursive
-```
-
-All commands below must be run from the repository root.
+Run all commands from the repository root: results are written to `experiment_results/` and figures to `figures/` relative to the current directory.
 
 ## Quick start
 
 ```bash
-python3 main.py experiments.yaml
+python -m eccentric configs/example.yaml
 ```
 
-This runs the small example in [`experiments.yaml`](experiments.yaml). Results are written to `experiment_results/Example/`:
+This runs the small example in [`configs/example.yaml`](configs/example.yaml) and writes to `experiment_results/Example/`:
 
-- `results.csv`: one row per configuration, including the `logical_error_rate`
-- `experiment.log`: progress and errors
+- `results.csv`: one row per configuration, for example the `logical_error_rate`
+- `experiment.log`: completed, skipped and failed configurations, with error messages
 - `metadata_<timestamp>.json`: a copy of the experiment configuration
 
 Results are appended to `results.csv`, so delete the directory or rename the experiment before re-running it.
+
+Command-line options:
+
+| Option | Description |
+| --- | --- |
+| `python -m eccentric a.yaml b.yaml` | Run several configuration files in sequence |
+| `-j N`, `--workers N` | Number of parallel worker processes (default: all CPUs). Lower it if you run out of memory |
+| `-e NAME`, `--experiment NAME` | Only run the experiment called `NAME` (repeatable) |
 
 ## Configuration
 
@@ -68,6 +78,7 @@ Experiments are described in a YAML file containing a list under `experiments`. 
 ```yaml
 experiments:
   - name: "Example"
+    type: logical_error
     num_samples: 1000
     backends: ["custom_grid"]
     backends_sizes: [300]
@@ -79,24 +90,38 @@ experiments:
 
 ### Fields
 
-| Field | Required | Description |
-| --- | --- | --- |
-| `name` | yes | Experiment name; results go to `experiment_results/<name>/` |
-| `num_samples` | yes | Number of shots sampled for the decoder |
-| `backends` | yes | List of backends (see below) |
-| `codes` | yes | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane) |
-| `decoders` | yes | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only) |
-| `error_types` | yes | List of noise models (see below) |
-| `error_probabilities` | for artificial noise | Physical error rates `p` used by the artificial noise models |
-| `backends_sizes` | for `custom_*` backends | Number of qubits of the custom topology. The code distance is then chosen as the largest distance that fits on the backend |
-| `distances` | no | Fixed code distances. The backend size is set to the minimum needed for the code. **Cannot be combined with `backends_sizes`** |
-| `cycles` | no | Number of syndrome-extraction rounds (single integer, must be ≥ 2). Defaults to the code distance |
-| `layout_methods` | no | Qiskit layout methods, e.g. `trivial`, `dense`, `sabre` |
-| `routing_methods` | no | Qiskit routing methods, e.g. `basic`, `sabre`, `stochastic`, `lookahead` |
-| `translating_methods` | no | Gate translation before transpilation: `qiskit`, `bqskit`, `tket` |
-| `gate_sets` | no | Target gate sets, used only by `get_translate_stats.py`: `h2`, `ibm_heron` |
+| Field | Description |
+| --- | --- |
+| `name` | Experiment name; results go to `experiment_results/<name>/` |
+| `type` | Experiment type (see below). Defaults to `logical_error` |
+| `num_samples` | Number of shots (or, for `routing` and `translation`, number of repetitions) |
+| `backends` | List of backends (see below) |
+| `codes` | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane) |
+| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only) |
+| `error_types` | List of noise models (see below) |
+| `error_probabilities` | Physical error rates `p` for the artificial noise models |
+| `backends_sizes` | Number of qubits of a `custom_*` backend. The largest code distance that fits is used |
+| `distances` | Fixed code distances. The backend size is set to the minimum needed by the code. **Cannot be combined with `backends_sizes`** |
+| `cycles` | Number of syndrome-extraction rounds (a single integer ≥ 2). Defaults to the code distance |
+| `layout_methods` | Qiskit layout methods, e.g. `trivial`, `dense`, `sabre` |
+| `routing_methods` | Qiskit routing methods, e.g. `basic`, `sabre`, `stochastic`, `lookahead` |
+| `translating_methods` | Gate translation: `qiskit`, `bqskit`, `tket` |
+| `gate_sets` | Target gate sets for `translation`: `h2`, `ibm_heron` |
+| `optimization_levels` | Translation optimization levels for `translation` (default `[0, 2, 3]`) |
 
-If neither `backends_sizes` nor `distances` is given, the backend size comes from the backend itself and the largest code distance that fits is used.
+If neither `backends_sizes` nor `distances` is given, the backend's own size is used and the largest code distance that fits is chosen. Configurations whose code does not fit (distance < 3) are skipped and logged.
+
+### Experiment types
+
+| `type` | Required fields | Output columns (besides the configuration) |
+| --- | --- | --- |
+| `logical_error` | `backends`, `codes`, `decoders`, `error_types` | `logical_error_rate` |
+| `decoder` | same as `logical_error` | `logical_error_rate`, decoding time and memory |
+| `program_stats` | same as `logical_error` | `logical_error_rate`, time and memory of every pipeline stage |
+| `accumulated_error` | same as `logical_error` | error rate of the unencoded circuit, of idle qubits, and after decoding |
+| `chromobius` | `backends`, `codes`, `decoders`, `error_types`, `distances` | `logical_error_rate` on the Chromobius color-code circuits; also supports `error_types: ["phenomenological"]` |
+| `routing` | `backends`, `codes` | gate, two-qubit gate and SWAP overhead of routing |
+| `translation` | `backends`, `codes`, `translating_methods` | gate and two-qubit gate overhead of gate-set translation |
 
 ### Backends
 
@@ -126,30 +151,29 @@ Hardware noise models must be paired with a matching backend, for example `real_
 
 ## Reproducing the paper
 
-Each figure has its own runner and configuration:
+Every experiment of the paper has a configuration in [`configs/`](configs):
 
-| Experiment | Command |
+| Configuration | Paper experiment |
 | --- | --- |
-| Code size | `python3 main.py experiments_conf/size.yaml` |
-| Connectivity and real topologies | `python3 main.py experiments_conf/connectivity.yaml` |
-| Variance | `python3 main.py experiments_conf/variance.yaml` |
-| Technologies | `python3 main.py experiments_conf/technologies.yaml` |
-| Distributed QC | `python3 get_dqc.py experiments_conf/dqc.yaml` |
-| Routing | `python3 get_routing_stats.py routing_experiments.yaml` |
-| Gate translation | `python3 get_translate_stats.py translate_experiments.yaml` |
-| Accumulated error / thresholds | `python3 get_accumulated_err.py experiments_conf/accumulated.yaml` |
-| Decoders | `python3 get_decoder.py experiments_conf/decoder.yaml` |
-| Chromobius decoder | `python3 get_chromobius.py experiments_conf/decoder_chromobius.yaml` |
-| Program statistics | `python3 get_program_stats.py experiments_conf/program_stats.yaml` |
-| Plots | `python3 plots/plots.py` (reads `experiment_results/`, writes PDFs to `data/`) |
-
-To run everything in sequence:
+| `configs/size.yaml` | Code size |
+| `configs/connectivity.yaml` | Connectivity and real topologies |
+| `configs/variance.yaml` | Variance of decoherence and readout errors |
+| `configs/technologies.yaml` | Hardware technologies |
+| `configs/dqc.yaml` | Distributed quantum computing |
+| `configs/routing.yaml` | Routing overhead |
+| `configs/translation.yaml` | Gate-set translation overhead |
+| `configs/accumulated.yaml` | Accumulated error and thresholds |
+| `configs/decoder.yaml` | Decoders |
+| `configs/chromobius.yaml` | Chromobius decoder (appendix) |
+| `configs/program_stats.yaml` | Time and memory of the benchmark |
 
 ```bash
-bash run_experiments.sh
+python -m eccentric configs/size.yaml   # one experiment
+bash run_experiments.sh                 # all experiments, then all plots
+python -m eccentric.plots               # only regenerate the figures
 ```
 
-The full suite takes a long time. The results used in the paper are already in `experiment_results/`, so `python3 plots/plots.py` regenerates the figures without re-running anything.
+The full suite takes a long time. The results used in the paper are already in `experiment_results/`, so `python -m eccentric.plots` regenerates the figures in `figures/` without re-running anything.
 
 ## Running with Docker
 
@@ -170,28 +194,36 @@ The full suite takes a long time. The results used in the paper are already in `
 
     ```bash
     docker cp eccentric_run:/app/experiment_results ./experiment_results_docker
-    docker cp eccentric_run:/app/data ./data_docker
+    docker cp eccentric_run:/app/figures ./figures_docker
     docker rm eccentric_run
     ```
 
-To run a single experiment instead, override the command, for example `docker run --rm eccentric python3 main.py experiments.yaml`.
+To run a single experiment instead, override the command, for example `docker run --rm eccentric python -m eccentric configs/example.yaml`.
 
 ## Comparison with real IBM hardware
 
-`ibm_submit.py` submits random circuits (2–7 qubits, depth 100, 10 circuits per width, 1000 shots each) to an IBM Quantum backend. `ibm_demo.py` then compares the measured fidelities with noiseless simulation and the noise models in this repository.
+`eccentric.hardware.ibm_submit` submits random circuits (2–7 qubits, depth 100, 10 circuits per width, 1000 shots each) to an IBM Quantum backend. `eccentric.hardware.ibm_demo` then compares the measured fidelities with noiseless simulation and the noise models in this repository.
 
 ```bash
-python3 ibm_submit.py submit            # submit the job (asks for confirmation; uses IBM credits)
-python3 ibm_submit.py results <job_id>  # download and store the results
-python3 ibm_demo.py [<job_id>]          # analyse and plot (defaults to the job used in the paper)
+python -m eccentric.hardware.ibm_submit submit            # submit the job (asks for confirmation; uses IBM credits)
+python -m eccentric.hardware.ibm_submit results <job_id>  # download and store the results
+python -m eccentric.hardware.ibm_demo [<job_id>]          # analyse and plot (defaults to the job used in the paper)
 ```
 
 Job metadata and results are stored in `experiment_results/ibm_runs/`. These scripts need an IBM Quantum API token. Follow the [IBM Quantum setup guide](https://quantum.cloud.ibm.com/docs/en/guides/cloud-setup) to save it in your environment.
 
+## Extending the framework
+
+- **New experiment type:** add a module to `eccentric/experiments/` that defines `REQUIRED` (the required config fields) and `run(task)`, which returns a list of result rows (dicts), and register it in `EXPERIMENTS` in `eccentric/experiments/__init__.py`. `task` is an `eccentric.experiments.Task` holding a single point of the sweep. `eccentric/experiments/base.py` provides the shared steps: `load_backend`, `resolve_distance`, `resolve_cycles`, `noisy_circuit`, `result_row`. Raise `Skip` to skip a configuration.
+- **New code, backend, noise model or decoder:** add it to the matching package and to its dispatcher (`get_code` in `eccentric/codes/utils.py`, `get_backend` in `eccentric/backends/utils.py`, `get_noise_model` in `eccentric/noise/utils.py`, `decode` in `eccentric/decoders/decode.py`). It then becomes available in every configuration under its new name.
+
+Run the tests with `pytest`.
+
 ## Troubleshooting
 
 - **`ModuleNotFoundError: No module named 'qiskit_qec'` or missing compiled extensions**: the submodules are missing or `qiskit_qec` was not built. Run `git submodule update --init --recursive`, then `python setup.py build_ext --inplace` in `external/qiskit_qec`.
-- **`ModuleNotFoundError` for `backends`, `codes`, …**: run the scripts from the repository root.
+- **`ModuleNotFoundError: No module named 'eccentric'`**: run from the repository root or install the package with `pip install -e .`.
+- **Workers killed / out of memory**: lower the number of parallel workers, e.g. `python -m eccentric -j 4 configs/size.yaml`.
 - **A configuration produces no row in `results.csv`**: check `experiment_results/<name>/experiment.log`. Configurations where the code does not fit on the backend (distance < 3) are skipped and logged.
 
 ## Citation

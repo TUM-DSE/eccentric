@@ -200,7 +200,6 @@ class NoiseModel:
             pre.append_operation("Z_ERROR" if op.name.endswith("X") else "X_ERROR", targets, p)
             self.add_qubit_error(post, targets, self.get_gate_time(op))
         elif op.name == "MPP":
-            assert len(targets) % 3 == 0 and all(t.is_combiner for t in targets[1::3]), repr(op)
             assert args == [] or args == [0]
             if op.name in self.noisy_gates:
                 p = self.noisy_gates[op.name]
@@ -208,6 +207,7 @@ class NoiseModel:
                 p = self.measure()
 
             if self.use_correlated_parity_measurement_errors:
+                assert len(targets) % 3 == 0 and all(t.is_combiner for t in targets[1::3]), repr(op)
                 for k in range(0, len(targets), 3):
                     mid += parity_measurement_with_correlated_measurement_noise(
                         t1=targets[k],

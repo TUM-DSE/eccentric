@@ -1,6 +1,6 @@
 import stim
 import numpy as np
-import chromobius
+import chromobius as chromobius_lib
 
 def chromobius(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool):
         dets, actual_obs_flips = circuit.compile_detector_sampler().sample(
@@ -8,7 +8,7 @@ def chromobius(circuit: stim.Circuit, num_shots: int, approximate_disjoint_error
             separate_observables=True,
             bit_packed=True,
         )
-        decoder = chromobius.compile_decoder_for_dem(
+        decoder = chromobius_lib.compile_decoder_for_dem(
             circuit.detector_error_model(),
             approximate_disjoint_errors=approximate_disjoint_errors
         )
