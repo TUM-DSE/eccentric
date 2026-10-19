@@ -8,7 +8,6 @@ from matplotlib.ticker import LogLocator
 from matplotlib.ticker import ScalarFormatter
 from matplotlib.patches import Rectangle
 
-# Marker styles for different codes
 marker_styles = {
     'gross': 'o',
     'bacon': 's',
@@ -19,14 +18,12 @@ marker_styles = {
     'other': ''
 }
 
-# Code display names
 code_rename_map = {
     'bacon': 'Bacon-Shor',
     'hh': 'Heavy-hex',
     'gross': 'Gross'
 }
 
-# Error type mapping
 error_type_map = {
     'Constant': 'constant',
     'SI1000': 'modsi1000'
@@ -40,7 +37,6 @@ decoder_map = {
     'chromobius': 'Chromobius'
 }
 
-# Backend display names
 backend_rename_map = {
     "real_willow": "Willow",
     "real_willow_ns": "Willow",
@@ -54,18 +50,15 @@ backend_rename_map = {
     "real_nighthawk_1_qpu": "1 QPU"
 }
 
-# Color palette and hatches for bars
 code_palette = sns.color_palette("pastel", n_colors=8)
 code_hatches = ["/", "\\", "//", "++", "xx", "**"]
 
-# Figure sizes and font
 WIDE_FIGSIZE = 6
 HEIGHT_FIGSIZE = 2.2
 FONTSIZE = 12
-BAR_WIDTH = 0.2  # constant bar width for consistency with size plot
+BAR_WIDTH = 0.2
 group_spacing = 0.4
 
-# Highlight backend sizes for specific codes and error types
 HIGHLIGHT = {
     ('surface', 'Constant'): [400, 500],
     ('hh', 'Constant'): [450],
@@ -78,24 +71,18 @@ HIGHLIGHT = {
 }
 
 
-# Matplotlib rcParams settings
 tex_fonts = {
-    # Use LaTeX to write all text
-    # "text.usetex": True,
     "font.family": "serif",
-    # Font sizes
     "axes.labelsize": FONTSIZE,
     "font.size": FONTSIZE,
     "legend.fontsize": FONTSIZE - 2,
     "xtick.labelsize": FONTSIZE - 2,
     "ytick.labelsize": FONTSIZE - 2,
     "axes.titlesize": 10,
-    # Line and marker styles
     "lines.linewidth": 2,
     "lines.markersize": 6,
     "lines.markeredgewidth": 1.5,
     "lines.markeredgecolor": "black",
-    # Error bar cap size
     "errorbar.capsize": 3,
 }
 

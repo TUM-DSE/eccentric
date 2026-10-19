@@ -1,14 +1,12 @@
 import numpy as np
 from qiskit.transpiler import InstructionProperties, Target, CouplingMap
 from qiskit.circuit.library import RZGate, XGate, SXGate, CZGate, Measure, Reset
-# TODO: Delay
 from qiskit.circuit import Parameter
 from qiskit.providers import BackendV2, Options
 from qiskit.visualization import plot_coupling_map
 
 class FakeGoogleWillowBackend(BackendV2):
-    """Fake Google Willow Backend."""
-    
+
     def __init__(self, extended=False):
         super().__init__(name="FakeGoogleWillow", backend_version=2)
         if extended:
@@ -23,31 +21,31 @@ class FakeGoogleWillowBackend(BackendV2):
     @property
     def target(self):
         return self._target
-    
+
     @property
     def max_circuits(self):
         return None
-    
+
     @property
     def coupling_map(self):
         return self._coupling_map
-    
+
     @property
     def qubit_positions(self):
         return self._qubit_positions
-    
+
     @property
     def get_remote_gates(self):
         return []
-    
+
     @property
     def num_qubits(self):
         return self._num_qubits
-    
+
     @classmethod
     def _default_options(cls):
         return Options(shots=1024)
-    
+
     @classmethod
     def _get_real_qubit_positions(cls):
         qubit_positions = [
@@ -67,7 +65,7 @@ class FakeGoogleWillowBackend(BackendV2):
         ]
         max_row = max(row for row, col in qubit_positions)
         return [(max_row - row, col) for row, col in qubit_positions]
-    
+
     @classmethod
     def _get_extended_qubit_positions(cls):
         qubit_positions_1 = [
@@ -92,19 +90,19 @@ class FakeGoogleWillowBackend(BackendV2):
         qubit_positions = qubit_positions_1 + qubit_positions_2 + qubit_positions_3
         max_row = max(row for row, col in qubit_positions)
         return [(max_row - row, col) for row, col in qubit_positions]
-    
+
     @classmethod
     def _get_coupling_list(cls, qubit_positions):
         coupling_list = []
         pos_to_index = {pos: idx for idx, pos in enumerate(qubit_positions)}
-        
+
         for row, col in qubit_positions:
             if (row + 1, col) in pos_to_index:
                 coupling_list.append((pos_to_index[(row, col)], pos_to_index[(row + 1, col)]))
             if (row, col + 1) in pos_to_index:
                 coupling_list.append((pos_to_index[(row, col)], pos_to_index[(row, col + 1)]))
         return coupling_list
-    
+
     def run(self, circuit, **kwargs):
         raise NotImplementedError("This backend does not contain a run method")
 

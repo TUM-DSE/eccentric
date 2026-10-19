@@ -36,11 +36,8 @@ bqskit_stim = [
     SdgGate(),
     SwapGate(),
     Reset(),
-    #MeasureGate(),
-    #BarrierPlaceholder(), # it deals with measure/barrier anyway it seems
 ]
 
-# TODO: either we need to provide custom tk1 to clifford gates decomposition or use a diff set for experiments
 tket_stim = [
     OpType.X,
     OpType.Y,
@@ -55,11 +52,8 @@ tket_stim = [
     OpType.Reset,
     OpType.Measure,
     OpType.Barrier,
-    # TODO: remove
-    #OpType.Rz
 ]
 
-#TODO: do we want to add ID?
 qiskit_ibm_heron = [
     "x",
     "sx",
@@ -86,7 +80,7 @@ bqskit_ibm_heron = [
 tket_ibm_heron = [
     OpType.X,
     OpType.SX,
-    OpType.ZZPhase, #same as RZZ
+    OpType.ZZPhase,
     OpType.Rz,
     OpType.Rx,
     OpType.CZ,
@@ -95,8 +89,6 @@ tket_ibm_heron = [
     OpType.Barrier,
 ]
 
-#qiskit has no fixed zz gate
-#added rxx and ryy gates to simulate SU(4)
 qiskit_h2 = [
     "rx",
     "ry",
@@ -119,7 +111,6 @@ bqskit_h2 = [
     RYYGate(),
     Reset(),
 ]
-
 
 
 tket_h2 =[
@@ -158,7 +149,7 @@ def translate(circuit, translating_method, gate_set=None, level=0):
         qiskit_circuit = transpile(
             circuit,
             basis_gates=gate_set_obj,
-            optimization_level=level, # TODO: 3 just for experiments!
+            optimization_level=level,
         )
         return qiskit_circuit
 
@@ -167,7 +158,6 @@ def translate(circuit, translating_method, gate_set=None, level=0):
         model = MachineModel(bqskit_circuit.num_qudits, gate_set=gate_set_obj)
         print(model.gate_set)
         bqskit_circuit = compile(bqskit_circuit, model=model, optimization_level=1)
-        #return bqskit_to_qiskit(bqskit_circuit)
         return bqskit_circuit
 
     elif translating_method == "tket":
@@ -198,7 +188,6 @@ def translate(circuit, translating_method, gate_set=None, level=0):
                 RemoveRedundancies()
             ])
             level3_pipeline.apply(tket_circuit)
-        #return tk_to_qiskit(tket_circuit)
         return tket_circuit
 
     else:

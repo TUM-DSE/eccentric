@@ -1,18 +1,11 @@
 import sys
 
 def filter_file(input_file):
-    """
-    Reads an input file, removes lines containing "ERROR" or "DEPOLARIZE",
-    and prints the filtered content to standard output.
-
-    Args:
-        input_file: The path to the input file.
-    """
     try:
         with open(input_file, 'r') as f:
             for line in f:
                 if "ERROR" not in line and "DEPOLARIZE" not in line:
-                    print(line, end='')  # Print without extra newline
+                    print(line, end='')
     except FileNotFoundError:
         print(f"Error: File '{input_file}' not found.")
     except Exception as e:

@@ -1,7 +1,6 @@
 import sys
 
 def normalize_stim_line(line):
-    """Expands gates with multiple targets into separate lines."""
     tokens = line.strip().split()
     if not tokens:
         return []
@@ -9,17 +8,14 @@ def normalize_stim_line(line):
     gate = tokens[0]
     targets = tokens[1:]
 
-    # Skip comments or unsupported lines
     if gate.startswith('#') or gate == '':
         return []
 
-    # Handle gates like 'CX 0 1 1 2' → [('CX', [0, 1]), ('CX', [1, 2])]
     if gate in {"CX", "CZ", "SWAP"}:
         if len(targets) % 2 != 0:
             raise ValueError(f"Invalid 2-target gate: {line}")
         return [f"{gate} {targets[i]} {targets[i+1]}" for i in range(0, len(targets), 2)]
-    
-    # Single-qubit gates (H, M, etc.)
+
     return [f"{gate} {target}" for target in targets]
 
 def normalize_file(filename):
@@ -29,7 +25,7 @@ def normalize_file(filename):
     normalized = []
     for line in lines:
         normalized.extend(normalize_stim_line(line))
-    
+
     return sorted(normalized)
 
 def compare_files(file1, file2):

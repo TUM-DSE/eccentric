@@ -9,7 +9,7 @@ def chromobius(circuit: stim.Circuit, num_shots: int, approximate_disjoint_error
             bit_packed=True,
         )
         decoder = chromobius.compile_decoder_for_dem(
-            circuit.detector_error_model(), 
+            circuit.detector_error_model(),
             approximate_disjoint_errors=approximate_disjoint_errors
         )
         predicted_obs_flips = decoder.predict_obs_flips_from_dets_bit_packed(dets)

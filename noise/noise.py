@@ -5,9 +5,7 @@ import random
 random.seed(123)
 import numpy as np
 
-#################################################################################################################
 # Based on: https://github.com/Strilanc/honeycomb_threshold/blob/main/src/noise.py
-#################################################################################################################
 from typing import Optional, Dict, Set, Tuple, List, Union, Callable
 
 import stim
@@ -47,13 +45,9 @@ class NoiseModel:
         self.reset = reset
         self.measure = measure
         self.shuttle = shuttle
-        # Remote can either be one single number, or dictionary containing remote pairs and their noise level. If remote
-        # is a single number, and no qubit tracking is provided, no remote connections are taken into consideration
         self.remote = remote
         self.noisy_gates = noisy_gates
         self.gate_times = gate_times
-        # If there is no qubit tracking provided, it is still possible to utilize remote_gates functionality. For this
-        # provided the remote_gates and their noise strength in the self.remote property
         self.qt = qt
         self.backend = backend
         self.use_correlated_parity_measurement_errors = use_correlated_parity_measurement_errors
@@ -62,7 +56,7 @@ class NoiseModel:
         else:
             self.measure_func = lambda: measure
 
-    
+
     def add_qubit_error(self, circuit: stim.Circuit, qubits: List[stim.GateTarget], gate_duration: float) -> None:
         # https://arxiv.org/pdf/1404.3747
 
@@ -73,7 +67,6 @@ class NoiseModel:
             t1 = qubit_properties.t1
             t2 = qubit_properties.t2
 
-            # Safety check
             if t1 <= 0 or t2 <= 0:
                 continue
 
@@ -90,7 +83,6 @@ class NoiseModel:
     def add_crosstalk_errors(self, touched_qubits: set[int], post: stim.Circuit):
         if self.backend == None:
             return
-        # TODO: could be enhanced by correlated errors
         already_noised = set()
         for q in touched_qubits:
             for neighbor in self.qt.get_neighbours(q):
@@ -108,7 +100,6 @@ class NoiseModel:
                     circuit.append_operation(pauli, [q], 1.0)
                     self.qt.leak_qubit(q)
 
-    # TODO: add targets type
     def add_leakage_errors(self, circuit: stim.Circuit, targets):
         qubit_targets = [t for t in targets if t.is_qubit_target]
         for target in qubit_targets:
@@ -116,15 +107,12 @@ class NoiseModel:
                 pauli = random.choice(["X_ERROR", "Y_ERROR", "Z_ERROR"])
                 circuit.append_operation(pauli, [target], 1.0)
                 self.qt.leak_qubit(target.value)
-    
+
     def is_remote(self, pair: List[int]) -> bool:
-        #if self.qt == None or self.backend == None:
-        #    return False
-        
+
         if self.qt == None:
             if self.remote == None or isinstance(self.remote, (int, float)): return False
             else:
-                # pair is a list, but remote needs this as pair
                 return tuple(pair) in self.remote
 
         if hasattr(self.backend, 'get_remote_gates'):
@@ -137,7 +125,7 @@ class NoiseModel:
     def get_gate_time(self, op: stim.CircuitInstruction, pair: Optional[List[int]] = None) -> Union[float, None]:
         if self.gate_times == {}:
             return 0
-        
+
         if pair:
             if self.backend and self.is_remote(pair):
                 if self.backend.name == "FakeQuantinuumApollo" or self.backend.name == "FakeInfleqtion":
@@ -146,7 +134,7 @@ class NoiseModel:
                     return self.gate_times["REMOTE"]
             else:
                 return self.gate_times["TQ"]
-                   
+
         if op.name in SQ_OPS:
             return self.gate_times["SQ"]
         elif op.name in RESET_OPS:
@@ -162,10 +150,10 @@ class NoiseModel:
         post = stim.Circuit()
         targets = op.targets_copy()
         args = op.gate_args_copy()
-        
+
         if self.leakage > 0:
             self.add_leakage_errors(post, targets)
-        
+
         if op.name in SQ_OPS:
             if op.name in self.noisy_gates:
                 post.append_operation("DEPOLARIZE1", targets, self.noisy_gates[op.name])
@@ -188,7 +176,6 @@ class NoiseModel:
                         if isinstance(self.remote, (int, float)):
                             post.append_operation("DEPOLARIZE2", pair, self.remote)
                         else:
-                            # Get strength based on the noise level of this pair
                             noise = self.remote[tuple(pair)]
                             post.append_operation("DEPOLARIZE2", pair, noise)
                     else:
@@ -279,7 +266,7 @@ class NoiseModel:
                     flush()
                     result.append_operation("TICK", [])
                     continue
-                
+
                 if op.name in SWAP_OPS and self.qt != None:
                     self.qt.update_stim_swaps(op)
 
@@ -295,10 +282,10 @@ class NoiseModel:
                 }
                 if op.name in ANNOTATION_OPS:
                     touched_qubits.clear()
-                
+
                 if self.crosstalk > 0:
                     self.add_crosstalk_errors(touched_qubits, post)
-                
+
                 used_qubits |= touched_qubits
                 if op.name in MEASURE_OPS:
                     measured_qubits |= touched_qubits
@@ -323,8 +310,6 @@ def parity_measurement_with_correlated_measurement_noise(
 
     ind_p = mix_probability_to_independent_component_probability(mix_probability, 5)
 
-    # Generate all possible combinations of (non-identity) channels.  Assumes triple of targets
-    # with last element corresponding to measure qubit.
     circuit = stim.Circuit()
     circuit.append_operation('R', [ancilla])
     if t1.is_x_target:

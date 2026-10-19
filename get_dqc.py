@@ -37,9 +37,7 @@ def run_experiment(
     translating_method=None,
 ):
     try:
-        print("Starting experiment")
         backend = get_backend(backend_name, backend_size)
-        print("Got backend")
         if d == None:
             d = get_max_d(code_name, backend.coupling_map.size())
             print(f"Max distance for {code_name} on backend {backend_name} is {d}")
@@ -48,22 +46,19 @@ def run_experiment(
                     f"{experiment_name} | Logical error rate for {code_name} with distance {d}, backend {backend_name}: Execution not possible"
                 )
                 return
-        
+
         if cycles is not None and cycles <= 1:
             logging.info(
                 f"{experiment_name} | Logical error rate for {code_name} with distance {d}, backend {backend_name}: Execution not possible, cycles must be greater than 1"
             )
             return
-        
+
         if cycles is None:
             cycles = d
-        
-              
-        print("Got distance")
+
+
         code = get_code(code_name, d, cycles)
-        print(f"Got code")
         detectors, logicals = code.stim_detectors()
-        print("Before translating")
 
         if translating_method:
             code.qc = translate(code.qc, translating_method)
@@ -113,9 +108,9 @@ def run_experiment(
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print(f"Remember to add YAML file!")
+        print("Usage: python3 get_dqc.py <config.yaml>")
         sys.exit(1)
-    
+
     conf_file = sys.argv[1]
 
     with open(conf_file, "r") as f:
@@ -138,7 +133,6 @@ if __name__ == "__main__":
         save_experiment_metadata(experiment, experiment_name)
         manager = Manager()
         lock = manager.Lock()
-        # TODO: better handling case if distances and backends_sizes are both set
 
         with ProcessPoolExecutor() as executor:
             if "backends_sizes" in experiment and "distances" in experiment:

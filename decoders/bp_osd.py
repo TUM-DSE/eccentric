@@ -3,13 +3,11 @@ import numpy as np
 from ldpc import bposd_decoder
 from stimbposd import (
     BPOSD,
-)  # doesn't work with current ldpcv2 code  pip install -U ldpc==0.1.60
+)
 from scipy.sparse import csc_matrix
 from typing import Dict, List, FrozenSet
 
-#########################################################################
 # Functions adapted from https://github.com/gongaa/SlidingWindowDecoder
-#########################################################################
 
 
 def dict_to_csc_matrix(elements_dict, shape):
@@ -27,9 +25,9 @@ def dict_to_csc_matrix(elements_dict, shape):
 
 
 def dem_to_check_matrices(dem: stim.DetectorErrorModel, return_col_dict=False):
-    DL_ids: Dict[str, int] = {}  # detectors + logical operators
-    L_map: Dict[int, FrozenSet[int]] = {}  # logical operators
-    priors_dict: Dict[int, float] = {}  # for each fault
+    DL_ids: Dict[str, int] = {}
+    L_map: Dict[int, FrozenSet[int]] = {}
+    priors_dict: Dict[int, float] = {}
 
     def handle_error(prob: float, detectors: List[int], observables: List[int]) -> None:
         dets = frozenset(detectors)
@@ -42,7 +40,6 @@ def dem_to_check_matrices(dem: stim.DetectorErrorModel, return_col_dict=False):
 
         hid = DL_ids[key]
         L_map[hid] = obs
-        #         priors_dict[hid] = priors_dict[hid] * (1 - prob) + prob * (1 - priors_dict[hid])
         priors_dict[hid] += prob
 
     for instruction in dem.flattened():

@@ -12,14 +12,12 @@ from qiskit.providers import QubitProperties
 # Taken from https://arxiv.org/pdf/2408.08288
 
 class FakeInfleqtionNoShuttlingBackend(BackendV2):
-    """Fake Infleqtion Backend."""
     def __init__(self, extended=False):
         super().__init__(name="FakeInfleqtion", backend_version=2)
         if extended:
             self.rows = 16
             self.columns = 24
         else:
-            # rescaled 3x each side
             self.rows = 4
             self.columns = 6
         self._coupling_map = CouplingMap.from_grid(self.rows, self.columns)
@@ -31,40 +29,40 @@ class FakeInfleqtionNoShuttlingBackend(BackendV2):
     @property
     def target(self):
         return self._target
-    
+
     @property
     def max_circuits(self):
         return None
-    
+
     @property
     def coupling_map(self):
         return self._coupling_map
-    
+
     @property
     def qubit_positions(self):
         return self._qubit_positions
-    
+
     @property
     def get_remote_gates(self):
         return self._remote_gates
-    
+
     @property
     def num_qubits(self):
         return self._num_qubits
-    
+
     @property
     def coupling_map(self):
         return self._coupling_map
-    
+
     @classmethod
     def _default_options(cls):
         return Options(shots=1024)
-    
+
     def addStateOfTheArtQubits(self):
         qubit_props = []
 
-        t1 = 26 # atom loss lifetime
-        t2 = 2.8 # 2.8 seconds estimated T2 with decoupling (12.7(5) ms without)
+        t1 = 26
+        t2 = 2.8
 
         for i in range(self.num_qubits):
             qubit_props.append(QubitProperties(t1=t1, t2=t2))

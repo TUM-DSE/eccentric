@@ -14,7 +14,6 @@
 
 # pylint: disable=invalid-name, disable=no-name-in-module, disable=no-member
 
-"""Generates CodeCircuits from stim circuits"""
 import warnings
 
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
@@ -38,11 +37,10 @@ from stim import Circuit as StimCircuit
 
 from glue.qiskit_qec.code_circuit import CodeCircuit
 
-# Instruction representing the detectors
 class DetectorInstruction(Instruction):
     def __init__(self, coords, rec_indices):
         params = {"coords": coords, "rec_indices": rec_indices}
-        super().__init__("DETECTOR", 1, 0, [params])  
+        super().__init__("DETECTOR", 1, 0, [params])
 
 class ShiftCoordsInstruction(Instruction):
     def __init__(self, shift_vector):
@@ -52,12 +50,12 @@ class ShiftCoordsInstruction(Instruction):
 class ObservableInclude(Instruction):
     def __init__(self, coords, rec_indices):
         params = {"coords": coords, "rec_indices": rec_indices}
-        super().__init__("OBSERVABLE_INCLUDE", 1, 0, [params])  
+        super().__init__("OBSERVABLE_INCLUDE", 1, 0, [params])
 
 class QubitCoords(Instruction):
     def __init__(self, coords, index: int):
         params = {"coords": coords, "index": index}
-        super().__init__("QUBIT_COORDS", 1, 0, [params])  
+        super().__init__("QUBIT_COORDS", 1, 0, [params])
 
 class StimCodeCircuit(CodeCircuit):
     """
@@ -69,27 +67,6 @@ class StimCodeCircuit(CodeCircuit):
         stim_circuit: StimCircuit,
         barriers: bool = True,
     ):
-        """
-        Args:
-            stim_circuit: stim circuit to be coverted
-            barriers (optional): whether to include barriers (coeersponding to stim TICK instructions)
-                in the qiskit circuits. Default is True
-        Examples:
-            Prepare and measure a Bell-state, checking the parity with a measurement
-            comparison (DETECTOR)
-            >>> from qiskit_qec.circuits.stim_code_circuit import StimCodeCircuit
-            >>> stim_ex1 = stim.Circuit('''
-            >>>     H 0
-            >>>     TICK
-            >>>     CX 0 1
-            >>>     X_ERROR(0.2) 0 1
-            >>>     TICK
-            >>>     M 0 1
-            >>>     DETECTOR rec[-1] rec[-2]
-            >>> ''')
-            >>> stim_code = StimCodeCircuit(stim_circuit = stim_ex1)
-            >>> stim_code.qc
-        """
         super().__init__()
         self.stim_circuit = stim_circuit
 
@@ -132,7 +109,7 @@ class StimCodeCircuit(CodeCircuit):
                             qubits = [target.value for target in instruction.targets_copy()]
                             for q in qubits:
                                 self.qc.append(single_qubit_gate_dict[inst_name], qargs=[q])
-                                
+
                         elif inst_name in two_qubit_gate_dict:
                             stim_targets = instruction.targets_copy()
                             for t1, t2 in zip(stim_targets[::2], stim_targets[1::2]):
@@ -141,7 +118,7 @@ class StimCodeCircuit(CodeCircuit):
                                     self.qc.append(two_qubit_gate_dict[inst_name], qargs=[q1, q2])
                                 elif t1.is_measurement_record_target:
                                     c1, q2 = t1.value, t2.value
-                                    inst_name = inst_name[1:]  # remove the C from CX,CY,CZ
+                                    inst_name = inst_name[1:]
                                     self.qc.append(
                                         single_qubit_gate_dict[inst_name], qargs=[q2]
                                     ).c_if(c1, 1)
@@ -180,57 +157,42 @@ class StimCodeCircuit(CodeCircuit):
                                 self.qc.x(flip_qubits)
                             meas_count += 1
 
-                            # NODE: add barrier to simplify preservation of measurement indices
                             self.qc.barrier()
                         elif inst_name == "R":
                             qubits = [target.value for target in instruction.targets_copy()]
 
                             self.qc.reset(qubits)
-                            # NOTE: Add barrier
-                            #self.qc.barrier()
 
                         elif inst_name == "TICK" and barriers:
                             self.qc.barrier()
 
                         elif inst_name == "QUBIT_COORDS":
-                            # Extract first item, since this can only be one item
                             qubit_index = [t.value for t in instruction.targets_copy()][0]
 
                             coords = instruction.gate_args_copy()
-                        
+
                             qcoord_instr = QubitCoords(coords, qubit_index)
                             qc_reg = self.qc.qregs[0]
                             self.qc.append(qcoord_instr, qargs=[qc_reg[qubit_index]])
 
                         elif inst_name == "DETECTOR":
-                            # Two options:
-                            # - Add the detector information to one qubit and add a barrier statement directly afterwards
-                            # - Add the detector to all qubits (this duplicate information needs to be removed afterwards)
-                            #   and thus no barrier is needed
-                            # - Note: the measurements, detectors etc. should always be wrapper with TICK, which is
-                            #         translated into a barrier
 
                             rec_indices = [t.value for t in instruction.targets_copy()]
                             coords = instruction.gate_args_copy()
-                            
+
                             det_instr = DetectorInstruction(coords, rec_indices)
 
-                            #for q in qc_reg:
-                            #    self.qc.append(det_instr, qargs=[q],)
                             qc_reg = self.qc.qregs[0]
                             self.qc.append(det_instr, qargs=[qc_reg[0]])
-                            # It is only necessary to add the detector information once, since the detectors and 
-                            # measurements are always wrapped with TICKS!
 
                         elif inst_name == "OBSERVABLE_INCLUDE":
                             rec_indices = [t.value for t in instruction.targets_copy()]
                             coords = instruction.gate_args_copy()
-                            
+
                             obs_instr = ObservableInclude(coords, rec_indices)
-                            # Add OBSERVABLE_INCLUDE to the first qubit of the circuit
                             qc_reg = self.qc.qregs[0]
                             self.qc.append(obs_instr, qargs=[qc_reg[0]])
-                            
+
                         elif inst_name == "SHIFT_COORDS":
                             coords = instruction.gate_args_copy()
                             shift_instr = ShiftCoordsInstruction(coords)
@@ -245,8 +207,6 @@ class StimCodeCircuit(CodeCircuit):
         self.circuit = {"": self.qc}
         self.base = ""
 
-        # if a set of measurement comparisons is deterministically 1 in the absence of errors,
-        # the set of syndromes is compared to that
         noiseless_measurements = self.decomp_stim_circuit.compile_sampler().sample(1)[0]
         clbit_dict = {
             (clbit._register.name, clbit._index): clind
@@ -259,21 +219,14 @@ class StimCodeCircuit(CodeCircuit):
             sum(noiseless_measurements[meas_list]) % 2 for meas_list in detector_meas_indices
         ]
 
-        # further code parameters
         try:
-            self.d = len(self.stim_circuit.shortest_graphlike_error())  # code distance
+            self.d = len(self.stim_circuit.shortest_graphlike_error())
         except ValueError:
             self.d = 0
         self.n = stim_circuit.num_qubits
-        # the number of rounds is not necessarily well-defined (Floquet codes etc.)
 
     def decompose_stim_circuit(self, stim_circuit):
-        """
-        Decompose gates in the stim circuit into Clifford gates that have an equivalent qiskit gate.
-        Errors are not included.
-        """
         decompose_1_dict = {
-            # single-qubit gates
             "C_XYZ": [("S_DAG", [0]), ("H", [0])],
             "C_ZYX": [("H", [0]), ("S", [0])],
             "H_XY": [("X", [0]), ("S", [0])],
@@ -288,7 +241,6 @@ class StimCodeCircuit(CodeCircuit):
         }
 
         decompose_2_dict = {
-            # two-qubit gates
             "CNOT": [("CX", [0, 1])],
             "CXSWAP": [("CX", [0, 1]), ("SWAP", [0, 1])],
             "SWAPCX": [("SWAP", [0, 1]), ("CX", [0, 1])],
@@ -371,7 +323,6 @@ class StimCodeCircuit(CodeCircuit):
             "ZCZ": [("CZ", [0, 1])],
         }
         decompose_m_dict = {
-            # measurements
             "MX": [("H", [0]), ("M", [0]), ("H", [0])],
             "MY": [
                 ("S_DAG", [0]),
@@ -461,7 +412,7 @@ class StimCodeCircuit(CodeCircuit):
                     if instruction.name in ("MXX", "MYY", "MZZ"):
                         if len(set(target_list)) < len(
                             target_list
-                        ):  # avoiding overlaps that result from stim broadcating
+                        ):
                             target_list = [
                                 target_list[i : i + 2] for i in range(0, len(target_list), 2)
                             ]
@@ -516,24 +467,12 @@ class StimCodeCircuit(CodeCircuit):
                 elif instruction.name == "MPP":
                     decomposed_stim_circuit += self.MPP_circuit(instruction)
                 elif instruction.name == "MPAD":
-                    # MPAD does affect the stim measurement sample output, but not the detector sample.
-                    # This is due to the fact that detectors are sensitive to changes
-                    # wrt the perfect output,
-                    # R 0
-                    # MPAD 1
-                    # M 0
-                    # DETECTOR rec[-1] rec[-2]
-                    # The above example results in a deterministinc detector samples False, not True!
-                    #
-                    # MPAD can have an effect on measurements, when a CX is controlled on an MPAD bit...
-                    # but what is the point of that anyway?
                     warnings.warn(
                         "The circuit contains MPAD instructions that are ignored in the conversion."
                         "This can affect the measurement outcomes, but not the detectors."
                     )
                     pass
                 elif instruction.name in stim_error_list:
-                    # do not include errors
                     pass
                 else:
                     gate = instruction.name
@@ -551,11 +490,9 @@ class StimCodeCircuit(CodeCircuit):
         return decomposed_stim_circuit
 
     def MPP_circuit(self, stim_instruction):
-        """Handle MPP measurements."""
         MPP_stim_circuit = StimCircuit()
         arg = stim_instruction.gate_args_copy()
 
-        # break it down into individual Pauli products
         target_lists = []
         target_list = []
         prev_is_combiner = True
@@ -600,45 +537,15 @@ class StimCodeCircuit(CodeCircuit):
         return MPP_stim_circuit
 
     def string2nodes(self, string, **kwargs):
-        """
-        Convert output string from circuits into a set of nodes for `DecodingGraph`.
-        Args:
-            string (string): Results string to convert.
-            kwargs (dict): Any additional keyword arguments.
-                logical (str): Logical value whose results are used ('0' as default).
-                all_logicals (bool): Whether to include logical nodes
-                irrespective of value. (False as default).
-        """
 
-        #nodes = string2nodes_with_detectors(
-        #    string=string,
-        #    detectors=self.detectors,
-        #    logicals=self.logicals,
-        #    clbits=self.qc.clbits,
-        #    det_ref_values=self.det_ref_values,
-        #    **kwargs,
-        #)
-        #return nodes
         raise NotImplementedError
 
     def string2raw_logicals(self, string):
-        """
-        Converts output string into a list of logical measurement outcomes
-        Logicals are the logical measurements produced by self.stim_detectors()
-        """
-        #_, self.logicals = self.stim_detectors()
 
-        #log_outs = string2logical_meas(string, self.logicals, self.circuit.clbits)
 
-        #return log_outs
         raise NotImplementedError
 
     def _make_syndrome_graph(self):
-        #e = self.stim_circuit.detector_error_model(
-        #    decompose_errors=True, approximate_disjoint_errors=True
-        #)
-        #graph, hyperedges = detector_error_model_to_rx_graph(e, detectors=self.detectors)
-        #return graph, hyperedges
         raise NotImplementedError
 
     def check_nodes(self, nodes, ignore_extras=False, minimal=False):
@@ -646,6 +553,6 @@ class StimCodeCircuit(CodeCircuit):
 
     def is_cluster_neutral(self, nodes):
         raise NotImplementedError
-    
+
     def stim_detectors(self):
         return self.detectors, self.logicals

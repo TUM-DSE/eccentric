@@ -9,9 +9,6 @@ class ArtificialVarianceNoise(NoiseModel):
 
     @staticmethod
     def measure() -> float:
-        """
-        Log-normal distribution since it makes more sense here
-        """
         if ArtificialVarianceNoise.m_sigma == 0.0:
             return ArtificialVarianceNoise.m_base
 
@@ -40,7 +37,7 @@ class ArtificialVarianceNoise(NoiseModel):
         return NoiseModel(
             sq=0.00025,
             tq=0.002,
-            measure=cls.measure,  
+            measure=cls.measure,
             gate_times={
                 "SQ": 50e-9,
                 "TQ": 70e-9,

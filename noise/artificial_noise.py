@@ -34,7 +34,6 @@ class ArtificialNoise(NoiseModel):
 
     @staticmethod
     def EM3_v1(p: float, qt) -> 'NoiseModel':
-        """EM3 but with measurement flip errors independent of measurement target depolarization error."""
         return NoiseModel(
             idle=p,
             measure=0,
@@ -50,7 +49,6 @@ class ArtificialNoise(NoiseModel):
 
     @staticmethod
     def EM3_v2(p: float, qt) -> 'NoiseModel':
-        """EM3 with measurement flip errors correlated with measurement target depolarization error."""
         return NoiseModel(
             sq=0,
             tq=0,
@@ -68,7 +66,6 @@ class ArtificialNoise(NoiseModel):
 
     @staticmethod
     def SI1000(p: float, qt, remote = None) -> 'NoiseModel':
-        """Inspired by superconducting device."""
         return NoiseModel(
             sq=p / 10,
             idle=p / 10,
@@ -82,10 +79,9 @@ class ArtificialNoise(NoiseModel):
                 "M": 5 * p,
             },
         )
-    
+
     @staticmethod
     def modSI1000(p: float, qt, remote = None) -> 'NoiseModel':
-        """Inspired by superconducting device."""
         return NoiseModel(
             sq=p / 10,
             tq = p,
@@ -100,10 +96,9 @@ class ArtificialNoise(NoiseModel):
                 "M": 5 * p,
             },
         )
-    
+
     @staticmethod
     def constant(p: float, qt, remote=None) -> 'NoiseModel':
-        """Inspired by superconducting device."""
         return NoiseModel(
             sq=p,
             tq=p,

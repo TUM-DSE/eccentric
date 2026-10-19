@@ -1,6 +1,4 @@
-#################################################################################################################
 # Taken from: https://github.com/Strilanc/honeycomb_threshold/blob/main/src/noise.py
-#################################################################################################################
 
 import dataclasses
 from typing import Optional, Dict, Set, Tuple
@@ -51,7 +49,6 @@ class OGNoiseModel:
 
     @staticmethod
     def EM3_v1(p: float) -> 'OGNoiseModel':
-        """EM3 but with measurement flip errors independent of measurement target depolarization error."""
         return OGNoiseModel(
             idle=p,
             measure_reset_idle=0,
@@ -65,7 +62,6 @@ class OGNoiseModel:
 
     @staticmethod
     def EM3_v2(p: float) -> 'OGNoiseModel':
-        """EM3 with measurement flip errors correlated with measurement target depolarization error."""
         return OGNoiseModel(
             any_clifford_1=0,
             any_clifford_2=0,
@@ -147,7 +143,6 @@ class OGNoiseModel:
             if not current_moment_mid:
                 return
 
-            # Apply idle depolarization rules.
             idle_qubits = sorted(qs - used_qubits)
             if used_qubits and idle_qubits and self.idle > 0:
                 current_moment_post.append_operation("DEPOLARIZE1", idle_qubits, self.idle)
@@ -155,7 +150,6 @@ class OGNoiseModel:
             if measured_or_reset_qubits and idle_qubits and self.measure_reset_idle > 0:
                 current_moment_post.append_operation("DEPOLARIZE1", idle_qubits, self.measure_reset_idle)
 
-            # Move current noisy moment into result.
             result += current_moment_pre
             result += current_moment_mid
             result += current_moment_post
@@ -190,7 +184,6 @@ class OGNoiseModel:
                 current_moment_mid += mid
                 current_moment_post += post
 
-                # Ensure the circuit is not touching qubits multiple times per tick.
                 touched_qubits = {
                     t.value
                     for t in op.targets_copy()
@@ -198,8 +191,6 @@ class OGNoiseModel:
                 }
                 if op.name in ANNOTATION_OPS:
                     touched_qubits.clear()
-                # Hack: turn off this assertion off for now since correlated errors are built into circuit.
-                #assert touched_qubits.isdisjoint(used_qubits), repr(current_moment_pre + current_moment_mid + current_moment_post)
                 used_qubits |= touched_qubits
                 if op.name in MEASURE_OPS or op.name in RESET_OPS:
                     measured_or_reset_qubits |= touched_qubits
@@ -211,14 +202,6 @@ class OGNoiseModel:
 
 
 def mix_probability_to_independent_component_probability(mix_probability: float, n: float) -> float:
-    """Converts the probability of applying a full mixing channel to independent component probabilities.
-
-    If each component is applied independently with the returned component probability, the overall effect
-    is identical to, with probability `mix_probability`, uniformly picking one of the components to apply.
-
-    Not that, unlike in other places in the code, the all-identity case is one of the components that can
-    be picked when applying the error case.
-    """
     return 0.5 - 0.5 * (1 - mix_probability) ** (1 / 2 ** (n - 1))
 
 
@@ -228,20 +211,9 @@ def parity_measurement_with_correlated_measurement_noise(
         t2: stim.GateTarget,
         ancilla: int,
         mix_probability: float) -> stim.Circuit:
-    """Performs a noisy parity measurement.
-
-    With probability mix_probability, applies a random element from
-
-        {I1,X1,Y1,Z1}*{I2,X2,Y2,Z2}*{no flip, flip}
-
-    Note that, unlike in other places in the code, the all-identity term is one of the possible
-    samples when the error occurs.
-    """
 
     ind_p = mix_probability_to_independent_component_probability(mix_probability, 5)
 
-    # Generate all possible combinations of (non-identity) channels.  Assumes triple of targets
-    # with last element corresponding to measure qubit.
     circuit = stim.Circuit()
     circuit.append_operation('R', [ancilla])
     if t1.is_x_target:

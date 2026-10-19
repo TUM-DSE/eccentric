@@ -7,9 +7,6 @@ from bqskit.ir.circuit import Circuit as BqskitCircuit
 import os
 
 def count_total_gates_qiskit(circuit: qiskit.QuantumCircuit):
-    """
-    Count the number of gates in a Qiskit circuit.
-    """
     count = 0
     gates = circuit.count_ops()
     for gate, num_gates in gates.items():
@@ -102,28 +99,20 @@ def count_swaps_qiskit(circuit: qiskit.QuantumCircuit):
     return 0
 
 def detailed_gate_count_qiskit(circuit: qiskit.QuantumCircuit):
-    """Returns a dictionary with the number of gates in a Qiskit circuit."""
     return circuit.count_ops()
 
 def count_total_gates_stim(circuit: stim.Circuit):
-    """
-    Count the number of gates in a Stim circuit.
-    """
-    #write circuit to file
     with open("circuit.txt", "w") as f:
         f.write(str(circuit))
-    #read circuit from file
     with open("circuit.txt", "r") as f:
         circuit_str = f.readlines()
 
-    # Count the number of gates
     count = 0
     repeat_cycles = 0
     repeating = False
     for line in circuit_str:
         line = line.strip()
         if line.startswith("REPEAT"):
-            #seperate the line by space
             l = line.split(" ")
             repeat_cycles = int(l[1])
             repeating = True
@@ -131,34 +120,30 @@ def count_total_gates_stim(circuit: stim.Circuit):
             repeating = False
             repeat_cycles = 0
         if line.startswith("H ") or line.startswith("S ") or line.startswith("X ") or line.startswith("Y ") or line.startswith("Z "):
-            #seperate the line by space
             l = line.split(" ")
             count += int(len(l)-1) * max(1, repeat_cycles*repeating)
-            
+
         elif line.startswith("CX ") or line.startswith("CZ "):
-            #seperate the line by space
             l = line.split(" ")
             count += int((int((len(l)-1)) * max(1, repeat_cycles*repeating))/2)
 
-    os.remove("circuit.txt")     
-    
+    os.remove("circuit.txt")
+
     return count
 
 def detailed_gate_count_stim(circuit: stim.Circuit):
     gates = {}
     with open("circuit.txt", "w") as f:
         f.write(str(circuit))
-    #read circuit from file
     with open("circuit.txt", "r") as f:
         circuit_str = f.readlines()
-    
+
     repeat_cycles = 0
     repeating = False
     for line in circuit_str:
         line = line.strip()
 
         if line.startswith("REPEAT"):
-            #seperate the line by space
             l = line.split(" ")
             repeat_cycles = int(l[1])
             repeating = True
@@ -167,20 +152,18 @@ def detailed_gate_count_stim(circuit: stim.Circuit):
             repeat_cycles = 0
 
         if line.startswith("H ") or line.startswith("S ") or line.startswith("X ") or line.startswith("Y ") or line.startswith("Z "):
-            #seperate the line by space
             l = line.split(" ")
             gate = l[0]
             if gate not in gates:
                 gates[gate] = 0
             gates[gate] += int(len(l)-1) * max(1, repeat_cycles*repeating)
         elif line.startswith("CX ") or line.startswith("CZ "):
-            #seperate the line by space
             l = line.split(" ")
             gate = l[0]
             if gate not in gates:
                 gates[gate] = 0
             gates[gate] += int((int((len(l)-1)) * max(1, repeat_cycles*repeating))/2)
-        else: # uncommon gates
+        else:
             l = line.split(" ")
             if l[0] in stim_gate_list.SINGLE_QUBIT_GATES:
                 if l[0] not in gates:
@@ -191,14 +174,13 @@ def detailed_gate_count_stim(circuit: stim.Circuit):
                     gates[l[0]] = 0
                 gates[gate] += int((int((len(l)-1)) * max(1, repeat_cycles*repeating))/2)
 
-    #os.remove("circuit.txt")
     return gates
 
 
 def tableau_fidelity(t1: stim.Tableau, t2: stim.Tableau) -> float:
     """Function by Craig Gidney
         soruce: https://quantumcomputing.stackexchange.com/questions/38826/how-do-i-efficiently-compute-the-fidelity-between-two-stabilizer-tableau-states
-    
+
     """
     t3 = t2**-1 * t1
     sim = stim.TableauSimulator()
@@ -216,36 +198,14 @@ def tableau_fidelity(t1: stim.Tableau, t2: stim.Tableau) -> float:
     return p
 
 def stabilizer_fidelity(starting_circuit, transpiled_circuit):
-    #check if stim type otherwise value error for now
     if type(starting_circuit) == qiskit.QuantumCircuit or type(transpiled_circuit) == qiskit.QuantumCircuit:
         raise ValueError("Stabilizer fidelity only works for stim circuits")
-    
+
     tableau_1 = stim.Tableau.from_circuit(starting_circuit, ignore_measurement=True, ignore_reset=True)
     tableau_2 = stim.Tableau.from_circuit(transpiled_circuit, ignore_measurement=True, ignore_reset=True)
     fidelity = tableau_fidelity(tableau_1, tableau_2)
     return fidelity
 
-
-"""
-def get_resource_overhead_total_gates(starting_circuit, transpiled_circuit):
-    if type(starting_circuit) == qiskit.QuantumCircuit:
-        starting_gates = count_total_gates_qiskit(starting_circuit)
-    elif type(starting_circuit) == stim.Circuit:
-        starting_gates = count_total_gates_stim(starting_circuit)
-    else:
-        raise ValueError("Unsupported circuit type")
-
-    if type(transpiled_circuit) == qiskit.QuantumCircuit:
-        transpiled_gates = count_total_gates_qiskit(transpiled_circuit)
-    elif type(transpiled_circuit) == stim.Circuit:
-        transpiled_gates = count_total_gates_stim(transpiled_circuit)
-    else:
-        raise ValueError("Unsupported circuit type")
-
-    gate_diff = transpiled_gates - starting_gates
-
-    return gate_diff
-"""
 
 def get_resource_overhead_1q_gates(starting_circuit, transpiled_circuit):
     def count_1q_gates(circuit):
@@ -305,13 +265,10 @@ def get_error_supression_factor_physical(physical_error_threshold, physical_erro
     return big_lamda
 
 
-
 def get_threshold_error_rate():
-    #TODO: implement this function  
     return None
 
 if __name__ == "__main__":
-    # Example usage for stim
     stim_circuit = stim.Circuit.generated(
         "surface_code:rotated_memory_z",
         rounds=3,

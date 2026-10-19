@@ -11,15 +11,12 @@ from typing import List, FrozenSet, Optional
 import stim
 
 
-##########################################################################################
-# https://github.com/Strilanc/heavy-hex-demo/
-##########################################################################################
+# Adapted from https://github.com/Strilanc/heavy-hex-demo/
 TItem = TypeVar('TItem')
 T = TypeVar("T")
 
 @dataclasses.dataclass(frozen=True)
 class AtLayer(Generic[T]):
-    """A special class that indicates the layer to read a measurement key from."""
     key: Any
     layer: int
 
@@ -34,7 +31,6 @@ def sorted_complex(
 
 
 class MeasurementTracker:
-    """Tracks measurements and groups of measurements, for producing stim record targets."""
     def __init__(self):
         self.recorded: Dict[Any, Optional[List[int]]] = {}
         self.next_measurement_index = 0
@@ -81,11 +77,6 @@ class MeasurementTracker:
 
 
 class Builder:
-    """Helper class for building stim circuits.
-
-    Handles qubit indexing (complex -> int conversion).
-    Handles measurement tracking (naming results and referring to them by name).
-    """
 
     def __init__(self,
                  *,
@@ -358,7 +349,6 @@ def make_mpp_based_round(*,
         if not desired_parity:
             builder.tick()
 
-    # Combined X column detectors
     if layer > 0 or time_boundary_basis == 'X':
         for combined_tiles in x_combos:
             pos = sum(tile.measure_qubit for tile in combined_tiles) / len(combined_tiles)
@@ -369,7 +359,6 @@ def make_mpp_based_round(*,
                 for d in ([0, 1] if layer > 0 else [0])
             ], pos=pos)
 
-    # Z detectors
     if layer > 0 or time_boundary_basis == 'Z':
         for combined_tiles in z_combos:
             kept_tiles = [tile for tile in combined_tiles if tile is not None]
@@ -390,19 +379,16 @@ def make_cx_based_round(*,
                         x_combos: List[List[Tile]],
                         z_combos: List[List[Optional[Tile]]],
                         include_flags: bool):
-    # step = 1
     builder.gate("R", [t.m for t in tiles])
     builder.tick()
     builder.gate("H", [t.m for t in tiles if t.basis == 'X'])
     builder.tick()
-    # step = 2
     builder.cx([
         (t.m, t.m + 0.5)
         for t in tiles
         if t.degree == 4
     ])
     builder.tick()
-    # step = 3
     builder.cx([
         (t.m + 0.5, t.m + 0.5 - 0.5j)
         for t in tiles
@@ -414,7 +400,6 @@ def make_cx_based_round(*,
         if t.degree == 4
     ])
     builder.tick()
-    # step = 4
     builder.cx([
         (t.m + 0.5, t.m + 0.5 + 0.5j)
         for t in tiles
@@ -430,10 +415,9 @@ def make_cx_based_round(*,
         for t in tiles
         if t.basis == 'X'
         if t.degree == 2
-        if t.data_qubits[0] is None  # (on top of patch)
+        if t.data_qubits[0] is None
     ])
     builder.tick()
-    # step = 5
     builder.cx([
         (t.m - 0.5, t.m - 0.5 - 0.5j)
         for t in tiles
@@ -449,17 +433,16 @@ def make_cx_based_round(*,
         for t in tiles
         if t.basis == 'X'
         if t.degree == 2
-        if t.data_qubits[0] is None  # (on top of patch)
+        if t.data_qubits[0] is None
     ])
     builder.cx([
         (t.m, t.m + 0.5)
         for t in tiles
         if t.basis == 'X'
         if t.degree == 2
-        if t.data_qubits[0] is not None  # (on bottom of patch)
+        if t.data_qubits[0] is not None
     ])
     builder.tick()
-    # step = 6
     builder.cx([
         (t.m, t.m - 0.5)
         for t in tiles
@@ -470,10 +453,9 @@ def make_cx_based_round(*,
         for t in tiles
         if t.basis == 'X'
         if t.degree == 2
-        if t.data_qubits[0] is not None  # (on bottom of patch)
+        if t.data_qubits[0] is not None
     ])
     builder.tick()
-    # step = 7
     builder.gate("H", [t.m for t in tiles if t.basis == 'X'])
     builder.tick()
     builder.measure([t.m for t in tiles if t.basis == 'X'], layer=layer)
@@ -493,14 +475,12 @@ def make_cx_based_round(*,
     builder.tick()
     builder.gate('R', [t.m for t in tiles if t.basis == 'Z'])
     builder.tick()
-    # step = 8
     builder.cx([
         (left.m - 0.5j, left.m)
         for left, right in z_combos
         if left is not None
     ])
     builder.tick()
-    # step = 9
     builder.cx([
         (left.m + 0.5j, left.m)
         for left, right in z_combos
@@ -512,17 +492,14 @@ def make_cx_based_round(*,
         if right is not None
     ])
     builder.tick()
-    # step = 10
     builder.cx([
         (right.m - 0.5j, right.m)
         for left, right in z_combos
         if right is not None
     ])
     builder.tick()
-    # step = 11
     builder.measure([t.m for t in tiles if t.basis == 'Z'], layer=layer)
 
-    # Combined X column detectors
     if layer > 0 or time_boundary_basis == 'X':
         for combined_tiles in x_combos:
             pos = sum(tile.measure_qubit for tile in combined_tiles) / len(combined_tiles)
@@ -533,7 +510,6 @@ def make_cx_based_round(*,
                 for d in ([0, 1] if layer > 0 else [0])
             ], pos=pos)
 
-    # Z detectors
     if layer > 0 or time_boundary_basis == 'Z':
         for combined_tiles in z_combos:
             kept_tiles = [tile for tile in combined_tiles if tile is not None]
@@ -560,7 +536,7 @@ def make_heavy_hex_circuit(
     m2t = {tile.measure_qubit: tile for tile in tiles}
     for tile in tiles:
         if tile.basis == 'X' and tile.degree == 2:
-            if tile.data_qubits[0] is None:  # top of patch
+            if tile.data_qubits[0] is None:
                 m2t[tile.m - 0.5j] = tile
             else:
                 m2t[tile.m + 0.5j] = tile
@@ -639,7 +615,6 @@ def make_heavy_hex_circuit(
         builder.tick()
     builder.measure(data_set, layer=layer)
 
-    # Final detectors
     final_tiles = x_combos if time_boundary_basis == 'X' else z_combos
     for combined_tiles in final_tiles:
         kept_tiles = [tile for tile in combined_tiles if tile is not None]
@@ -659,10 +634,6 @@ def make_heavy_hex_circuit(
     builder.obs_include([AtLayer(q, layer) for q in obs_qubits],
                         obs_index=0)
     return head + builder.circuit
-
-
-
-##########################################################################################
 
 
 def get_hh_code(d, T = None):

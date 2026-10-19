@@ -14,7 +14,6 @@
 
 # pylint: disable=invalid-name, disable=no-name-in-module, disable=unused-argument
 
-"""Tools to use functionality from Stim."""
 from typing import Union, List, Dict
 from math import log as loga
 from stim import Circuit as StimCircuit
@@ -75,7 +74,6 @@ def get_stim_circuits_with_detectors(
             "barrier": "TICK",
         }
 
-        # Instructions specific to detectors/measurements
         stim_detector_gates = [
             "DETECTOR",
             "SHIFT_COORDS",
@@ -106,15 +104,13 @@ def get_stim_circuits_with_detectors(
                 qargs[i]._index + qreg_offset[qargs[i]._register.name] for i in range(len(qargs))
             ]
 
-            # Gates and measurements
             if inst.name in qiskit_to_stim_dict:
-                #print(inst)
-                if len(cargs) > 0:  # keeping track of measurement indices in stim
+                if len(cargs) > 0:
                     measurement_data.append([cargs[0]._register.name, cargs[0]._index])
 
-                if qiskit_to_stim_dict[inst.name] == "TICK":  # barrier
+                if qiskit_to_stim_dict[inst.name] == "TICK":
                     stim_circuit.append("TICK")
-                elif hasattr(inst, "condition") and inst.condition is not None:  # handle c_ifs
+                elif hasattr(inst, "condition") and inst.condition is not None:
                     if inst.name in "xyz":
                         if inst.condition[1] == 1:
                             clbit = inst.condition[0]
@@ -130,7 +126,6 @@ def get_stim_circuits_with_detectors(
                                     qubit_indices[0],
                                 ],
                             )
-                            #stim_circuit.append("TICK")
                         else:
                             raise Exception(
                                 "Classically controlled gate must be conditioned on bit value 1"
@@ -139,16 +134,11 @@ def get_stim_circuits_with_detectors(
                         raise Exception(
                             "Classically controlled " + inst.name + " gate is not supported"
                         )
-                else:  # gates/measurements acting on qubits
+                else:
                     stim_circuit.append(qiskit_to_stim_dict[inst.name], qubit_indices)
-                    # Add barrier to two qubit gates, in order to not have stim combining these gates again
-                    #if inst.name in ["swap", "cx", "cy", "cz"]:
-                    #    stim_circuit.append("TICK")
             elif inst.name in stim_detector_gates:
                 if inst.name == "QUBIT_COORDS":
-                    # NOTE: ignore these for now, since stimcircuit has issues converting this back
                     stim_circuit.append("QUBIT_COORDS", [inst.params[0]['index']], inst.params[0]['coords'])
-                    #stim_circuit.append("TICK")
 
                     pass
                 elif inst.name == "DETECTOR" or inst.name == "OBSERVABLE_INCLUDE":
@@ -164,31 +154,19 @@ def get_stim_circuits_with_detectors(
                 raise Exception("Unexpected operations: " + str([inst, qargs, cargs]))
 
         compact_circ = StimCircuit()
-        #for layer in collect_circuit_layers(stim_circuit):
         for layer in collect_circuit_layers_with_ticks(stim_circuit):
             compact_circ += layer
             compact_circ.append_operation("TICK")
 
         stim_circuits.append(compact_circ)
         stim_measurement_data.append(measurement_data)
-    
+
 
     return stim_circuits, stim_measurement_data
 
 
 def collect_circuit_layers_with_ticks(circ: StimCircuit) -> list[StimCircuit]:
-    """Split a Stim circuit into parallel-executable layers between ticks
 
-    Split a Stim circuit into parallel-executable layers while keeping DETECTOR, OBSERVABLE_INCLUDE, SHIFT_COORDS,
-    QUBIT_COORDS in the same relative layer defined by TICK boundaries.
-
-    :param circ: Stim circuit to process
-    :type circ: StimCircuit
-    :return: list of circuit layers. All instructions in one layer can be executed in parallel.
-    :rtype: list[StimCircuit]
-    """
-
-    # Split circuit into tick-delimited layers
     tick_layers = [[]]
     for instr in circ:
         if instr.name == "TICK":
@@ -196,15 +174,12 @@ def collect_circuit_layers_with_ticks(circ: StimCircuit) -> list[StimCircuit]:
         else:
             tick_layers[-1].append(instr)
 
-    # ensure no trailing empty layer
     if tick_layers and len(tick_layers[-1]) == 0:
         tick_layers.pop()
 
-    # Iterate over tick layers
     for layer_instrs in tick_layers:
         circ_cpy = StimCircuit()
 
-    # Iterate over each tick-defined layer
     final_layers: list[StimCircuit] = []
     for layer_instrs in tick_layers:
         circ_cpy = StimCircuit()
@@ -213,7 +188,6 @@ def collect_circuit_layers_with_ticks(circ: StimCircuit) -> list[StimCircuit]:
 
         sublayers = collect_circuit_layers(circ_cpy)
 
-        # append the resulting sublayers
         final_layers.extend(sublayers)
 
     return final_layers
@@ -233,10 +207,8 @@ def collect_circuit_layers(circ: StimCircuit) -> list[StimCircuit]:
     """
 
 
-    # Copy the circuit and separate all instructions by ticks
     circ_cpy = StimCircuit()
     for instr in circ:
-        # Moved outside grouping, since these operations to not act on qubits, but carry additional parameters
         if (instr.name == "QUBIT_COORDS" or
             instr.name == "DETECTOR" or
             instr.name == "OBSERVABLE_INCLUDE" or
@@ -251,73 +223,53 @@ def collect_circuit_layers(circ: StimCircuit) -> list[StimCircuit]:
             circ_cpy.append_operation("TICK", [])
 
 
-    # Now work with the copied circuit
     circ = circ_cpy
     n_qubits = circ.num_qubits
     layers = []
 
     while len(circ) > 0:
         layer = StimCircuit()
-        # Track used qubits in this layer
-        qubit_layer_used = [False] * n_qubits 
-        # Track instructions to delete after adding them to the layer
-        instr_to_delete = []  
+        qubit_layer_used = [False] * n_qubits
+        instr_to_delete = []
         idx = 0
 
         while idx < len(circ):
             instr = circ[idx]
 
-            # Skip TICK instructions
             while instr is not None and instr.name == "TICK" and idx < len(circ):
                 circ.pop(idx)
                 instr = circ[idx] if idx < len(circ) else None
 
-            if instr is None:  # No more instructions to process
+            if instr is None:
                 break
-            
+
             if (instr.name == "QUBIT_COORDS" or
                 instr.name == "DETECTOR" or
                 instr.name == "OBSERVABLE_INCLUDE" or
                 instr.name == "SHIFT_COORDS"):
-                # Simply append these instructions
                 layer.append_operation(instr)
                 instr_to_delete.append(idx)
             else:
 
                 qubits = [q.qubit_value for q in instr.targets_copy()]
 
-                # Check if any qubit from this instruction is already used in the layer
                 if not any(qubit_layer_used[q] for q in qubits):
                     layer.append_operation(instr.name, qubits)
-                    instr_to_delete.append(idx)  # Mark this instruction for removal
+                    instr_to_delete.append(idx)
 
-                # Mark the qubits used in this instruction
                 for q in qubits:
                     qubit_layer_used[q] = True
 
             idx += 1
 
-        # Add the layer to the list
         layers.append(layer)
 
-        # Remove the instructions that were added to the layer
         for n_deleted, gate_idx in enumerate(instr_to_delete):
             circ.pop(gate_idx - n_deleted)
 
     return layers
 def collect_circuit_layers_with_ticks(circ: StimCircuit) -> list[StimCircuit]:
-    """Split a Stim circuit into parallel-executable layers between ticks
 
-    Split a Stim circuit into parallel-executable layers while keeping DETECTOR, OBSERVABLE_INCLUDE, SHIFT_COORDS,
-    QUBIT_COORDS in the same relative layer defined by TICK boundaries.
-
-    :param circ: Stim circuit to process
-    :type circ: StimCircuit
-    :return: list of circuit layers. All instructions in one layer can be executed in parallel.
-    :rtype: list[StimCircuit]
-    """
-
-    # Split circuit into tick-delimited layers
     tick_layers = [[]]
     for instr in circ:
         if instr.name == "TICK":
@@ -325,15 +277,12 @@ def collect_circuit_layers_with_ticks(circ: StimCircuit) -> list[StimCircuit]:
         else:
             tick_layers[-1].append(instr)
 
-    # ensure no trailing empty layer
     if tick_layers and len(tick_layers[-1]) == 0:
         tick_layers.pop()
 
-    # Iterate over tick layers
     for layer_instrs in tick_layers:
         circ_cpy = StimCircuit()
 
-    # Iterate over each tick-defined layer
     final_layers: list[StimCircuit] = []
     for layer_instrs in tick_layers:
         circ_cpy = StimCircuit()
@@ -342,7 +291,6 @@ def collect_circuit_layers_with_ticks(circ: StimCircuit) -> list[StimCircuit]:
 
         sublayers = collect_circuit_layers(circ_cpy)
 
-        # append the resulting sublayers
         final_layers.extend(sublayers)
 
     return final_layers
@@ -362,10 +310,8 @@ def collect_circuit_layers(circ: StimCircuit) -> list[StimCircuit]:
     """
 
 
-    # Copy the circuit and separate all instructions by ticks
     circ_cpy = StimCircuit()
     for instr in circ:
-        # Moved outside grouping, since these operations to not act on qubits, but carry additional parameters
         if (instr.name == "QUBIT_COORDS" or
             instr.name == "DETECTOR" or
             instr.name == "OBSERVABLE_INCLUDE" or
@@ -380,56 +326,47 @@ def collect_circuit_layers(circ: StimCircuit) -> list[StimCircuit]:
             circ_cpy.append_operation("TICK", [])
 
 
-    # Now work with the copied circuit
     circ = circ_cpy
     n_qubits = circ.num_qubits
     layers = []
 
     while len(circ) > 0:
         layer = StimCircuit()
-        # Track used qubits in this layer
-        qubit_layer_used = [False] * n_qubits 
-        # Track instructions to delete after adding them to the layer
-        instr_to_delete = []  
+        qubit_layer_used = [False] * n_qubits
+        instr_to_delete = []
         idx = 0
 
         while idx < len(circ):
             instr = circ[idx]
 
-            # Skip TICK instructions
             while instr is not None and instr.name == "TICK" and idx < len(circ):
                 circ.pop(idx)
                 instr = circ[idx] if idx < len(circ) else None
 
-            if instr is None:  # No more instructions to process
+            if instr is None:
                 break
-            
+
             if (instr.name == "QUBIT_COORDS" or
                 instr.name == "DETECTOR" or
                 instr.name == "OBSERVABLE_INCLUDE" or
                 instr.name == "SHIFT_COORDS"):
-                # Simply append these instructions
                 layer.append_operation(instr)
                 instr_to_delete.append(idx)
             else:
 
                 qubits = [q.qubit_value for q in instr.targets_copy()]
 
-                # Check if any qubit from this instruction is already used in the layer
                 if not any(qubit_layer_used[q] for q in qubits):
                     layer.append_operation(instr.name, qubits)
-                    instr_to_delete.append(idx)  # Mark this instruction for removal
+                    instr_to_delete.append(idx)
 
-                # Mark the qubits used in this instruction
                 for q in qubits:
                     qubit_layer_used[q] = True
 
             idx += 1
 
-        # Add the layer to the list
         layers.append(layer)
 
-        # Remove the instructions that were added to the layer
         for n_deleted, gate_idx in enumerate(instr_to_delete):
             circ.pop(gate_idx - n_deleted)
 

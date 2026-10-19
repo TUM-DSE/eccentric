@@ -28,7 +28,7 @@ def run_experiment():
     cycles = 3
 
     for code_name, d in zip(codes, distances):
-    
+
         code = get_code(code_name, d, cycles)
 
         result_data = {

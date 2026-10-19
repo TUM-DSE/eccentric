@@ -34,5 +34,5 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python check_qasm_equivalence.py <file1.qasm> <file2.qasm>")
         sys.exit(1)
-    
+
     main(sys.argv[1], sys.argv[2])

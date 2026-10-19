@@ -3,15 +3,14 @@ import csv
 import argparse
 
 def adjust_precision(logical_error_rate, num_samples):
-    """Round logical_error_rate to the nearest multiple of 1/num_samples."""
     try:
         num_samples = int(num_samples)
         logical_error_rate = float(logical_error_rate)
         unit = 1 / num_samples
         rounded = round(logical_error_rate / unit) * unit
-        return f"{rounded:.3f}"  # Keeps 6 decimal digits for consistency
+        return f"{rounded:.3f}"
     except ValueError:
-        return logical_error_rate  # Leave unchanged if not a number
+        return logical_error_rate
 
 def process_csv(filepath):
     with open(filepath, newline='') as f:
@@ -26,13 +25,12 @@ def process_csv(filepath):
         num_samples_idx = header.index("num_samples")
         ler_idx = header.index("logical_error_rate")
     except ValueError:
-        return  # Skip files without the right headers
-    # Adjust the logical_error_rate in all rows
+        return
     changed = False
     for i in range(1, len(rows)):
         row = rows[i]
         if len(row) <= max(num_samples_idx, ler_idx):
-            continue  # Skip malformed rows
+            continue
 
         old_val = row[ler_idx]
         new_val = adjust_precision(old_val, row[num_samples_idx])

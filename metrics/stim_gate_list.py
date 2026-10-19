@@ -1,4 +1,3 @@
-# Pauli gates
 PAULI_GATES = [
     "I",
     "X",
@@ -6,7 +5,6 @@ PAULI_GATES = [
     "Z",
 ]
 
-# Single-qubit Clifford gates
 SINGLE_QUBIT_GATES = [
     "C_NXYZ",
     "C_NZYX",
@@ -33,7 +31,6 @@ SINGLE_QUBIT_GATES = [
     "S_DAG",
 ]
 
-# Two-qubit Clifford gates
 TWO_QUBIT_GATES = [
     "CNOT",
     "CX",
@@ -64,7 +61,6 @@ TWO_QUBIT_GATES = [
     "ZCZ",
 ]
 
-# Noise channels
 NOISE_CHANNELS = [
     "CORRELATED_ERROR",
     "DEPOLARIZE1",

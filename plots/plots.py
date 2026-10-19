@@ -32,7 +32,6 @@ def generate_size_plot(df_path):
     for row, et in enumerate(error_types):
         original_et = error_type_map.get(et, et.lower())
 
-        # global xticks for this error type
         all_xticks = sorted(
             df.loc[
                 (df["backend"] == backend) & (df["error_type"] == original_et),
@@ -84,12 +83,9 @@ def generate_size_plot(df_path):
                         label="_nolegend_",
                     )
 
-            # consistent X ticks per column
             ax.set_xticks(all_xticks)
             ax.set_xticklabels(all_xticks, fontsize=FONTSIZE - 2)
-            # ax.set_xlabel("Backend Size", fontsize=FONTSIZE)
 
-            # titles on the left
             letter = letters[row * n_cols + col]
             title_et = "Const." if et == "Constant" else et
             ax.set_title(
@@ -114,16 +110,13 @@ def generate_size_plot(df_path):
             ax.grid(True)
             ax.set_ylim(0, 0.65)
 
-            # collect legend handles
             handles, labels = ax.get_legend_handles_labels()
             for h, l in zip(handles, labels):
                 if l not in unique_labels and l != "_nolegend_":
                     unique_labels[l] = h
 
-    # adjust margins for legend
     plt.subplots_adjust(left=0.07, right=0.95, bottom=0.15, top=0.92)
 
-    # one global legend
     fig.legend(
         handles=list(unique_labels.values()),
         labels=list(unique_labels.keys()),
@@ -167,7 +160,6 @@ def generate_size_plot_two(df_path):
             ax = axes[col]
             original_et = error_type_map.get(et, et.lower())
 
-            # get xticks for this error type
             all_xticks = sorted(
                 df.loc[
                     (df["backend"] == backend) & (df["error_type"] == original_et),
@@ -199,7 +191,6 @@ def generate_size_plot_two(df_path):
                     markeredgecolor="none",
                 )[0]
 
-                # highlight selected points
                 highlight_x = HIGHLIGHT.get((code_key, et), [])
                 if highlight_x:
                     sel = np.isin(xs, highlight_x)
@@ -217,13 +208,11 @@ def generate_size_plot_two(df_path):
                         label="_nolegend_",
                     )
 
-            # set consistent ticks
             ax.set_xticks(all_xticks)
             ax.set_xticklabels(all_xticks, fontsize=FONTSIZE - 2)
             ax.set_ylim(0, 0.65)
             ax.grid(True)
 
-            # title
             letter = letters[col]
             title_et = "Uniform" if et == "Constant" else et
             ax.set_title(
@@ -233,11 +222,9 @@ def generate_size_plot_two(df_path):
                 fontweight="bold",
             )
 
-            # ylabel only on left plot
             if col == 0:
                 ax.set_ylabel("Logical Error Rate", fontsize=FONTSIZE)
             ax.set_xlabel("Backend Size", fontsize=FONTSIZE)
-            # blue annotation
             ax.text(
                 1.0,
                 1.12,
@@ -250,20 +237,17 @@ def generate_size_plot_two(df_path):
                 ha="right",
             )
 
-            # collect legend handles
             handles, labels = ax.get_legend_handles_labels()
             for h, l in zip(handles, labels):
                 if l not in unique_labels and l != "_nolegend_":
                     unique_labels[l] = h
 
-        # adjust layout and legend
         plt.subplots_adjust(left=0.08, right=0.88, bottom=0.2, top=0.88)
         fig.legend(
             handles=list(unique_labels.values()),
             labels=list(unique_labels.keys()),
             loc="lower center",
             bbox_to_anchor=(0.94, 0.2),
-            # ncol=len(unique_labels),
             frameon=False,
         )
 
@@ -300,7 +284,6 @@ def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
     )
     df_topo, codes_topo, backends_topo = preprocess(topology_csv, reverse_backends=True)
 
-    # --- Figure setup ---
     fig, axes = plt.subplots(
         1, 2, figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE * 0.9), sharey=True
     )
@@ -312,7 +295,6 @@ def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
     )
     hatches = code_hatches
 
-    # --- Plot helper ---
     def plot_subplot(ax, df, codes, backends, title):
         x = np.arange(len(backends)) * (bar_width * len(codes) + group_spacing)
 
@@ -327,7 +309,6 @@ def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
                     val = row["logical_error_rate"].values[0]
                     n = row["num_samples"].values[0]
 
-                    # --- Reviewer fix: replace zero with 1/N ---
                     if val == 0:
                         val = 1 / n
 
@@ -382,13 +363,11 @@ def generate_connectivity_topology_plot(connectivity_csv, topology_csv):
             spine.set_edgecolor("black")
             spine.set_linewidth(1)
 
-    # --- Plot left/right ---
     plot_subplot(axes[0], df_conn, codes_conn, backends_conn, "a) Artificial Topology")
     plot_subplot(axes[1], df_topo, codes_topo, backends_topo, "b) Real Topology")
 
     axes[0].set_ylabel("Logical Err. Rate (log)", fontsize=FONTSIZE)
 
-    # --- Shared legend ---
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(
         handles,
@@ -471,22 +450,18 @@ def generate_technology_plot(path):
 
 
 def generate_dqc_plot(dqc_files):
-    """
-    Generate a single PDF with all DQC subplots (2 per file) in one row.
-    """
     fig, axes = plt.subplots(
         1, 4, figsize=(2.05 * WIDE_FIGSIZE, HEIGHT_FIGSIZE), sharey=True
     )
 
     if len(dqc_files) == 1:
-        axes = np.array(axes)  # ensure axes is iterable
+        axes = np.array(axes)
 
     for file_idx, csv_path in enumerate(dqc_files):
         df = pd.read_csv(csv_path)
         df = df[df["routing_method"] != "basic"]
         df = df[df["code"] != "gross"]
 
-        # Standard renaming
         df["backend"] = df["backend"].replace(backend_rename_map)
         df["code"] = df["code"].apply(
             lambda x: code_rename_map.get(x.lower(), x.capitalize())
@@ -494,14 +469,13 @@ def generate_dqc_plot(dqc_files):
 
         device = csv_path.split("/")[1].split("_")[1]
 
-        # Use error_type instead of error_probability
         for i, err_label in enumerate(["normal", "downscaled"]):
             ax_idx = file_idx * 2 + i
             ax = axes[ax_idx]
 
             if err_label == "normal":
                 sub_df = df[~df["error_type"].str.contains("downscaled", na=False)]
-            else:  # "downscaled" corresponds to 10% error
+            else:
                 sub_df = df[df["error_type"].str.contains("downscaled", na=False)]
 
             codes = sorted(sub_df["code"].unique())
@@ -580,7 +554,6 @@ def generate_dqc_plot(dqc_files):
                 ha="right",
             )
 
-    # Shared vertical legend on the right
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(
         handles,
@@ -593,8 +566,6 @@ def generate_dqc_plot(dqc_files):
         columnspacing=0.7,
     )
 
-    # fig.patch.set_edgecolor("blue")
-    # fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.08, bottom=0.27, right=0.995, wspace=0.05)
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/dqc.pdf", format="pdf")
@@ -604,7 +575,6 @@ def generate_dqc_plot(dqc_files):
 def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
     df = pd.read_csv(df_path)
 
-    # format codes
     def format_code(code):
         code = code.lower()
         return {
@@ -624,7 +594,6 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
     n_cols = total_columns
     n_rows = int(np.ceil(n_routing / n_cols))
 
-    # figure setup
     fig, axes = plt.subplots(
         n_rows,
         n_cols,
@@ -632,7 +601,7 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
         sharey=True,
         gridspec_kw={"wspace": 0.1},
     )
-    axes = np.array(axes).reshape(-1)  # flatten
+    axes = np.array(axes).reshape(-1)
 
     bar_width = 0.2
     hatches = ["/", "\\", "//", "o", "-"]
@@ -643,19 +612,17 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
 
     letters = [f"({chr(97+i)})" for i in range(len(routing_methods))]
 
-    # helper formatter: produce "4.5e-5" style, no offset
     def sci_formatter(y, _pos):
         if y == 0:
             return "0"
-        s = f"{y:.2e}"  # e.g. "4.50e-05"
+        s = f"{y:.2e}"
         mant, exp = s.split("e")
-        mant = mant.rstrip("0").rstrip(".")  # "4.5"
-        exp_int = int(exp)  # -5 (as int)
-        return f"{mant}e{exp_int}"  # "4.5e-5"
+        mant = mant.rstrip("0").rstrip(".")
+        exp_int = int(exp)
+        return f"{mant}e{exp_int}"
 
     func_formatter = FuncFormatter(sci_formatter)
 
-    # plotting
     for i, routing in enumerate(routing_methods):
         ax = axes[i]
         subset = df[df["routing_method"] == routing]
@@ -688,7 +655,6 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
                 capsize=3,
             )
 
-        # title with (a), (b), ...
         ax.set_title(
             f"{chr(97 + i)}) {routing.capitalize()}",
             loc="left",
@@ -704,19 +670,15 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
         ax.grid(axis="y")
         ax.set_axisbelow(True)
 
-        # apply our formatter (inline scientific notation) and hide offset text
         ax.yaxis.set_major_formatter(func_formatter)
-        # ensure no separate offset text is shown
         try:
             ax.yaxis.get_offset_text().set_visible(False)
         except Exception:
             pass
 
-    # remove unused axes
     for j in range(i + 1, len(axes)):
         fig.delaxes(axes[j])
 
-    # add "Lower is better ↓" on all subplots that have data
     for ax in axes:
         if ax is not None and ax.has_data():
             ax.text(
@@ -731,10 +693,8 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
                 ha="right",
             )
 
-    # adjust margins
     plt.subplots_adjust(left=0.05, right=0.95, bottom=0.3)
 
-    # global legend (as before)
     handles = [
         plt.Rectangle(
             (0, 0),
@@ -752,7 +712,7 @@ def generate_swap_overhead_plot(df_path, backend_label, total_columns=3):
         handles,
         labels,
         loc="lower center",
-        bbox_to_anchor=(0.18, 0.31),  # just above the first subplot
+        bbox_to_anchor=(0.18, 0.31),
         ncol=1,
         fontsize=FONTSIZE,
         frameon=True,
@@ -774,15 +734,12 @@ def generate_swap_overhead_norm_plot(df_path, backend_label, total_columns=3):
             "bacon": "Bacon-Shor",
         }.get(code, code.capitalize())
 
-    # Load main data
     df = pd.read_csv(df_path)
     df["code"] = df["code"].apply(format_code)
 
-    # Load original gate counts
     df_og_gates = pd.read_csv("experiment_results/Translation/results.csv")
     df_og_gates["code"] = df_og_gates["code"].apply(format_code)
 
-    # Map: code -> original 2q gates
     og_gate_dict = dict(zip(df_og_gates["code"], df_og_gates["original_2q_gates"]))
 
     routing_methods = df["routing_method"].dropna().unique()
@@ -826,10 +783,9 @@ def generate_swap_overhead_norm_plot(df_path, backend_label, total_columns=3):
                 )
                 var = entry["tq_gate_overhead_var"].values[0] if not entry.empty else 0
 
-                # normalize by original gate counts
                 og_val = og_gate_dict.get(code, np.nan)
                 if not np.isnan(og_val) and og_val > 0:
-                    mean = (mean / og_val) * 100  # percent
+                    mean = (mean / og_val) * 100
                     var = (var / (og_val**2)) * (100**2)
                 values.append(mean)
                 errors.append(np.sqrt(var))
@@ -846,7 +802,6 @@ def generate_swap_overhead_norm_plot(df_path, backend_label, total_columns=3):
                 capsize=3,
             )
 
-        # subplot title with letter
         ax.set_title(
             f"{chr(100 + i)}) {routing.capitalize()}",
             fontsize=12,
@@ -876,11 +831,9 @@ def generate_swap_overhead_norm_plot(df_path, backend_label, total_columns=3):
             ha="right",
         )
 
-    # Remove unused axes
     for j in range(i + 1, len(axes)):
         fig.delaxes(axes[j])
 
-    # Legend
     handles = [
         plt.Rectangle(
             (0, 0),
@@ -893,13 +846,12 @@ def generate_swap_overhead_norm_plot(df_path, backend_label, total_columns=3):
         for layout in layout_methods
     ]
     labels = [layout.capitalize() for layout in layout_methods]
-    # Legend horizontally at the top of the first subplot
     axes[0].legend(
         handles,
         labels,
         loc="lower center",
-        bbox_to_anchor=(0.17, 0.33),  # just above the first subplot
-        ncol=1,  # horizontal layout
+        bbox_to_anchor=(0.17, 0.33),
+        ncol=1,
         fontsize=FONTSIZE,
         frameon=True,
     )
@@ -917,18 +869,12 @@ from matplotlib.ticker import FuncFormatter
 
 
 def generate_compact_swap_plots(df_path, backend_label):
-    # --------------------------
-    # Helper: format codes
-    # --------------------------
     def format_code(code):
         code = code.lower()
         return {"hh": "Heavy-Hex", "surface": "Surface", "color": "Color"}.get(
             code, code.capitalize()
         )
 
-    # --------------------------
-    # Load data
-    # --------------------------
     df = pd.read_csv(df_path)
     df["code"] = df["code"].apply(format_code)
 
@@ -940,7 +886,7 @@ def generate_compact_swap_plots(df_path, backend_label):
     layout_methods = df["layout_method"].dropna().unique()
     codes = sorted(df["code"].unique())
 
-    n_routing = len(routing_methods)  # number of columns
+    n_routing = len(routing_methods)
     bar_width = 0.2
     hatches = ["/", "\\", "//", "o", "-"]
     layout_styles = {
@@ -948,22 +894,16 @@ def generate_compact_swap_plots(df_path, backend_label):
         for i, layout in enumerate(layout_methods)
     }
 
-    # --------------------------
-    # Figure setup: 2 rows x n_routing columns
-    # --------------------------
     fig, axes = plt.subplots(
         2,
         n_routing,
         figsize=(2 * WIDE_FIGSIZE, 1.7 * HEIGHT_FIGSIZE),
         sharex=True,
-        sharey="row",  # <-- share Y axis across each row
+        sharey="row",
         constrained_layout=True,
     )
-    axes = np.array(axes).reshape(2, n_routing)  # row 0: abs, row1: norm
+    axes = np.array(axes).reshape(2, n_routing)
 
-    # --------------------------
-    # Scientific formatter
-    # --------------------------
     def sci_formatter(y, _pos):
         if y == 0:
             return "0"
@@ -975,14 +915,10 @@ def generate_compact_swap_plots(df_path, backend_label):
 
     func_formatter = FuncFormatter(sci_formatter)
 
-    # --------------------------
-    # Plotting
-    # --------------------------
     for col, routing in enumerate(routing_methods):
         subset = df[df["routing_method"] == routing]
         x = np.arange(len(codes))
 
-        # --- Absolute SWAP Overhead (top row) ---
         ax_abs = axes[0, col]
         for j, layout in enumerate(layout_methods):
             values, errors = [], []
@@ -1035,7 +971,6 @@ def generate_compact_swap_plots(df_path, backend_label):
             ha="right",
         )
 
-        # --- Normalized Overhead (% of original 2Q gates, bottom row) ---
         ax_norm = axes[1, col]
         for j, layout in enumerate(layout_methods):
             values, errors = [], []
@@ -1089,9 +1024,6 @@ def generate_compact_swap_plots(df_path, backend_label):
             ha="right",
         )
 
-    # --------------------------
-    # Legend on top-left
-    # --------------------------
     handles = [
         plt.Rectangle(
             (0, 0),
@@ -1114,19 +1046,12 @@ def generate_compact_swap_plots(df_path, backend_label):
         columnspacing=0.6,
     )
 
-    # Save
     os.makedirs("data", exist_ok=True)
     plt.savefig(f"data/{backend_label}_routing.pdf", format="pdf")
     plt.close(fig)
 
 
 def generate_normalized_gate_overhead(df_path):
-    """
-    Generate one PDF with two subplots of normalized gate overhead:
-    - IBM Heron
-    - H2
-    Shared vertical legend on the right.
-    """
 
     df = pd.read_csv(df_path)
     method_label_map = {
@@ -1145,7 +1070,6 @@ def generate_normalized_gate_overhead(df_path):
         lambda x: code_rename_map.get(x.lower(), x.capitalize())
     )
 
-    # --- Colors ---
     qiskit_base, tket_base = code_palette[0], code_palette[1]
     qiskit_opt = tuple(min(1, c + 0.25) for c in qiskit_base)
     tket_opt = tuple(min(1, c + 0.25) for c in tket_base)
@@ -1171,7 +1095,6 @@ def generate_normalized_gate_overhead(df_path):
 
     methods = ["qiskit", "qiskit_optimized", "tket", "tket_optimized"]
 
-    # --- Figure with 2 subplots ---
     fig, axes = plt.subplots(
         1, 2, figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE), sharey=True
     )
@@ -1193,12 +1116,10 @@ def generate_normalized_gate_overhead(df_path):
             index="code", columns="translating_method", values="original_total_gates"
         )
 
-        # Normalize
         for method in methods:
             if method in pivot.columns and method in total_gates.columns:
                 pivot[method] = pivot[method] / total_gates[method]
 
-        # --- Bars ---
         for j, method in enumerate(methods):
             if method not in pivot.columns:
                 continue
@@ -1213,13 +1134,11 @@ def generate_normalized_gate_overhead(df_path):
                 edgecolor="black",
             )
 
-        # Title
         device_label = "IBM Heron" if gate_set == "ibm_heron" else "H2"
         ax.set_title(
             f"{chr(97 + i)}) {device_label}", fontsize=12, fontweight="bold", loc="left"
         )
 
-        # Axes formatting
         ax.set_xticks(x + (BAR_WIDTH * (len(methods) - 1)) / 2)
         ax.set_xticklabels(codes, fontsize=FONTSIZE - 2, rotation=30, ha="right")
         ax.tick_params(axis="y", labelsize=FONTSIZE - 2)
@@ -1230,7 +1149,6 @@ def generate_normalized_gate_overhead(df_path):
         ax.set_ylim(0, 12)
         ax.set_axisbelow(True)
 
-        # "Lower is better"
         ax.text(
             1.0,
             1.14,
@@ -1272,10 +1190,6 @@ def generate_normalized_gate_overhead(df_path):
 
 
 def generate_gate_overhead(df_path):
-    """
-    Generate one PDF with two subplots (IBM Heron and H2).
-    Shared vertical legend on the right.
-    """
 
     df = pd.read_csv(df_path)
     method_label_map = {
@@ -1294,9 +1208,8 @@ def generate_gate_overhead(df_path):
         lambda x: code_rename_map.get(x.lower(), x.capitalize())
     )
 
-    # --- Colors ---
     qiskit_base, tket_base = code_palette[0], code_palette[1]
-    qiskit_opt = tuple(min(1, c + 0.25) for c in qiskit_base)  # lighter variant
+    qiskit_opt = tuple(min(1, c + 0.25) for c in qiskit_base)
     tket_opt = tuple(min(1, c + 0.25) for c in tket_base)
 
     color_map = {
@@ -1320,7 +1233,6 @@ def generate_gate_overhead(df_path):
 
     methods = ["qiskit", "tket", "qiskit_optimized", "tket_optimized"]
 
-    # --- Figure with 2 subplots ---
     fig, axes = plt.subplots(
         1, 2, figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE), sharey=True
     )
@@ -1352,13 +1264,11 @@ def generate_gate_overhead(df_path):
                 edgecolor="black",
             )
 
-        # Title
         device_label = "IBM Heron" if gate_set == "ibm_heron" else "H2"
         ax.set_title(
             f"{chr(97 + i)}) {device_label}", fontsize=12, fontweight="bold", loc="left"
         )
 
-        # Axes formatting
         ax.set_xticks(x + (BAR_WIDTH * (len(methods) - 1)) / 2)
         ax.set_xticklabels(codes, fontsize=FONTSIZE - 2, rotation=30, ha="right")
         ax.tick_params(axis="y", labelsize=FONTSIZE - 2)
@@ -1368,7 +1278,6 @@ def generate_gate_overhead(df_path):
         ax.grid(axis="y")
         ax.set_axisbelow(True)
 
-        # "Lower is better"
         ax.text(
             1.0,
             1.14,
@@ -1427,7 +1336,6 @@ def generate_overhead_2x2(df_path):
         lambda x: code_rename_map.get(x.lower(), x.capitalize())
     )
 
-    # --- Colors and styles ---
     qiskit_base, tket_base = code_palette[0], code_palette[1]
     qiskit_opt = tuple(min(1, c + 0.25) for c in qiskit_base)
     tket_opt = tuple(min(1, c + 0.25) for c in tket_base)
@@ -1474,7 +1382,6 @@ def generate_overhead_2x2(df_path):
             codes = sorted(subset["code"].unique())
             x = np.arange(len(codes))
 
-            # Pivot
             pivot = subset.pivot(
                 index="code", columns="translating_method", values="gate_overhead_mean"
             )
@@ -1489,7 +1396,6 @@ def generate_overhead_2x2(df_path):
                     if method in pivot.columns and method in total_gates.columns:
                         pivot[method] = pivot[method] / total_gates[method]
 
-            # --- Bars ---
             for j, method in enumerate(methods):
                 if method not in pivot.columns:
                     continue
@@ -1504,7 +1410,6 @@ def generate_overhead_2x2(df_path):
                     edgecolor="black",
                 )
 
-            # Titles
             device_label = "IBM Heron" if gate_set == "ibm_heron" else "H2"
             ylabel = "Gate Overhead" if mode == "overhead" else "Norm. Overhead"
             letter = letters[row * 2 + col]
@@ -1513,7 +1418,6 @@ def generate_overhead_2x2(df_path):
                 f"{letter} {device_label}", fontsize=12, fontweight="bold", loc="left"
             )
 
-            # Set x-ticks only for bottom row (shared x)
             if row == 1:
                 ax.set_xticks(x + (BAR_WIDTH * (len(methods) - 1)) / 2)
                 ax.set_xticklabels(
@@ -1531,11 +1435,9 @@ def generate_overhead_2x2(df_path):
             ax.grid(axis="y")
             ax.set_axisbelow(True)
 
-            # limits per row
             if mode == "normalized":
                 ax.set_ylim(0, 12)
 
-            # annotation
             ax.text(
                 1.0,
                 1.14,
@@ -1548,12 +1450,10 @@ def generate_overhead_2x2(df_path):
                 ha="right",
             )
 
-    # Layout adjustments
     plt.subplots_adjust(
         left=0.08, bottom=0.22, right=0.98, top=0.92, wspace=0.15, hspace=0.25
     )
 
-    # --- Shared vertical legend ---
     handles = [
         plt.Rectangle(
             (0, 0),
@@ -1574,10 +1474,9 @@ def generate_overhead_2x2(df_path):
         fontsize=FONTSIZE,
         frameon=False,
         ncol=4,
-        columnspacing=0.8,  # ⬅️ reduce horizontal space between columns
-        handletextpad=0.4,  # ⬅️ reduce space between patch and text
-        borderaxespad=0.3,  # ⬅️ reduce distance from axes
-        # handlelength=1.0
+        columnspacing=0.8,
+        handletextpad=0.4,
+        borderaxespad=0.3,
     )
 
     os.makedirs("data", exist_ok=True)
@@ -1624,7 +1523,6 @@ def generate_variance_two(decoherence_csv, readout_csv):
 
     codes = sorted(set(df_deco["code"]).union(df_read["code"]))
 
-    # Baseline for readout from variance_none decoherence
     baseline_rows = df_deco[df_deco["backend_plot"] == "variance_none"]
     if baseline_rows.empty:
         raise ValueError("No variance_none baseline found in decoherence CSV")
@@ -1634,7 +1532,6 @@ def generate_variance_two(decoherence_csv, readout_csv):
         lambda x: np.sqrt((x**2).sum())
     )
 
-    # Inject baseline into readout
     rows = []
     for c in codes:
         if c not in baseline_mean:
@@ -1677,7 +1574,6 @@ def generate_variance_two(decoherence_csv, readout_csv):
                     raise ValueError(
                         f"Missing value for code '{code}' and backend '{backend}'"
                     )
-                # Aggregate multiple rows if they exist
                 mean_val = r["logical_error_rate"].mean()
                 std_val = np.sqrt((r["std"] ** 2).sum())
                 means.append(mean_val)
@@ -1725,9 +1621,6 @@ def generate_variance_two(decoherence_csv, readout_csv):
         frameon=False,
     )
 
-    # fig.patch.set_edgecolor("blue")
-    # fig.patch.set_linewidth(6)
-    # fig.patch.set_facecolor("none")
 
     plt.subplots_adjust(left=0.06, right=0.94, bottom=0.4)
     os.makedirs("data", exist_ok=True)
@@ -1741,7 +1634,6 @@ def generate_decoder_plot(df_path):
         if "error_type" in df.columns:
             df = df[df["error_type"] == err_name]
 
-        # Optional renaming
         if "code_rename_map" in globals():
             df["code"] = df["code"].apply(
                 lambda x: code_rename_map.get(x.lower(), x.capitalize())
@@ -1752,20 +1644,17 @@ def generate_decoder_plot(df_path):
         if "decoder_map" in globals():
             df["decoder"] = df["decoder"].apply(lambda x: decoder_map.get(x, x))
 
-        # Binomial std error (only used for logical_error_rate)
         df["std"] = np.sqrt(
             df["logical_error_rate"]
             * (1 - df["logical_error_rate"])
             / df["num_samples"]
         )
 
-        # Unique codes and decoders
         codes = sorted(df["code"].unique())
         decoders = sorted(df["decoder"].unique())
         n_codes = len(codes)
         n_decoders = len(decoders)
 
-        # Layout constants
         colors = code_palette
         x = np.arange(n_codes)
         offsets = np.linspace(-BAR_WIDTH, BAR_WIDTH, n_decoders)
@@ -1834,7 +1723,6 @@ def generate_decoder_plot(df_path):
                 ha="right",
             )
 
-        # Titles and scales
         axes[0].set_yscale("log")
         axes[0].set_title(
             "a) Effectiveness", loc="left", fontsize=FONTSIZE, fontweight="bold"
@@ -1850,10 +1738,6 @@ def generate_decoder_plot(df_path):
 
         axes[-1].legend(loc="upper right", frameon=True)
 
-        # Figure styling & spacing
-        # fig.patch.set_edgecolor("blue")
-        # fig.patch.set_linewidth(3)
-        # fig.patch.set_facecolor("none")
 
         plt.subplots_adjust(left=0.06, right=0.99, bottom=0.25, wspace=0.25)
         if err_name == "modsi1000":
@@ -1869,7 +1753,6 @@ def generate_decoder_error_barplot(df_path):
         if "error_type" in df.columns:
             df = df[df["error_type"] == err_name]
 
-        # Optional mappings
         if "decoder_map" in globals():
             df["decoder"] = df["decoder"].apply(lambda x: decoder_map.get(x, x))
         if "code_rename_map" in globals():
@@ -1879,10 +1762,8 @@ def generate_decoder_error_barplot(df_path):
         else:
             df["code"] = df["code"].apply(lambda x: x.capitalize())
 
-        # Expect only one code
         code_name = df["code"].iloc[0]
 
-        # Unique variables
         decoders = sorted(df["decoder"].unique())
         error_probs = sorted(df["error_probability"].unique())
         distances = sorted(df["distance"].unique())
@@ -1893,12 +1774,10 @@ def generate_decoder_error_barplot(df_path):
 
         colors = code_palette if "code_palette" in globals() else plt.cm.Set2.colors
 
-        # Create only one row (modsi1000), one column per decoder
         fig, axes = plt.subplots(
             1, n_decoders, figsize=(2 * WIDE_FIGSIZE, HEIGHT_FIGSIZE), sharey=True
         )
 
-        # If only one decoder, axes might not be iterable
         if n_decoders == 1:
             axes = [axes]
 
@@ -1906,7 +1785,6 @@ def generate_decoder_error_barplot(df_path):
             ax = axes[col]
             subset = df[df["decoder"] == decoder]
 
-            # x positions for error probabilities
             x = np.arange(n_probs)
             group_width = BAR_WIDTH * n_dist
             offsets = np.linspace(
@@ -1926,7 +1804,6 @@ def generate_decoder_error_barplot(df_path):
                         values.append(sub["logical_error_rate"].values[0])
                     else:
                         values.append(0)
-                        # Mark missing data
                         ax.text(
                             x[error_probs.index(p)] + offsets[i],
                             1e-3,
@@ -1947,7 +1824,6 @@ def generate_decoder_error_barplot(df_path):
                     edgecolor="black",
                 )
 
-            # Axes settings
             ax.set_yscale("log")
             ax.grid(axis="y")
             ax.set_xticks(x)
@@ -1956,7 +1832,6 @@ def generate_decoder_error_barplot(df_path):
             if col == 0:
                 ax.set_ylabel("Logical Err. Rate (log)", fontsize=FONTSIZE)
 
-            # Titles and annotations
             ax.set_title(
                 f"{chr(97 + col)}) {decoder}",
                 fontsize=FONTSIZE,
@@ -1976,16 +1851,12 @@ def generate_decoder_error_barplot(df_path):
                 va="bottom",
             )
 
-            # Legend only on first plot
             if col == 1:
                 ax.legend(
                     loc="upper left",
-                    bbox_to_anchor=(-0.01, 1.08),  # (x, y) relative to the axes
+                    bbox_to_anchor=(-0.01, 1.08),
                     frameon=False,
                 )
-        # fig.patch.set_edgecolor("blue")
-        # fig.patch.set_linewidth(3)
-        # fig.patch.set_facecolor("none")
 
         plt.tight_layout(rect=[0, 0, 1, 1])
         os.makedirs("data", exist_ok=True)
@@ -1994,16 +1865,9 @@ def generate_decoder_error_barplot(df_path):
 
 
 def generate_decoder_plot_time(df_path):
-    """
-    Generate side-by-side bar plots of decoder performance
-    for both error types ("SI1000" and "Constant").
-    Each plot shows logical error rate (bars) with execution time annotated.
-    """
 
-    # --- Load data ---
     df = pd.read_csv(df_path)
 
-    # Optional renaming
     if "code_rename_map" in globals():
         df["code"] = df["code"].apply(
             lambda x: code_rename_map.get(x.lower(), x.capitalize())
@@ -2014,7 +1878,6 @@ def generate_decoder_plot_time(df_path):
     if "decoder_map" in globals():
         df["decoder"] = df["decoder"].apply(lambda x: decoder_map.get(x, x))
 
-    # --- Compute standard error (optional) ---
     if {"logical_error_rate", "num_samples"} <= set(df.columns):
         df["std"] = np.sqrt(
             df["logical_error_rate"]
@@ -2024,7 +1887,6 @@ def generate_decoder_plot_time(df_path):
     else:
         df["std"] = 0
 
-    # --- Constants and setup ---
     error_types = ["modsi1000", "constant"]
     colors = code_palette
     fig, axes = plt.subplots(
@@ -2044,7 +1906,6 @@ def generate_decoder_plot_time(df_path):
         x = np.arange(n_codes)
         offsets = np.linspace(-BAR_WIDTH, BAR_WIDTH, n_decoders)
 
-        # Plot bars
         for i, decoder in enumerate(decoders):
             means, stds, times = [], [], []
             for code in codes:
@@ -2083,7 +1944,6 @@ def generate_decoder_plot_time(df_path):
                 edgecolor="black",
             )
 
-        # --- Styling ---
         if etype == "modsi1000":
             ax.set_title(
                 f"SI1000 Noise", loc="left", fontsize=FONTSIZE, fontweight="bold"
@@ -2132,12 +1992,10 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
         exp_int = int(exp)
         return f"{mant}e{exp_int}"
 
-    # Load CSVs
     df_common = pd.read_csv(csv_common)
     df_big = pd.read_csv(csv_big)
     df_more = pd.read_csv(csv_more_shots)
 
-    # Select rows
     row_baseline = df_common[
         df_common["backend"].str.contains("full", case=False)
     ].iloc[0]
@@ -2145,7 +2003,6 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
     row_big = df_big.iloc[0]
     row_more = df_more.iloc[0]
 
-    # Ordered cases (capitalized)
     cases = [
         ("Baseline", row_baseline),
         ("Bigger\nBackend", row_big),
@@ -2158,7 +2015,6 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
     x = np.arange(len(labels))
     width = 0.65
 
-    # Time components
     time_cols = [
         "time_backend",
         "time_circuit",
@@ -2174,7 +2030,6 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
         "time_repr",
         "time_noise",
     ]
-    # Memory components (FULL)
     mem_cols = [
         "mem_backend_full_MB",
         "mem_circuit_full_MB",
@@ -2184,19 +2039,16 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
         "mem_decode_full_MB",
     ]
 
-    # -------- FIGURE: 3 rows, 1 column --------
     fig, axes = plt.subplots(
         3, 1, figsize=(WIDE_FIGSIZE * 0.8, HEIGHT_FIGSIZE * 2), sharex=True
     )
 
     color_map = code_palette
 
-    # ======== a) TIME (WITH DECODE) ========
     bottom = np.zeros(len(labels))
-    axes[0].grid(axis="y")  # Grid behind bars
+    axes[0].grid(axis="y")
     for i, col in enumerate(time_cols):
         label = col.replace("time_", "").capitalize()
-        # Rename legend entries
         if label == "Repr":
             label = "Repr. Change"
         elif label == "Circuit":
@@ -2236,13 +2088,12 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
         fontsize=FONTSIZE - 1,
         frameon=True,
         ncol=2,
-        labelspacing=0.3,  # vertical spacing between entries
-        handletextpad=0.4,  # space between marker and text
-        handlelength=1.2,  # length of color box
+        labelspacing=0.3,
+        handletextpad=0.4,
+        handlelength=1.2,
         borderpad=0.18,
     )
 
-    # ======== b) TIME (NO DECODE) ========
     bottom = np.zeros(len(labels))
     axes[1].grid(axis="y")
     for i, col in enumerate(time_cols_no_decode):
@@ -2283,7 +2134,6 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
         fontweight="bold",
     )
 
-    # ======== c) MEMORY (PEAK RSS) ========
     axes[2].grid(axis="y")
 
     mem_values = [row["peak_memory_full_MB"] for row in rows]
@@ -2294,7 +2144,6 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
         "c) Peak Memory Usage", loc="left", fontsize=FONTSIZE, fontweight="bold"
     )
     axes[2].set_ylabel("Memory [MB]", fontsize=FONTSIZE)
-    # axes[2].yaxis.set_major_formatter(FuncFormatter(sci_formatter))
 
     axes[2].text(
         1.01,
@@ -2308,7 +2157,6 @@ def plot_time_and_memory_stacked(csv_common, csv_big, csv_more_shots):
         fontweight="bold",
     )
 
-    # -------- SHARED X-AXIS --------
     axes[2].set_xticks(x)
     axes[2].set_xticklabels(labels, fontsize=FONTSIZE - 2, rotation=0, ha="center")
 
@@ -2329,12 +2177,10 @@ def plot_time_and_memory(csv_common, csv_big, csv_more_shots):
         exp_int = int(exp)
         return f"{mant}e{exp_int}"
 
-    # Load CSVs
     df_common = pd.read_csv(csv_common)
     df_big = pd.read_csv(csv_big)
     df_more = pd.read_csv(csv_more_shots)
 
-    # Select rows
     row_baseline = df_common[
         df_common["backend"].str.contains("full", case=False)
     ].iloc[0]
@@ -2342,7 +2188,6 @@ def plot_time_and_memory(csv_common, csv_big, csv_more_shots):
     row_big = df_big.iloc[0]
     row_more = df_more.iloc[0]
 
-    # Ordered cases (capitalized)
     cases = [
         ("Baseline", row_baseline),
         ("Bigger\nBackend", row_big),
@@ -2355,7 +2200,6 @@ def plot_time_and_memory(csv_common, csv_big, csv_more_shots):
     x = np.arange(len(labels))
     width = 0.65
 
-    # Time components
     time_cols = [
         "time_backend",
         "time_circuit",
@@ -2371,7 +2215,6 @@ def plot_time_and_memory(csv_common, csv_big, csv_more_shots):
         "time_repr",
         "time_noise",
     ]
-    # Memory components (FULL)
     mem_cols = [
         "mem_backend_full_MB",
         "mem_circuit_full_MB",
@@ -2381,19 +2224,16 @@ def plot_time_and_memory(csv_common, csv_big, csv_more_shots):
         "mem_decode_full_MB",
     ]
 
-    # -------- FIGURE: 3 rows, 1 column --------
     fig, axes = plt.subplots(
         1, 3, figsize=(WIDE_FIGSIZE * 2.2, HEIGHT_FIGSIZE), sharex=True
     )
 
     color_map = code_palette
 
-    # ======== a) TIME (WITH DECODE) ========
     bottom = np.zeros(len(labels))
-    axes[0].grid(axis="y")  # Grid behind bars
+    axes[0].grid(axis="y")
     for i, col in enumerate(time_cols):
         label = col.replace("time_", "").capitalize()
-        # Rename legend entries
         if label == "Repr":
             label = "Repr. Change"
         elif label == "Circuit":
@@ -2433,13 +2273,12 @@ def plot_time_and_memory(csv_common, csv_big, csv_more_shots):
         fontsize=FONTSIZE - 2,
         frameon=True,
         ncol=1,
-        labelspacing=0.3,  # vertical spacing between entries
-        handletextpad=0.4,  # space between marker and text
-        handlelength=1.2,  # length of color box
+        labelspacing=0.3,
+        handletextpad=0.4,
+        handlelength=1.2,
         borderpad=0.18,
     )
 
-    # ======== b) TIME (NO DECODE) ========
     bottom = np.zeros(len(labels))
     axes[1].grid(axis="y")
     for i, col in enumerate(time_cols_no_decode):
@@ -2480,7 +2319,6 @@ def plot_time_and_memory(csv_common, csv_big, csv_more_shots):
         fontweight="bold",
     )
 
-    # ======== c) MEMORY (PEAK RSS) ========
     axes[2].grid(axis="y")
 
     mem_values = [row["peak_memory_full_MB"] for row in rows]
@@ -2491,7 +2329,6 @@ def plot_time_and_memory(csv_common, csv_big, csv_more_shots):
         "c) Peak Mem. Usage", loc="left", fontsize=FONTSIZE, fontweight="bold"
     )
     axes[2].set_ylabel("Memory [MB]", fontsize=FONTSIZE)
-    # axes[2].yaxis.set_major_formatter(FuncFormatter(sci_formatter))
 
     axes[2].text(
         1.01,
@@ -2505,7 +2342,6 @@ def plot_time_and_memory(csv_common, csv_big, csv_more_shots):
         fontweight="bold",
     )
 
-    # -------- SHARED X-AXIS --------
     axes[2].set_xticks(x)
     axes[2].set_xticklabels(labels, fontsize=FONTSIZE - 2, rotation=0, ha="center")
 
@@ -2547,9 +2383,7 @@ def plot_threshold_per_code(csv_path):
             markeredgecolor="none",
         )
 
-    # Log–log axes (threshold plot)
     ax.set_xscale("log")
-    # ax.set_yscale("log")  # optional
 
     ax.set_xlabel("Physical Error Probability", fontsize=12, labelpad=0.01)
     ax.set_ylabel("Logical Error Rate", fontsize=12)
@@ -2567,7 +2401,6 @@ def plot_threshold_per_code(csv_path):
 
     ax.grid(True, which="both")
 
-    # Legend in top-left corner
     handles, labels = ax.get_legend_handles_labels()
     unique_labels = {}
     for h, l in zip(handles, labels):
@@ -2586,8 +2419,6 @@ def plot_threshold_per_code(csv_path):
     ax.set_title(
         "Effectiveness of Codes", loc="left", fontsize=FONTSIZE, fontweight="bold"
     )
-    # fig.patch.set_edgecolor("blue")
-    # fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.15, right=0.99, top=0.85, bottom=0.2)
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/thresholds.pdf", format="pdf")
@@ -2598,11 +2429,9 @@ def plot_gross_shot_comparison(csv_1000, csv_more):
     df_1000 = pd.read_csv(csv_1000)
     df_more = pd.read_csv(csv_more)
 
-    # Filter to gross code only
     df_1000 = df_1000[df_1000["code"] == "gross"]
     df_more = df_more[df_more["code"] == "gross"]
 
-    # Keep only common error probabilities
     common_probs = np.intersect1d(
         df_1000["error_probability"].unique(), df_more["error_probability"].unique()
     )
@@ -2610,11 +2439,9 @@ def plot_gross_shot_comparison(csv_1000, csv_more):
     df_1000 = df_1000[df_1000["error_probability"].isin(common_probs)]
     df_more = df_more[df_more["error_probability"].isin(common_probs)]
 
-    # Sort for clean lines
     df_1000 = df_1000.sort_values("error_probability")
     df_more = df_more.sort_values("error_probability")
 
-    # Figure
     fig, ax = plt.subplots(figsize=(0.7 * WIDE_FIGSIZE, HEIGHT_FIGSIZE))
 
     ax.plot(
@@ -2635,9 +2462,7 @@ def plot_gross_shot_comparison(csv_1000, csv_more):
         label=f"Gross ({df_more['num_samples'].iloc[0]} shots)",
     )
 
-    # Log–log threshold plot
     ax.set_xscale("log")
-    # ax.set_yscale("log")
 
     ax.set_xlabel("Physical Error Probability", fontsize=FONTSIZE, labelpad=0.01)
     ax.set_ylabel("Logical Error Rate", fontsize=FONTSIZE)
@@ -2661,8 +2486,6 @@ def plot_gross_shot_comparison(csv_1000, csv_more):
         ha="right",
     )
 
-    # fig.patch.set_edgecolor("blue")
-    # fig.patch.set_linewidth(3)
     plt.subplots_adjust(left=0.15, right=0.99, top=0.85, bottom=0.2)
     os.makedirs("data", exist_ok=True)
     plt.savefig("data/shot_comparison.pdf", format="pdf")
@@ -2721,7 +2544,6 @@ def generate_size_plot_separate(df_path):
                 markeredgecolor="none",
             )[0]
 
-            # Highlight selected points
             highlight_x = HIGHLIGHT.get((code_key, et), [])
             if highlight_x:
                 sel = np.isin(xs, highlight_x)
@@ -2773,7 +2595,6 @@ def generate_size_plot_separate(df_path):
         plt.subplots_adjust(left=0.15, right=0.78, top=0.85, bottom=0.2)
 
         os.makedirs("data", exist_ok=True)
-        # plt.tight_layout(rect=[0, 0.05, 1, 0.95])
         plt.savefig(f"data/size_{et}_{err_prob}.pdf", format="pdf")
         plt.close(fig)
 

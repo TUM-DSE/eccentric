@@ -10,15 +10,12 @@ job_result = job.result()
 pub_result = job_result[0].data.block_0_meas_block_0.get_counts()
 print(pub_result)
 
-#for idx, pub_result in enumerate(job_result):
-#    print(f"Expectation values for pub {idx}: {pub_result.data.evs}")
 
-
-counts = pub_result  # your dict
+counts = pub_result
 
 only_00000000 = counts.get("00000000", 0)
 everything_else = sum(v for k, v in counts.items() if k != "00000000")
-total = only_00000000 + everything_else  # or sum(counts.values())
+total = only_00000000 + everything_else
 
 print("only_00000000:", only_00000000)
 print("everything_else:", everything_else)

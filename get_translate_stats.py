@@ -56,7 +56,6 @@ def run_experiment(
                         tq_gates = []
                         for _ in range(num_samples):
                             transpiled_circuit = translate(original_circuit, translating_method, gate_set, level)
-                            #transpiled_total_gates = count_total_gates_qiskit(transpiled_circuit)
                             gates.append(get_resource_overhead_total_gates(original_circuit, transpiled_circuit))
                             tq_gates.append(get_resource_overhead_2q_gates(original_circuit, transpiled_circuit))
 
@@ -89,7 +88,8 @@ def run_experiment(
 
 
 if __name__ == "__main__":
-    with open("translate_experiments.yaml", "r") as f:
+    conf_file = sys.argv[1] if len(sys.argv) > 1 else "translate_experiments.yaml"
+    with open(conf_file, "r") as f:
         config = yaml.safe_load(f)
 
     for experiment in config["experiments"]:
@@ -119,7 +119,7 @@ if __name__ == "__main__":
                     backend,
                     backend_size,
                     code_name,
-                    None,  # d is None so it'll be calculated dynamically
+                    None,
                     cycles,
                     lock,
                     translating_methods,

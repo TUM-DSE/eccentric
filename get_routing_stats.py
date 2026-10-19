@@ -24,7 +24,7 @@ def run_experiment(
     backend_name,
     backend_size,
     code_name,
-    d,  # d is None so it'll be calculated dynamically
+    d,
     cycles,
     lock,
     routing_method,
@@ -45,7 +45,6 @@ def run_experiment(
 
         for state, qc in code.circuit.items():
             original_circuit = qc
-            #original_total_gates = count_total_gates_qiskit(original_circuit)
 
             gates = []
             tq_gates = []
@@ -86,7 +85,8 @@ def run_experiment(
 
 
 if __name__ == "__main__":
-    with open("routing_experiments.yaml", "r") as f:
+    conf_file = sys.argv[1] if len(sys.argv) > 1 else "routing_experiments.yaml"
+    with open(conf_file, "r") as f:
         config = yaml.safe_load(f)
 
     for experiment in config["experiments"]:
@@ -117,7 +117,7 @@ if __name__ == "__main__":
                     backend,
                     backend_size,
                     code_name,
-                    None,  # d is None so it'll be calculated dynamically
+                    None,
                     cycles,
                     lock,
                     routing_method,

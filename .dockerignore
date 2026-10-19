@@ -1,17 +1,8 @@
-# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
 venv/
+.venv/
 .pytest_cache/
-.tox/
-
-# Git
 .git/
-.gitignore
-
-# Project specific heavy files or secrets
-job_info_*.json
-qecc_benchmark.log
+*.log
 .env

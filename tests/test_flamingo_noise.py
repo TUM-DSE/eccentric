@@ -2,7 +2,6 @@ import stim
 import pytest
 from noise.flamingo_noise import FlamingoNoise, flamingo_err_prob
 
-# TODO: this is just a sanity check
 
 class DummyQubitTracking:
     def get_layout_postion(self, q):
@@ -22,7 +21,7 @@ class DummyBackend:
     @property
     def get_remote_gates(self):
         return {(2, 3)}
-    
+
     def qubit_properties(self, qubit):
         return QubitProperties(t1=0.1, t2=0.1, frequency=None)
 
@@ -53,8 +52,4 @@ def test_noisy_op_distinguishes_remote_gates(noise_model):
     pre, mid, post = noise_model.noisy_op(op, base_p=0.01, ancilla=10)
 
     post_str = str(post)
-    #assert "DEPOLARIZE2 2 3 0.3" in post_str
-    #assert "DEPOLARIZE2 0 1 0.01" in post_str
-    #assert "DEPOLARIZE2 4 5 0.01" in post_str
     mid_str = str(mid)
-    #assert mid_str.count("CX") == 3

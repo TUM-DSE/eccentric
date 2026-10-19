@@ -11,4 +11,3 @@ experiments:
     codes: ["surface", "gross", "color", "bacon", "hh", "steane"]
     error_types: ["variance"]
     decoders: ["bposd"]
-

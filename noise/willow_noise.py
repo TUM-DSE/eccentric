@@ -1,7 +1,7 @@
 from .noise import *
 
 class WillowNoise(NoiseModel):
-    
+
     @staticmethod
     def get_noise(qt) -> 'NoiseModel':
         # From https://arxiv.org/pdf/2408.13687
@@ -13,6 +13,6 @@ class WillowNoise(NoiseModel):
             leakage=2.5e-4,
             leakage_propagation=2.0e-4,
             reset=1.5e-3,
-            measure=0.8e-2, # In the paper: readout
+            measure=0.8e-2,
             qt=qt
         )

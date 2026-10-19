@@ -10,7 +10,6 @@ def make_idle_qubit_circuit(num_rounds: int, num_qubits: int) -> StimCodeCircuit
     for _ in range(num_rounds):
         circuit.append("TICK")
 
-    # Measure all qubits at the end in Z basis
     circuit.append("M", list(range(num_qubits)))
 
     return StimCodeCircuit(stim_circuit=circuit)

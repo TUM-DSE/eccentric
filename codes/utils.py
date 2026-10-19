@@ -50,35 +50,32 @@ def get_code(code_name: str, d: int, cycles: int):
 def get_max_d(code_name: str, n: int):
     if code_name == "surface":
         if n < 26:
-            raise 1 #Note that a Error will be logged in the main.py
+            raise ValueError(f"Surface code needs at least 26 qubits, got {n}")
 
         d = int((-3 + math.isqrt(9 + 8*(n+1))) // 4)
         d = d - ((1 - d) % 2)
         assert d % 2 == 1
         return d
     elif code_name == "hh":
-        # n = 5d^2 - 2d - 1 /2
         d = int((2 + math.sqrt(40 * n + 24)) / 10)
-        d = d - ((1 - d) % 2) # In order to mamize the logical error rate we want odd distances according to the heavy hex author: https://journals.aps.org/prx/pdf/10.1103/PhysRevX.10.011022
+        d = d - ((1 - d) % 2) # https://journals.aps.org/prx/pdf/10.1103/PhysRevX.10.011022
         assert d % 2 == 1
         return d
     elif code_name == "gross":
         return 12
     elif code_name == "color":
         d = int((math.sqrt(4*n) +1)/3)
-        d = d - ((1 - d) % 2) # we look into triangular color code which has odd distance
+        d = d - ((1 - d) % 2)
         assert d % 2 == 1
         return d
     elif code_name == "bacon":
-        #assuming square lattice n = d^2
-        #actually it should be d = min(m,n) according to qecc zoo but we have no m,n structure
         d = int(math.sqrt(n))
-        d = d - ((1 - d) % 2) 
+        d = d - ((1 - d) % 2)
         return d
     elif code_name == 'steane':
-        if n >= 686: # According to Stim file
+        if n >= 686:
             return 27
-        elif n >= 98: # According to Stim file
+        elif n >= 98:
             return 9
         elif n >= 13:
             return 3
@@ -95,7 +92,7 @@ def get_min_n(code_name: str, d: int):
     elif code_name == "color":
         return int(math.ceil((3*d - 1)**2 / 4))
     elif code_name == "bacon":
-        return d * d #this is only partially true d*d is for sure the lower bound but code actually might require more qubits
+        return d * d
     elif code_name == 'steane':
         if d == 3:
             return 14

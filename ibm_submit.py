@@ -9,13 +9,10 @@ from qiskit import QuantumCircuit, transpile
 from qiskit_ibm_runtime import QiskitRuntimeService, Sampler
 
 
-# ========================= IBM CLOUD UTILITIES =========================
-
 def get_available_ibm_backends(
     min_qubits: int = 2,
     operational_only: bool = True
 ) -> List[Dict[str, Any]]:
-    """Get list of available IBM backends with their properties."""
     try:
         service = QiskitRuntimeService()
         backends = service.backends()
@@ -86,7 +83,6 @@ def select_best_ibm_backend(
 
 
 def validate_ibm_credentials() -> bool:
-    """Check if IBM Quantum credentials are properly configured."""
     try:
         service = QiskitRuntimeService()
         backends = service.backends()
@@ -97,14 +93,11 @@ def validate_ibm_credentials() -> bool:
         return False
 
 
-# ========================= CIRCUIT GENERATION =========================
-
 def generate_random_circuit_with_torino_gates(
     num_qubits: int,
     depth: int,
     seed: Optional[int] = None
 ) -> QuantumCircuit:
-    """Generate a random circuit using only FakeTorino's native gate set."""
     if seed is not None:
         random.seed(seed)
         np.random.seed(seed)
@@ -158,8 +151,6 @@ def generate_random_circuit_with_torino_gates(
     return circuit
 
 
-# ========================= IBM CLOUD FUNCTIONS =========================
-
 def submit_circuits_to_ibm_cloud(
     circuits: List[QuantumCircuit],
     backend_name: str = "ibm_torino",
@@ -169,7 +160,6 @@ def submit_circuits_to_ibm_cloud(
     save_job_info: bool = True,
     max_shots_per_job: int = 100000
 ) -> Dict[str, Any]:
-    """Submit a batch of circuits to IBM cloud as a single job."""
 
     try:
         service = QiskitRuntimeService()
@@ -245,7 +235,6 @@ def get_ibm_job_results(
     wait_for_completion: bool = True,
     timeout: int = 3600
 ) -> Dict[str, Any]:
-    """Retrieve results from an IBM cloud job."""
 
     service = QiskitRuntimeService()
 
@@ -305,7 +294,6 @@ def get_ibm_job_results(
 
 
 def load_job_info_from_file(job_id: str) -> Dict[str, Any]:
-    """Load job information from saved JSON file."""
     job_file = f"experiment_results/ibm_runs/job_info_{job_id}.json"
     if os.path.exists(job_file):
         with open(job_file, 'r') as f:
@@ -316,7 +304,6 @@ def load_job_info_from_file(job_id: str) -> Dict[str, Any]:
 
 
 def load_results_from_file(job_id: str) -> Optional[Dict[str, Any]]:
-    """Load IBM job results from local file."""
     results_file = f"experiment_results/ibm_runs/job_results_{job_id}.json"
     if os.path.exists(results_file):
         print(f"Loading results from local file: {results_file}")
@@ -324,8 +311,6 @@ def load_results_from_file(job_id: str) -> Optional[Dict[str, Any]]:
             return json.load(f)
     return None
 
-
-# ========================= EXPERIMENT SUBMISSION =========================
 
 def run_full_experiment_submit(
     qubit_range: Tuple[int, int] = (2, 7),
@@ -335,7 +320,6 @@ def run_full_experiment_submit(
     seed: int = 42,
     backend_name: str = None,
 ) -> Dict[str, Any]:
-    """Generate circuits and submit them to IBM cloud. Returns job info."""
 
     qubit_sizes = list(range(qubit_range[0], qubit_range[1] + 1))
     total_circuits = len(qubit_sizes) * circuits_per_qubit_size
@@ -381,7 +365,6 @@ def run_full_experiment_submit(
         'qubit_sizes': qubit_sizes
     }
 
-    # Save extended job info
     job_file = f"experiment_results/ibm_runs/job_info_{job_info['job_id']}.json"
     serializable = {k: v for k, v in job_info.items() if k != 'transpiled_circuits'}
     with open(job_file, 'w') as f:
@@ -391,15 +374,12 @@ def run_full_experiment_submit(
 
 
 def retrieve_and_save_results(job_id: str) -> Dict[str, Any]:
-    """Retrieve IBM job results and save them to job_results_<job_id>.json."""
 
-    # Check if results already exist locally
     existing = load_results_from_file(job_id)
     if existing is not None:
         print(f"Results already saved locally for job {job_id}")
         return existing
 
-    # Retrieve from IBM cloud
     print(f"Retrieving results for job {job_id}...")
     ibm_results = get_ibm_job_results(job_id, wait_for_completion=True)
 
@@ -407,7 +387,6 @@ def retrieve_and_save_results(job_id: str) -> Dict[str, Any]:
         print(f"Error retrieving results: {ibm_results['error']}")
         return ibm_results
 
-    # Save results locally
     results_file = f"experiment_results/ibm_runs/job_results_{job_id}.json"
     with open(results_file, 'w') as f:
         json.dump(ibm_results, f, indent=2)
@@ -415,8 +394,6 @@ def retrieve_and_save_results(job_id: str) -> Dict[str, Any]:
 
     return ibm_results
 
-
-# ========================= CLI COMMANDS =========================
 
 def submit_job():
 
@@ -450,13 +427,13 @@ def submit_job():
     job_id = job_info['job_id']
     print(f"Job ID: {job_id}")
 
-    print(f"To retrieve results: python ibm_demo_copy.py results {job_id}")
+    print(f"To retrieve results: python3 ibm_submit.py results {job_id}")
 
     return job_id
 
 
 def get_results(job_id: str):
-    print("Tring to get results for job ID:", job_id)
+    print("Trying to get results for job ID:", job_id)
 
     result = retrieve_and_save_results(job_id)
 
@@ -470,12 +447,10 @@ def get_results(job_id: str):
     return result
 
 
-
 def main():
-    """Main entry point."""
 
     if len(sys.argv) < 2:
-        print(__doc__)
+        print("Usage: python3 ibm_submit.py submit | results <job_id>")
         return
 
     command = sys.argv[1].lower()

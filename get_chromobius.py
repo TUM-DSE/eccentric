@@ -84,9 +84,9 @@ def run_experiment(
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print(f"Remember to add YAML file!")
+        print("Usage: python3 get_chromobius.py <config.yaml>")
         sys.exit(1)
-    
+
     conf_file = sys.argv[1]
 
     with open(conf_file, "r") as f:
@@ -109,7 +109,6 @@ if __name__ == "__main__":
         save_experiment_metadata(experiment, experiment_name)
         manager = Manager()
         lock = manager.Lock()
-        # TODO: better handling case if distances and backends_sizes are both set
 
         with ProcessPoolExecutor() as executor:
             if "backends_sizes" in experiment and "distances" in experiment:

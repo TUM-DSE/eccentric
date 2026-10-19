@@ -27,7 +27,6 @@ def get_backend(backend: str, backend_size: int):
         elif name == "torino":
             backend = FakeTorino()
         elif name == "willow":
-            # By default we allow extension as otherwise codes are limited
             backend = FakeGoogleWillowBackend(extended=True)
         elif name == "apollo":
             backend = FakeQuantinuumApolloBackend()
@@ -37,8 +36,6 @@ def get_backend(backend: str, backend_size: int):
             backend = FakeInfleqtionBackend(extended=True)
         elif name == "nsinfleqtion":
             backend = FakeInfleqtionNoShuttlingBackend(extended=True)
-        #elif name == "aquila":
-        #    backend = FakeQueraAquilaBackend()
         else:
             raise NotImplementedError
     elif backend_type == "variance":

@@ -42,11 +42,10 @@ def run_experiment(
     try:
         pid = os.getpid()
         process = psutil.Process(pid)
-        # Start total timing and memory tracking
         total_start = time.perf_counter()
         tracemalloc.start()
 
-       
+
         backend = get_backend(backend_name, backend_size)
         if d is None:
             if backend_name == "real_flamingo_1_qpu":
@@ -71,8 +70,6 @@ def run_experiment(
         stim_circuit = get_stim_circuits(code.qc, detectors=detectors, logicals=logicals)[0][0]
         noise_model = get_noise_model(error_type, qt, error_prob, backend)
         stim_circuit = noise_model.noisy_circuit(stim_circuit)
-        # -----------------------
-        # DECODING
         t0 = time.perf_counter()
         logical_error_rate = decode(code_name, stim_circuit, num_samples, decoder, backend_name, error_type)
         t_decode = time.perf_counter() - t0
@@ -80,7 +77,6 @@ def run_experiment(
         mem_decode_full = process.memory_info().rss / 1e6
         tracemalloc.stop()
 
-        # Save results
         result_data = {
             "backend": backend_name,
             "backend_size": backend_size,
@@ -108,9 +104,9 @@ def run_experiment(
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print(f"Remember to add YAML file!")
+        print("Usage: python3 get_decoder.py <config.yaml>")
         sys.exit(1)
-    
+
     conf_file = sys.argv[1]
 
     with open(conf_file, "r") as f:
@@ -133,7 +129,6 @@ if __name__ == "__main__":
         save_experiment_metadata(experiment, experiment_name)
         manager = Manager()
         lock = manager.Lock()
-        # TODO: better handling case if distances and backends_sizes are both set
 
         with ProcessPoolExecutor() as executor:
             if "backends_sizes" in experiment and "distances" in experiment:

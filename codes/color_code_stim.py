@@ -13,9 +13,7 @@ import stim
 from qiskit_qec.circuits import StimCodeCircuit
 
 
-#########################################################################
 # Functions adapted from https://github.com/seokhyung-lee/color-code-stim
-#########################################################################
 
 class ColorCode:
     tanner_graph: ig.Graph
@@ -43,60 +41,8 @@ class ColorCode:
         perfect_init_final: bool = False,
         logical_gap: bool = False,
         use_last_detectors: bool = True,
-        # custom_noise_channel: Optional[Tuple[str, object]] = None,
-        # dem_decomposed: Optional[Dict[str, Tuple[
-        #     stim.DetectorErrorModel, stim.DetectorErrorModel]]] =
-        #     None,
         benchmarking: bool = False,
     ):
-        """
-        Class for constructing a color code circuit and simulating the
-        concatenated MWPM decoder.
-
-        Parameters
-        ----------
-        d : int >= 3
-            Code distance. Should be an odd number of 3 or more.
-        rounds : int >= 1
-            Number of syndrome extraction rounds.
-        shape : {'triangle', 'tri', 'rectangle', 'rec', 'rec_stability', 'growing'}, default 'tri'
-            Shape of the color code patch.
-        d2 : int >= 3, optional
-            Second code distance of the rectangular patch (if applicable). If
-            not provided, d2=d.
-        cnot_schedule : {12-tuple of integers, 'tri_optimal', 'tri_optimal_reversed'}, default 'tri_optimal'
-            CNOT schedule.
-            If this is a 12-tuple of integers, it indicate (a, b, ... l)
-            specifying the CNOT schedule.
-            If this is 'tri_optimal', it is (2, 3, 6, 5, 4, 1, 3, 4, 7, 6,
-            5, 2), which is the optimal schedule for the triangular color code.
-            If this is 'tri_optimal_reversed', it is (3, 4, 7, 6, 5, 2, 2,
-            3, 6, 5, 4, 1), which has the X- and Z-part reversed from
-            'tri_optimal'.
-        p_bitflip : float, default 0
-            Bit-flip probability at the start of each round.
-        p_reset : float, default 0
-            Probability of a wrong qubit reset (i.e., producing an
-            orthogonal state).
-        p_meas : float, default 0
-            Probability of a flipped measurement outcome.
-        p_cnot : float, default 0
-            Strength of a two-qubit depolarizing noise channel following
-            each CNOT gate.
-        p_idle : float, default 0
-            Strength of a single-qubit depolarizing noise channel following
-            each idle gate.
-        p_circuit : float, optional
-            If given, p_reset = p_meas = p_cnot = p_idle = p_circuit.
-        perfect_init_final : bool, default False
-            Whether to use perfect initialization and final measurement.
-        logical_gap : bool, default False
-            Whether to compute logical gap during decoding.
-        use_last_detectors : bool, default True
-            Whether to use detectors from the last round.
-        benchmarking : bool, default False
-            Whether to measure execution time of each step.
-        """
         if isinstance(cnot_schedule, str):
             if cnot_schedule in ["tri_optimal", "LLB"]:
                 cnot_schedule = (2, 3, 6, 5, 4, 1, 3, 4, 7, 6, 5, 2)
@@ -157,20 +103,12 @@ class ColorCode:
 
         self.benchmarking = benchmarking
 
-        # Mapping between detector ids and ancillary qubits
-        # self.detectors[detector_id] = (anc_qubit, time_coord)
         self.detectors = []
 
-        # Detector ids grouped by colors
         self.detector_ids = {"r": [], "g": [], "b": []}
 
-        # Various qubit groups
         self.qubit_groups = {}
 
-        # Decomposed detector error models
-        # It is generated when required.
-        # if dem_decomposed is None:
-        #     dem_decomposed = {}
         self.dems_sym_decomposed = {}
         self.dems_decomposed = {}
 
@@ -183,12 +121,10 @@ class ColorCode:
         self.org_dem = self.circuit.detector_error_model(flatten_loops=True)
         self._bp_inputs = {}
 
-        # Get detector list
         detector_coords_dict = self.circuit.get_detector_coordinates()
         for detector_id in range(self.circuit.num_detectors):
             coords = detector_coords_dict[detector_id]
             if len(coords) == 1:
-                # boundary dets when logical_gap = True
                 if self.shape == "tri":
                     color = "r"
                 elif self.shape == "growing":
@@ -338,9 +274,7 @@ class ColorCode:
                             )
                             detid += 1
 
-            # Additional corner vertex
             x = y = L2 + 1
-            # x, y = L2 - 2, L2
             tanner_graph.add_vertex(
                 name=f"{x}-{y}",
                 x=x,
@@ -426,7 +360,6 @@ class ColorCode:
         else:
             raise ValueError("Invalid shape")
 
-        # Update qubit_groups
         data_qubits = tanner_graph.vs.select(pauli=None)
         anc_qubits = tanner_graph.vs.select(pauli_ne=None)
         anc_Z_qubits = anc_qubits.select(pauli="Z")
@@ -447,7 +380,6 @@ class ColorCode:
             }
         )
 
-        # Add edges
         links = []
         offsets = [(-1, 1), (1, 1), (2, 0), (1, -1), (-1, -1), (-2, 0)]
         for anc_qubit in self.qubit_groups["anc"]:
@@ -474,7 +406,6 @@ class ColorCode:
                         )
                         links.append(link)
 
-        # Assign colors to links
         link: ig.Edge
         for link in links:
             v1: ig.Vertex
@@ -536,7 +467,7 @@ class ColorCode:
             temp_bdrys = "z"
             red_links = data_q1s = data_q2s = None
         elif shape == "growing":
-            temp_bdrys = "mixed"  # Mixed boundaries
+            temp_bdrys = "mixed"
             y_init_patch_bdry = 3 * round((d2 - d) / 2)
             data_qubits_outside_init_patch = data_qubits.select(y_lt=y_init_patch_bdry)
             red_links = [
@@ -552,9 +483,7 @@ class ColorCode:
         else:
             raise NotImplementedError
 
-        # custom_noise_channel = self.custom_noise_channel
 
-        # Syndrome extraction circuit without SPAM
         synd_extr_circuit_without_spam = stim.Circuit()
         for timeslice in range(1, max(cnot_schedule) + 1):
             targets = [i for i, val in enumerate(cnot_schedule) if val == timeslice]
@@ -588,7 +517,6 @@ class ColorCode:
                     data_qid = data_qubit.index
                     operated_qids.update({anc_qid, data_qid})
 
-                    # tanner_graph.add_edge(anc_qid, data_qid)
                     CX_target = (
                         [data_qid, anc_qid] if target < 6 else [anc_qid, data_qid]
                     )
@@ -615,7 +543,6 @@ class ColorCode:
 
             return tuple(coords)
 
-        # Syndrome extraction circuit with measurement & detector
         def get_synd_extr_circuit(first=False):
             synd_extr_circuit = synd_extr_circuit_without_spam.copy()
 
@@ -683,22 +610,16 @@ class ColorCode:
             if p_bitflip > 0:
                 synd_extr_circuit.append("X_ERROR", data_qids, p_bitflip)
 
-            # if custom_noise_channel is not None:
-            #     synd_extr_circuit.append(custom_noise_channel[0],
-            #                              data_qids,
-            #                              custom_noise_channel[1])
 
             synd_extr_circuit.append("TICK")
             synd_extr_circuit.append("SHIFT_COORDS", (), (0, 0, 1))
 
             return synd_extr_circuit
 
-        # Main circuit
         for qubit in tanner_graph.vs:
             coords = get_qubit_coords(qubit)
             circuit.append("QUBIT_COORDS", qubit.index, coords)
 
-        # Initialize qubits
         if temp_bdrys == "z":
             circuit.append("RZ", data_qids)
             if p_reset > 0 and not perfect_init_final:
@@ -718,13 +639,11 @@ class ColorCode:
                 circuit.append("DEPOLARIZE2", red_links.ravel(), p_cnot)
 
         else:
-            # Data qubits inside the initial patch
             data_qids_init_patch = data_qubits.select(y_ge=y_init_patch_bdry)["qid"]
             circuit.append("RZ", data_qids_init_patch)
             if p_reset > 0 and not perfect_init_final:
                 circuit.append("X_ERROR", data_qids_init_patch, p_reset)
 
-            # Data qubits outside the initial patch
             circuit.append("RX", data_q1s)
             circuit.append("RZ", data_q2s)
             if p_reset > 0:
@@ -747,17 +666,12 @@ class ColorCode:
         if p_bitflip > 0:
             circuit.append("X_ERROR", data_qids, p_bitflip)
 
-        # if custom_noise_channel is not None:
-        #     circuit.append(custom_noise_channel[0],
-        #                    data_qids,
-        #                    custom_noise_channel[1])
 
         circuit.append("TICK")
 
         circuit += get_synd_extr_circuit(first=True)
         circuit += get_synd_extr_circuit() * (rounds - 1)
 
-        # Final data qubit measurements (& observables for red boundaries)
         p_meas_final = 0 if perfect_init_final else p_meas
         if temp_bdrys in {"z", "mixed"}:
             circuit.append("MZ", data_qids, p_meas_final)
@@ -785,7 +699,7 @@ class ColorCode:
 
             circuit.append("TICK")
 
-            circuit.append("MZ", data_q2s, p_meas_final)  # ZZ measurement outcomes
+            circuit.append("MZ", data_q2s, p_meas_final)
 
             num_data_q2s = data_q2s.size
             lookback_inds_anc = {}
@@ -818,7 +732,7 @@ class ColorCode:
             else:
                 circuit.append("OBSERVABLE_INCLUDE", target, 0)
 
-            circuit.append("MX", data_q1s, p_meas_final)  # XX measurement outcomes
+            circuit.append("MX", data_q1s, p_meas_final)
 
             num_data_q1s = data_q1s.size
             lookback_inds_anc = {}
@@ -855,7 +769,6 @@ class ColorCode:
             else:
                 circuit.append("OBSERVABLE_INCLUDE", target, 1)
 
-        # Logical observables
         if temp_bdrys in {"z", "mixed"}:
             if self.shape in {"tri", "growing"}:
                 qubits_logs = [tanner_graph.vs.select(obs=True)]
@@ -875,31 +788,14 @@ class ColorCode:
                     circuit.append("DETECTOR", target, obs_id)
 
     def get_detector(self, detector_id):
-        """
-        Get the ancillary qubit and round corresponding to a detector from a
-        given detector ID.
-
-        Parameters
-        ----------
-        detector_id : int
-            Detector ID.
-
-        Returns
-        -------
-        anc : ig.Vertex
-            Ancillary qubit involved in the detector.
-        round : int
-            Round that the detector belongs to.
-        """
         return self.detectors[detector_id]
-    
-#############################################################################################
+
 
 def get_color_code(d=5,rounds=5):
     colorcode = ColorCode(
     d=d,
     rounds=rounds,
-    cnot_schedule="tri_optimal",  # Default CNOT schedule optimized in our paper.
+    cnot_schedule="tri_optimal",
     p_circuit=0,
     )
     return StimCodeCircuit(stim_circuit = colorcode.circuit)

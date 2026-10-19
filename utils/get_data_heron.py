@@ -9,7 +9,6 @@ from qiskit.transpiler import InstructionDurations
 backend = FakeKyiv()
 durations = InstructionDurations.from_backend(backend)
 
-# Optionally convert to seconds using dt value
 dt = backend.configuration().dt
 print(f"\nBackend dt: {dt} seconds")
 
