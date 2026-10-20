@@ -1,0 +1,21 @@
+experiments:
+  - name: "NewCodesFamilies"
+    type: logical_error
+    num_samples: 1000
+    backends: ["custom_grid"]
+    backends_sizes: [100]
+    codes: ["repetition", "xzzx", "toric", "planar_honeycomb"]
+    error_types: ["sd6"]
+    error_probabilities: [0.001]
+    decoders: ["bposd"]
+
+  - name: "NewCodesFixed"
+    type: logical_error
+    num_samples: 1000
+    backends: ["custom_grid"]
+    backends_sizes: [150]
+    cycles: 3
+    codes: ["bb72", "bpc36", "hgp_hamming", "rm15", "lp", "qt36", "hyperbolic_floquet_60"]
+    error_types: ["sd6"]
+    error_probabilities: [0.001]
+    decoders: ["bposd"]

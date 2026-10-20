@@ -1,9 +1,6 @@
 import stim
 import numpy as np
-from ldpc import bposd_decoder
-from stimbposd import (
-    BPOSD,
-)
+from ldpc import BpOsdDecoder
 from scipy.sparse import csc_matrix
 from typing import Dict, List, FrozenSet
 
@@ -24,7 +21,7 @@ def dict_to_csc_matrix(elements_dict, shape):
     return csc_matrix((data, (row_ind, col_ind)), shape=shape)
 
 
-def dem_to_check_matrices(dem: stim.DetectorErrorModel, return_col_dict=False):
+def dem_to_check_matrices(dem: stim.DetectorErrorModel, return_col_dict=False, xor_priors=False):
     DL_ids: Dict[str, int] = {}
     L_map: Dict[int, FrozenSet[int]] = {}
     priors_dict: Dict[int, float] = {}
@@ -40,7 +37,10 @@ def dem_to_check_matrices(dem: stim.DetectorErrorModel, return_col_dict=False):
 
         hid = DL_ids[key]
         L_map[hid] = obs
-        priors_dict[hid] += prob
+        if xor_priors:
+            priors_dict[hid] = priors_dict[hid] * (1 - prob) + prob * (1 - priors_dict[hid])
+        else:
+            priors_dict[hid] += prob
 
     for instruction in dem.flattened():
         if instruction.type == "error":
@@ -83,15 +83,14 @@ def bposd_chk(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors
     dem = circuit.detector_error_model(approximate_disjoint_errors=approximate_disjoint_errors)
     chk, obs, priors, col_dict = dem_to_check_matrices(dem, return_col_dict=True)
 
-    bpd = bposd_decoder(
+    bpd = BpOsdDecoder(
         chk,
-        channel_probs=list(priors),
+        error_channel=list(priors),
         max_iter=10000,
         bp_method="minimum_sum",
         ms_scaling_factor=1.0,
         osd_method="osd_cs",
         osd_order=7,
-        input_vector_type="syndrome",
     )
 
     dem_sampler: stim.CompiledDemSampler = dem.compile_sampler()
@@ -111,24 +110,26 @@ def bposd_chk(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors
 
 
 def bposd_batch(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool):
+    # Same decoder setup as stimbposd.BPOSD, which is incompatible with ldpc v2
     sampler = circuit.compile_detector_sampler()
     detection_events, observable_flips = sampler.sample(
         num_shots, separate_observables=True
     )
 
     dem = circuit.detector_error_model(approximate_disjoint_errors=approximate_disjoint_errors)
-    matcher = BPOSD(
-        dem,
-        max_bp_iters=10000,
+    chk, obs, priors = dem_to_check_matrices(dem, xor_priors=True)
+    bpd = BpOsdDecoder(
+        chk,
+        error_channel=list(priors),
+        max_iter=10000,
         bp_method="minimum_sum",
+        ms_scaling_factor=1.0,
         osd_method="osd_cs",
-        osd_order=7,
+        osd_order=min(7, chk.shape[1] - chk.shape[0]),
     )
-    predictions = matcher.decode_batch(detection_events)
     num_errors = 0
     for shot in range(num_shots):
-        actual_for_shot = observable_flips[shot]
-        predicted_for_shot = predictions[shot]
-        if not np.array_equal(actual_for_shot, predicted_for_shot):
+        predicted_for_shot = (obs @ bpd.decode(detection_events[shot])) % 2
+        if not np.array_equal(observable_flips[shot], predicted_for_shot):
             num_errors += 1
     return num_errors / num_shots

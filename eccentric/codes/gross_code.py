@@ -88,7 +88,7 @@ def create_generalized_bicycle_codes(l, a, b, name=None):
     hz = np.hstack((B.T, A.T))
     return css_code(hx, hz, name=name, name_prefix="GB")
 
-def create_bivariate_bicycle_codes(l, m, A_x_pows, A_y_pows, B_x_pows, B_y_pows, name=None):
+def create_bivariate_bicycle_codes(l, m, A_x_pows, A_y_pows, B_x_pows, B_y_pows, name=None, code_distance=np.nan):
     S_l=create_circulant_matrix(l, [-1])
     S_m=create_circulant_matrix(m, [-1])
     x = kron(S_l, identity(m, dtype=int))
@@ -99,7 +99,7 @@ def create_bivariate_bicycle_codes(l, m, A_x_pows, A_y_pows, B_x_pows, B_y_pows,
     B = reduce(lambda x,y: x+y, B_list).toarray()
     hx = np.hstack((A, B))
     hz = np.hstack((B.T, A.T))
-    return css_code(hx, hz, name=name, name_prefix="BB", check_css=True), A_list, B_list
+    return css_code(hx, hz, code_distance=code_distance, name=name, name_prefix="BB", check_css=True), A_list, B_list
 
 def build_circuit(code, A_list, B_list, num_repeat, z_basis=True, use_both=False, HZH=False):
     n = code.N
@@ -277,3 +277,15 @@ def get_gross_code(d=12, T=12):
         use_both=False,
     )
     return StimCodeCircuit(stim_circuit = stim_circuit)
+
+
+def make_bb_circuit(n, T):
+    """Bivariate bicycle code [[n, k, d]] from BBCODE_DICT, with the same circuit as the gross code"""
+    (k, d), = [(k, d) for (n_, k, d) in BBCODE_DICT if n_ == n]
+    l, m, (a_x, *a_y), (b_y, *b_x) = BBCODE_DICT[(n, k, d)]
+    code, A_list, B_list = create_bivariate_bicycle_codes(l, m, [a_x], a_y, b_x, [b_y], code_distance=d)
+    return build_circuit(code, A_list, B_list,
+        num_repeat=T,
+        z_basis=True,
+        use_both=False,
+    )

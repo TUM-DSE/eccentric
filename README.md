@@ -20,7 +20,8 @@ eccentric/                 the framework (Python package)
 ├── runner.py              config loading, parameter sweeps, parallel execution, result saving
 ├── experiments/           experiment types, one module each
 ├── backends/              fake hardware backends and custom topologies
-├── codes/                 QEC code circuits: surface, heavy-hex, gross, color, Bacon-Shor, concatenated Steane
+├── codes/                 QEC code circuits: surface, heavy-hex, gross, color, Bacon-Shor, concatenated Steane,
+│                          and the catalog of further codes (see "Codes")
 ├── noise/                 artificial and hardware-inspired noise models
 ├── decoders/              MWPM, BP-OSD and Chromobius
 ├── transpilers/           layout/routing and gate-set translation (Qiskit, BQSKit, TKET)
@@ -32,7 +33,7 @@ experiment_results/        raw results used in the paper
 figures/                   generated figures
 docs/                      pipeline overview figure
 tests/                     unit and end-to-end tests
-external/                  submodules: qiskit-qec fork, more-bacon-less-threshold
+external/                  submodules: qiskit-qec fork, more-bacon-less-threshold, honeycomb_threshold, honeycomb-boundaries
 ```
 
 ## Installation (Linux)
@@ -103,7 +104,7 @@ experiments:
 | `type` | Experiment type: `logical_error` (default), `decoder`, `program_stats`, `accumulated_error`, `chromobius`, `routing`, `translation` |
 | `num_samples` | Number of shots (or, for `routing` and `translation`, number of repetitions) |
 | `backends` | List of backends (see below) |
-| `codes` | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane) |
+| `codes` | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane), and the codes listed under [Codes](#codes) |
 | `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only) |
 | `error_types` | List of noise models (see below) |
 | `error_probabilities` | Physical error rates `p` for the artificial noise models |
@@ -117,6 +118,31 @@ experiments:
 | `optimization_levels` | Translation optimization levels for `translation` (default `[0, 2, 3]`) |
 
 If neither `backends_sizes` nor `distances` is given, the backend's own size is used and the largest code distance that fits is chosen. Configurations whose code does not fit (distance < 3) are skipped and logged.
+
+### Codes
+
+Besides the codes of the paper, these codes are available. They are registered in `eccentric/codes/catalog.py`, which builds a noiseless Stim memory circuit (Z basis) for each of them; the circuit then goes through the same transpilation, noise and decoding pipeline as every other code. Code families accept any distance from their minimum upwards; fixed instances only have their own distance, so use `backends_sizes` (or `distances` with exactly that value) for them. The qubit count includes the syndrome ancillas.
+
+| Name | Code | Qubits | Source |
+| --- | --- | --- | --- |
+| `repetition` | Repetition code, distance `d ≥ 3` | 2d − 1 | Stim generator |
+| `xzzx` | XZZX surface code (rotated surface code with a Hadamard on every other data qubit), `d ≥ 3` | 2d² − 1 | Stim generator |
+| `toric` | Unrotated toric code [[2d², 2, d]] | 4d² | [qLDPC](https://github.com/qLDPCOrg/qLDPC) |
+| `honeycomb` | Periodic honeycomb (Floquet) code, SD6 circuit, even `d ≥ 4` | 2.5 · d · 6⌈d/4⌉ | [honeycomb_threshold](https://github.com/Strilanc/honeycomb_threshold) |
+| `planar_honeycomb` | Planar honeycomb code with boundaries, SD6 circuit, `d ≥ 3` | 68 at d = 3 | [honeycomb-boundaries](https://github.com/Strilanc/honeycomb-boundaries) |
+| `bb72`, `bb90`, `bb108`, `bb288` | Bivariate bicycle codes [[72,12,6]], [[90,8,10]], [[108,8,10]], [[288,12,18]], same circuit as `gross` | 2n | Bravyi et al., arXiv:2308.07915 |
+| `bpc36`, `bpc72`, `bpc90` | Balanced product cyclic codes [[36,8,4]], [[72,8,8]], [[90,8,10]], cardinal schedule | 2n | [QUITS](https://github.com/mkangquantum/quits) |
+| `hgp_hamming` | Hypergraph product of two [7,4,3] Hamming codes, [[58,16,3]] | 100 | qLDPC |
+| `rm15` | Punctured quantum Reed-Muller code [[15,1,3]] | 29 | qLDPC |
+| `lp` | Lifted product (lift-connected surface) code [[39,3,3]] | 75 | qLDPC |
+| `qt36`, `qt72` | Quantum Tanner codes [[36,8,3]], [[72,14,4]] on the dihedral group D4 | 68, 136 | qLDPC |
+| `hyperbolic_floquet_60`, `_120`, `_160`, `_240` | Hyperbolic Floquet codes with 60/120/160/240 data qubits, d = 3/3/4/4 (pair measurements, no ancillas) | n | [hyperbolic-floquet-data](https://github.com/oscarhiggott/hyperbolic-floquet-data) |
+
+Notes:
+
+- Decoders: `bposd` works for all of them. `mwpm` works for `repetition`, `xzzx`, `toric`, `honeycomb`, `planar_honeycomb` and the hyperbolic Floquet codes; the other codes are not matchable. `chromobius` needs color-annotated detector coordinates, which are lost when the circuit goes through Qiskit.
+- `d` is the code distance. The syndrome-extraction circuits can have a lower circuit-level distance: `lp` (qLDPC's edge-coloring schedule) and the honeycomb codes have circuit distance below `d`, and `bpc72` below 8.
+- `cycles` sets the number of syndrome rounds. Floquet codes count one round as one X, Y and Z sub-round; the planar honeycomb code needs an even number of at least 4 rounds and the hyperbolic Floquet codes run `2 + 2⌈(cycles − 2)/2⌉` rounds.
 
 ### Backends
 

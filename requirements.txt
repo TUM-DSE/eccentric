@@ -76,7 +76,7 @@ jupyterlab_pygments==0.3.0
 jupyterlab_widgets==3.0.13
 kiwisolver==1.4.7
 lark==1.2.2
-ldpc==0.1.60
+ldpc==2.4.1
 llvmlite==0.43.0
 MarkupSafe==3.0.2
 matplotlib-inline==0.1.7
@@ -84,7 +84,6 @@ matplotlib==3.9.3
 mccabe==0.7.0
 mistune==3.1.0
 mpmath==1.3.0
-mqt.qecc==1.8.2
 msgpack==1.1.0
 multidict==6.1.0
 multiprocess==0.70.17
@@ -120,6 +119,7 @@ propcache==0.2.1
 proto-plus==1.25.0
 protobuf==4.25.5
 psutil==6.1.0
+qldpc==0.4.1
 ptyprocess==0.7.0
 pure_eval==0.2.3
 pyasn1==0.6.1
@@ -133,7 +133,7 @@ Pygments==2.18.0
 PyJWT==2.10.1
 pylatexenc==2.10
 pylint==3.3.3
-PyMatching==2.2.1
+PyMatching==2.3.1
 pyparsing==3.2.0
 pyquil==4.14.3
 pyspnego==0.11.2
@@ -171,7 +171,7 @@ s3transfer==0.11.4
 scipy==1.15.2
 seaborn==0.13.2
 setuptools==78.1.0
-sinter==1.14.0
+sinter==1.16.0
 six==1.17.0
 sniffio==1.3.1
 sortedcontainers==2.4.0
@@ -179,8 +179,7 @@ soupsieve==2.6
 stack-data==0.6.3
 statsmodels==0.14.1
 stevedore==5.4.1
-stim==1.14.0
-stimbposd==0.0.1
+stim==1.16.0
 stimcirq==1.14.0
 symengine==0.13.0
 sympy==1.13.3

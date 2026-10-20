@@ -5,9 +5,12 @@ from .bacon_shor import get_bacon_shor_code
 from .concat_steane import get_concat_steane_code
 from .surface_code import get_surface_code
 from .hh_code import get_hh_code
+from .catalog import CODES, MemoryCodeCircuit, make_circuit, max_distance, min_num_qubits
 
 def get_code(code_name: str, d: int, cycles: int):
-    if code_name == "hh":
+    if code_name in CODES:
+        return MemoryCodeCircuit(stim_circuit=make_circuit(code_name, d, cycles))
+    elif code_name == "hh":
         if cycles == None:
             return get_hh_code(d, None)
         else:
@@ -48,7 +51,9 @@ def get_code(code_name: str, d: int, cycles: int):
 
 
 def get_max_d(code_name: str, n: int):
-    if code_name == "surface":
+    if code_name in CODES:
+        return max_distance(code_name, n)
+    elif code_name == "surface":
         if n < 26:
             raise ValueError(f"Surface code needs at least 26 qubits, got {n}")
 
@@ -83,7 +88,9 @@ def get_max_d(code_name: str, n: int):
 
 
 def get_min_n(code_name: str, d: int):
-    if code_name == "surface":
+    if code_name in CODES:
+        return min_num_qubits(code_name, d)
+    elif code_name == "surface":
         return 2 * d * d + 3 * d - 1
     elif code_name == "hh":
         return int(math.ceil((5 * d * d - 2 * d - 1) / 2))
