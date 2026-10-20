@@ -132,6 +132,10 @@ Besides the codes of the paper, these codes are available. They are registered i
 | `planar_honeycomb` | Planar honeycomb code with boundaries, SD6 circuit, `d ≥ 3` | 68 at d = 3 | [honeycomb-boundaries](https://github.com/Strilanc/honeycomb-boundaries) |
 | `bb54`, `bb72`, `bb90`, `bb98`, `bb108`, `bb162`, `bb180`, `bb288`, `bb756` | Bivariate bicycle codes [[54,8,6]], [[72,12,6]], [[90,8,10]], [[98,6,12]], [[108,8,10]], [[162,8,14]], [[180,8,16]], [[288,12,18]], [[756,16,≤34]], same circuit as `gross` | 2n | Bravyi et al., arXiv:2308.07915, and `BBCODE_DICT` |
 | `bpc36`, `bpc54`, `bpc72`, `bpc90`, `bpc108`, `bpc126`, `bpc144`, `bpc162`, `bpc180` | Balanced product cyclic codes [[36,8,4]], [[54,8,4]], [[72,8,8]], [[90,8,10]], [[108,8,8]], [[126,8,10]], [[144,8,12]], [[162,8,12]], [[180,8,16]], cardinal schedule | 2n | [QUITS](https://github.com/mkangquantum/quits), arXiv:2411.03302 |
+| `hgp225`, `hgp625`, `hgp900` | Hypergraph products of classical (3,4)-regular LDPC codes, [[225,9,6]], [[625,25,8]], [[900,36,10]], cardinal schedule | 441, 1225, 1764 | QUITS (matrices in `eccentric/codes/data/quits_hgp`) |
+| `lcs15`, `lcs52`, `lcs65`, `lcs150`, `lcs175` | Lift-connected surface codes [[15,3,3]], [[52,4,4]], [[65,5,5]], [[150,6,6]], [[175,7,7]], zxcoloration schedule | 27, 100, 125, 294, 343 | QUITS, arXiv:2401.02911 |
+| `qlp544` | Quasi-cyclic lifted product code [[544,80,≤12]], cardinal schedule | 1024 | QUITS, arXiv:2308.08648 |
+| `mitten150` | Mitten code [[150,30,≤8]] over C5 × S3 (QUITS' demo instance, not the d = 10 code of the paper), Mitten schedule | 270 | QUITS, arXiv:2607.28795 |
 | `gb46`, `gb48`, `gb126` | Generalized bicycle codes [[46,2,9]], [[48,6,8]], [[126,28,8]] | 2n | Panteleev & Kalachev, arXiv:1904.02703; circuit from qLDPC |
 | `hgp_hamming` | Hypergraph product of two [7,4,3] Hamming codes, [[58,16,3]] | 100 | qLDPC |
 | `rm15` | Punctured quantum Reed-Muller code [[15,1,3]] | 29 | qLDPC |
@@ -143,9 +147,10 @@ Besides the codes of the paper, these codes are available. They are registered i
 Notes:
 
 - Decoders: `bposd` works for all of them. `mwpm` works for `repetition`, `xzzx`, `toric`, `honeycomb`, `planar_honeycomb` and the (semi-)hyperbolic Floquet codes; the other codes are not matchable. `chromobius` needs color-annotated detector coordinates, which are lost when the circuit goes through Qiskit.
-- `d` is the code distance. The syndrome-extraction circuits can have a lower circuit-level distance: `lp` (qLDPC's edge-coloring schedule) and the honeycomb codes have circuit distance below `d`, and `bpc72` below 8.
+- `d` is the code distance. The syndrome-extraction circuits can have a lower circuit-level distance: `lp` (qLDPC's edge-coloring schedule), the `lcs*` codes and the honeycomb codes have circuit distance below `d`, and `bpc72` below 8.
 - `cycles` sets the number of syndrome rounds. Floquet codes count one round as one X, Y and Z sub-round; the planar honeycomb code needs an even number of at least 4 rounds and the hyperbolic Floquet codes run `2 + 2⌈(cycles − 2)/2⌉` rounds.
-- Distances verified by exact computation: `bb54`, `bb98`, `gb46`, `gb48`, `rm15`, `hgp_hamming`, `lp`, `qt36`, `qt72`, and `toric` at d = 3. The others are taken from the cited papers; for `bb756` the distance is an upper bound.
+- Distances verified by exact computation: `bb54`, `bb98`, `gb46`, `gb48`, `rm15`, `hgp_hamming`, `lp`, `lcs15`, `lcs52`, `qt36`, `qt72`, and `toric` at d = 3. The `hgp*`, other `lcs*`, `qlp544` and `mitten150` distances are upper bounds from QUITS' randomized estimator, which match the cited papers. The others are taken from the cited papers; for `bb756` the distance is an upper bound.
+- `hgp625`, `hgp900` and `qlp544` take up to a minute to build; their tests only run with `pytest -m slow`.
 
 ### Backends
 

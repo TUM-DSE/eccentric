@@ -54,10 +54,10 @@ def _bb(n):
     return make
 
 
-def _bpc(n):
+def _quits(builder_name, *args):
     def make(rounds):
-        from .quits_codes import make_bpc_circuit
-        return make_bpc_circuit(n, rounds)
+        from . import quits_codes
+        return getattr(quits_codes, builder_name)(*args, rounds)
     return make
 
 
@@ -111,15 +111,25 @@ CODES = {
     "gb126": FixedCode(_qldpc("generalized_bicycle_code", 126), 8),
     "qt36": FixedCode(_qldpc("quantum_tanner_code", 1), 3),
     "qt72": FixedCode(_qldpc("quantum_tanner_code", 0), 4),
-    "bpc36": FixedCode(_bpc(36), 4),
-    "bpc54": FixedCode(_bpc(54), 4),
-    "bpc72": FixedCode(_bpc(72), 8),
-    "bpc90": FixedCode(_bpc(90), 10),
-    "bpc108": FixedCode(_bpc(108), 8),
-    "bpc126": FixedCode(_bpc(126), 10),
-    "bpc144": FixedCode(_bpc(144), 12),
-    "bpc162": FixedCode(_bpc(162), 12),
-    "bpc180": FixedCode(_bpc(180), 16),
+    "bpc36": FixedCode(_quits("make_bpc_circuit", 36), 4),
+    "bpc54": FixedCode(_quits("make_bpc_circuit", 54), 4),
+    "bpc72": FixedCode(_quits("make_bpc_circuit", 72), 8),
+    "bpc90": FixedCode(_quits("make_bpc_circuit", 90), 10),
+    "bpc108": FixedCode(_quits("make_bpc_circuit", 108), 8),
+    "bpc126": FixedCode(_quits("make_bpc_circuit", 126), 10),
+    "bpc144": FixedCode(_quits("make_bpc_circuit", 144), 12),
+    "bpc162": FixedCode(_quits("make_bpc_circuit", 162), 12),
+    "bpc180": FixedCode(_quits("make_bpc_circuit", 180), 16),
+    "hgp225": FixedCode(_quits("make_hgp_circuit", 225), 6),
+    "hgp625": FixedCode(_quits("make_hgp_circuit", 625), 8),
+    "hgp900": FixedCode(_quits("make_hgp_circuit", 900), 10),
+    "lcs15": FixedCode(_quits("make_lcs_circuit", 15), 3),
+    "lcs52": FixedCode(_quits("make_lcs_circuit", 52), 4),
+    "lcs65": FixedCode(_quits("make_lcs_circuit", 65), 5),
+    "lcs150": FixedCode(_quits("make_lcs_circuit", 150), 6),
+    "lcs175": FixedCode(_quits("make_lcs_circuit", 175), 7),
+    "qlp544": FixedCode(_quits("make_qlp_circuit"), 12),
+    "mitten150": FixedCode(_quits("make_mitten_circuit"), 8),
     "hyperbolic_floquet_60": FixedCode(_hyperbolic("4.10.10_n=60_k=5_d=3.stim"), 3),
     "hyperbolic_floquet_120": FixedCode(_hyperbolic("4.10.10_n=120_k=8_d=3.stim"), 3),
     "hyperbolic_floquet_160": FixedCode(_hyperbolic("4.10.10_n=160_k=10_d=4.stim"), 4),

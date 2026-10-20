@@ -9,12 +9,20 @@ NOISE_OPS = {"DEPOLARIZE1", "DEPOLARIZE2", "X_ERROR", "Y_ERROR", "Z_ERROR", "PAU
              "PAULI_CHANNEL_2", "E", "ELSE_CORRELATED_ERROR", "HERALDED_ERASE"}
 
 
+# QUITS takes up to a minute to schedule these, run them with `pytest -m slow`
+SLOW = {"hgp625", "hgp900", "qlp544"}
+
+
+def all_codes(names=CODES):
+    return [pytest.param(n, marks=pytest.mark.slow) if n in SLOW else n for n in sorted(names)]
+
+
 def smallest_distance(name):
     code = CODES[name]
     return code.distance if isinstance(code, FixedCode) else code.min_d
 
 
-@pytest.mark.parametrize("name", sorted(CODES))
+@pytest.mark.parametrize("name", all_codes())
 def test_circuit_is_noiseless_with_deterministic_detectors(name):
     d = smallest_distance(name)
     circuit = make_circuit(name, d, 2)
@@ -33,7 +41,7 @@ def test_family_size_formula(name):
         assert code.num_qubits(d) == make_circuit(name, d, 2).num_qubits
 
 
-@pytest.mark.parametrize("name", sorted(CODES))
+@pytest.mark.parametrize("name", all_codes())
 def test_max_distance_matches_min_size(name):
     d = smallest_distance(name)
     n = get_min_n(name, d)
@@ -51,7 +59,7 @@ def test_rounds_change_circuit_length():
     assert long.num_detectors > short.num_detectors
 
 
-@pytest.mark.parametrize("name", sorted(CODES))
+@pytest.mark.parametrize("name", all_codes())
 def test_qiskit_round_trip_keeps_detectors(name):
     code = get_code(name, smallest_distance(name), 2)
     detectors, logicals = code.stim_detectors()
@@ -80,6 +88,9 @@ def test_qiskit_round_trip_keeps_detectors(name):
     ("bb54", "bposd"),
     ("bpc54", "bposd"),
     ("gb48", "bposd"),
+    ("hgp225", "bposd"),
+    ("lcs52", "bposd"),
+    ("mitten150", "bposd"),
 ])
 def test_logical_error_end_to_end(name, decoder):
     d = smallest_distance(name)
