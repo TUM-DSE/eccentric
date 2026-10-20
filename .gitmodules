@@ -4,3 +4,9 @@
 [submodule "external/more-bacon-less-threshold"]
 	path = external/more-bacon-less-threshold
 	url = https://github.com/aswierkowska/more-bacon-less-threshold.git
+[submodule "external/honeycomb_threshold"]
+	path = external/honeycomb_threshold
+	url = https://github.com/Strilanc/honeycomb_threshold.git
+[submodule "external/honeycomb-boundaries"]
+	path = external/honeycomb-boundaries
+	url = https://github.com/Strilanc/honeycomb-boundaries.git
