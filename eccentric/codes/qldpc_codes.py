@@ -49,3 +49,20 @@ def quantum_tanner_code(seed: int) -> codes.CSSCode:
     # Quantum Tanner code on the dihedral group D4 with repetition-code subcodes: seed 1 gives
     # [[36,8,3]], seed 0 gives [[72,14,4]]
     return codes.QTCode.random(abstract.DihedralGroup(4), codes.RepetitionCode(3), seed=seed)
+
+
+# Generalized bicycle codes from Panteleev & Kalachev, arXiv:1904.02703, Appendix B:
+# H_X = [A | B], H_Z = [B^T | A^T] with A, B circulant, given as (size, powers of A, powers of B)
+GB_CODES = {
+    46: (23, [0, 5, 8, 12], [0, 1, 5, 7]),
+    48: (24, [0, 2, 8, 15], [0, 2, 12, 17]),
+    126: (63, [0, 1, 14, 16, 22], [0, 3, 13, 20, 42]),
+}
+
+
+def generalized_bicycle_code(n: int) -> codes.CSSCode:
+    from .gross_code import create_circulant_matrix
+
+    size, a, b = GB_CODES[n]
+    A, B = create_circulant_matrix(size, a), create_circulant_matrix(size, b)
+    return codes.CSSCode(np.hstack((A, B)), np.hstack((B.T, A.T)))

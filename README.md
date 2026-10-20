@@ -130,19 +130,22 @@ Besides the codes of the paper, these codes are available. They are registered i
 | `toric` | Unrotated toric code [[2d², 2, d]] | 4d² | [qLDPC](https://github.com/qLDPCOrg/qLDPC) |
 | `honeycomb` | Periodic honeycomb (Floquet) code, SD6 circuit, even `d ≥ 4` | 2.5 · d · 6⌈d/4⌉ | [honeycomb_threshold](https://github.com/Strilanc/honeycomb_threshold) |
 | `planar_honeycomb` | Planar honeycomb code with boundaries, SD6 circuit, `d ≥ 3` | 68 at d = 3 | [honeycomb-boundaries](https://github.com/Strilanc/honeycomb-boundaries) |
-| `bb72`, `bb90`, `bb108`, `bb288` | Bivariate bicycle codes [[72,12,6]], [[90,8,10]], [[108,8,10]], [[288,12,18]], same circuit as `gross` | 2n | Bravyi et al., arXiv:2308.07915 |
-| `bpc36`, `bpc72`, `bpc90` | Balanced product cyclic codes [[36,8,4]], [[72,8,8]], [[90,8,10]], cardinal schedule | 2n | [QUITS](https://github.com/mkangquantum/quits) |
+| `bb54`, `bb72`, `bb90`, `bb98`, `bb108`, `bb162`, `bb180`, `bb288`, `bb756` | Bivariate bicycle codes [[54,8,6]], [[72,12,6]], [[90,8,10]], [[98,6,12]], [[108,8,10]], [[162,8,14]], [[180,8,16]], [[288,12,18]], [[756,16,≤34]], same circuit as `gross` | 2n | Bravyi et al., arXiv:2308.07915, and `BBCODE_DICT` |
+| `bpc36`, `bpc54`, `bpc72`, `bpc90`, `bpc108`, `bpc126`, `bpc144`, `bpc162`, `bpc180` | Balanced product cyclic codes [[36,8,4]], [[54,8,4]], [[72,8,8]], [[90,8,10]], [[108,8,8]], [[126,8,10]], [[144,8,12]], [[162,8,12]], [[180,8,16]], cardinal schedule | 2n | [QUITS](https://github.com/mkangquantum/quits), arXiv:2411.03302 |
+| `gb46`, `gb48`, `gb126` | Generalized bicycle codes [[46,2,9]], [[48,6,8]], [[126,28,8]] | 2n | Panteleev & Kalachev, arXiv:1904.02703; circuit from qLDPC |
 | `hgp_hamming` | Hypergraph product of two [7,4,3] Hamming codes, [[58,16,3]] | 100 | qLDPC |
 | `rm15` | Punctured quantum Reed-Muller code [[15,1,3]] | 29 | qLDPC |
 | `lp` | Lifted product (lift-connected surface) code [[39,3,3]] | 75 | qLDPC |
 | `qt36`, `qt72` | Quantum Tanner codes [[36,8,3]], [[72,14,4]] on the dihedral group D4 | 68, 136 | qLDPC |
-| `hyperbolic_floquet_60`, `_120`, `_160`, `_240` | Hyperbolic Floquet codes with 60/120/160/240 data qubits, d = 3/3/4/4 (pair measurements, no ancillas) | n | [hyperbolic-floquet-data](https://github.com/oscarhiggott/hyperbolic-floquet-data) |
+| `hyperbolic_floquet_60`, `_120`, `_160`, `_240`, `_256`, `_320` | Hyperbolic Floquet codes [[60,5,3]], [[120,8,3]], [[160,10,4]], [[240,8,4]], [[256,34,4]], [[320,18,5]] (pair measurements, no ancillas) | n | [hyperbolic-floquet-data](https://github.com/oscarhiggott/hyperbolic-floquet-data) |
+| `semi_hyperbolic_floquet_64`, `_144`, `_256`, `_400`, `_576` | Semi-hyperbolic Floquet codes from the Bolza code, k = 4, d = 3/4/6/7/8 (a distance-scaling family) | n | hyperbolic-floquet-data |
 
 Notes:
 
-- Decoders: `bposd` works for all of them. `mwpm` works for `repetition`, `xzzx`, `toric`, `honeycomb`, `planar_honeycomb` and the hyperbolic Floquet codes; the other codes are not matchable. `chromobius` needs color-annotated detector coordinates, which are lost when the circuit goes through Qiskit.
+- Decoders: `bposd` works for all of them. `mwpm` works for `repetition`, `xzzx`, `toric`, `honeycomb`, `planar_honeycomb` and the (semi-)hyperbolic Floquet codes; the other codes are not matchable. `chromobius` needs color-annotated detector coordinates, which are lost when the circuit goes through Qiskit.
 - `d` is the code distance. The syndrome-extraction circuits can have a lower circuit-level distance: `lp` (qLDPC's edge-coloring schedule) and the honeycomb codes have circuit distance below `d`, and `bpc72` below 8.
 - `cycles` sets the number of syndrome rounds. Floquet codes count one round as one X, Y and Z sub-round; the planar honeycomb code needs an even number of at least 4 rounds and the hyperbolic Floquet codes run `2 + 2⌈(cycles − 2)/2⌉` rounds.
+- Distances verified by exact computation: `bb54`, `bb98`, `gb46`, `gb48`, `rm15`, `hgp_hamming`, `lp`, `qt36`, `qt72`, and `toric` at d = 3. The others are taken from the cited papers; for `bb756` the distance is an upper bound.
 
 ### Backends
 

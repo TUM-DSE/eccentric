@@ -76,6 +76,10 @@ def test_qiskit_round_trip_keeps_detectors(name):
     ("honeycomb", "bposd"),
     ("planar_honeycomb", "bposd"),
     ("hyperbolic_floquet_60", "bposd"),
+    ("semi_hyperbolic_floquet_64", "mwpm"),
+    ("bb54", "bposd"),
+    ("bpc54", "bposd"),
+    ("gb48", "bposd"),
 ])
 def test_logical_error_end_to_end(name, decoder):
     d = smallest_distance(name)

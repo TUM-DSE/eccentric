@@ -4,4 +4,5 @@ https://github.com/oscarhiggott/hyperbolic-floquet-data (Apache-2.0, see `LICENS
 O. Higgott and N. P. Breuckmann, arXiv:2308.03750.
 
 Filenames give the seed tiling, the number of data qubits `n`, logical qubits `k` and embedded distance `d`.
-These are the purely hyperbolic (`l=1`) codes with `d >= 3` and at most 240 data qubits.
+Files without a prefix are purely hyperbolic codes (fine-graining parameter `l=1`); files prefixed `semi_l=<l>_`
+are semi-hyperbolic codes, here the family obtained by fine-graining the [[16,4,2]] Bolza code (`8.8.8/k=4_c7c24aad`).
