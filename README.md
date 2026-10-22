@@ -65,7 +65,7 @@ python -m eccentric configs/example.yaml
 
 This runs the small example in [`configs/example.yaml`](configs/example.yaml) and writes to `experiment_results/Example/`:
 
-- `results.csv`: one row per configuration, for example the `logical_error_rate`
+- `results.csv`: one row per configuration, for example the `logical_error_rate` over all `rounds` of syndrome extraction and the `logical_error_rate_per_round` derived from it as (1 − (1 − 2P)^(1/rounds))/2
 - `experiment.log`: completed, skipped and failed configurations, with error messages
 - `metadata_<timestamp>.json`: a copy of the experiment configuration
 
@@ -116,6 +116,7 @@ experiments:
 | `translating_methods` | Gate translation: `qiskit`, `bqskit`, `tket` |
 | `gate_sets` | Target gate sets for `translation`: `h2`, `ibm_heron` |
 | `optimization_levels` | Translation optimization levels for `translation` (default `[0, 2, 3]`) |
+| `schedules` | Syndrome-extraction schedules (see [Codes](#codes)). Each code uses its default when omitted; configurations whose code does not support a schedule are skipped |
 
 If neither `backends_sizes` nor `distances` is given, the backend's own size is used and the largest code distance that fits is chosen. Configurations whose code does not fit (distance < 3) are skipped and logged.
 
@@ -126,6 +127,7 @@ Besides the codes of the paper, these codes are available. They are registered i
 | Name | Code | Qubits | Source |
 | --- | --- | --- | --- |
 | `repetition` | Repetition code, distance `d ≥ 3` | 2d − 1 | Stim generator |
+| `chromobius_color` | Triangular color code measured with multi-qubit Pauli measurements, with the color-annotated detectors that `chromobius` needs, `d ≥ 3` | (3d² + 1)/4 | ECCentric's Chromobius circuit |
 | `xzzx` | XZZX surface code (rotated surface code with a Hadamard on every other data qubit), `d ≥ 3` | 2d² − 1 | Stim generator |
 | `toric` | Unrotated toric code [[2d², 2, d]] | 4d² | [qLDPC](https://github.com/qLDPCOrg/qLDPC) |
 | `honeycomb` | Periodic honeycomb (Floquet) code, SD6 circuit, even `d ≥ 4` | 2.5 · d · 6⌈d/4⌉ | [honeycomb_threshold](https://github.com/Strilanc/honeycomb_threshold) |
@@ -144,9 +146,21 @@ Besides the codes of the paper, these codes are available. They are registered i
 | `hyperbolic_floquet_60`, `_120`, `_160`, `_240`, `_256`, `_320` | Hyperbolic Floquet codes [[60,5,3]], [[120,8,3]], [[160,10,4]], [[240,8,4]], [[256,34,4]], [[320,18,5]] (pair measurements, no ancillas) | n | [hyperbolic-floquet-data](https://github.com/oscarhiggott/hyperbolic-floquet-data) |
 | `semi_hyperbolic_floquet_64`, `_144`, `_256`, `_400`, `_576` | Semi-hyperbolic Floquet codes from the Bolza code, k = 4, d = 3/4/6/7/8 (a distance-scaling family) | n | hyperbolic-floquet-data |
 
+Syndrome-extraction schedules (`schedules`), the first being each code's default:
+
+| Codes | Schedules |
+| --- | --- |
+| `bb*` | `ibm` (the depth-8 circuit of Bravyi et al., as for `gross`), `zxcoloration` (QUITS) |
+| `toric`, `hgp_hamming`, `rm15`, `lp`, `gb*`, `qt*` | `edge_coloring` (all checks together), `edge_coloring_xz` (X checks before Z checks) (qLDPC) |
+| `bpc*`, `hgp225`/`625`/`900`, `qlp544` | `cardinal`, `cardinalNSmerge`, `zxcoloration` (QUITS) |
+| `lcs*` | `zxcoloration`, `cardinal`, `cardinalNSmerge` (QUITS) |
+| `mitten150` | `custom` (depth 12), `hook_error_free` (depth 24), `zxcoloration` (QUITS) |
+
+The other codes have a single circuit. Result rows report the schedule used.
+
 Notes:
 
-- Decoders: `bposd` works for all of them. `mwpm` works for `repetition`, `xzzx`, `toric`, `honeycomb`, `planar_honeycomb` and the (semi-)hyperbolic Floquet codes; the other codes are not matchable. `chromobius` needs color-annotated detector coordinates, which are lost when the circuit goes through Qiskit.
+- Decoders: `bposd` works for all of them. `mwpm` works for `repetition`, `xzzx`, `toric`, `honeycomb`, `planar_honeycomb` and the (semi-)hyperbolic Floquet codes; the other codes are not matchable. `chromobius` needs color-annotated detector coordinates, which only `chromobius_color` has.
 - `d` is the code distance. The syndrome-extraction circuits can have a lower circuit-level distance: `lp` (qLDPC's edge-coloring schedule), the `lcs*` codes and the honeycomb codes have circuit distance below `d`, and `bpc72` below 8.
 - `cycles` sets the number of syndrome rounds. Floquet codes count one round as one X, Y and Z sub-round; the planar honeycomb code needs an even number of at least 4 rounds and the hyperbolic Floquet codes run `2 + 2⌈(cycles − 2)/2⌉` rounds.
 - Distances verified by exact computation: `bb54`, `bb98`, `gb46`, `gb48`, `rm15`, `hgp_hamming`, `lp`, `lcs15`, `lcs52`, `qt36`, `qt72`, and `toric` at d = 3. The `hgp*`, other `lcs*`, `qlp544` and `mitten150` distances are upper bounds from QUITS' randomized estimator, which match the cited papers. The others are taken from the cited papers; for `bb756` the distance is an upper bound.
@@ -158,7 +172,7 @@ Notes:
 | --- | --- | --- |
 | `mwpm` | Minimum-weight perfect matching (PyMatching) | Matchable codes: surface, heavy-hex, Bacon-Shor, repetition, XZZX, toric, honeycomb, hyperbolic Floquet |
 | `bposd`, `bposd_batch`, `bposd_chk` | BP + ordered statistics decoding (ldpc) | All codes |
-| `chromobius` | Möbius color-code decoder | Color code, only in the `chromobius` experiment type: it needs color-annotated detector coordinates, which are lost when the circuit goes through Qiskit |
+| `chromobius` | Möbius color-code decoder | Circuits with color-annotated detectors: `chromobius_color`, and the `chromobius` experiment type |
 | `bplsd` | BP + localised statistics decoding (ldpc), same BP settings as `bposd` | All codes |
 | `belief_find` | BP + union-find (ldpc), same BP settings as `bposd` | All codes |
 | `union_find` | Weighted union-find (ldpc) | Topological codes; fails on qLDPC codes |
@@ -186,14 +200,18 @@ Notes:
 | Value | Description |
 | --- | --- |
 | `sd6`, `pm3`, `em3_1`, `em3_2`, `si1000`, `modsi1000`, `constant` | Artificial noise models parameterised by `error_probabilities` |
+| `erasure`, `erasure_undetected` | Pure erasure noise: every gate and measurement loses each of its qubits with probability `p`, heralded right away to the decoder, or not detected at all |
 | `real_willow`, `real_apollo`, `real_infleqtion`, `real_heron` | Hardware-inspired noise models |
 | `real_willow_spec` | Willow with the gate and measurement errors of Google's Willow spec sheet (Dec 2024) instead of arXiv:2408.13687; the other parameters, which the spec sheet does not report, are shared with `real_willow`. Use with the `real_willow` backend |
-| `real_harvard` | Harvard/MIT neutral atoms from arXiv:2506.20661: 0.1% single-qubit and 0.5% CZ error, 0.46% readout error, 0.25% atom loss per move, measured gate, readout and move durations, T2 = 1 s (T1 is not reported and set to T2) |
+| `real_harvard` | Harvard/MIT neutral atoms from arXiv:2506.20661: 0.1% single-qubit and 0.5% CZ error, 0.46% readout error, atom loss of 0.25% per move and 0.24% per readout that is detected when the atom is next imaged, measured gate, readout and move durations, T2 = 1 s (T1 is not reported and set to T2) |
+| `real_harvard_undetected` | `real_harvard` with undetected atom loss |
 | `real_flamingo`, `real_flamingo_downscaled` | IBM Flamingo noise, and the same noise scaled down 10× |
 | `variance` | Decoherence driven by the T1/T2 values of a `variance_*` backend |
 | `variance_low`, `variance_mid`, `variance_high` | Readout error drawn from a log-normal distribution with increasing variance |
 
 Hardware noise models must be paired with a matching backend, for example `real_infleqtion` with `real_infleqtion`.
+
+Loss (erasure) is modeled per qubit: a lost qubit is replaced by a maximally mixed one. When it is detected, a noiseless flag qubit records the loss and is read out as an extra detector, either right after the loss (`erasure`) or at the qubit's next measurement (`real_harvard`), so decoders can use where losses happened. Decoders that work on the full detector error model, such as `bposd`, `bplsd` or `tesseract`, make use of it.
 
 ## Reproducing the paper
 

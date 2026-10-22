@@ -5,12 +5,19 @@ import stim
 from qldpc import abstract, circuits, codes
 from qldpc.objects import Pauli
 
-# Noiseless memory experiments built with qLDPC (https://github.com/qLDPCOrg/qLDPC):
-# each syndrome round measures all checks with ancillas scheduled by edge coloring
+# Noiseless memory experiments built with qLDPC (https://github.com/qLDPCOrg/qLDPC): each syndrome
+# round measures all checks with one ancilla per check, scheduled by edge coloring of the Tanner
+# graph, either of all checks together or of the X checks before the Z checks
+SCHEDULES = {
+    "edge_coloring": circuits.EdgeColoring,
+    "edge_coloring_xz": circuits.EdgeColoringXZ,
+}
 
 
-def make_memory_circuit(code: codes.CSSCode, rounds: int, basis: str = "Z") -> stim.Circuit:
-    return circuits.get_memory_experiment(code, basis=Pauli[basis], num_rounds=rounds)
+def make_memory_circuit(code: codes.CSSCode, rounds: int, schedule: str = "edge_coloring", basis: str = "Z") -> stim.Circuit:
+    return circuits.get_memory_experiment(
+        code, basis=Pauli[basis], num_rounds=rounds, syndrome_measurement_strategy=SCHEDULES[schedule]()
+    )
 
 
 def toric_code(d: int) -> codes.CSSCode:

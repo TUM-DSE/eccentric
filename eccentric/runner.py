@@ -19,6 +19,7 @@ SWEEPS = {
     "translating_methods": "translating_method",
     "gate_sets": "gate_set",
     "optimization_levels": "optimization_level",
+    "schedules": "schedule",
 }
 
 

@@ -5,11 +5,12 @@ from .bacon_shor import get_bacon_shor_code
 from .concat_steane import get_concat_steane_code
 from .surface_code import get_surface_code
 from .hh_code import get_hh_code
-from .catalog import CODES, MemoryCodeCircuit, make_circuit, max_distance, min_num_qubits
+from .catalog import CODES, MemoryCodeCircuit, make_circuit, max_distance, min_num_qubits, num_rounds, resolve_schedule
 
-def get_code(code_name: str, d: int, cycles: int):
+def get_code(code_name: str, d: int, cycles: int, schedule: str = None):
+    resolve_schedule(code_name, schedule)
     if code_name in CODES:
-        return MemoryCodeCircuit(stim_circuit=make_circuit(code_name, d, cycles))
+        return MemoryCodeCircuit(stim_circuit=make_circuit(code_name, d, cycles, schedule))
     elif code_name == "hh":
         if cycles == None:
             return get_hh_code(d, None)

@@ -16,6 +16,10 @@ RESET_OPS = {"R", "RX", "RY"}
 MEASURE_OPS = {"M", "MX", "MY"}
 ANNOTATION_OPS = {"OBSERVABLE_INCLUDE", "DETECTOR", "SHIFT_COORDS", "QUBIT_COORDS", "TICK"}
 SWAP_OPS = {"SWAP"}
+LOSS_DETECTION = ("none", "immediate", "measurement")
+# Tag of the instructions added to herald losses, whose measurement records are not part of the
+# original circuit
+HERALD_TAG = "herald"
 
 class NoiseModel:
     def __init__(
@@ -34,7 +38,11 @@ class NoiseModel:
         gate_times: Optional[Dict[str, float]] = {},
         qt: Optional[QubitTracking] = None,
         backend: Optional[BackendV2] = None,
-        use_correlated_parity_measurement_errors: bool = False
+        use_correlated_parity_measurement_errors: bool = False,
+        loss: float = 0,
+        loss_remote: float = 0,
+        loss_measure: float = 0,
+        loss_detection: str = "none",
     ):
         self.sq = sq
         self.tq = tq
@@ -51,6 +59,17 @@ class NoiseModel:
         self.qt = qt
         self.backend = backend
         self.use_correlated_parity_measurement_errors = use_correlated_parity_measurement_errors
+        # Loss (erasure) probability per qubit of a local gate, of a remote gate (a move) and of a
+        # measurement. A lost qubit is replaced by a maximally mixed one. loss_detection is
+        # "none" (plain Pauli noise), "immediate" (heralded right away, as for erasure qubits) or
+        # "measurement" (detected the next time the qubit is measured, as for atom loss)
+        if loss_detection not in LOSS_DETECTION:
+            raise ValueError(f"loss_detection must be one of {LOSS_DETECTION}, got {loss_detection}")
+        self.loss = loss
+        self.loss_remote = loss_remote
+        self.loss_measure = loss_measure
+        self.loss_detection = loss_detection
+        self.flag_offset = None
         if callable(measure):
             self.measure_func = measure
         else:
@@ -108,6 +127,32 @@ class NoiseModel:
                 circuit.append_operation(pauli, [target], 1.0)
                 self.qt.leak_qubit(target.value)
 
+    def has_heralded_loss(self) -> bool:
+        return self.loss_detection != "none" and (self.loss or self.loss_remote or self.loss_measure) > 0
+
+    def read_loss_flags(self, circuit: stim.Circuit, qubits: List[int]):
+        for q in qubits:
+            circuit.append("M", [self.flag_offset + q], tag=HERALD_TAG)
+            circuit.append(stim.CircuitInstruction("DETECTOR", [stim.target_rec(-1)], [], tag=HERALD_TAG))
+            circuit.append("R", [self.flag_offset + q], tag=HERALD_TAG)
+
+    def add_loss(self, circuit: stim.Circuit, qubits: List[int], p: float):
+        if p == 0 or not qubits:
+            return
+        if self.loss_detection == "none":
+            circuit.append("PAULI_CHANNEL_1", qubits, [p / 4, p / 4, p / 4])
+            return
+        # Each qubit has a noiseless flag qubit that a loss flips together with a random Pauli.
+        # Independent mechanisms instead of a disjoint mixture keep the DEM exact; they differ
+        # at order p^2.
+        for q in qubits:
+            flag = stim.target_x(self.flag_offset + q)
+            circuit.append("CORRELATED_ERROR", [flag], p / 4)
+            for pauli in (stim.target_x, stim.target_y, stim.target_z):
+                circuit.append("CORRELATED_ERROR", [flag, pauli(q)], p / 4)
+        if self.loss_detection == "immediate":
+            self.read_loss_flags(circuit, qubits)
+
     def is_remote(self, pair: List[int]) -> bool:
 
         if self.qt == None:
@@ -160,6 +205,7 @@ class NoiseModel:
             elif self.sq != 0:
                 post.append_operation("DEPOLARIZE1", targets, self.sq)
             self.add_qubit_error(post, targets, self.get_gate_time(op))
+            self.add_loss(post, [t.value for t in targets], self.loss)
         elif op.name in TQ_OPS or op.name in SWAP_OPS:
             if op.name in self.noisy_gates:
                 p = self.noisy_gates[op.name]
@@ -183,6 +229,7 @@ class NoiseModel:
                 else:
                     post.append_operation("DEPOLARIZE2", pair, p)
                 self.add_qubit_error(post, targets[i:i + 2], self.get_gate_time(op, pair))
+                self.add_loss(post, pair, self.loss_remote if self.is_remote(pair) else self.loss)
         elif op.name in RESET_OPS:
             for q in targets:
                 if self.qt != None:
@@ -197,6 +244,10 @@ class NoiseModel:
                 p = self.noisy_gates[op.name]
             else:
                 p = self.measure_func()
+            measured = [t.value for t in targets]
+            self.add_loss(pre, measured, self.loss_measure)
+            if self.loss_detection == "measurement" and self.has_heralded_loss():
+                self.read_loss_flags(pre, measured)
             pre.append_operation("Z_ERROR" if op.name.endswith("X") else "X_ERROR", targets, p)
             self.add_qubit_error(post, targets, self.get_gate_time(op))
         elif op.name == "MPP":
@@ -225,6 +276,13 @@ class NoiseModel:
         return pre, mid, post
 
     def noisy_circuit(self, circuit: stim.Circuit, *, qs: Optional[Set[int]] = None) -> stim.Circuit:
+        if self.has_heralded_loss() and self.flag_offset is None:
+            # Flag qubits after the ancilla qubit used for correlated MPP errors
+            self.flag_offset = circuit.num_qubits + 1
+            try:
+                return remap_measurement_records(self.noisy_circuit(circuit.flattened(), qs=qs))
+            finally:
+                self.flag_offset = None
         result = stim.Circuit()
         ancilla = circuit.num_qubits
 
@@ -295,6 +353,29 @@ class NoiseModel:
                 raise NotImplementedError(repr(op))
         flush()
         return result
+
+
+def remap_measurement_records(circuit: stim.Circuit) -> stim.Circuit:
+    """Shift the measurement-record lookbacks of the original instructions past the records that
+    herald instructions inserted in between"""
+    result = stim.Circuit()
+    new_index = []
+    total = 0
+    for inst in circuit:
+        if inst.tag != HERALD_TAG and any(t.is_measurement_record_target for t in inst.targets_copy()):
+            targets = [
+                stim.target_rec(new_index[len(new_index) + t.value] - total) if t.is_measurement_record_target else t
+                for t in inst.targets_copy()
+            ]
+            inst = stim.CircuitInstruction(inst.name, targets, inst.gate_args_copy(), tag=inst.tag)
+        single = stim.Circuit()
+        single.append(inst)
+        n = single.num_measurements
+        if inst.tag != HERALD_TAG:
+            new_index.extend(range(total, total + n))
+        total += n
+        result.append(inst)
+    return result
 
 
 def mix_probability_to_independent_component_probability(mix_probability: float, n: float) -> float:

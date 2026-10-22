@@ -3,7 +3,7 @@ import numpy as np
 from ..codes import get_code
 from ..metrics import count_swaps_qiskit, get_resource_overhead_2q_gates, get_resource_overhead_total_gates
 from ..transpilers import run_transpiler
-from .base import load_backend, resolve_distance
+from .base import load_backend, resolve_code_schedule, resolve_distance
 
 REQUIRED = ("backends", "codes")
 
@@ -11,7 +11,8 @@ REQUIRED = ("backends", "codes")
 def run(task):
     backend = load_backend(task)
     d = resolve_distance(task, backend)
-    code = get_code(task.code, d, task.cycles)
+    schedule = resolve_code_schedule(task)
+    code = get_code(task.code, d, task.cycles, schedule)
     rows = []
     for state, circuit in code.circuit.items():
         gates, tq_gates, swaps = [], [], []
@@ -29,6 +30,7 @@ def run(task):
             "state": state,
             "routing_method": task.routing_method,
             "layout_method": task.layout_method,
+            "schedule": schedule or "N/A",
             "gate_overhead_mean": np.mean(gates),
             "gate_overhead_var": np.var(gates),
             "tq_gate_overhead_mean": np.mean(tq_gates),

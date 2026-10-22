@@ -30,6 +30,10 @@ def get_noise_model(error_type: str,
             return ArtificialNoise.modSI1000(p, qt, remote=remote)
         elif error_type == "constant":
             return ArtificialNoise.constant(p, qt, remote=remote)
+        elif error_type == "erasure":
+            return ArtificialNoise.erasure(p, qt)
+        elif error_type == "erasure_undetected":
+            return ArtificialNoise.erasure(p, qt, detected=False)
     if error_type == "real_willow":
         return WillowNoise.get_noise(qt)
     elif error_type == "real_willow_spec":
@@ -42,6 +46,8 @@ def get_noise_model(error_type: str,
         return InfleqtionNoise.get_noise(qt, backend)
     elif error_type == "real_harvard" and backend:
         return HarvardNoise.get_noise(qt, backend)
+    elif error_type == "real_harvard_undetected" and backend:
+        return HarvardNoise.get_noise(qt, backend, loss_detection="none")
     elif error_type == "real_apollo":
         return ApolloNoise.get_noise(qt)
     elif error_type == "real_heron":

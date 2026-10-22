@@ -5,7 +5,7 @@ from ..codes import get_code, make_idle_qubit_circuit
 from ..decoders import decode, raw_error_rate
 from ..noise import get_noise_model
 from ..transpilers import run_transpiler
-from .base import base_row, load_backend, resolve_cycles, resolve_distance
+from .base import base_row, load_backend, resolve_code_schedule, resolve_cycles, resolve_distance
 
 REQUIRED = ("backends", "codes", "decoders", "error_types")
 
@@ -23,7 +23,7 @@ def run(task):
     d = resolve_distance(task, backend)
     cycles = resolve_cycles(task, d)
     logical_qubits = 12 if task.code == "gross" else 1
-    circuit = _noisy(task, backend, get_code(task.code, d, cycles))
+    circuit = _noisy(task, backend, get_code(task.code, d, cycles, resolve_code_schedule(task)))
     idle_circuit = _noisy(task, backend, make_idle_qubit_circuit(cycles, logical_qubits))
     raw = raw_error_rate(circuit, task.num_samples) / task.num_samples
     idle = raw_error_rate(idle_circuit, task.num_samples) / task.num_samples
