@@ -8,6 +8,7 @@ from .fake_loon import FakeIBMLoon
 from .fake_willow import FakeGoogleWillowBackend
 from .fake_infleqtion import FakeInfleqtionBackend
 from .fake_infleqtion_no_shuttling import FakeInfleqtionNoShuttlingBackend
+from .fake_harvard import FakeHarvardBackend
 from .variance_backend import VarianceBackend
 
 def get_backend(backend: str, backend_size: int):
@@ -36,6 +37,8 @@ def get_backend(backend: str, backend_size: int):
             backend = FakeInfleqtionBackend(extended=True)
         elif name == "nsinfleqtion":
             backend = FakeInfleqtionNoShuttlingBackend(extended=True)
+        elif name == "harvard":
+            backend = FakeHarvardBackend()
         else:
             raise NotImplementedError
     elif backend_type == "variance":

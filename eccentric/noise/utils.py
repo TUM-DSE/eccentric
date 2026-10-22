@@ -6,6 +6,7 @@ from .infleqtion_noise import InfleqtionNoise
 from .artificial_noise import ArtificialNoise
 from .artificial_variance_noise import ArtificialVarianceNoise
 from .heron_noise import HeronNoise
+from .harvard_noise import HarvardNoise
 from ..backends import *
 from typing import Union
 
@@ -31,12 +32,16 @@ def get_noise_model(error_type: str,
             return ArtificialNoise.constant(p, qt, remote=remote)
     if error_type == "real_willow":
         return WillowNoise.get_noise(qt)
+    elif error_type == "real_willow_spec":
+        return WillowNoise.get_spec_sheet_noise(qt)
     elif error_type == "real_flamingo" and backend:
         return FlamingoNoise.get_noise(qt, backend)
     elif error_type == "real_flamingo_downscaled" and backend:
         return FlamingoNoiseDownscaled.get_noise(qt, backend)
     elif error_type == "real_infleqtion" and backend:
         return InfleqtionNoise.get_noise(qt, backend)
+    elif error_type == "real_harvard" and backend:
+        return HarvardNoise.get_noise(qt, backend)
     elif error_type == "real_apollo":
         return ApolloNoise.get_noise(qt)
     elif error_type == "real_heron":

@@ -163,6 +163,7 @@ Notes:
 | `real_willow` | Google Willow |
 | `real_apollo`, `real_nsapollo` | Quantinuum Apollo with and without shuttling |
 | `real_infleqtion`, `real_nsinfleqtion` | Infleqtion with and without shuttling |
+| `real_harvard` | Harvard/MIT reconfigurable neutral-atom array with 448 atoms (Bluvstein et al., Nature 649, 2025): grid neighbours interact in place, all other pairs after moving an atom |
 | `variance_<level>_<scale>` | Flamingo-like device with T1/T2 variance `<level>` ∈ {`none`, `low`, `mid`, `high`} and coherence times scaled by `<scale>`, e.g. `variance_mid_10` |
 | `ibm_<device>` | A real IBM device through `QiskitRuntimeService` (requires an IBM token) |
 
@@ -172,6 +173,8 @@ Notes:
 | --- | --- |
 | `sd6`, `pm3`, `em3_1`, `em3_2`, `si1000`, `modsi1000`, `constant` | Artificial noise models parameterised by `error_probabilities` |
 | `real_willow`, `real_apollo`, `real_infleqtion`, `real_heron` | Hardware-inspired noise models |
+| `real_willow_spec` | Willow with the gate and measurement errors of Google's Willow spec sheet (Dec 2024) instead of arXiv:2408.13687; the other parameters, which the spec sheet does not report, are shared with `real_willow`. Use with the `real_willow` backend |
+| `real_harvard` | Harvard/MIT neutral atoms from arXiv:2506.20661: 0.1% single-qubit and 0.5% CZ error, 0.46% readout error, 0.25% atom loss per move, measured gate, readout and move durations, T2 = 1 s (T1 is not reported and set to T2) |
 | `real_flamingo`, `real_flamingo_downscaled` | IBM Flamingo noise, and the same noise scaled down 10× |
 | `variance` | Decoherence driven by the T1/T2 values of a `variance_*` backend |
 | `variance_low`, `variance_mid`, `variance_high` | Readout error drawn from a log-normal distribution with increasing variance |

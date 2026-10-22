@@ -42,6 +42,7 @@ backend_rename_map = {
     "real_willow_ns": "Willow",
     "real_infleqtion": "Infleqtion\n(w/ s.)",
     "real_nsinfleqtion": "Infleqtion",
+    "real_harvard": "Harvard/MIT",
     "real_nsapollo": "Apollo\n(w/o s.)",
     "real_apollo": "Apollo",
     "real_flamingo": "DQC",
