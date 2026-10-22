@@ -182,7 +182,7 @@ class NoiseModel:
                         post.append_operation("DEPOLARIZE2", pair, p)
                 else:
                     post.append_operation("DEPOLARIZE2", pair, p)
-                self.add_qubit_error(post, targets, self.get_gate_time(op, pair))
+                self.add_qubit_error(post, targets[i:i + 2], self.get_gate_time(op, pair))
         elif op.name in RESET_OPS:
             for q in targets:
                 if self.qt != None:
