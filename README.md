@@ -105,7 +105,7 @@ experiments:
 | `num_samples` | Number of shots (or, for `routing` and `translation`, number of repetitions) |
 | `backends` | List of backends (see below) |
 | `codes` | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane), and the codes listed under [Codes](#codes) |
-| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only) |
+| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only), `bplsd`, `union_find`, `belief_find`, `belief_matching`, `relay_bp`, `tesseract` (see [Decoders](#decoders)) |
 | `error_types` | List of noise models (see below) |
 | `error_probabilities` | Physical error rates `p` for the artificial noise models |
 | `backends_sizes` | Number of qubits of a `custom_*` backend. The largest code distance that fits is used |
@@ -151,6 +151,20 @@ Notes:
 - `cycles` sets the number of syndrome rounds. Floquet codes count one round as one X, Y and Z sub-round; the planar honeycomb code needs an even number of at least 4 rounds and the hyperbolic Floquet codes run `2 + 2⌈(cycles − 2)/2⌉` rounds.
 - Distances verified by exact computation: `bb54`, `bb98`, `gb46`, `gb48`, `rm15`, `hgp_hamming`, `lp`, `lcs15`, `lcs52`, `qt36`, `qt72`, and `toric` at d = 3. The `hgp*`, other `lcs*`, `qlp544` and `mitten150` distances are upper bounds from QUITS' randomized estimator, which match the cited papers. The others are taken from the cited papers; for `bb756` the distance is an upper bound.
 - `hgp625`, `hgp900` and `qlp544` take up to a minute to build; their tests only run with `pytest -m slow`.
+
+### Decoders
+
+| Value | Decoder | Works for |
+| --- | --- | --- |
+| `mwpm` | Minimum-weight perfect matching (PyMatching) | Matchable codes: surface, heavy-hex, Bacon-Shor, repetition, XZZX, toric, honeycomb, hyperbolic Floquet |
+| `bposd`, `bposd_batch`, `bposd_chk` | BP + ordered statistics decoding (ldpc) | All codes |
+| `chromobius` | Möbius color-code decoder | Color code, only in the `chromobius` experiment type: it needs color-annotated detector coordinates, which are lost when the circuit goes through Qiskit |
+| `bplsd` | BP + localised statistics decoding (ldpc), same BP settings as `bposd` | All codes |
+| `belief_find` | BP + union-find (ldpc), same BP settings as `bposd` | All codes |
+| `union_find` | Weighted union-find (ldpc) | Topological codes; fails on qLDPC codes |
+| `belief_matching` | BP followed by matching with the BP marginals as weights | Matchable codes, and codes whose errors decompose into matching edges |
+| `relay_bp` | Relay-BP (IBM, arXiv:2506.01779) with the paper's parameters | All codes; built for bivariate bicycle codes |
+| `tesseract` | Tesseract most-likely-error search decoder (Google) with its default configuration | All codes, but slow beyond a few hundred qubits; use as an accuracy reference on small instances |
 
 ### Backends
 

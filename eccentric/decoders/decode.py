@@ -5,6 +5,18 @@ import numpy as np
 from .bp_osd import bposd_chk, bposd_batch
 from .mwpm import mwpm
 from .chromobius import chromobius
+from .ldpc_decoders import bplsd, union_find, belief_find
+from .belief_matching import belief_matching
+from .sinter_decoders import relay_bp, tesseract
+
+DECODERS = {
+    "bplsd": bplsd,
+    "union_find": union_find,
+    "belief_find": belief_find,
+    "belief_matching": belief_matching,
+    "relay_bp": relay_bp,
+    "tesseract": tesseract,
+}
 
 
 def decode(
@@ -44,6 +56,12 @@ def decode(
             return bposd_batch(circuit, num_shots, approximate_disjoint_errors)
         except Exception as e:
             logging.error(f"BP-OSD BATCH failed: {e}")
+            return None
+    elif decoder in DECODERS:
+        try:
+            return DECODERS[decoder](circuit, num_shots, approximate_disjoint_errors)
+        except Exception as e:
+            logging.error(f"{decoder} failed: {e}")
             return None
     else:
         raise NotImplementedError
