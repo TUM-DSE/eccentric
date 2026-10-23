@@ -115,6 +115,22 @@ def ordering_extended_steane_code():
 
     return orderings
 
+def destructive_readout(n_data, orderings, basis):
+    """Measure all data qubits and compare the stabilizers they give with the last syndrome round.
+
+    The checks of a round are measured X stabilizers first, then Z stabilizers, one per ordering.
+    The logical observable is the transversal logical operator, the parity of all data qubits.
+    """
+    n_checks = len(orderings)
+    circuit = stim.Circuit()
+    circuit.append("M" if basis == "Z" else "MX", range(n_data))
+    last_check = n_data + n_checks if basis == "Z" else n_data + 2 * n_checks
+    for j, ordering in enumerate(orderings):
+        targets = [stim.target_rec(q - n_data) for q in ordering] + [stim.target_rec(j - last_check)]
+        circuit.append("DETECTOR", targets)
+    circuit.append("OBSERVABLE_INCLUDE", [stim.target_rec(q - n_data) for q in range(n_data)], 0)
+    return circuit
+
 def normal_steane_circuit_f(rounds = 0, basis="Z"):
     circuit = stim.Circuit()
     orderings = ordering_normal_stean_code()
@@ -133,13 +149,13 @@ def normal_steane_circuit_f(rounds = 0, basis="Z"):
             circuit += stim.Circuit(f"R {i}\n")
             circuit += stim.Circuit(f"H {i}\n")
 
-        for i in range(10, 14):
+        for i in range(10, 13):
             circuit += stim.Circuit(f"R {i}\n")
     elif basis == "X":
         for i in range(7, 10):
             circuit += stim.Circuit(f"RX {i}\n")
 
-        for i in range(10, 14):
+        for i in range(10, 13):
             circuit += stim.Circuit(f"RX {i}\n")
             circuit += stim.Circuit(f"H {i}\n")
 
@@ -190,21 +206,7 @@ def normal_steane_circuit_f(rounds = 0, basis="Z"):
 
     circuit += stim.Circuit("TICK")
     circuit = add_cycles_normal_steane_code(circuit, orderings, rounds-1, basis)
-
-    string = "CX "
-    for i in range(7):
-        string += str(13) + " " + str(i) + " "
-    circuit += stim.Circuit(f"{string}\n")
-    string = ""
-    circuit += stim.Circuit("TICK")
-
-    if basis == "Z":
-        circuit += stim.Circuit("MR 13\n")
-    elif basis == "X":
-        circuit += stim.Circuit("H 13\n")
-        circuit += stim.Circuit("MX 13\n")
-        circuit += stim.Circuit("RX 13\n")
-    circuit += stim.Circuit("OBSERVABLE_INCLUDE(0) rec[-1]\n")
+    circuit += destructive_readout(7, orderings, basis)
     return circuit
 
 def add_cycles_normal_steane_code(circuit, orderings, rounds, basis):
@@ -276,12 +278,12 @@ def concat_steane_circuit_f(rounds = 0, basis="Z"):
         for i in range(49, 73):
             circuit += stim.Circuit(f"H {i}\n")
 
-        for i in range(73, 98):
+        for i in range(73, 97):
             circuit += stim.Circuit(f"R {i}\n")
     elif basis == "X":
         for i in range(49, 73):
             circuit += stim.Circuit(f"RX {i}\n")
-        for i in range(73, 98):
+        for i in range(73, 97):
             circuit += stim.Circuit(f"RX {i}\n")
             circuit += stim.Circuit(f"H {i}\n")
     for ordering, i in zip(orderings, range(49,73)):
@@ -330,22 +332,7 @@ def concat_steane_circuit_f(rounds = 0, basis="Z"):
 
     circuit += stim.Circuit("TICK")
     circuit = add_cycles_concat_steane_code(circuit, orderings, rounds-1, basis)
-
-    string = "CX "
-    for i in range(49):
-        string += str(97) + " " + str(i) + " "
-    circuit += stim.Circuit(f"{string}\n")
-    string = ""
-
-    circuit += stim.Circuit("TICK")
-    if basis == "Z":
-        circuit += stim.Circuit("MR 97\n")
-    elif basis == "X":
-        circuit += stim.Circuit("H 97\n")
-        circuit += stim.Circuit("MX 97\n")
-        circuit += stim.Circuit("RX 97\n")
-    circuit += stim.Circuit("OBSERVABLE_INCLUDE(0) rec[-1]\n")
-
+    circuit += destructive_readout(49, orderings, basis)
     return circuit
 
 def add_cycles_concat_steane_code(circuit, orderings, rounds, basis):
@@ -416,12 +403,12 @@ def extended_steane_circuit(rounds=0, basis="Z"):
         for i in range(343, 514):
             circuit += stim.Circuit(f"H {i}\n")
 
-        for i in range(514, 686):
+        for i in range(514, 685):
             circuit += stim.Circuit(f"R {i}\n")
     elif basis == "X":
         for i in range(343, 514):
             circuit += stim.Circuit(f"RX {i}\n")
-        for i in range(514, 686):
+        for i in range(514, 685):
             circuit += stim.Circuit(f"RX {i}\n")
             circuit += stim.Circuit(f"H {i}\n")
 
@@ -469,23 +456,8 @@ def extended_steane_circuit(rounds=0, basis="Z"):
         circuit += stim.Circuit(f"DETECTOR rec[{0-i}]\n")
 
     circuit += stim.Circuit("TICK")
-    circuit = add_cycles_extended_steane_circuit(circuit, orderings, rounds, basis)
-
-    string = "CX "
-    for i in range(343):
-        string += str(685) + " " + str(i) + " "
-    circuit += stim.Circuit(f"{string}\n")
-    string = ""
-
-    circuit += stim.Circuit("TICK")
-    if basis == "Z":
-        circuit += stim.Circuit("MR 685\n")
-    elif basis == "X":
-        circuit += stim.Circuit("H 685\n")
-        circuit += stim.Circuit("MX 685\n")
-        circuit += stim.Circuit("RX 685\n")
-    circuit += stim.Circuit("OBSERVABLE_INCLUDE(0) rec[-1]\n")
-
+    circuit = add_cycles_extended_steane_circuit(circuit, orderings, rounds-1, basis)
+    circuit += destructive_readout(343, orderings, basis)
     return circuit
 
 def add_cycles_extended_steane_circuit(circuit, orderings, rounds, basis):
@@ -553,6 +525,9 @@ def concat_steane_circuit(rounds=1):
     return circuit
 
 def get_concat_steane_code(m, rounds=1,basis="Z"):
+    if basis != "Z":
+        # The data qubits always start in |0>, so only the Z-basis memory experiment is prepared
+        raise NotImplementedError("Concatenated Steane circuits only support the Z basis")
     if m==1:
         circuit = normal_steane_circuit_f(rounds,basis=basis)
     elif m==2:

@@ -79,9 +79,9 @@ def get_max_d(code_name: str, n: int):
         d = d - ((1 - d) % 2)
         return d
     elif code_name == 'steane':
-        if n >= 686:
+        if n >= 685:
             return 27
-        elif n >= 98:
+        elif n >= 97:
             return 9
         elif n >= 13:
             return 3
@@ -103,9 +103,9 @@ def get_min_n(code_name: str, d: int):
         return d * d
     elif code_name == 'steane':
         if d == 3:
-            return 14
+            return 13
         elif d == 9:
-            return 98
+            return 97
         elif d == 27:
-            return 686
+            return 685
     return 0
