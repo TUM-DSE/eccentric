@@ -127,7 +127,6 @@ Besides the codes of the paper, these codes are available. They are registered i
 | Name | Code | Qubits | Source |
 | --- | --- | --- | --- |
 | `repetition` | Repetition code, distance `d ≥ 3` | 2d − 1 | Stim generator |
-| `chromobius_color` | Triangular color code measured with multi-qubit Pauli measurements, with the color-annotated detectors that `chromobius` needs, `d ≥ 3` | (3d² + 1)/4 | ECCentric's Chromobius circuit |
 | `xzzx` | XZZX surface code (rotated surface code with a Hadamard on every other data qubit), `d ≥ 3` | 2d² − 1 | Stim generator |
 | `toric` | Unrotated toric code [[2d², 2, d]] | 4d² | [qLDPC](https://github.com/qLDPCOrg/qLDPC) |
 | `honeycomb` | Periodic honeycomb (Floquet) code, SD6 circuit, even `d ≥ 4` | 2.5 · d · 6⌈d/4⌉ | [honeycomb_threshold](https://github.com/Strilanc/honeycomb_threshold) |
@@ -160,7 +159,7 @@ The other codes have a single circuit. Result rows report the schedule used.
 
 Notes:
 
-- Decoders: `bposd` works for all of them. `mwpm` works for `repetition`, `xzzx`, `toric`, `honeycomb`, `planar_honeycomb` and the (semi-)hyperbolic Floquet codes; the other codes are not matchable. `chromobius` needs color-annotated detector coordinates, which only `chromobius_color` has.
+- Decoders: `bposd` works for all of them. `mwpm` works for `repetition`, `xzzx`, `toric`, `honeycomb`, `planar_honeycomb` and the (semi-)hyperbolic Floquet codes; the other codes are not matchable. `chromobius` needs color-annotated detector coordinates, which only the paper's `color` code has.
 - `d` is the code distance. The syndrome-extraction circuits can have a lower circuit-level distance: `lp` (qLDPC's edge-coloring schedule), the `lcs*` codes and the honeycomb codes have circuit distance below `d`, and `bpc72` below 8.
 - `cycles` sets the number of syndrome rounds. Floquet codes count one round as one X, Y and Z sub-round; the planar honeycomb code needs an even number of at least 4 rounds and the hyperbolic Floquet codes run `2 + 2⌈(cycles − 2)/2⌉` rounds.
 - Distances verified by exact computation: `bb54`, `bb98`, `gb46`, `gb48`, `rm15`, `hgp_hamming`, `lp`, `lcs15`, `lcs52`, `qt36`, `qt72`, and `toric` at d = 3. The `hgp*`, other `lcs*`, `qlp544` and `mitten150` distances are upper bounds from QUITS' randomized estimator, which match the cited papers. The others are taken from the cited papers; for `bb756` the distance is an upper bound.
@@ -172,7 +171,7 @@ Notes:
 | --- | --- | --- |
 | `mwpm` | Minimum-weight perfect matching (PyMatching) | Matchable codes: surface, heavy-hex, Bacon-Shor, repetition, XZZX, toric, honeycomb, hyperbolic Floquet |
 | `bposd`, `bposd_batch`, `bposd_chk` | BP + ordered statistics decoding (ldpc) | All codes |
-| `chromobius` | Möbius color-code decoder | Circuits with color-annotated detectors: `chromobius_color`, and the `chromobius` experiment type |
+| `chromobius` | Möbius color-code decoder | The `color` code, whose detectors carry the color and basis annotation Chromobius needs, and the `chromobius` experiment type |
 | `bplsd` | BP + localised statistics decoding (ldpc), same BP settings as `bposd` | All codes |
 | `belief_find` | BP + union-find (ldpc), same BP settings as `bposd` | All codes |
 | `union_find` | Weighted union-find (ldpc) | Topological codes; fails on qLDPC codes |

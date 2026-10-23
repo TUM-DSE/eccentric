@@ -100,12 +100,6 @@ def _hyperbolic(filename):
     return make
 
 
-def _chromobius_color(d, rounds, schedule):
-    # Triangular color code measured with MPPs, with the color-annotated detectors Chromobius needs
-    from .chromobius_color_code import make_color_code_circuit
-    return make_color_code_circuit(obs_basis="Z", base_data_width=d, rounds=rounds, noise_strength=0)
-
-
 def _periodic_honeycomb(d, rounds, schedule):
     from .honeycomb import make_periodic_honeycomb_circuit
     return make_periodic_honeycomb_circuit(d, rounds)
@@ -130,7 +124,6 @@ CODES = {
     "repetition": CodeFamily(_repetition, lambda d: 2 * d - 1),
     "xzzx": CodeFamily(_xzzx, lambda d: 2 * d * d - 1),
     "toric": CodeFamily(_toric, lambda d: 4 * d * d, schedules=QLDPC_SCHEDULES),
-    "chromobius_color": CodeFamily(_chromobius_color, lambda d: (3 * d * d + 1) // 4),
     "honeycomb": CodeFamily(_periodic_honeycomb, _periodic_honeycomb_qubits, min_d=4),
     "planar_honeycomb": CodeFamily(_planar_honeycomb, _planar_honeycomb_qubits, rounds=_planar_honeycomb_rounds),
     "bb54": FixedCode(_bb(54), 6, BB_SCHEDULES),
@@ -248,8 +241,10 @@ def make_circuit(code_name: str, d: int, rounds: Optional[int], schedule: Option
     if isinstance(code, FixedCode):
         if d is not None and d != code.distance:
             raise ValueError(f"{code_name} only has distance {code.distance}, got {d}")
-        return _flatten_and_compact(code.make(rounds or code.distance, schedule))
-    return _flatten_and_compact(code.make(d, rounds or d, schedule))
+        circuit = code.make(rounds or code.distance, schedule)
+    else:
+        circuit = code.make(d, rounds or d, schedule)
+    return _flatten_and_compact(circuit)
 
 
 def min_num_qubits(code_name: str, d: int) -> int:

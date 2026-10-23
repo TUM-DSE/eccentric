@@ -543,6 +543,12 @@ class ColorCode:
 
             return tuple(coords)
 
+        def get_detector_coords(anc_qubit: ig.Vertex):
+            # (x, y, t, basis and color): the 4th coordinate is what Chromobius decodes with,
+            # 0-2 for red, green, blue X checks and 3-5 for Z checks
+            basis_color = 3 * (anc_qubit["pauli"] == "Z") + "rgb".index(anc_qubit["color"])
+            return get_qubit_coords(anc_qubit) + (0, basis_color)
+
         def get_synd_extr_circuit(first=False):
             synd_extr_circuit = synd_extr_circuit_without_spam.copy()
 
@@ -559,16 +565,14 @@ class ColorCode:
                         ):
                             continue
                     lookback = -num_anc_Z_qubits + j
-                    coords = get_qubit_coords(anc_qubit)
-                    coords += (0,)
+                    coords = get_detector_coords(anc_qubit)
                     target = stim.target_rec(lookback)
                     synd_extr_circuit.append("DETECTOR", target, coords)
 
             else:
                 for j, anc_qubit in enumerate(anc_Z_qubits):
                     lookback = -num_anc_Z_qubits + j
-                    coords = get_qubit_coords(anc_qubit)
-                    coords += (0,)
+                    coords = get_detector_coords(anc_qubit)
                     target = [
                         stim.target_rec(lookback),
                         stim.target_rec(lookback - num_anc_qubits),
@@ -586,16 +590,14 @@ class ColorCode:
                         continue
 
                     lookback = -num_anc_X_qubits + j
-                    coords = get_qubit_coords(anc_qubit)
-                    coords += (0,)
+                    coords = get_detector_coords(anc_qubit)
                     target = [stim.target_rec(lookback)]
                     synd_extr_circuit.append("DETECTOR", target, coords)
 
             elif not first:
                 for j, anc_qubit in enumerate(anc_X_qubits):
                     lookback = -num_anc_X_qubits + j
-                    coords = get_qubit_coords(anc_qubit)
-                    coords += (0,)
+                    coords = get_detector_coords(anc_qubit)
                     target = [
                         stim.target_rec(lookback),
                         stim.target_rec(lookback - num_anc_qubits),
@@ -686,7 +688,7 @@ class ColorCode:
                     lookback_inds.append(-num_data_qubits - num_anc_qubits + j_anc)
                     target = [stim.target_rec(ind) for ind in lookback_inds]
                     circuit.append(
-                        "DETECTOR", target, get_qubit_coords(anc_qubit) + (0,)
+                        "DETECTOR", target, get_detector_coords(anc_qubit)
                     )
 
         else:

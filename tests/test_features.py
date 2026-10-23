@@ -82,7 +82,7 @@ def test_rows_use_the_rounds_the_circuit_runs():
 # Detector coordinates
 
 def test_detector_coordinates_survive_the_pipeline():
-    t = task(code="chromobius_color", decoder="chromobius", distance=5, backend_size=19, cycles=3)
+    t = task(code="color", decoder="chromobius", distance=5, backend_size=60, cycles=3)
     circuit = noisy_circuit(t, load_backend(t), 5, 3)
     coords = [inst.gate_args_copy() for inst in circuit.flattened() if inst.name == "DETECTOR"]
     assert coords and all(len(c) == 4 for c in coords)
