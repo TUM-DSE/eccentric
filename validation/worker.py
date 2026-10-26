@@ -27,10 +27,10 @@ def done(run_dir, job_id):
     return os.path.exists(os.path.join(run_dir, "results", f"{job_id}.json"))
 
 
-def write_failure(run_dir, job, reason):
+def write_failure(run_dir, job, reason, status="failed"):
     path = os.path.join(run_dir, "results", f"{job['id']}.json")
     with open(path + ".tmp", "w") as f:
-        json.dump({"job": job, "status": "failed", "error": reason, "host": os.uname().nodename}, f)
+        json.dump({"job": job, "status": status, "error": reason, "host": os.uname().nodename}, f)
     os.replace(path + ".tmp", path)
 
 
@@ -42,8 +42,11 @@ def ready(run_dir, job):
     if not done(run_dir, needs):
         return "wait"
     with open(os.path.join(run_dir, "results", f"{needs}.json")) as f:
-        if json.load(f)["status"] != "done":
-            return f"needed job {needs} failed"
+        needed = json.load(f)
+    if needed["status"] == "skipped":
+        return f"skipped: {needed.get('reason', needed.get('error'))}"
+    if needed["status"] != "done":
+        return f"needed job {needs} failed"
     return None
 
 
@@ -59,7 +62,7 @@ def run(run_dir, job, v1_python):
     if job["type"] == "decode_v1":
         cmd = [v1_python, "-m", "validation.decode_v1", run_dir, job["id"], os.path.join(run_dir, "bp_osd_v1.py")]
     else:
-        cmd = [sys.executable, "-m", "validation.run_job", run_dir, job["id"]]
+        cmd = [sys.executable, "-m", job.get("module", "validation.run_job"), run_dir, job["id"]]
     log = open(os.path.join(run_dir, "logs", f"{job['id']}.log"), "w")
     try:
         subprocess.run(cmd, cwd=REPO, stdout=log, stderr=subprocess.STDOUT, timeout=job["timeout"])
@@ -83,7 +86,7 @@ def worker_loop(run_dir, jobs, v1_python):
             if state == "wait" or not claim(run_dir, job):
                 continue
             if state is not None:
-                write_failure(run_dir, job, state)
+                write_failure(run_dir, job, state, "skipped" if state.startswith("skipped") else "failed")
             else:
                 run(run_dir, job, v1_python)
             progressed = True
