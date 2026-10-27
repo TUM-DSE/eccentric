@@ -45,6 +45,26 @@ def qldpc_ibm():
                                    decoders=["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"])
 
 
+def qldpc_ibm_projected(max_qubits=600):
+    """qLDPC codes that fit none of the IBM devices above, on projected Loon and Flamingo devices with
+    as many QPUs in the chain as the code needs, at tenfold lower noise (at the devices' own noise
+    no qLDPC code works even on the existing devices). Tesseract is left out, it ran out of time on
+    most codes above 200 qubits."""
+    from eccentric.codes import get_min_n
+
+    devices = [("loon", 121, 242), ("flamingo", 133, 399)]
+    for code in QLDPC_CODES:
+        for d in code_distances(code):
+            n = get_min_n(code, d)
+            for device, qpu_size, largest in devices:
+                if n <= largest or n > max_qubits:
+                    continue
+                for schedule in schedules(code):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d,
+                               backend=f"real_{device}_{-(-n // qpu_size)}_qpus", error_type="real_flamingo_downscaled",
+                               error_probability=None, decoders=["bposd", "relay_bp", "belief_find"])
+
+
 def reference(max_qubits=600):
     """Every code at its default schedule on an all-to-all device with SD6 noise, the common ground
     that makes the device slices comparable"""
@@ -67,4 +87,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "reference": reference}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "reference": reference}

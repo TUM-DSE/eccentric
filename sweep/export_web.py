@@ -50,6 +50,7 @@ DECODERS = {
 
 SLICES = {
     "qldpc_ibm": "QLDPC codes on IBM devices",
+    "qldpc_ibm_projected": "QLDPC codes on projected larger IBM devices",
     "reference": "Reference: all codes, all-to-all, SD6 noise",
 }
 
@@ -57,6 +58,15 @@ COLUMNS = ["slice", "code", "family", "taxonomy", "schedule", "distance", "round
            "error_type", "error_probability", "decoder", "status", "logical_error_rate", "ler_low", "ler_high",
            "ler_per_round", "ler_per_round_high", "shots", "errors", "circuit_qubits", "swaps", "two_qubit_gates",
            "layers", "device_qubits", "note"]
+
+
+def device_label(backend):
+    # Projected devices: real_loon_5_qpus is a chain of five Loon QPUs
+    parts = backend.split("_")
+    if len(parts) == 4 and parts[3] == "qpus":
+        name, size = {"loon": ("IBM Loon/Nighthawk", 121), "flamingo": ("IBM Flamingo", 133)}[parts[1]]
+        return f"{name}, {parts[2]} QPUs ({int(parts[2]) * size} qubits, projected)"
+    return DEVICES.get(backend, backend)
 
 
 def family(code):
@@ -84,7 +94,7 @@ def main():
         "generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
         "commits": sorted(df.commit.dropna().unique().tolist()),
         "complete": bool((df.status != "pending").all()),
-        "labels": {"devices": DEVICES, "noise": NOISE, "decoders": DECODERS, "slices": SLICES},
+        "labels": {"devices": {b: device_label(b) for b in df.backend.unique()}, "noise": NOISE, "decoders": DECODERS, "slices": SLICES},
         "columns": COLUMNS,
         "rows": rows,
     }
