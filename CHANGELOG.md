@@ -139,9 +139,37 @@ which experiments and paper figures it affects, and how it was checked.
   measured. The remaining difference (the model is slightly optimistic) fits what the model leaves
   out, such as leakage accumulation and stray couplings.
 
+### 8. Codes were placed qubit by qubit onto sparse devices
+
+- **File:** `eccentric/transpilers/transpiler.py`.
+- **Problem:** `run_transpiler` compiles with Qiskit's `optimization_level=0` (so that no gate
+  optimization changes the syndrome circuit). Without an explicit layout method, level 0 places
+  circuit qubit i on device qubit i (`TrivialLayout`) and leaves the rest to routing; it never looks
+  for a placement, not even one needing no SWAPs, which Qiskit's levels 1 to 3 find with `VF2Layout`.
+  The surface code at d = 7 on Willow fits the grid exactly but was routed with about 740 SWAPs per
+  two cycles; where no exact fit exists, a chosen placement still needs far fewer SWAPs: 198 instead
+  of 582 for the surface code at d = 5 on Torino, 2162 instead of 3311 for bb72 on Loon, 12346
+  instead of 19364 for the gross code on Flamingo (two cycles). On the Willow surface code memory,
+  the routed d = 7 code gave 1.1% logical error per cycle (MWPM), against 0.077% placed on the grid.
+- **Fix:** without a layout method, `run_transpiler` first looks for a placement under which every
+  two-qubit gate acts on coupled qubits (with rustworkx's VF2, Qiskit's level-2 search budget),
+  using only local couplers if it can and otherwise the fewest remote ones. Without one, SabreLayout
+  chooses the placement, on the qubits of one QPU when the circuit fits there, so that codes do not
+  spread over the noisy links between QPUs without need. Compilation stays at level 0 and routing is
+  unchanged; an explicit layout method (`trivial`, `dense`, `sabre`) is used as given, and
+  `layout_method="trivial"` reproduces the old behaviour.
+- **Affects:** every result on a sparse device compiled without a layout method: in the paper
+  `Real_Topology`, `Willow`, `DQC_Flamingo`, `DQC_Nighthawk`, `Connectivity` and
+  `Program_stats_topology`, and on Apollo and Infleqtion (no SWAPs there, but fewer shuttles); in the
+  sweep all IBM-device results. Not affected: all-to-all devices (`custom_full`, `variance_*`), the
+  routing experiments (`Routing_grid`, `Routing_hh`, which set the layout method) and the `native`
+  devices. Exact fits are rare: of 2049 earlier results on sparse devices, 40 had one (18 of them in
+  the routing experiments); the change comes mostly from choosing a placement at all.
+- **Checked by:** `tests/test_platforms.py::test_layout_of_codes_that_fit_the_device`.
+
 ## Changed
 
-### 8. BP-OSD decoders run on ldpc v2
+### 9. BP-OSD decoders run on ldpc v2
 
 - **File:** `eccentric/decoders/bp_osd.py`; `requirements.txt`. **Commit:** `d55f942`.
 - **Why:** the new code libraries (qLDPC, QUITS) need `ldpc` ≥ 2, which breaks `stimbposd`
@@ -154,7 +182,7 @@ which experiments and paper figures it affects, and how it was checked.
   decoders, for the validation circuits of all codes at two error rates: 214 paired comparisons, mean |z| = 0.13. The only two
   differences beyond 3σ (`lcs15`) favour the new version.
 
-### 9. Dependencies
+### 10. Dependencies
 
 - `ldpc` 0.1.60 → 2.4.1, `stim` 1.14.0 → 1.16.0, `sinter` 1.14.0 → 1.16.0, `PyMatching`
   2.2.1 → 2.3.1.
@@ -162,14 +190,14 @@ which experiments and paper figures it affects, and how it was checked.
   `ldpc` < 2).
 - Added for the new features: `qldpc`, `quits`, `relay-bp`, `tesseract-decoder`, `beliefmatching`.
 
-### 10. More columns in result rows
+### 11. More columns in result rows
 
 - Rows with a logical error rate (`logical_error`, `decoder`, `program_stats`, `chromobius`) now
   also contain `schedule`, `rounds` (the syndrome rounds the circuit runs) and
   `logical_error_rate_per_round`; `accumulated_error`, `routing` and `translation` rows contain
   `schedule`. Existing columns are unchanged.
 
-### 11. Minor
+### 12. Minor
 
 - `create_bivariate_bicycle_codes` accepts the known code distance, so it is not recomputed by
   brute force (same circuits).
@@ -206,12 +234,13 @@ which experiments and paper figures it affects, and how it was checked.
 7. **Circuit-level distance is often below the code distance**, including for the paper's `color`
    code (≤ 2 at d = 3, ≤ 3 at d = 5, from hook errors with one ancilla per check). This is a
    property of the syndrome-extraction circuits, not a bug; `validation/` reports it per code.
-8. **Compilation dominates many device results.** With the default Qiskit layout and routing, codes
-   are routed with many SWAPs even where they could be placed directly: the d = 3 surface code on
-   Willow needs about 250 SWAPs (13% logical error over 10 cycles with MWPM, against 4.2% placed on
-   the grid, with the corrected Willow model), and qLDPC codes on Loon and Flamingo spend 75–89% of
-   their two-qubit gates on SWAPs. This is how the paper compiles too; the `native` device (a
-   coupler for every qubit pair of the circuit) gives the placed-directly comparison.
+8. **Some codes cannot be placed without SWAPs on the devices they target.** The heavy-hex code
+   (`hh`) does not fit the heavy-hex lattice: its circuit's coupling graph has cycles of 10 and 16
+   qubits, the lattice only cycles of 12 and more, so even on Heron it is routed (46 SWAPs at d = 3
+   over two cycles). The Loon model gives long-range c-couplers only to the first row of each QPU,
+   where IBM's layout gives every qubit two (arXiv:2308.07915), so bivariate bicycle codes on Loon
+   are routed; the `native` devices give the placed comparison, with the long-range couplers as good
+   as local ones (`native`) or as noisy as remote ones (`native_lr`).
 9. **MWPM on heavy-hex gets worse with distance** at SD6 noise (p = 5×10⁻⁴: 0.21%, 0.62%, 0.69% at
    d = 3, 5, 7 over d rounds) while BP-OSD improves; decomposing the error model (entry 5) did not
    change this. Not yet explained.

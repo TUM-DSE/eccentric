@@ -53,3 +53,21 @@ def test_native_layout_of_bb_code(schedule):
         assert set(Counter(q for e in device.get_remote_gates for q in e).values()) == remote_per_qubit
         circuit = noisy_circuit(task, device, 6, 2)
         assert not any(inst.name == "SWAP" for inst in circuit.flattened())
+
+
+def test_layout_of_codes_that_fit_the_device():
+    from eccentric.codes import get_code
+    from eccentric.transpilers import run_transpiler
+
+    def compile_code(code, d, backend, layout_method=None):
+        device = get_backend(backend, None)
+        qc = run_transpiler(get_code(code, d, 2).qc, device, layout_method, None)
+        remote = {tuple(sorted(p)) for p in getattr(device, "get_remote_gates", [])}
+        gates = [tuple(sorted(qc.find_bit(q).index for q in inst.qubits)) for inst in qc.data if len(inst.qubits) == 2]
+        return qc.count_ops().get("swap", 0), sum(g in remote for g in gates)
+
+    # The surface code is a subgraph of Willow's grid and needs no SWAPs, unless placed qubit by qubit
+    assert compile_code("surface", 7, "real_willow") == (0, 0)
+    assert compile_code("surface", 7, "real_willow", "trivial")[0] > 0
+    # A code that fits one QPU stays off the remote couplers between QPUs
+    assert compile_code("surface", 7, "real_flamingo")[1] == 0
