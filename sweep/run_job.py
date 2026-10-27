@@ -12,6 +12,10 @@ import sys
 import time
 from importlib import metadata
 
+# Many jobs run side by side on a machine: one thread each, not a thread pool per core
+for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "NUMBA_NUM_THREADS", "RAYON_NUM_THREADS"):
+    os.environ.setdefault(var, "1")
+
 import numpy as np
 import stim
 
