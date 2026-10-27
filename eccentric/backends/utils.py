@@ -20,11 +20,14 @@ def get_backend(backend: str, backend_size: int):
         shape = backend.split("_")[1]
         backend = get_custom_topology(shape, backend_size)
     elif backend_type == "real":
-        name = backend.split("_")[1]
+        parts = backend.split("_")
+        name = parts[1]
+        # real_loon_5_qpus / real_flamingo_5_qpus: projected devices with more QPUs in the chain
+        num_qpus = {"num_qpus": int(parts[2])} if len(parts) == 4 and parts[3] == "qpus" else {}
         if name == "flamingo":
-            backend = FakeIBMFlamingo()
+            backend = FakeIBMFlamingo(**num_qpus)
         elif name == "loon":
-            backend = FakeIBMLoon()
+            backend = FakeIBMLoon(**num_qpus)
         elif name == "torino":
             backend = FakeTorino()
         elif name == "willow":

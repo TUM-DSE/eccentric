@@ -8,8 +8,9 @@ from qiskit_ibm_runtime.fake_provider import FakeKyiv
 
 class FakeIBMFlamingo(BackendV2):
 
-    def __init__(self):
+    def __init__(self, num_qpus: int = 3):
         super().__init__(name="FakeIBMFlamingo", backend_version=2)
+        self.num_qpus = num_qpus
         self._remote_gates, self._coupling_map = self.get_endpoints()
         self._num_qubits = self._coupling_map.size()
         self._target = Target("Fake IBM Flamingo", num_qubits=self._num_qubits)
@@ -73,10 +74,14 @@ class FakeIBMFlamingo(BackendV2):
         return new_endpoints_tuple, new_coupling_map
 
     def get_endpoints(self):
-        endpoints, map_interm = self.DQCCouplingMap(self.heavySquareHeronCouplingMap(), self.heavySquareHeronCouplingMap(), [[32, 18], [51, 37], [70, 56], [89, 75]])
-        endpoints_new, map_large = self.DQCCouplingMap(map_interm, self.heavySquareHeronCouplingMap(), [[165, 18], [184, 37], [203, 56], [222, 75]])
-        all_endpoints = endpoints + endpoints_new
-        return all_endpoints, map_large
+        # A chain of QPUs, each linked to the next by four l-couplers
+        qpu = self.heavySquareHeronCouplingMap()
+        all_endpoints, coupling_map = [], qpu
+        for i in range(1, self.num_qpus):
+            offset = (i - 1) * qpu.size()
+            endpoints, coupling_map = self.DQCCouplingMap(coupling_map, qpu, [[offset + 32, 18], [offset + 51, 37], [offset + 70, 56], [offset + 89, 75]])
+            all_endpoints += endpoints
+        return all_endpoints, coupling_map
 
     def addStateOfTheArtQubits(self):
         qubit_props = []

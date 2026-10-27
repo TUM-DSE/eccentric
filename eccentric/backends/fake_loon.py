@@ -6,8 +6,9 @@ import numpy as np
 
 class FakeIBMLoon(BackendV2):
 
-    def __init__(self):
+    def __init__(self, num_qpus: int = 2):
         super().__init__(name="FakeIBMLoon", backend_version="2")
+        self.num_qpus = num_qpus
 
         self._remote_gates, self._coupling_map = self.get_distributed_coupling_map()
         self._num_qubits = self._coupling_map.size()
@@ -94,13 +95,14 @@ class FakeIBMLoon(BackendV2):
         return self.squareLatticeCouplingMap(add_c_couplers=True)
 
     def get_distributed_coupling_map(self) -> tuple[list, CouplingMap]:
-
-        endpoints, coupling_map_two = self.DQCCouplingMap(self.squareLatticeCouplingMap(add_c_couplers=True),
-                                                    self.squareLatticeCouplingMap(add_c_couplers=True),
-                                                    [[32, 18], [51, 37], [70, 56], [89, 75]]
-                                                    )
-
-        return endpoints, coupling_map_two
+        # A chain of QPUs, each linked to the next by four l-couplers
+        qpu = self.squareLatticeCouplingMap(add_c_couplers=True)
+        all_endpoints, coupling_map = [], qpu
+        for i in range(1, self.num_qpus):
+            offset = (i - 1) * qpu.size()
+            endpoints, coupling_map = self.DQCCouplingMap(coupling_map, qpu, [[offset + 32, 18], [offset + 51, 37], [offset + 70, 56], [offset + 89, 75]])
+            all_endpoints += endpoints
+        return all_endpoints, coupling_map
 
     def addStateOfTheArtQubits(self):
         qubit_props = []
