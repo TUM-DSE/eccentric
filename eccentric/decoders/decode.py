@@ -23,7 +23,7 @@ def decode(
         code_name: str, circuit: stim.Circuit, num_shots: int, decoder: str, backend_name: str, error_type: str
 ) -> float:
     approximate_disjoint_errors = False
-    if (backend_name.split("_")[0] == "variance" or backend_name.split("_")[0] == "real") and (error_type == "variance" or error_type.split("_")[0] == "real"):
+    if backend_name.split("_")[0] in ("variance", "real", "native") and (error_type == "variance" or error_type.split("_")[0] == "real"):
         approximate_disjoint_errors = True
 
     if decoder == "mwpm":
