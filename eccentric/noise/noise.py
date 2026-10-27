@@ -43,10 +43,16 @@ class NoiseModel:
         loss_remote: float = 0,
         loss_measure: float = 0,
         loss_detection: str = "none",
+        idle_window: str = "layer",
     ):
         self.sq = sq
         self.tq = tq
         self.idle = idle
+        # The idle error hits the qubits that wait in every layer ("layer"), or only while others
+        # are measured ("measurement"), as Google reports it for Willow
+        if idle_window not in ("layer", "measurement"):
+            raise ValueError(f"idle_window must be 'layer' or 'measurement', got {idle_window}")
+        self.idle_window = idle_window
         self.crosstalk = crosstalk
         self.leakage = leakage
         self.leakage_propagation = leakage_propagation if leakage_propagation != 0 else leakage
@@ -302,7 +308,7 @@ class NoiseModel:
                 return
 
             idle_qubits = sorted(qs - used_qubits)
-            if idle_qubits and self.idle > 0:
+            if idle_qubits and self.idle > 0 and (self.idle_window == "layer" or measured_qubits):
                 current_moment_post.append_operation("DEPOLARIZE1", idle_qubits, self.idle)
 
             result += current_moment_pre

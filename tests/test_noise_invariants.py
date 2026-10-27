@@ -107,3 +107,12 @@ def test_zero_noise_gives_no_logical_errors(code, decoder, error_type):
                 code=code, distance=d, cycles=2, decoder=decoder, error_type=error_type, error_probability=1e-12)
     (row,) = logical_error.run(task)
     assert float(row["logical_error_rate"]) == 0.0
+
+
+@pytest.mark.parametrize("window,expected", [("layer", 3), ("measurement", 1)])
+def test_idle_window(window, expected):
+    # Three layers: a gate, a measurement of qubit 1, another gate; qubit 0 waits in all three
+    circuit = stim.Circuit("H 1\nTICK\nM 1\nTICK\nH 1")
+    noisy = NoiseModel(idle=0.01, idle_window=window).noisy_circuit(circuit)
+    idles = [inst for inst in noisy.flattened() if inst.name == "DEPOLARIZE1" and 0 in [t.value for t in inst.targets_copy()]]
+    assert len(idles) == expected

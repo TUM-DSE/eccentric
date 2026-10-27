@@ -4,7 +4,8 @@ class WillowNoise(NoiseModel):
 
     @staticmethod
     def get_noise(qt) -> 'NoiseModel':
-        # From https://arxiv.org/pdf/2408.13687
+        # From https://arxiv.org/pdf/2408.13687; its idle error is the error of the data qubits while
+        # the measure qubits are measured and reset, once per cycle
         return NoiseModel(
             sq=6.2e-4,
             tq=2.8e-3,
@@ -14,6 +15,7 @@ class WillowNoise(NoiseModel):
             leakage_propagation=2.0e-4,
             reset=1.5e-3,
             measure=0.8e-2,
+            idle_window="measurement",
             qt=qt
         )
 
@@ -32,5 +34,6 @@ class WillowNoise(NoiseModel):
             leakage_propagation=2.0e-4,
             reset=1.5e-3,
             measure=7.7e-3,
+            idle_window="measurement",
             qt=qt
         )

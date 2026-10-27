@@ -108,11 +108,40 @@ which experiments and paper figures it affects, and how it was checked.
   did the same.
 - **Fix:** the "1 QPU" devices are built with a single QPU. The distance choice is unchanged.
 - **Affects:** every `real_loon_1_qpu` and `real_flamingo_1_qpu` result, including the
-  single-QPU baselines of the distributed-QPU comparison in the paper.
+  single-QPU baselines of the distributed-QPU comparison in the paper. In the sweep the effect on
+  the logical error rate is small: of 467 decodes on the same configurations (qLDPC codes, IBM
+  noise and tenfold lower), 441 agree within 3 standard errors, 14 are lower and 12 higher after
+  the fix (median ratio 1.00), so the circuits that spilled over used few inter-QPU links.
+- **Checked by:** `tests/test_platforms.py::test_single_and_projected_ibm_qpus`; after the fix none
+  of the 102 circuits uses more qubits than one QPU. The two- and three-QPU devices are unchanged
+  (identical couplers and inter-QPU links).
+
+### 7. Willow idle error applied in every layer instead of once per cycle
+
+- **Files:** `eccentric/noise/noise.py` (new `idle_window` option), `eccentric/noise/willow_noise.py`.
+- **Problem:** the Willow models (`real_willow`, `real_willow_spec`) take their idle error, 0.9%,
+  from Google's "data qubit idle error during measurement and reset" (arXiv:2408.13687), an error
+  per cycle on the data qubits. `NoiseModel` applied it as a depolarizing error to every waiting
+  qubit in every layer, about seven times per surface-code cycle. Willow was therefore about eight
+  times too noisy: the surface code at d = 7 placed on the grid gave 1.1% logical error per cycle,
+  against 0.143% in Google's experiment, and an error suppression factor Λ of 1.6 instead of 2.14.
+  Switching off each error source in turn showed the idle error to account for almost all of it.
+- **Fix:** `NoiseModel(idle_window="measurement")` applies the idle error only in layers with
+  measurements, to the qubits that wait meanwhile; the Willow models use it. All other models keep
+  the idle error per layer (`idle_window="layer"`, the default), which is how SD6, SI1000 and the
+  other synthetic models define it.
+- **Affects:** every Willow result, including the paper's (`experiment_results/Willow`, the Willow
+  rows of `Real_Topology`).
+- **Checked by:** `tests/test_noise_invariants.py::test_idle_window`, and against Google's
+  experiment: the surface code memory placed on the grid, 10 cycles, MWPM, now gives 0.44%, 0.20%
+  and 0.076% per cycle at d = 3, 5, 7 (Λ = 2.4) with the paper's Willow model and 0.50%, 0.23%,
+  0.097% (Λ = 2.3) with the spec-sheet model, against about 0.65%, 0.31% and 0.143% (Λ = 2.14)
+  measured. The remaining difference (the model is slightly optimistic) fits what the model leaves
+  out, such as leakage accumulation and stray couplings.
 
 ## Changed
 
-### 7. BP-OSD decoders run on ldpc v2
+### 8. BP-OSD decoders run on ldpc v2
 
 - **File:** `eccentric/decoders/bp_osd.py`; `requirements.txt`. **Commit:** `d55f942`.
 - **Why:** the new code libraries (qLDPC, QUITS) need `ldpc` ≥ 2, which breaks `stimbposd`
@@ -125,7 +154,7 @@ which experiments and paper figures it affects, and how it was checked.
   decoders, for the validation circuits of all codes at two error rates: 214 paired comparisons, mean |z| = 0.13. The only two
   differences beyond 3σ (`lcs15`) favour the new version.
 
-### 8. Dependencies
+### 9. Dependencies
 
 - `ldpc` 0.1.60 → 2.4.1, `stim` 1.14.0 → 1.16.0, `sinter` 1.14.0 → 1.16.0, `PyMatching`
   2.2.1 → 2.3.1.
@@ -133,14 +162,14 @@ which experiments and paper figures it affects, and how it was checked.
   `ldpc` < 2).
 - Added for the new features: `qldpc`, `quits`, `relay-bp`, `tesseract-decoder`, `beliefmatching`.
 
-### 9. More columns in result rows
+### 10. More columns in result rows
 
 - Rows with a logical error rate (`logical_error`, `decoder`, `program_stats`, `chromobius`) now
   also contain `schedule`, `rounds` (the syndrome rounds the circuit runs) and
   `logical_error_rate_per_round`; `accumulated_error`, `routing` and `translation` rows contain
   `schedule`. Existing columns are unchanged.
 
-### 10. Minor
+### 11. Minor
 
 - `create_bivariate_bicycle_codes` accepts the known code distance, so it is not recomputed by
   brute force (same circuits).
@@ -177,6 +206,15 @@ which experiments and paper figures it affects, and how it was checked.
 7. **Circuit-level distance is often below the code distance**, including for the paper's `color`
    code (≤ 2 at d = 3, ≤ 3 at d = 5, from hook errors with one ancilla per check). This is a
    property of the syndrome-extraction circuits, not a bug; `validation/` reports it per code.
+8. **Compilation dominates many device results.** With the default Qiskit layout and routing, codes
+   are routed with many SWAPs even where they could be placed directly: the d = 3 surface code on
+   Willow needs about 250 SWAPs (13% logical error over 10 cycles with MWPM, against 4.2% placed on
+   the grid, with the corrected Willow model), and qLDPC codes on Loon and Flamingo spend 75–89% of
+   their two-qubit gates on SWAPs. This is how the paper compiles too; the `native` device (a
+   coupler for every qubit pair of the circuit) gives the placed-directly comparison.
+9. **MWPM on heavy-hex gets worse with distance** at SD6 noise (p = 5×10⁻⁴: 0.21%, 0.62%, 0.69% at
+   d = 3, 5, 7 over d rounds) while BP-OSD improves; decomposing the error model (entry 5) did not
+   change this. Not yet explained.
 
 ## Validation
 
