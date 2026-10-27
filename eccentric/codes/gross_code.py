@@ -289,3 +289,33 @@ def make_bb_circuit(n, T):
         z_basis=True,
         use_both=False,
     )
+
+
+def long_range_pairs(code_name, pairs):
+    """The qubit pairs of a bivariate bicycle circuit that need long-range couplers in IBM's toric
+    layout (arXiv:2308.07915): the edges of the x-term of A and the y-term of B, two per qubit. The
+    other four edges of each qubit form the torus. pairs are the circuit's two-qubit gate pairs, from
+    which the order of the X-check, data and Z-check qubits is recognised."""
+    from itertools import permutations
+
+    if code_name == "gross":
+        code, A_list, B_list = create_bivariate_bicycle_codes(12, 6, [3], [1, 2], [1, 2], [3])
+    else:
+        n = int(code_name[2:])
+        (k, d), = [(k, d) for (n_, k, d) in BBCODE_DICT if n_ == n]
+        l, m, (a_x, *a_y), (b_y, *b_x) = BBCODE_DICT[(n, k, d)]
+        code, A_list, B_list = create_bivariate_bicycle_codes(l, m, [a_x], a_y, b_x, [b_y])
+    half = code.N // 2
+    a1, b1 = A_list[0].toarray(), B_list[0].toarray()
+    zero = np.zeros_like(a1)
+    # Long-range part of hx = [A | B] and hz = [B^T | A^T]
+    long_x, long_z = np.hstack([a1, b1]), np.hstack([b1.T, a1.T])
+    pairs = {frozenset(p) for p in pairs}
+    sizes = {"X": half, "D": code.N, "Z": half}
+    for order in permutations("XDZ"):
+        offset = {b: sum(sizes[c] for c in order[:order.index(b)]) for b in order}
+        def edges(h, check):
+            return {frozenset((offset[check] + i, offset["D"] + j)) for i, j in zip(*h.nonzero())}
+        if edges(code.hx, "X") | edges(code.hz, "Z") == pairs:
+            return {tuple(sorted(e)) for e in edges(long_x, "X") | edges(long_z, "Z")}
+    raise ValueError(f"the circuit's qubit pairs do not match the Tanner graph of {code_name}")

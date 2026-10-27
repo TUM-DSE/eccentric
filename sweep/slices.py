@@ -4,6 +4,8 @@ A configuration is a code (with a schedule and distance), a device with a noise 
 rate), a compiler setting and a number of syndrome rounds; each configuration is decoded with
 several decoders on the same shots.
 """
+from itertools import product
+
 from eccentric.codes.catalog import CODES, CodeFamily, FixedCode
 
 QLDPC_PREFIXES = ("bb", "bpc", "gb", "hgp", "lp", "lcs", "qt", "mitten", "qlp")
@@ -67,7 +69,8 @@ def qldpc_ibm_projected(max_qubits=600):
 
 def bb_native(max_qubits=600):
     """Bivariate bicycle codes placed one to one on a device built for them, IBM's planned layout,
-    to compare with the same codes compiled onto Loon and Flamingo"""
+    to compare with the same codes compiled onto Loon and Flamingo: with long-range couplers as good
+    as local ones (native) and as noisy as IBM's remote couplers, 3% at the devices' noise (native_lr)"""
     from eccentric.codes import get_min_n
 
     for code in QLDPC_CODES:
@@ -77,8 +80,8 @@ def bb_native(max_qubits=600):
             for d in code_distances(code):
                 if get_min_n(code, d) > max_qubits:
                     continue
-                for error_type in ("real_flamingo", "real_flamingo_downscaled"):
-                    yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend="native",
+                for backend, error_type in product(("native", "native_lr"), ("real_flamingo", "real_flamingo_downscaled")):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend=backend,
                                error_type=error_type, error_probability=None,
                                decoders=["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"])
 

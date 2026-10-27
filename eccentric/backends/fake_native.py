@@ -7,12 +7,12 @@ class FakeNativeBackend(BackendV2):
     """A device built for one code: a qubit per code qubit and a coupler for every pair of qubits the
     syndrome circuit entangles, so the code is placed one to one and needs no SWAPs. For bivariate
     bicycle codes this is IBM's planned layout (arXiv:2308.07915), whose long-range c-couplers are
-    assumed to be as good as nearest-neighbour couplers."""
+    either as good as nearest-neighbour couplers or, given as remote_pairs, as noisy as remote ones."""
 
     # Place circuit qubit i on device qubit i
     layout_method = "trivial"
 
-    def __init__(self, num_qubits: int, pairs):
+    def __init__(self, num_qubits: int, pairs, remote_pairs=()):
         super().__init__(name="FakeNativeBackend", backend_version="2")
         edges = sorted({(a, b) for a, b in pairs} | {(b, a) for a, b in pairs})
         self._coupling_map = CouplingMap(edges)
@@ -20,7 +20,8 @@ class FakeNativeBackend(BackendV2):
             if q not in self._coupling_map.physical_qubits:
                 self._coupling_map.add_physical_qubit(q)
         self._num_qubits = num_qubits
-        self._remote_gates = []
+        # Couplers with the noise model's remote error and gate time
+        self._remote_gates = sorted(remote_pairs)
         self._target = Target("Fake native device", num_qubits=num_qubits)
         self.addStateOfTheArtQubits()
         self.gate_set = ["id", "sx", "x", "rz", "rzz", "cz", "rx"]

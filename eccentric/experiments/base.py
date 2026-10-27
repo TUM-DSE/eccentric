@@ -10,6 +10,7 @@ import stim
 from qiskit_qec.utils import get_stim_circuits
 
 from ..backends import FakeNativeBackend, QubitTracking, get_backend
+from ..codes.gross_code import long_range_pairs
 from ..codes import get_code, get_max_d, num_rounds, resolve_schedule
 from ..noise import get_noise_model
 from ..transpilers import run_transpiler, translate
@@ -52,18 +53,20 @@ class Task:
 
 
 def load_backend(task: Task):
-    if task.backend == "native":
+    if task.backend in ("native", "native_lr"):
         return native_backend(task)
     return get_backend(task.backend, task.backend_size)
 
 
 def native_backend(task: Task):
-    """A device whose couplers are exactly the qubit pairs of the code's syndrome circuit"""
+    """A device whose couplers are exactly the qubit pairs of the code's syndrome circuit; on
+    native_lr the long-range couplers of IBM's layout of bivariate bicycle codes are remote gates"""
     if task.distance is None:
         raise Skip("the native device needs a fixed distance")
     qc = get_code(task.code, task.distance, resolve_cycles(task, task.distance), resolve_code_schedule(task)).qc
     pairs = {tuple(qc.find_bit(q).index for q in inst.qubits) for inst in qc.data if len(inst.qubits) == 2}
-    return FakeNativeBackend(qc.num_qubits, pairs)
+    remote = long_range_pairs(task.code, pairs) if task.backend == "native_lr" else ()
+    return FakeNativeBackend(qc.num_qubits, pairs, remote)
 
 
 def resolve_distance(task: Task, backend) -> int:

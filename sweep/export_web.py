@@ -34,6 +34,7 @@ DEVICES = {
     "real_flamingo": "IBM Flamingo, 3 QPUs (399 qubits)",
     "custom_full": "All-to-all connectivity",
     "native": "Native layout: a device built for the code, IBM's planned layout for bivariate bicycle codes",
+    "native_lr": "Native layout with long-range couplers as noisy as IBM's remote couplers",
 }
 
 NOISE = {
