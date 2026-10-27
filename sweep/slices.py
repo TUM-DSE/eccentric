@@ -105,6 +105,17 @@ def paper_dqc():
                            error_probability=None, decoders=["bposd"])
 
 
+def willow_surface():
+    """The surface code memory on Willow, to compare with Google's experiment below threshold
+    (Nature 638, 920 (2025): 0.143% logical error per cycle at distance 7, suppression factor 2.14),
+    under the paper's Willow noise and the spec-sheet noise, compiled onto Willow by Qiskit (as in the
+    paper) and placed on the grid without SWAPs as in Google's experiment (native)"""
+    for d, cycles, backend, error_type in product((3, 5, 7), (10, 30), ("real_willow", "native"), ("real_willow", "real_willow_spec")):
+        yield dict(code="surface", schedule=None, distance=d, cycles=cycles, backend=backend, error_type=error_type,
+                   error_probability=None, decoders=["mwpm", "bposd", "tesseract"],
+                   decode=dict(time_budget=1800, timeout=2 * 3600))
+
+
 def reference(max_qubits=600):
     """Every code at its default schedule on an all-to-all device with SD6 noise, the common ground
     that makes the device slices comparable"""
@@ -127,4 +138,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "reference": reference}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "reference": reference}

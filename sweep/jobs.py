@@ -22,13 +22,14 @@ def make_jobs(slice_name):
     jobs = []
     for config in SLICES[slice_name]():
         decoders = config.pop("decoders")
+        decode = {**DECODE, **config.pop("decode", {})}
         circuit_id = "circuit." + config_id(slice_name, config)
         jobs.append(dict(id=circuit_id, type="circuit", module="sweep.run_job", slice=slice_name, priority=0,
                          timeout=4 * 3600, **config))
         for decoder in decoders:
             jobs.append(dict(id=f"decode.{config_id(slice_name, config)}.decoder={decoder}", type="decode",
                              module="sweep.run_job", slice=slice_name, needs=circuit_id, decoder=decoder,
-                             priority=2 if decoder == "tesseract" else 1, **config, **DECODE))
+                             priority=2 if decoder == "tesseract" else 1, **config, **decode))
     return jobs
 
 

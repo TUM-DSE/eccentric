@@ -28,6 +28,7 @@ FAMILIES = [
 
 DEVICES = {
     "real_torino": "IBM Heron (133 qubits)",
+    "real_willow": "Google Willow (extended, 315 qubits)",
     "real_loon_1_qpu": "IBM Loon/Nighthawk, 1 QPU (120 qubits)",
     "real_loon": "IBM Loon/Nighthawk, 2 QPUs (242 qubits)",
     "real_flamingo_1_qpu": "IBM Flamingo, 1 QPU (133 qubits)",
@@ -42,6 +43,8 @@ NOISE = {
     "real_flamingo": "IBM Flamingo",
     "real_flamingo_downscaled": "IBM Flamingo, 10x lower",
     "sd6": "SD6 (uniform depolarizing)",
+    "real_willow": "Google Willow (paper model)",
+    "real_willow_spec": "Google Willow (spec sheet)",
 }
 
 DECODERS = {
@@ -55,6 +58,7 @@ SLICES = {
     "qldpc_ibm_projected": "QLDPC codes on projected larger IBM devices",
     "bb_native": "Bivariate bicycle codes in IBM's native layout",
     "paper_dqc": "Paper: one QPU vs distributed QPUs, re-run with the fixes",
+    "willow_surface": "Surface code on Google Willow, against Google's experiment",
     "reference": "Reference: all codes, all-to-all, SD6 noise",
 }
 
