@@ -84,9 +84,22 @@ which experiments and paper figures it affects, and how it was checked.
   now works on the `color` code in `logical_error` experiments.
 - **Checked by:** `tests/test_features.py::test_detector_coordinates_survive_the_pipeline`.
 
+### 5. MWPM decoding graph built from an undecomposed error model
+
+- **File:** `eccentric/decoders/mwpm.py`.
+- **Problem:** the detector error model was generated without `decompose_errors=True`. PyMatching
+  then builds its matching graph without the error mechanisms that flip more than two detectors
+  (for example Y errors and correlated two-qubit errors), so most edge probabilities were too low
+  (surface code d = 5: 466 of 502 edges, mean probability 2.0e-3 instead of 3.3e-3).
+- **Fix:** the error model is decomposed into graph edges, the standard way to use PyMatching. A
+  circuit whose errors cannot be decomposed now makes MWPM fail instead of decoding with a wrong graph.
+- **Affects:** all `mwpm` results. On the circuits checked (surface code d = 5, heavy-hex d = 3 at
+  p = 0.001) the logical error rates changed only within the statistical error, so this does not
+  explain the gap between MWPM and BP-OSD reported in the paper.
+
 ## Changed
 
-### 5. BP-OSD decoders run on ldpc v2
+### 6. BP-OSD decoders run on ldpc v2
 
 - **File:** `eccentric/decoders/bp_osd.py`; `requirements.txt`. **Commit:** `d55f942`.
 - **Why:** the new code libraries (qLDPC, QUITS) need `ldpc` ≥ 2, which breaks `stimbposd`
@@ -99,7 +112,7 @@ which experiments and paper figures it affects, and how it was checked.
   decoders, for the validation circuits of all codes at two error rates: 214 paired comparisons, mean |z| = 0.13. The only two
   differences beyond 3σ (`lcs15`) favour the new version.
 
-### 6. Dependencies
+### 7. Dependencies
 
 - `ldpc` 0.1.60 → 2.4.1, `stim` 1.14.0 → 1.16.0, `sinter` 1.14.0 → 1.16.0, `PyMatching`
   2.2.1 → 2.3.1.
@@ -107,14 +120,14 @@ which experiments and paper figures it affects, and how it was checked.
   `ldpc` < 2).
 - Added for the new features: `qldpc`, `quits`, `relay-bp`, `tesseract-decoder`, `beliefmatching`.
 
-### 7. More columns in result rows
+### 8. More columns in result rows
 
 - Rows with a logical error rate (`logical_error`, `decoder`, `program_stats`, `chromobius`) now
   also contain `schedule`, `rounds` (the syndrome rounds the circuit runs) and
   `logical_error_rate_per_round`; `accumulated_error`, `routing` and `translation` rows contain
   `schedule`. Existing columns are unchanged.
 
-### 8. Minor
+### 9. Minor
 
 - `create_bivariate_bicycle_codes` accepts the known code distance, so it is not recomputed by
   brute force (same circuits).
