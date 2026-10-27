@@ -53,6 +53,7 @@ SLICES = {
     "qldpc_ibm": "QLDPC codes on IBM devices",
     "qldpc_ibm_projected": "QLDPC codes on projected larger IBM devices",
     "bb_native": "Bivariate bicycle codes in IBM's native layout",
+    "paper_dqc": "Paper: one QPU vs distributed QPUs, re-run with the fixes",
     "reference": "Reference: all codes, all-to-all, SD6 noise",
 }
 

@@ -83,6 +83,25 @@ def bb_native(max_qubits=600):
                                decoders=["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"])
 
 
+# Distances of the paper's distributed-QPU comparison (experiment_results/DQC_*), per device
+PAPER_DQC = {
+    "real_loon_1_qpu": {"surface": 7, "color": 7, "hh": 7, "bacon": 9, "steane": 9},
+    "real_loon": {"surface": 9, "color": 9, "hh": 9, "bacon": 15, "steane": 9},
+    "real_flamingo_1_qpu": {"surface": 7, "color": 7, "hh": 7, "bacon": 11, "steane": 9},
+    "real_flamingo": {"surface": 13, "color": 13, "hh": 11, "bacon": 19, "steane": 9},
+}
+
+
+def paper_dqc():
+    """The paper's comparison of one QPU with distributed QPUs, again with the fixes (decoherence,
+    Steane readout, single-QPU devices) and BP-OSD as in the paper"""
+    for backend, distances in PAPER_DQC.items():
+        for code, d in distances.items():
+            for error_type in ("real_flamingo", "real_flamingo_downscaled"):
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=error_type,
+                           error_probability=None, decoders=["bposd"])
+
+
 def reference(max_qubits=600):
     """Every code at its default schedule on an all-to-all device with SD6 noise, the common ground
     that makes the device slices comparable"""
@@ -105,4 +124,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "reference": reference}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "reference": reference}
