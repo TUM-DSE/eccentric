@@ -65,6 +65,24 @@ def qldpc_ibm_projected(max_qubits=600):
                                error_probability=None, decoders=["bposd", "relay_bp", "belief_find"])
 
 
+def bb_native(max_qubits=600):
+    """Bivariate bicycle codes placed one to one on a device built for them, IBM's planned layout,
+    to compare with the same codes compiled onto Loon and Flamingo"""
+    from eccentric.codes import get_min_n
+
+    for code in QLDPC_CODES:
+        if not code.startswith(("bb", "gross")):
+            continue
+        for schedule in schedules(code):
+            for d in code_distances(code):
+                if get_min_n(code, d) > max_qubits:
+                    continue
+                for error_type in ("real_flamingo", "real_flamingo_downscaled"):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend="native",
+                               error_type=error_type, error_probability=None,
+                               decoders=["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"])
+
+
 def reference(max_qubits=600):
     """Every code at its default schedule on an all-to-all device with SD6 noise, the common ground
     that makes the device slices comparable"""
@@ -87,4 +105,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "reference": reference}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "reference": reference}

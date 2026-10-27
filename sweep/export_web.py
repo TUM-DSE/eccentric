@@ -33,6 +33,7 @@ DEVICES = {
     "real_flamingo_1_qpu": "IBM Flamingo, 1 QPU (133 qubits)",
     "real_flamingo": "IBM Flamingo, 3 QPUs (399 qubits)",
     "custom_full": "All-to-all connectivity",
+    "native": "Native layout: a device built for the code, IBM's planned layout for bivariate bicycle codes",
 }
 
 NOISE = {
@@ -51,6 +52,7 @@ DECODERS = {
 SLICES = {
     "qldpc_ibm": "QLDPC codes on IBM devices",
     "qldpc_ibm_projected": "QLDPC codes on projected larger IBM devices",
+    "bb_native": "Bivariate bicycle codes in IBM's native layout",
     "reference": "Reference: all codes, all-to-all, SD6 noise",
 }
 

@@ -97,9 +97,22 @@ which experiments and paper figures it affects, and how it was checked.
   p = 0.001) the logical error rates changed only within the statistical error, so this does not
   explain the gap between MWPM and BP-OSD reported in the paper.
 
+### 6. "1 QPU" devices were compiled onto the full multi-QPU device
+
+- **File:** `eccentric/backends/utils.py` (with `fake_loon.py` and `fake_flamingo.py`, which now take
+  the number of QPUs).
+- **Problem:** `real_loon_1_qpu` and `real_flamingo_1_qpu` loaded the full two- and three-QPU
+  devices. The single-QPU size (120 and 133 qubits) only chose the code distance, so the compiler
+  was free to place and route the code across all QPUs, over the slow and noisy inter-QPU links. In
+  the sweep, 84 of 102 "1 QPU" circuits used more qubits than one QPU has. The paper-era `main.py`
+  did the same.
+- **Fix:** the "1 QPU" devices are built with a single QPU. The distance choice is unchanged.
+- **Affects:** every `real_loon_1_qpu` and `real_flamingo_1_qpu` result, including the
+  single-QPU baselines of the distributed-QPU comparison in the paper.
+
 ## Changed
 
-### 6. BP-OSD decoders run on ldpc v2
+### 7. BP-OSD decoders run on ldpc v2
 
 - **File:** `eccentric/decoders/bp_osd.py`; `requirements.txt`. **Commit:** `d55f942`.
 - **Why:** the new code libraries (qLDPC, QUITS) need `ldpc` ≥ 2, which breaks `stimbposd`
@@ -112,7 +125,7 @@ which experiments and paper figures it affects, and how it was checked.
   decoders, for the validation circuits of all codes at two error rates: 214 paired comparisons, mean |z| = 0.13. The only two
   differences beyond 3σ (`lcs15`) favour the new version.
 
-### 7. Dependencies
+### 8. Dependencies
 
 - `ldpc` 0.1.60 → 2.4.1, `stim` 1.14.0 → 1.16.0, `sinter` 1.14.0 → 1.16.0, `PyMatching`
   2.2.1 → 2.3.1.
@@ -120,14 +133,14 @@ which experiments and paper figures it affects, and how it was checked.
   `ldpc` < 2).
 - Added for the new features: `qldpc`, `quits`, `relay-bp`, `tesseract-decoder`, `beliefmatching`.
 
-### 8. More columns in result rows
+### 9. More columns in result rows
 
 - Rows with a logical error rate (`logical_error`, `decoder`, `program_stats`, `chromobius`) now
   also contain `schedule`, `rounds` (the syndrome rounds the circuit runs) and
   `logical_error_rate_per_round`; `accumulated_error`, `routing` and `translation` rows contain
   `schedule`. Existing columns are unchanged.
 
-### 9. Minor
+### 10. Minor
 
 - `create_bivariate_bicycle_codes` accepts the known code distance, so it is not recomputed by
   brute force (same circuits).

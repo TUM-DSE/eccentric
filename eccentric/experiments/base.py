@@ -9,7 +9,7 @@ import psutil
 import stim
 from qiskit_qec.utils import get_stim_circuits
 
-from ..backends import QubitTracking, get_backend
+from ..backends import FakeNativeBackend, QubitTracking, get_backend
 from ..codes import get_code, get_max_d, num_rounds, resolve_schedule
 from ..noise import get_noise_model
 from ..transpilers import run_transpiler, translate
@@ -52,7 +52,18 @@ class Task:
 
 
 def load_backend(task: Task):
+    if task.backend == "native":
+        return native_backend(task)
     return get_backend(task.backend, task.backend_size)
+
+
+def native_backend(task: Task):
+    """A device whose couplers are exactly the qubit pairs of the code's syndrome circuit"""
+    if task.distance is None:
+        raise Skip("the native device needs a fixed distance")
+    qc = get_code(task.code, task.distance, resolve_cycles(task, task.distance), resolve_code_schedule(task)).qc
+    pairs = {tuple(qc.find_bit(q).index for q in inst.qubits) for inst in qc.data if len(inst.qubits) == 2}
+    return FakeNativeBackend(qc.num_qubits, pairs)
 
 
 def resolve_distance(task: Task, backend) -> int:
@@ -103,7 +114,8 @@ def noisy_circuit(task: Task, backend, d: int, cycles: int, stage=lambda name: n
     if task.translating_method:
         code.qc = translate(code.qc, task.translating_method)
     with stage("transpile"):
-        code.qc = run_transpiler(code.qc, backend, task.layout_method, task.routing_method)
+        layout_method = task.layout_method or getattr(backend, "layout_method", None)
+        code.qc = run_transpiler(code.qc, backend, layout_method, task.routing_method)
     qt = QubitTracking(backend, code.qc)
     with stage("repr"):
         circuit = get_stim_circuits(code.qc, detectors=detectors, logicals=logicals)[0][0]
