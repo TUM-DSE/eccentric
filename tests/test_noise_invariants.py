@@ -138,3 +138,19 @@ def test_waiting_qubits_decay():
     expected = 0.5 * (1 - math.exp(-1.56e-6 / t1)) + (1 - math.exp(-1.56e-6 / t2)) / 2 - (1 - math.exp(-1.56e-6 / t1)) / 4
     assert waiting(FlamingoNoise.get_noise(None, backend)) == pytest.approx(expected, rel=1e-6)
     assert 0 < waiting(FlamingoNoiseDownscaled.get_noise(None, backend)) < waiting(FlamingoNoise.get_noise(None, backend))
+
+
+def test_waiting_in_a_layer_with_gates_in_sequence():
+    # A layer can measure a qubit and then reset it; the others wait for both, 1.56 us + 1.29 us
+    from eccentric.backends.utils import get_backend
+    from eccentric.noise.flamingo_noise import FlamingoNoise
+
+    backend = get_backend("real_loon_1_qpu", None)
+    model = FlamingoNoise.get_noise(None, backend)
+    noisy = model.noisy_circuit(stim.Circuit("R 0 1\nTICK\nM 1\nR 1"))
+    layer = stim.Circuit(str(noisy).split("TICK")[1])
+    waited = [i for i in layer.flattened() if i.name == "PAULI_CHANNEL_1" and i.targets_copy()[0].value == 0]
+    t1, t2 = backend.qubit_properties(0).t1, backend.qubit_properties(0).t2
+    t = 1.56e-6 + model.gate_times["R"]
+    px = 0.25 * (1 - math.exp(-t / t1))
+    assert len(waited) == 1 and waited[0].gate_args_copy()[0] == pytest.approx(px, rel=1e-6)

@@ -291,18 +291,16 @@ class NoiseModel:
         gate durations, unless the model has its own idle error)"""
         return self.backend is not None and self.idle == 0 and bool(self.gate_times)
 
-    def durations(self, op: stim.CircuitInstruction) -> Dict[int, float]:
-        """How long each qubit of the operation is busy"""
+    def durations(self, op: stim.CircuitInstruction) -> List[Tuple[List[int], float]]:
+        """The gates of the operation in order, each with its qubits and duration"""
         targets = [t.value for t in op.targets_copy() if t.is_qubit_target]
         if op.name in TQ_OPS or op.name in SWAP_OPS:
-            busy = {}
-            for i in range(0, len(targets), 2):
-                pair = targets[i:i + 2]
-                busy.update(dict.fromkeys(pair, self.get_gate_time(op, pair)))
-            return busy
+            pairs = [targets[i:i + 2] for i in range(0, len(targets), 2)]
+            return [(pair, self.get_gate_time(op, pair)) for pair in pairs]
         if op.name in SQ_OPS or op.name in RESET_OPS or op.name in MEASURE_OPS:
-            return dict.fromkeys(targets, self.get_gate_time(op))
-        return {}
+            duration = self.get_gate_time(op)
+            return [([q], duration) for q in targets]
+        return []
 
     def noisy_circuit(self, circuit: stim.Circuit, *, qs: Optional[Set[int]] = None) -> stim.Circuit:
         if self.has_heralded_loss() and self.flag_offset is None:
@@ -325,6 +323,10 @@ class NoiseModel:
         if qs is None:
             # The qubits the circuit uses, not all qubits of the device
             qs = {t.value for inst in circuit.flattened() for t in inst.targets_copy() if t.is_qubit_target}
+        # Within a layer, every gate starts as soon as its qubits are free (a layer can hold a
+        # measurement and then a reset of the same qubit): when each qubit is free again, and how
+        # long it was busy
+        clock: Dict[int, float] = {}
         busy: Dict[int, float] = {}
 
         def flush():
@@ -335,13 +337,14 @@ class NoiseModel:
             idle_qubits = sorted(qs - used_qubits)
             if idle_qubits and self.idle > 0 and (self.idle_window == "layer" or measured_qubits):
                 current_moment_post.append_operation("DEPOLARIZE1", idle_qubits, self.idle)
-            if busy and self.decoheres():
-                # Every qubit waits until the slowest operation of the layer is done
-                layer = max(busy.values())
+            if clock and self.decoheres():
+                # Every qubit waits whenever it is not busy until the layer is done
+                layer = max(clock.values())
                 for q in sorted(qs):
                     wait = layer - busy.get(q, 0)
-                    if wait > 0:
+                    if wait > 1e-15:
                         self.add_qubit_error(current_moment_post, [stim.GateTarget(q)], wait)
+            clock.clear()
             busy.clear()
 
             result += current_moment_pre
@@ -385,8 +388,11 @@ class NoiseModel:
 
                 used_qubits |= touched_qubits
                 if self.decoheres():
-                    for q, duration in self.durations(op).items():
-                        busy[q] = max(busy.get(q, 0), duration)
+                    for qubits, duration in self.durations(op):
+                        start = max(clock.get(q, 0) for q in qubits)
+                        for q in qubits:
+                            clock[q] = start + duration
+                            busy[q] = busy.get(q, 0) + duration
                 if op.name in MEASURE_OPS:
                     measured_qubits |= touched_qubits
                 if op.name in RESET_OPS:
