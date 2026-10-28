@@ -154,8 +154,8 @@ which experiments and paper figures it affects, and how it was checked.
 - **Fix:** without a layout method, `run_transpiler` first looks for a placement under which every
   two-qubit gate acts on coupled qubits (with rustworkx's VF2, Qiskit's level-2 search budget),
   using only local couplers if it can and otherwise the fewest remote ones. Without one, SabreLayout
-  chooses the placement, on the qubits of one QPU when the circuit fits there, so that codes do not
-  spread over the noisy links between QPUs without need. Compilation stays at level 0 and routing is
+  chooses the placement; when the circuit fits on one QPU, it is placed and routed on that QPU's
+  local couplers, so that codes do not spread over the noisy links between QPUs without need. Compilation stays at level 0 and routing is
   unchanged; an explicit layout method (`trivial`, `dense`, `sabre`) is used as given, and
   `layout_method="trivial"` reproduces the old behaviour.
 - **Affects:** every result on a sparse device compiled without a layout method: in the paper

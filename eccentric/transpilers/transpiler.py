@@ -43,7 +43,8 @@ def perfect_layout(circuit, backend):
 
 def local_layout(circuit, backend):
     """SabreLayout's placement of the circuit on the largest group of qubits joined by local couplers,
-    or None if the device has no remote couplers or the circuit does not fit on the group"""
+    with the device's local couplers to route on, or None if the device has no remote couplers or the
+    circuit does not fit on the group"""
     coupling_map = backend.coupling_map
     remote = {tuple(sorted(p)) for p in getattr(backend, "get_remote_gates", [])}
     if not remote:
@@ -60,16 +61,18 @@ def local_layout(circuit, backend):
     layout_pass = SabreLayout(group, skip_routing=True)
     layout_pass.run(circuit_to_dag(circuit))
     layout = layout_pass.property_set["layout"]
-    return Layout({q: qubits[layout[q]] for q in circuit.qubits})
+    return Layout({q: qubits[layout[q]] for q in circuit.qubits}), CouplingMap(local)
 
 
 def run_transpiler(circuit, backend, layout_method, routing_method):
     # Without a layout method, Qiskit's level 0 places circuit qubit i on device qubit i. Place the
     # circuit without SWAPs when the device allows it, as levels 1 to 3 do, else let SabreLayout choose,
-    # on one QPU's local couplers if the circuit fits there
-    initial_layout = None
+    # and routed on one QPU's local couplers if the circuit fits there
+    initial_layout, coupling_map = None, None
     if layout_method is None:
-        initial_layout = perfect_layout(circuit, backend) or local_layout(circuit, backend)
+        initial_layout = perfect_layout(circuit, backend)
+        if initial_layout is None:
+            initial_layout, coupling_map = local_layout(circuit, backend) or (None, None)
         if initial_layout is None:
             layout_method = "sabre"
     return transpile(
@@ -77,6 +80,7 @@ def run_transpiler(circuit, backend, layout_method, routing_method):
                 basis_gates=qiskit_stim,
                 optimization_level=0,
                 backend=backend,
+                coupling_map=coupling_map,
                 initial_layout=initial_layout,
                 layout_method=None if initial_layout else layout_method,
                 routing_method=routing_method
