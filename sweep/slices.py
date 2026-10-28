@@ -153,6 +153,25 @@ def qldpc_bicycle_chain(max_qubits=600):
                                error_probability=None, decoders=["bposd", "relay_bp", "belief_find"])
 
 
+def qldpc_atoms():
+    """qLDPC codes on neutral atoms (the Harvard/MIT array and Infleqtion's) and on Quantinuum's ions,
+    at the devices' own noise: any two qubits interact after a move, which costs a gate error (and,
+    for the Harvard array, atom loss), so the codes need no SWAPs"""
+    from eccentric.backends.utils import get_backend
+    from eccentric.codes import get_min_n
+
+    for backend, error_type in (("real_harvard", "real_harvard"), ("real_infleqtion", "real_infleqtion"), ("real_apollo", "real_apollo")):
+        size = get_backend(backend, None).num_qubits
+        for code in QLDPC_CODES:
+            for d in code_distances(code):
+                if get_min_n(code, d) > size:
+                    continue
+                for schedule in schedules(code):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend=backend,
+                               error_type=error_type, error_probability=None,
+                               decoders=["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"])
+
+
 # The paper's experiments compiled onto sparse devices with circuit qubit i on device qubit i
 PAPER_TOPOLOGY = ["Real_Topology", "Willow", "Connectivity", "Program_stats_topology", "Apollo", "Infleqtion"]
 
@@ -198,4 +217,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "paper_topology": paper_topology, "reference": reference}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "reference": reference}
