@@ -20,16 +20,16 @@ from sweep.export_web import DEVICES
 CATALOG = [
     ("real_torino", None, "IBM Heron r1 (Torino)", "IBM", ["real_heron"],
      "IBM's 133-qubit Heron processor: a heavy-hex lattice, every qubit coupled to two or three neighbours."),
-    ("real_flamingo_1_qpu", None, "IBM Flamingo, 1 QPU", "IBM", ["real_flamingo", "real_flamingo_downscaled"],
+    ("real_flamingo_1_qpu", None, "IBM Flamingo, 1 QPU", "IBM", ["real_flamingo", "real_flamingo_downscaled", "real_flamingo_m700", "real_flamingo_downscaled_m700"],
      "A Flamingo QPU as modelled here: the 127-qubit Eagle heavy-hex lattice extended to 133 qubits."),
     ("real_flamingo", None, "IBM Flamingo, 3 QPUs", "IBM", ["real_flamingo", "real_flamingo_downscaled"],
      "Three Flamingo QPUs in a chain, each linked to the next by four l-couplers (remote, 3% error, 300 ns)."),
-    ("real_loon_1_qpu", None, "IBM Loon/Nighthawk, 1 QPU", "IBM", ["real_flamingo", "real_flamingo_downscaled"],
+    ("real_loon_1_qpu", None, "IBM Loon/Nighthawk, 1 QPU", "IBM", ["real_flamingo", "real_flamingo_downscaled", "real_flamingo_m700", "real_flamingo_downscaled_m700"],
      "An 11 by 11 square lattice with long-range c-couplers (IBM's large-scale fault-tolerance roadmap). "
      "As modelled, the c-couplers start from the first row of the lattice only."),
     ("real_loon", None, "IBM Loon/Nighthawk, 2 QPUs", "IBM", ["real_flamingo", "real_flamingo_downscaled"],
      "Two Loon QPUs linked by four l-couplers."),
-    ("real_bicycle", None, "IBM bicycle architecture module", "IBM", ["real_flamingo", "real_flamingo_downscaled"],
+    ("real_bicycle", None, "IBM bicycle architecture module", "IBM", ["real_flamingo", "real_flamingo_downscaled", "real_flamingo_m700", "real_flamingo_downscaled_m700"],
      "The 288 qubits of the gross code in its toric layout: four couplers to neighbours on a torus and two "
      "long-range c-couplers per qubit, all as good as local couplers."),
     ("real_bicycle_lr", None, "IBM bicycle module, noisy c-couplers", "IBM", ["real_flamingo", "real_flamingo_downscaled"],
@@ -60,7 +60,9 @@ CATALOG = [
 NOISE_LABELS = {
     "real_heron": "IBM Heron (calibration averages)",
     "real_flamingo": "IBM (Flamingo/Loon targets)",
-    "real_flamingo_downscaled": "IBM, tenfold lower",
+    "real_flamingo_downscaled": "IBM, tenfold lower (T1/T2 x3)",
+    "real_flamingo_m700": "IBM, 700 ns readout",
+    "real_flamingo_downscaled_m700": "IBM, tenfold lower, 700 ns readout",
     "real_willow": "Google Willow (Nature 2025)",
     "real_willow_spec": "Google Willow (spec sheet)",
     "real_apollo": "Quantinuum Apollo",

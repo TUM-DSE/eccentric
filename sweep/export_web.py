@@ -51,6 +51,8 @@ NOISE = {
     "real_heron": "IBM Heron",
     "real_flamingo": "IBM Flamingo",
     "real_flamingo_downscaled": "IBM Flamingo, 10x lower",
+    "real_flamingo_m700": "IBM Flamingo, 700 ns readout",
+    "real_flamingo_downscaled_m700": "IBM Flamingo, 10x lower, 700 ns readout",
     "sd6": "SD6 (uniform depolarizing)",
     "real_willow": "Google Willow (paper model)",
     "real_willow_spec": "Google Willow (spec sheet)",
@@ -76,6 +78,7 @@ SLICES = {
     "qldpc_bicycle_chain": "QLDPC codes on chained bicycle architecture modules",
     "qldpc_atoms": "QLDPC codes on neutral atoms and trapped ions",
     "paper_topology": "Paper: experiments on sparse devices, re-run with placement without SWAPs",
+    "readout_700": "IBM devices with 700 ns instead of 1.56 us readout",
     "reference": "Reference: all codes, all-to-all, SD6 noise",
 }
 
