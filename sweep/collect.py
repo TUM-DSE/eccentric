@@ -1,5 +1,8 @@
 """Collect a sweep into one table, one row per configuration and decoder:
-python -m sweep.collect <run_dir> <out_dir>
+python -m sweep.collect <run_dir> [<run_dir> ...] <out_dir>
+
+Of several run directories, a later one replaces the rows of the same configuration and decoder in
+earlier ones (a rerun of some slices after a fix).
 
 Writes results.csv and results.json. Each row says how far its logical error rate can be trusted:
 "measured" (enough logical errors), "low statistics" (stopped by the shot or time limit),
@@ -82,9 +85,10 @@ def rows(run_dir):
 
 
 def main():
-    run_dir, out_dir = sys.argv[1], sys.argv[2]
+    run_dirs, out_dir = sys.argv[1:-1], sys.argv[-1]
     os.makedirs(out_dir, exist_ok=True)
-    df = pd.DataFrame(rows(run_dir))
+    df = pd.concat([pd.DataFrame(rows(run_dir)) for run_dir in run_dirs], ignore_index=True)
+    df = df.drop_duplicates(subset=CONFIG + ["decoder"], keep="last")
     df.to_csv(os.path.join(out_dir, "results.csv"), index=False)
     df.to_json(os.path.join(out_dir, "results.json"), orient="records", indent=1)
     print(df.groupby(["slice", "status"]).size().unstack(fill_value=0).to_string())
