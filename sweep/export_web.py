@@ -33,6 +33,8 @@ DEVICES = {
     "real_loon": "IBM Loon/Nighthawk, 2 QPUs (242 qubits)",
     "real_flamingo_1_qpu": "IBM Flamingo, 1 QPU (133 qubits)",
     "real_flamingo": "IBM Flamingo, 3 QPUs (399 qubits)",
+    "real_bicycle": "IBM bicycle module: gross-code toric layout with long-range c-couplers (288 qubits)",
+    "real_bicycle_lr": "IBM bicycle module with c-couplers as noisy as remote couplers (288 qubits)",
     "custom_full": "All-to-all connectivity",
     "native": "Native layout: a device built for the code, IBM's planned layout for bivariate bicycle codes",
     "native_lr": "Native layout with long-range couplers as noisy as IBM's remote couplers",

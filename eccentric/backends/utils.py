@@ -6,6 +6,7 @@ from .fake_apollo_no_shuttling import FakeQuantinuumApolloNoShuttlingBackend
 from .fake_flamingo import FakeIBMFlamingo
 from .fake_loon import FakeIBMLoon
 from .fake_native import FakeNativeBackend
+from .fake_bicycle import FakeIBMBicycle
 from .fake_willow import FakeGoogleWillowBackend
 from .fake_infleqtion import FakeInfleqtionBackend
 from .fake_infleqtion_no_shuttling import FakeInfleqtionNoShuttlingBackend
@@ -24,11 +25,14 @@ def get_backend(backend: str, backend_size: int):
         parts = backend.split("_")
         name = parts[1]
         # real_loon_1_qpu is a single QPU, real_loon_5_qpus a projected chain of five
-        num_qpus = {"num_qpus": int(parts[2])} if len(parts) == 4 and parts[3] in ("qpu", "qpus") else {}
+        num_qpus = {"num_qpus": int(parts[-2])} if len(parts) >= 4 and parts[-1] in ("qpu", "qpus") else {}
         if name == "flamingo":
             backend = FakeIBMFlamingo(**num_qpus)
         elif name == "loon":
             backend = FakeIBMLoon(**num_qpus)
+        elif name == "bicycle":
+            # real_bicycle_lr: c-couplers as noisy as remote ones
+            backend = FakeIBMBicycle(noisy_c_couplers=parts[2:3] == ["lr"], **num_qpus)
         elif name == "torino":
             backend = FakeTorino()
         elif name == "willow":

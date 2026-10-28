@@ -71,3 +71,23 @@ def test_layout_of_codes_that_fit_the_device():
     assert compile_code("surface", 7, "real_willow", "trivial")[0] > 0
     # A code that fits one QPU stays off the remote couplers between QPUs
     assert compile_code("surface", 7, "real_flamingo")[1] == 0
+
+
+def test_bicycle_module():
+    from collections import Counter
+    from eccentric.codes import get_code
+    from eccentric.transpilers import run_transpiler
+
+    for backend, noisy in [("real_bicycle", False), ("real_bicycle_lr", True), ("real_bicycle_2_qpus", False)]:
+        device = get_backend(backend, None)
+        # Six couplers per qubit (both directions), plus the links between modules
+        degrees = Counter(q for e in device.coupling_map.get_edges() for q in e)
+        assert Counter(degrees.values())[12] == device.num_qubits - 2 * len(device.LINKS) * (device.num_qubits // 288 - 1)
+        assert len(device.get_remote_gates) == noisy * 288 + len(device.LINKS) * (device.num_qubits // 288 - 1)
+    # The gross code is placed without SWAPs, with two gates per qubit and cycle on the c-couplers
+    device = get_backend("real_bicycle_lr", None)
+    qc = run_transpiler(get_code("gross", 12, 2).qc, device, device.layout_method, None)
+    remote = {tuple(sorted(p)) for p in device.get_remote_gates}
+    gates = [tuple(sorted(qc.find_bit(q).index for q in inst.qubits)) for inst in qc.data if len(inst.qubits) == 2]
+    assert qc.count_ops().get("swap", 0) == 0
+    assert sum(g in remote for g in gates) == 2 * 288
