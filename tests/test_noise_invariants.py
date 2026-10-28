@@ -111,8 +111,30 @@ def test_zero_noise_gives_no_logical_errors(code, decoder, error_type):
 
 @pytest.mark.parametrize("window,expected", [("layer", 3), ("measurement", 1)])
 def test_idle_window(window, expected):
-    # Three layers: a gate, a measurement of qubit 1, another gate; qubit 0 waits in all three
-    circuit = stim.Circuit("H 1\nTICK\nM 1\nTICK\nH 1")
+    # Qubit 0 is reset, then waits through three layers: a gate, a measurement of qubit 1, another gate
+    circuit = stim.Circuit("R 0\nTICK\nH 1\nTICK\nM 1\nTICK\nH 1")
     noisy = NoiseModel(idle=0.01, idle_window=window).noisy_circuit(circuit)
     idles = [inst for inst in noisy.flattened() if inst.name == "DEPOLARIZE1" and 0 in [t.value for t in inst.targets_copy()]]
     assert len(idles) == expected
+
+
+def test_waiting_qubits_decay():
+    # On a device with T1 and T2, a qubit that waits while another is measured decays for the
+    # duration of the measurement, and with the coherence times scaled it decays less
+    from eccentric.backends.utils import get_backend
+    from eccentric.noise.flamingo_noise import FlamingoNoise
+    from eccentric.noise.flamingo_noise_downscaled import FlamingoNoiseDownscaled
+
+    backend = get_backend("real_loon_1_qpu", None)
+    circuit = stim.Circuit("R 0 1\nTICK\nM 1")
+
+    def waiting(model):
+        noisy = model.noisy_circuit(circuit)
+        layer = str(noisy).split("TICK")[1]
+        channels = [inst for inst in stim.Circuit(layer).flattened() if inst.name == "PAULI_CHANNEL_1"]
+        return sum(sum(i.gate_args_copy()) for i in channels if i.targets_copy()[0].value == 0)
+
+    t1, t2 = backend.qubit_properties(0).t1, backend.qubit_properties(0).t2
+    expected = 0.5 * (1 - math.exp(-1.56e-6 / t1)) + (1 - math.exp(-1.56e-6 / t2)) / 2 - (1 - math.exp(-1.56e-6 / t1)) / 4
+    assert waiting(FlamingoNoise.get_noise(None, backend)) == pytest.approx(expected, rel=1e-6)
+    assert 0 < waiting(FlamingoNoiseDownscaled.get_noise(None, backend)) < waiting(FlamingoNoise.get_noise(None, backend))

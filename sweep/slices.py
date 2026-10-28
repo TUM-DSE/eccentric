@@ -172,6 +172,24 @@ def qldpc_atoms():
                                decoders=["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"])
 
 
+def readout_700():
+    """The IBM devices' codes again with 700 ns readout instead of today's 1.56 us, to see how much
+    faster readout would help: qLDPC and the paper's codes on one Loon or Flamingo QPU and on the
+    bicycle module, at the default schedule"""
+    from eccentric.codes import get_min_n
+
+    devices = [("real_loon_1_qpu", 121), ("real_flamingo_1_qpu", 133), ("real_bicycle", 288)]
+    for code in QLDPC_CODES + ["surface", "color", "hh", "bacon", "steane"]:
+        decoders = ["bposd", "relay_bp"] if code in QLDPC_CODES else ["bposd"] + (["mwpm"] if code in MATCHABLE else [])
+        for d in code_distances(code):
+            for backend, size in devices:
+                if get_min_n(code, d) > size:
+                    continue
+                for error_type in ("real_flamingo_m700", "real_flamingo_downscaled_m700"):
+                    yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=error_type,
+                               error_probability=None, decoders=decoders)
+
+
 # The paper's experiments compiled onto sparse devices with circuit qubit i on device qubit i
 PAPER_TOPOLOGY = ["Real_Topology", "Willow", "Connectivity", "Program_stats_topology", "Apollo", "Infleqtion"]
 
@@ -217,4 +235,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "reference": reference}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference}

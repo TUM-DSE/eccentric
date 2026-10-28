@@ -44,6 +44,7 @@ class NoiseModel:
         loss_measure: float = 0,
         loss_detection: str = "none",
         idle_window: str = "layer",
+        coherence_scale: float = 1,
     ):
         self.sq = sq
         self.tq = tq
@@ -62,6 +63,8 @@ class NoiseModel:
         self.remote = remote
         self.noisy_gates = noisy_gates
         self.gate_times = gate_times
+        # T1 and T2 of the device's qubits are multiplied by this, e.g. for projections of better devices
+        self.coherence_scale = coherence_scale
         self.qt = qt
         self.backend = backend
         self.use_correlated_parity_measurement_errors = use_correlated_parity_measurement_errors
@@ -89,8 +92,10 @@ class NoiseModel:
             return
         for qubit in qubits:
             qubit_properties = self.backend.qubit_properties(qubit.value)
-            t1 = qubit_properties.t1
-            t2 = qubit_properties.t2
+            if qubit_properties is None or qubit_properties.t1 is None or qubit_properties.t2 is None:
+                continue
+            t1 = qubit_properties.t1 * self.coherence_scale
+            t2 = qubit_properties.t2 * self.coherence_scale
 
             if t1 <= 0 or t2 <= 0:
                 continue
@@ -281,6 +286,24 @@ class NoiseModel:
         mid.append_operation(op.name, targets, args)
         return pre, mid, post
 
+    def decoheres(self) -> bool:
+        """Whether qubits decay by their T1 and T2 while they wait (devices with coherence times and
+        gate durations, unless the model has its own idle error)"""
+        return self.backend is not None and self.idle == 0 and bool(self.gate_times)
+
+    def durations(self, op: stim.CircuitInstruction) -> Dict[int, float]:
+        """How long each qubit of the operation is busy"""
+        targets = [t.value for t in op.targets_copy() if t.is_qubit_target]
+        if op.name in TQ_OPS or op.name in SWAP_OPS:
+            busy = {}
+            for i in range(0, len(targets), 2):
+                pair = targets[i:i + 2]
+                busy.update(dict.fromkeys(pair, self.get_gate_time(op, pair)))
+            return busy
+        if op.name in SQ_OPS or op.name in RESET_OPS or op.name in MEASURE_OPS:
+            return dict.fromkeys(targets, self.get_gate_time(op))
+        return {}
+
     def noisy_circuit(self, circuit: stim.Circuit, *, qs: Optional[Set[int]] = None) -> stim.Circuit:
         if self.has_heralded_loss() and self.flag_offset is None:
             # Flag qubits after the ancilla qubit used for correlated MPP errors
@@ -300,7 +323,9 @@ class NoiseModel:
         reset_qubits: Set[int] = set()
 
         if qs is None:
-            qs = set(range(circuit.num_qubits))
+            # The qubits the circuit uses, not all qubits of the device
+            qs = {t.value for inst in circuit.flattened() for t in inst.targets_copy() if t.is_qubit_target}
+        busy: Dict[int, float] = {}
 
         def flush():
             nonlocal result
@@ -310,6 +335,14 @@ class NoiseModel:
             idle_qubits = sorted(qs - used_qubits)
             if idle_qubits and self.idle > 0 and (self.idle_window == "layer" or measured_qubits):
                 current_moment_post.append_operation("DEPOLARIZE1", idle_qubits, self.idle)
+            if busy and self.decoheres():
+                # Every qubit waits until the slowest operation of the layer is done
+                layer = max(busy.values())
+                for q in sorted(qs):
+                    wait = layer - busy.get(q, 0)
+                    if wait > 0:
+                        self.add_qubit_error(current_moment_post, [stim.GateTarget(q)], wait)
+            busy.clear()
 
             result += current_moment_pre
             result += current_moment_mid
@@ -351,6 +384,9 @@ class NoiseModel:
                     self.add_crosstalk_errors(touched_qubits, post)
 
                 used_qubits |= touched_qubits
+                if self.decoheres():
+                    for q, duration in self.durations(op).items():
+                        busy[q] = max(busy.get(q, 0), duration)
                 if op.name in MEASURE_OPS:
                     measured_qubits |= touched_qubits
                 if op.name in RESET_OPS:

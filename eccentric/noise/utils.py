@@ -42,6 +42,11 @@ def get_noise_model(error_type: str,
         return FlamingoNoise.get_noise(qt, backend)
     elif error_type == "real_flamingo_downscaled" and backend:
         return FlamingoNoiseDownscaled.get_noise(qt, backend)
+    elif error_type == "real_flamingo_m700" and backend:
+        # A projection of faster readout, 700 ns instead of today's 1.56 us
+        return FlamingoNoise.get_noise(qt, backend, measure_time=700e-9)
+    elif error_type == "real_flamingo_downscaled_m700" and backend:
+        return FlamingoNoiseDownscaled.get_noise(qt, backend, measure_time=700e-9)
     elif error_type == "real_infleqtion" and backend:
         return InfleqtionNoise.get_noise(qt, backend)
     elif error_type == "real_harvard" and backend:

@@ -167,9 +167,37 @@ which experiments and paper figures it affects, and how it was checked.
   the routing experiments); the change comes mostly from choosing a placement at all.
 - **Checked by:** `tests/test_platforms.py::test_layout_of_codes_that_fit_the_device`.
 
+### 9. Qubits did not decohere while they waited, and IBM readout took 70 ns
+
+- **Files:** `eccentric/noise/noise.py`, `eccentric/noise/flamingo_noise.py`,
+  `eccentric/noise/flamingo_noise_downscaled.py`, `eccentric/noise/utils.py`.
+- **Problem:** T1/T2 decoherence was added only to the qubits an operation acts on, for that
+  operation's duration. A qubit that waited (a data qubit while the ancillas are measured, or any
+  qubit beside a slower operation) got no noise, so the noise models without a fixed `idle` error
+  had no idle noise at all. On top, the IBM Flamingo/Loon models (also used for the bicycle module)
+  gave measurement the duration of a two-qubit gate, 70 ns; IBM Heron's calibration data gives
+  1.56 us, which our Heron model already used. The tenfold-lower model divided the error
+  probabilities by 10 but kept T1/T2, unlike the "futuristic" IBM model of our other analyses
+  (errors / 10, T1/T2 x 3).
+- **Fix:** in every layer, each qubit the circuit uses decoheres for the time it waits for the
+  slowest operation of the layer (measurement and reset layers included), with its own T1/T2. The
+  IBM models measure for 1.56 us; `real_flamingo_m700` and `real_flamingo_downscaled_m700` are
+  variants with 700 ns readout. `real_flamingo_downscaled` multiplies T1/T2 by 3
+  (`NoiseModel(coherence_scale=3)`).
+- **Effect:** with the median T1/T2 of the IBM models (about 175 and 143 us), a data qubit waiting
+  out one readout gets about 0.8% error, four times the two-qubit gate error. Surface code d = 5 on
+  one Loon QPU (MWPM, 5 rounds): 0.42% -> 1.5% logical error at IBM noise (0.91% with 700 ns
+  readout); 0.021% -> 0.020% at tenfold lower noise with T1/T2 x 3.
+- **Affects:** every noise model that derives decoherence from T1/T2 and gate times (no fixed
+  `idle`): `real_flamingo`, `real_flamingo_downscaled`, `real_heron`, `real_infleqtion`,
+  `real_harvard`, `variance` and `variance_*`, i.e. all IBM results of the sweep, the paper's
+  distributed-QPU (Fig. 17), variance (Fig. 15) and Infleqtion results, and the neutral-atom slice.
+  Not affected: `real_willow` (fixed idle error), `real_apollo` and the artificial models.
+- **Checked by:** `tests/test_noise_invariants.py::test_waiting_qubits_decay`.
+
 ## Changed
 
-### 9. BP-OSD decoders run on ldpc v2
+### 10. BP-OSD decoders run on ldpc v2
 
 - **File:** `eccentric/decoders/bp_osd.py`; `requirements.txt`. **Commit:** `d55f942`.
 - **Why:** the new code libraries (qLDPC, QUITS) need `ldpc` ≥ 2, which breaks `stimbposd`
@@ -182,7 +210,7 @@ which experiments and paper figures it affects, and how it was checked.
   decoders, for the validation circuits of all codes at two error rates: 214 paired comparisons, mean |z| = 0.13. The only two
   differences beyond 3σ (`lcs15`) favour the new version.
 
-### 10. Dependencies
+### 11. Dependencies
 
 - `ldpc` 0.1.60 → 2.4.1, `stim` 1.14.0 → 1.16.0, `sinter` 1.14.0 → 1.16.0, `PyMatching`
   2.2.1 → 2.3.1.
@@ -190,14 +218,14 @@ which experiments and paper figures it affects, and how it was checked.
   `ldpc` < 2).
 - Added for the new features: `qldpc`, `quits`, `relay-bp`, `tesseract-decoder`, `beliefmatching`.
 
-### 11. More columns in result rows
+### 12. More columns in result rows
 
 - Rows with a logical error rate (`logical_error`, `decoder`, `program_stats`, `chromobius`) now
   also contain `schedule`, `rounds` (the syndrome rounds the circuit runs) and
   `logical_error_rate_per_round`; `accumulated_error`, `routing` and `translation` rows contain
   `schedule`. Existing columns are unchanged.
 
-### 12. Minor
+### 13. Minor
 
 - `create_bivariate_bicycle_codes` accepts the known code distance, so it is not recomputed by
   brute force (same circuits).
