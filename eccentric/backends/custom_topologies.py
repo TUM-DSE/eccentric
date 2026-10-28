@@ -36,6 +36,16 @@ def generate_cube_map(num_layers, num_rows, num_columns, bidirectional=True):
     return CouplingMap(graph.edge_list(), description="cube")
 
 
+def generate_diamond_map(num_qubits):
+    """The largest square grid in the shape of a diamond (|x| + |y| <= r) with at most num_qubits
+    qubits, the shape of Willow, into which the rotated surface code fits without SWAPs"""
+    r = int((math.sqrt(2 * num_qubits - 1) - 1) / 2)
+    nodes = [(x, y) for x in range(-r, r + 1) for y in range(-r, r + 1) if abs(x) + abs(y) <= r]
+    index = {p: i for i, p in enumerate(nodes)}
+    edges = [(index[p], index[q]) for p in nodes for q in ((p[0] + 1, p[1]), (p[0], p[1] + 1)) if q in index]
+    return CouplingMap(edges + [(b, a) for a, b in edges], description="diamond")
+
+
 def get_custom_topology(shape: str, num_qubits: int):
     if shape == "line":
         coupling_map = CouplingMap.from_line(num_qubits)
@@ -56,6 +66,8 @@ def get_custom_topology(shape: str, num_qubits: int):
         coupling_map = generate_cube_map(num_layers, num_rows, num_cols)
     elif shape == "full":
         coupling_map = CouplingMap.from_full(num_qubits)
+    elif shape == "diamond":
+        coupling_map = generate_diamond_map(num_qubits)
     elif shape == "heavyhex":
         d = (2 + math.sqrt(40 * num_qubits + 24)) / 10
         d = int(d)

@@ -183,7 +183,7 @@ Notes:
 
 | Value | Description |
 | --- | --- |
-| `custom_line`, `custom_grid`, `custom_cube`, `custom_full`, `custom_heavyhex` | Synthetic topologies; require `backends_sizes` (or `distances`) |
+| `custom_line`, `custom_grid`, `custom_cube`, `custom_full`, `custom_heavyhex`, `custom_diamond` | Synthetic topologies; require `backends_sizes` (or `distances`) |
 | `real_flamingo`, `real_loon` | IBM Flamingo and IBM Loon/Nighthawk (multi-chip, with remote gates) |
 | `real_flamingo_1_qpu`, `real_loon_1_qpu` | The same devices restricted to a single QPU |
 | `real_bicycle`, `real_bicycle_lr` | IBM's bicycle architecture module: the gross code's 288 qubits in the toric layout, each with four torus couplers and two long-range c-couplers (in `_lr` as noisy as remote gates); `real_bicycle_<n>_qpus` chains n modules by remote links |

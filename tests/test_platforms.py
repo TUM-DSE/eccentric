@@ -59,8 +59,8 @@ def test_layout_of_codes_that_fit_the_device():
     from eccentric.codes import get_code
     from eccentric.transpilers import run_transpiler
 
-    def compile_code(code, d, backend, layout_method=None):
-        device = get_backend(backend, None)
+    def compile_code(code, d, backend, layout_method=None, size=None):
+        device = get_backend(backend, size)
         qc = run_transpiler(get_code(code, d, 2).qc, device, layout_method, None)
         remote = {tuple(sorted(p)) for p in getattr(device, "get_remote_gates", [])}
         gates = [tuple(sorted(qc.find_bit(q).index for q in inst.qubits)) for inst in qc.data if len(inst.qubits) == 2]
@@ -71,6 +71,9 @@ def test_layout_of_codes_that_fit_the_device():
     assert compile_code("surface", 7, "real_willow", "trivial")[0] > 0
     # A code that fits one QPU stays off the remote couplers between QPUs
     assert compile_code("surface", 7, "real_flamingo")[1] == 0
+    # The rotated surface code fits a grid in the shape of a diamond
+    assert get_backend("custom_diamond", 85).num_qubits == 85
+    assert compile_code("surface", 5, "custom_diamond", size=85)[0] == 0
 
 
 def test_bicycle_module():

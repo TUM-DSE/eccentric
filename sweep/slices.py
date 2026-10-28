@@ -136,6 +136,29 @@ def qldpc_bicycle():
                                error_type=error_type, error_probability=None, decoders=decoders)
 
 
+# The paper's experiments compiled onto sparse devices with circuit qubit i on device qubit i
+PAPER_TOPOLOGY = ["Real_Topology", "Willow", "Connectivity", "Program_stats_topology", "Apollo", "Infleqtion"]
+
+
+def paper_topology():
+    """The paper's experiments on sparse devices at the paper's configurations, compiled again with
+    the placement without SWAPs (CHANGELOG fix 8) and decoded with BP-OSD as in the paper"""
+    import csv
+    import os
+
+    results = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "experiment_results")
+    configs = set()
+    for experiment in PAPER_TOPOLOGY:
+        with open(os.path.join(results, experiment, "results.csv")) as f:
+            for row in csv.DictReader(f):
+                configs.add((row["code"], int(row["distance"]), int(row["cycles"]), row["backend"],
+                             int(row["backend_size"]) if row["backend_size"] else None, row["error_type"],
+                             float(row["error_probability"]) if row["error_probability"] else None))
+    for code, d, cycles, backend, size, error_type, p in sorted(configs, key=str):
+        yield dict(code=code, schedule=None, distance=d, cycles=cycles, backend=backend, backend_size=size,
+                   error_type=error_type, error_probability=p, decoders=["bposd"])
+
+
 def reference(max_qubits=600):
     """Every code at its default schedule on an all-to-all device with SD6 noise, the common ground
     that makes the device slices comparable"""
@@ -158,4 +181,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "reference": reference}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "paper_topology": paper_topology, "reference": reference}
