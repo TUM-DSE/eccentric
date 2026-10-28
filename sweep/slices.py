@@ -116,6 +116,26 @@ def willow_surface():
                    decode=dict(time_budget=1800, timeout=2 * 3600))
 
 
+def qldpc_bicycle():
+    """qLDPC and the paper's codes on IBM's bicycle architecture module (288 qubits), with its
+    long-range c-couplers as good as local ones or as noisy as remote ones, at IBM noise and tenfold
+    lower"""
+    from eccentric.codes import get_min_n
+
+    noises = ["real_flamingo", "real_flamingo_downscaled"]
+    for code in QLDPC_CODES + ["surface", "color", "hh", "bacon", "steane"]:
+        qldpc = code in QLDPC_CODES
+        decoders = ["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"] if qldpc else \
+            ["bposd", "tesseract"] + (["mwpm"] if code in MATCHABLE else []) + (["chromobius"] if code == "color" else [])
+        for d in code_distances(code):
+            if get_min_n(code, d) > 288:
+                continue
+            for schedule in schedules(code):
+                for backend, error_type in product(["real_bicycle", "real_bicycle_lr"], noises):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend=backend,
+                               error_type=error_type, error_probability=None, decoders=decoders)
+
+
 def reference(max_qubits=600):
     """Every code at its default schedule on an all-to-all device with SD6 noise, the common ground
     that makes the device slices comparable"""
@@ -138,4 +158,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "reference": reference}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "reference": reference}
