@@ -179,15 +179,23 @@ which experiments and paper figures it affects, and how it was checked.
   1.56 us, which our Heron model already used. The tenfold-lower model divided the error
   probabilities by 10 but kept T1/T2, unlike the "futuristic" IBM model of our other analyses
   (errors / 10, T1/T2 x 3).
-- **Fix:** in every layer, each qubit the circuit uses decoheres for the time it waits for the
-  slowest operation of the layer (measurement and reset layers included), with its own T1/T2. The
+- **Fix:** in every layer, each qubit the circuit uses decoheres, with its own T1/T2, for the time
+  it is not busy until the layer is done. A layer of a compiled circuit can hold gates in sequence
+  on one qubit (a measurement and then a reset, a basis change and then a CX), so the gates of a
+  layer are scheduled as early as their qubits allow. The
   IBM models measure for 1.56 us; `real_flamingo_m700` and `real_flamingo_downscaled_m700` are
   variants with 700 ns readout. `real_flamingo_downscaled` multiplies T1/T2 by 3
   (`NoiseModel(coherence_scale=3)`).
 - **Effect:** with the median T1/T2 of the IBM models (about 175 and 143 us), a data qubit waiting
-  out one readout gets about 0.8% error, four times the two-qubit gate error. Surface code d = 5 on
-  one Loon QPU (MWPM, 5 rounds): 0.42% -> 1.5% logical error at IBM noise (0.91% with 700 ns
-  readout); 0.021% -> 0.020% at tenfold lower noise with T1/T2 x 3.
+  out one readout and reset (2.85 us) gets about 1.4% error, seven times the two-qubit gate error.
+  Surface code d = 5 on one Loon QPU (MWPM, 5 rounds): 0.42% -> 2.6% logical error at IBM noise
+  (1.7% with 700 ns readout); 0.021% -> 0.055% at tenfold lower noise with T1/T2 x 3.
+- **History:** until July 2025 the noise model gave the qubits that were not measured in a
+  measurement layer a depolarizing error equal to the measurement error (likewise for reset);
+  commit `6775675` ("Quick fix", 7 July 2025) removed it without a stated reason. From then on,
+  and in all the paper's results, waiting qubits got no noise in the T1/T2 models. Fix 1 above
+  (decoherence of busy qubits counted once per gate, not once per gate of the layer) did not
+  change this.
 - **Affects:** every noise model that derives decoherence from T1/T2 and gate times (no fixed
   `idle`): `real_flamingo`, `real_flamingo_downscaled`, `real_heron`, `real_infleqtion`,
   `real_harvard`, `variance` and `variance_*`, i.e. all IBM results of the sweep, the paper's
