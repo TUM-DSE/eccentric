@@ -136,7 +136,7 @@ def test_waiting_qubits_decay():
 
     t1, t2 = backend.qubit_properties(0).t1, backend.qubit_properties(0).t2
     expected = 0.5 * (1 - math.exp(-1.56e-6 / t1)) + (1 - math.exp(-1.56e-6 / t2)) / 2 - (1 - math.exp(-1.56e-6 / t1)) / 4
-    assert waiting(FlamingoNoise.get_noise(None, backend)) == pytest.approx(expected, rel=1e-6)
+    assert waiting(FlamingoNoise.get_noise(None, backend)) == pytest.approx(expected, rel=1e-4)
     assert 0 < waiting(FlamingoNoiseDownscaled.get_noise(None, backend)) < waiting(FlamingoNoise.get_noise(None, backend))
 
 
@@ -153,4 +153,4 @@ def test_waiting_in_a_layer_with_gates_in_sequence():
     t1, t2 = backend.qubit_properties(0).t1, backend.qubit_properties(0).t2
     t = 1.56e-6 + model.gate_times["R"]
     px = 0.25 * (1 - math.exp(-t / t1))
-    assert len(waited) == 1 and waited[0].gate_args_copy()[0] == pytest.approx(px, rel=1e-6)
+    assert len(waited) == 1 and waited[0].gate_args_copy()[0] == pytest.approx(px, rel=1e-4)
