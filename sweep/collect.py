@@ -49,8 +49,20 @@ def load(run_dir):
     return results
 
 
+def superseded(run_dir):
+    """Results that sweep.extend set aside when it queued their decodes again with more shots"""
+    results = {}
+    path = os.path.join(run_dir, "superseded")
+    for name in os.listdir(path) if os.path.isdir(path) else []:
+        if name.startswith("results.") and name.endswith(".json"):
+            with open(os.path.join(path, name)) as f:
+                r = json.load(f)
+            results[r["job"]["id"]] = r
+    return results
+
+
 def rows(run_dir):
-    results = load(run_dir)
+    results, earlier = load(run_dir), superseded(run_dir)
     for name in sorted(os.listdir(os.path.join(run_dir, "jobs"))):
         with open(os.path.join(run_dir, "jobs", name)) as f:
             job = json.load(f)
@@ -58,6 +70,9 @@ def rows(run_dir):
             continue
         circuit = results.get(job["needs"], {})
         decode = results.get(job["id"])
+        if decode is None and job["id"].endswith(".long"):
+            # Until the longer decode finishes, keep the result it is to replace
+            decode = earlier.get(job["id"][:-len(".long")])
         row = {k: job.get(k) for k in CONFIG}
         row["decoder"] = job["decoder"]
         row.update({k: circuit.get(k) for k in RESOURCES})

@@ -35,6 +35,13 @@ DEVICES = {
     "real_flamingo": "IBM Flamingo, 3 QPUs (399 qubits)",
     "real_bicycle": "IBM bicycle module: gross-code toric layout with long-range c-couplers (288 qubits)",
     "real_bicycle_lr": "IBM bicycle module with c-couplers as noisy as remote couplers (288 qubits)",
+    "real_apollo": "Quantinuum Apollo (trapped ions, shuttling, 768 qubits)",
+    "real_nsapollo": "Quantinuum Apollo without shuttling (768 qubits)",
+    "real_infleqtion": "Infleqtion (neutral atoms, shuttling, 384 qubits)",
+    "real_nsinfleqtion": "Infleqtion without shuttling (384 qubits)",
+    "real_harvard": "Harvard/MIT neutral-atom array (moves, 448 qubits)",
+    "custom_grid": "Square grid (300 qubits)",
+    "custom_cube": "Cube (300 qubits)",
     "custom_full": "All-to-all connectivity",
     "native": "Native layout: a device built for the code, IBM's planned layout for bivariate bicycle codes",
     "native_lr": "Native layout with long-range couplers as noisy as IBM's remote couplers",
@@ -47,6 +54,10 @@ NOISE = {
     "sd6": "SD6 (uniform depolarizing)",
     "real_willow": "Google Willow (paper model)",
     "real_willow_spec": "Google Willow (spec sheet)",
+    "real_apollo": "Quantinuum Apollo",
+    "real_infleqtion": "Infleqtion",
+    "real_harvard": "Harvard/MIT array",
+    "modsi1000": "SI1000 (superconducting-inspired)",
 }
 
 DECODERS = {
@@ -62,6 +73,9 @@ SLICES = {
     "bb_native": "Bivariate bicycle codes in IBM's native layout",
     "paper_dqc": "Paper: one QPU vs distributed QPUs, re-run with the fixes",
     "willow_surface": "Surface code on Google Willow, against Google's experiment",
+    "qldpc_bicycle_chain": "QLDPC codes on chained bicycle architecture modules",
+    "qldpc_atoms": "QLDPC codes on neutral atoms and trapped ions",
+    "paper_topology": "Paper: experiments on sparse devices, re-run with placement without SWAPs",
     "reference": "Reference: all codes, all-to-all, SD6 noise",
 }
 
@@ -74,7 +88,10 @@ COLUMNS = ["slice", "code", "family", "taxonomy", "schedule", "distance", "round
 def device_label(backend):
     # Projected devices: real_loon_5_qpus is a chain of five Loon QPUs
     parts = backend.split("_")
-    if len(parts) == 4 and parts[3] == "qpus":
+    if len(parts) >= 4 and parts[-1] == "qpus":
+        if parts[1] == "bicycle":
+            noisy = ", noisy c-couplers" if parts[2] == "lr" else ""
+            return f"IBM bicycle modules, {parts[-2]} chained{noisy} ({int(parts[-2]) * 288} qubits)"
         name, size = {"loon": ("IBM Loon/Nighthawk", 121), "flamingo": ("IBM Flamingo", 133)}[parts[1]]
         return f"{name}, {parts[2]} QPUs ({int(parts[2]) * size} qubits, projected)"
     return DEVICES.get(backend, backend)
