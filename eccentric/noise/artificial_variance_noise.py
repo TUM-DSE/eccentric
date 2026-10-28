@@ -41,7 +41,8 @@ class ArtificialVarianceNoise(NoiseModel):
             gate_times={
                 "SQ": 50e-9,
                 "TQ": 70e-9,
-                "M": 70e-9,
+                # Readout as long as on IBM Heron today, as in the Flamingo model
+                "M": 1.56e-6,
                 "R": 1.2942222222222222e-6
             },
             qt=qt,

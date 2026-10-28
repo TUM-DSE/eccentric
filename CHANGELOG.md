@@ -170,13 +170,15 @@ which experiments and paper figures it affects, and how it was checked.
 ### 9. Qubits did not decohere while they waited, and IBM readout took 70 ns
 
 - **Files:** `eccentric/noise/noise.py`, `eccentric/noise/flamingo_noise.py`,
-  `eccentric/noise/flamingo_noise_downscaled.py`, `eccentric/noise/utils.py`.
+  `eccentric/noise/flamingo_noise_downscaled.py`, `eccentric/noise/artificial_variance_noise.py`,
+  `eccentric/noise/utils.py`.
 - **Problem:** T1/T2 decoherence was added only to the qubits an operation acts on, for that
   operation's duration. A qubit that waited (a data qubit while the ancillas are measured, or any
   qubit beside a slower operation) got no noise, so the noise models without a fixed `idle` error
   had no idle noise at all. On top, the IBM Flamingo/Loon models (also used for the bicycle module)
   gave measurement the duration of a two-qubit gate, 70 ns; IBM Heron's calibration data gives
-  1.56 us, which our Heron model already used. The tenfold-lower model divided the error
+  1.56 us, which our Heron model already used. The variance model, which has the Flamingo errors,
+  also measured in 70 ns. The tenfold-lower model divided the error
   probabilities by 10 but kept T1/T2, unlike the "futuristic" IBM model of our other analyses
   (errors / 10, T1/T2 x 3).
 - **Fix:** in every layer, each qubit the circuit uses decoheres, with its own T1/T2, for the time
