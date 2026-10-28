@@ -136,6 +136,23 @@ def qldpc_bicycle():
                                error_type=error_type, error_probability=None, decoders=decoders)
 
 
+def qldpc_bicycle_chain(max_qubits=600):
+    """qLDPC codes too large for one bicycle architecture module, on as many modules as they need,
+    chained by remote links, at tenfold lower noise as on the projected Loon and Flamingo chains"""
+    from eccentric.codes import get_min_n
+
+    for code in QLDPC_CODES:
+        for d in code_distances(code):
+            n = get_min_n(code, d)
+            if n <= 288 or n > max_qubits:
+                continue
+            for schedule in schedules(code):
+                for variant in ("bicycle", "bicycle_lr"):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d,
+                               backend=f"real_{variant}_{-(-n // 288)}_qpus", error_type="real_flamingo_downscaled",
+                               error_probability=None, decoders=["bposd", "relay_bp", "belief_find"])
+
+
 # The paper's experiments compiled onto sparse devices with circuit qubit i on device qubit i
 PAPER_TOPOLOGY = ["Real_Topology", "Willow", "Connectivity", "Program_stats_topology", "Apollo", "Infleqtion"]
 
@@ -181,4 +198,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "paper_topology": paper_topology, "reference": reference}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "paper_topology": paper_topology, "reference": reference}
