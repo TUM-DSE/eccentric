@@ -1,9 +1,11 @@
-"""Count what the sweeps cost, for the website: python -m sweep.effort <out.json> <run_dir> [<run_dir> ...]
+"""Count what the sweeps cost, for the website:
+python -m sweep.effort <out.json> [--results <collected results.csv>] <run_dir> [<run_dir> ...]
 
 Every job that finished left a result with its run time (one core per job), including results that
 later runs replaced (superseded/). Jobs that were stopped without a result are not counted, so the
 totals are lower bounds.
 """
+import csv
 import datetime
 import json
 import os
@@ -21,6 +23,9 @@ def results(run_dir):
 
 def main():
     out, run_dirs = sys.argv[1], sys.argv[2:]
+    table = None
+    if run_dirs[:1] == ["--results"]:
+        table, run_dirs = run_dirs[1], run_dirs[2:]
     jobs = seconds = shots = errors = 0
     codes, devices, noise, decoders = set(), set(), set(), set()
     for run_dir in run_dirs:
@@ -39,6 +44,10 @@ def main():
     effort = {"updated": datetime.date.today().isoformat(), "jobs": jobs, "cpu_hours": round(seconds / 3600),
               "shots": shots, "logical_errors": errors, "codes": len(codes), "devices": len(devices),
               "noise_models": len(noise), "decoders": len(decoders)}
+    if table:
+        # The rows of the results explorer: one per configuration and decoder
+        with open(table, newline="") as f:
+            effort["results"] = sum(1 for _ in csv.reader(f)) - 1
     with open(out, "w") as f:
         json.dump(effort, f, indent=1)
     print(effort)
