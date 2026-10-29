@@ -7,6 +7,7 @@ The JSON holds labels for codes, devices, noise models and decoders, and the row
 import datetime
 import json
 import math
+import os
 import sys
 
 import pandas as pd
@@ -107,6 +108,18 @@ def family(code):
     return code, "Other"
 
 
+def latest_commit(commits):
+    """The most recent of the commits that produced results, by the repository's history"""
+    import subprocess
+    repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    history = subprocess.run(["git", "log", "--all", "--format=%H"], cwd=repo, capture_output=True, text=True).stdout.split()
+    for full in history:
+        for short in commits:
+            if full.startswith(short):
+                return short
+    return sorted(commits)[-1] if len(commits) else None
+
+
 def clean(value):
     if value is None or (isinstance(value, float) and math.isnan(value)):
         return None
@@ -123,7 +136,7 @@ def main():
     rows = [[clean(r.get(c)) for c in COLUMNS] for r in df.to_dict("records")]
     out = {
         "generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "commits": sorted(df.commit.dropna().unique().tolist()),
+        "commit": latest_commit(df.commit.dropna().unique()),
         "complete": bool((df.status != "pending").all()),
         "labels": {"devices": {b: device_label(b) for b in df.backend.unique()}, "noise": NOISE, "decoders": DECODERS, "slices": SLICES},
         "columns": COLUMNS,
