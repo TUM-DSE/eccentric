@@ -15,6 +15,9 @@ import sys
 SEED_STRIDE = 10_000_000
 CHUNK = dict(time_budget=8 * 3600, timeout=9 * 3600, first_batch=100, max_batch=5000)
 PAPER_SLICES = ("paper_dqc", "paper_topology")
+# Workers take cheap and important chunks first: the paper's rows, then low statistics, then timeouts,
+# with Tesseract (the slowest decoder) after the others of each kind
+PRIORITY = {"paper": 0, "low statistics": 1, "timeout": 3}
 
 
 def weak(job, result, max_errors):
@@ -66,7 +69,8 @@ def main():
             chunk = {k: v for k, v in job.items() if k != "needs"}
             chunk.update(CHUNK, id=f"{job['id']}.refine{i}", max_shots=shots, target_errors=target,
                          seed_offset=(i + 1) * SEED_STRIDE, refines=f"{os.path.basename(run_dir)}/{job['id']}",
-                         circuit_file=os.path.join(run_dir, "circuits", f"{job['needs']}.stim"), priority=1)
+                         circuit_file=os.path.join(run_dir, "circuits", f"{job['needs']}.stim"),
+                         priority=PRIORITY[reason] + (1 if job["decoder"] == "tesseract" else 0))
             with open(os.path.join(refine_dir, "jobs", f"{chunk['id']}.json"), "w") as f:
                 json.dump(chunk, f)
         counts[reason] = counts.get(reason, 0) + 1
