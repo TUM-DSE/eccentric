@@ -11,10 +11,12 @@ import stim
 logging.disable(logging.CRITICAL)
 
 
+ORIGINAL_SAMPLERS = (stim.Circuit.compile_detector_sampler, stim.DetectorErrorModel.compile_sampler)
+
+
 def seeded_samplers(seed_box):
     """Make every detector sampler deterministic, so all decoders see the same shots"""
-    circuit_sampler = stim.Circuit.compile_detector_sampler
-    dem_sampler = stim.DetectorErrorModel.compile_sampler
+    circuit_sampler, dem_sampler = ORIGINAL_SAMPLERS
     stim.Circuit.compile_detector_sampler = lambda self, *a, **k: circuit_sampler(self, seed=seed_box[0])
     stim.DetectorErrorModel.compile_sampler = lambda self, *a, **k: dem_sampler(self, seed=seed_box[0])
 
@@ -112,19 +114,24 @@ def noisy(job, run_dir):
     return {"distance": d, "num_qubits": circuit.num_qubits, "num_detectors": circuit.num_detectors}
 
 
-def decode_adaptively(job, decode_batch):
+def decode_adaptively(job, decode_batch, checkpoint=None):
+    """Decode batches of shots until the job's target errors, shots or time budget are reached. A
+    batch's seed is its first shot plus the job's seed offset, so jobs with different offsets
+    sample different shots. checkpoint, if given, receives the counts after every batch"""
     seed_box = [0]
     seeded_samplers(seed_box)
     shots = errors = 0
     batch, start = job["first_batch"], time.time()
     while errors < job["target_errors"] and shots < job["max_shots"] and time.time() - start < job["time_budget"]:
-        seed_box[0] = 1000 + shots
+        seed_box[0] = job.get("seed_offset", 0) + 1000 + shots
         ler = decode_batch(batch)
         if ler is None:
             return {"failed": True, "shots": shots}
         errors += int(round(ler * batch))
         shots += batch
         batch = min(2 * batch, job["max_batch"], job["max_shots"] - shots) or batch
+        if checkpoint:
+            checkpoint({"shots": shots, "errors": errors, "seconds": time.time() - start})
     return {"shots": shots, "errors": errors, "logical_error_rate": errors / shots if shots else None,
             "seconds": time.time() - start}
 

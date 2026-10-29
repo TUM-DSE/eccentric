@@ -88,10 +88,23 @@ def circuit_job(job, run_dir):
 def decode_job(job, run_dir):
     from eccentric.decoders import decode
 
-    circuit = stim.Circuit.from_file(os.path.join(run_dir, "circuits", f"{job['needs']}.stim"))
+    # A refinement job decodes a circuit of another run directory (sweep.refine)
+    circuit_file = job.get("circuit_file") or os.path.join(run_dir, "circuits", f"{job['needs']}.stim")
+    circuit = stim.Circuit.from_file(circuit_file)
+    partial = os.path.join(run_dir, "results", f"{job['id']}.partial")
+    origin = provenance()
+
+    def checkpoint(counts):
+        # What a decode has seen so far, kept if the worker stops it at its timeout
+        with open(partial + ".tmp", "w") as f:
+            json.dump({**counts, **origin}, f)
+        os.replace(partial + ".tmp", partial)
+
     result = decode_adaptively(
-        job, lambda n: decode(job["code"], circuit, n, job["decoder"], job["backend"], job["error_type"]))
-    return {**result, **provenance()}
+        job, lambda n: decode(job["code"], circuit, n, job["decoder"], job["backend"], job["error_type"]), checkpoint)
+    if os.path.exists(partial):
+        os.remove(partial)
+    return {**result, **origin}
 
 
 def main():

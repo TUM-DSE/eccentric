@@ -58,6 +58,24 @@ def claim(run_dir, job):
         return False
 
 
+def keep_partial(run_dir, job, reason):
+    """Write the counts a stopped decode checkpointed as its result; False if it has none"""
+    path = os.path.join(run_dir, "results", f"{job['id']}.partial")
+    if not os.path.exists(path):
+        return False
+    with open(path) as f:
+        partial = json.load(f)
+    os.remove(path)
+    if not partial.get("shots"):
+        return False
+    result = {**partial, "logical_error_rate": partial["errors"] / partial["shots"], "job": job, "status": "done",
+              "stopped": reason, "host": os.uname().nodename}
+    with open(os.path.join(run_dir, "results", f"{job['id']}.json.tmp"), "w") as f:
+        json.dump(result, f)
+    os.replace(os.path.join(run_dir, "results", f"{job['id']}.json.tmp"), os.path.join(run_dir, "results", f"{job['id']}.json"))
+    return True
+
+
 def run(run_dir, job, v1_python):
     if job["type"] == "decode_v1":
         cmd = [v1_python, "-m", "validation.decode_v1", run_dir, job["id"], os.path.join(run_dir, "bp_osd_v1.py")]
@@ -66,10 +84,11 @@ def run(run_dir, job, v1_python):
     log = open(os.path.join(run_dir, "logs", f"{job['id']}.log"), "w")
     try:
         subprocess.run(cmd, cwd=REPO, stdout=log, stderr=subprocess.STDOUT, timeout=job["timeout"])
-        if not done(run_dir, job["id"]):
+        if not done(run_dir, job["id"]) and not keep_partial(run_dir, job, "crashed"):
             write_failure(run_dir, job, "crashed without a result, see logs/")
     except subprocess.TimeoutExpired:
-        write_failure(run_dir, job, f"timeout after {job['timeout']} s")
+        if not keep_partial(run_dir, job, f"timeout after {job['timeout']} s"):
+            write_failure(run_dir, job, f"timeout after {job['timeout']} s")
 
 
 def worker_loop(run_dir, jobs, v1_python):

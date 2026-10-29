@@ -3,6 +3,8 @@ python -m sweep.collect <run_dir> [<run_dir> ...] <out_dir>
 
 Of several run directories, a later one replaces the rows of the same configuration and decoder in
 earlier ones (a rerun of some slices after a fix).
+The chunks of a refinement run (sweep.refine) add their shots and errors to
+the result they refine; pass their directory among the run directories.
 
 Writes results.csv and results.json. Each row says how far its logical error rate can be trusted:
 "measured" (enough logical errors), "low statistics" (stopped by the shot or time limit),
@@ -61,18 +63,36 @@ def superseded(run_dir):
     return results
 
 
-def rows(run_dir):
+def refinements(run_dirs):
+    """Shots, errors and chunks that sweep.refine added to decodes, keyed by run dir name/job id"""
+    added = {}
+    for run_dir in run_dirs:
+        for r in load(run_dir).values():
+            base = r["job"].get("refines")
+            if base and r.get("status") == "done" and r.get("shots"):
+                shots, errors, chunks = added.get(base, (0, 0, 0))
+                added[base] = (shots + r["shots"], errors + r["errors"], chunks + 1)
+    return added
+
+
+def rows(run_dir, added=None):
     results, earlier = load(run_dir), superseded(run_dir)
+    added = added or {}
     for name in sorted(os.listdir(os.path.join(run_dir, "jobs"))):
         with open(os.path.join(run_dir, "jobs", name)) as f:
             job = json.load(f)
-        if job["type"] != "decode":
+        if job["type"] != "decode" or job.get("refines"):
             continue
         circuit = results.get(job["needs"], {})
         decode = results.get(job["id"])
         if decode is None and job["id"].endswith(".long"):
             # Until the longer decode finishes, keep the result it is to replace
             decode = earlier.get(job["id"][:-len(".long")])
+        more = added.get(f"{os.path.basename(os.path.abspath(run_dir))}/{job['id']}")
+        if more and decode is not None and (decode["status"] == "done" or str(decode.get("error", "")).startswith("timeout")):
+            # Chunks decoded with other seeds add their shots to the run's own (none if it timed out)
+            own = (decode.get("shots", 0), decode.get("errors", 0)) if decode["status"] == "done" else (0, 0)
+            decode = {**decode, "status": "done", "shots": own[0] + more[0], "errors": own[1] + more[1], "refined_chunks": more[2]}
         row = {k: job.get(k) for k in CONFIG}
         row["decoder"] = job["decoder"]
         row.update({k: circuit.get(k) for k in RESOURCES})
@@ -88,7 +108,8 @@ def rows(run_dir):
         else:
             shots, errors = decode["shots"], decode["errors"]
             low, high = wilson(errors, shots)
-            row.update(shots=shots, errors=errors, decode_seconds=decode.get("seconds"))
+            row.update(shots=shots, errors=errors, decode_seconds=decode.get("seconds"),
+                       refined_chunks=decode.get("refined_chunks"))
             if errors == 0:
                 row.update(status="upper bound", logical_error_rate=None, ler_high=high)
             else:
@@ -102,7 +123,8 @@ def rows(run_dir):
 def main():
     run_dirs, out_dir = sys.argv[1:-1], sys.argv[-1]
     os.makedirs(out_dir, exist_ok=True)
-    df = pd.concat([pd.DataFrame(rows(run_dir)) for run_dir in run_dirs], ignore_index=True)
+    added = refinements(run_dirs)
+    df = pd.concat([pd.DataFrame(rows(run_dir, added)) for run_dir in run_dirs], ignore_index=True)
     df = df.drop_duplicates(subset=CONFIG + ["decoder"], keep="last")
     df.to_csv(os.path.join(out_dir, "results.csv"), index=False)
     df.to_json(os.path.join(out_dir, "results.json"), orient="records", indent=1)
