@@ -9,7 +9,8 @@ the result they refine; pass their directory among the run directories.
 Writes results.csv and results.json. Each row says how far its logical error rate can be trusted:
 "measured" (enough logical errors), "low statistics" (stopped by the shot or time limit),
 "upper bound" (no logical error seen, the 95% bound is given), "does not fit", "decoder not
-applicable" or "failed".
+applicable" or "failed". It also names the run, the job and the result file it came from, for
+sweep.effort.
 """
 import json
 import math
@@ -78,6 +79,7 @@ def refinements(run_dirs):
 def rows(run_dir, added=None):
     results, earlier = load(run_dir), superseded(run_dir)
     added = added or {}
+    run = os.path.basename(os.path.abspath(run_dir))
     for name in sorted(os.listdir(os.path.join(run_dir, "jobs"))):
         with open(os.path.join(run_dir, "jobs", name)) as f:
             job = json.load(f)
@@ -85,10 +87,12 @@ def rows(run_dir, added=None):
             continue
         circuit = results.get(job["needs"], {})
         decode = results.get(job["id"])
+        result_file = f"results/{job['id']}.json"
         if decode is None and job["id"].endswith(".long"):
             # Until the longer decode finishes, keep the result it is to replace
             decode = earlier.get(job["id"][:-len(".long")])
-        more = added.get(f"{os.path.basename(os.path.abspath(run_dir))}/{job['id']}")
+            result_file = f"superseded/results.{job['id'][:-len('.long')]}.json"
+        more = added.get(f"{run}/{job['id']}")
         if more and decode is not None and (decode["status"] == "done" or str(decode.get("error", "")).startswith("timeout")):
             # Chunks decoded with other seeds add their shots to the run's own (none if it timed out)
             own = (decode.get("shots", 0), decode.get("errors", 0)) if decode["status"] == "done" else (0, 0)
@@ -97,6 +101,7 @@ def rows(run_dir, added=None):
         row["decoder"] = job["decoder"]
         row.update({k: circuit.get(k) for k in RESOURCES})
         row["commit"] = (decode or circuit).get("commit")
+        row.update(run=run, job_id=job["id"], result_file=result_file if decode is not None else None)
         if decode is None:
             row["status"] = "pending"
         elif circuit.get("status") == "skipped":

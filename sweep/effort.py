@@ -1,9 +1,10 @@
-"""Count what the sweeps cost, for the website:
-python -m sweep.effort <out.json> [--results <collected results.csv>] <run_dir> [<run_dir> ...]
+"""Count the work behind the results the website shows:
+python -m sweep.effort <out.json> <collected results.csv> <run_dir> [<run_dir> ...]
 
-Every job that finished left a result with its run time (one core per job), including results that
-later runs replaced (superseded/). Jobs that were stopped without a result are not counted, so the
-totals are lower bounds.
+Counts the rows of sweep.collect's table that hold a logical error rate or bound, and for each the
+decode whose result the row holds, the refinement chunks that added their shots to it, and the circuit
+it decoded (once, though several decoders share it). Jobs that failed or were stopped without counts,
+and results that later runs replaced, are left out. Each job ran on one core.
 """
 import csv
 import datetime
@@ -11,43 +12,53 @@ import json
 import os
 import sys
 
+COUNTED = ("measured", "low statistics", "upper bound")
 
-def results(run_dir):
-    for sub, prefix in (("results", ""), ("superseded", "results.")):
-        path = os.path.join(run_dir, sub)
+
+def load(run_dir, path):
+    with open(os.path.join(run_dir, path)) as f:
+        return json.load(f)
+
+
+def chunks(run_dirs):
+    """The finished refinement chunks, keyed by the run dir name/job id of the decode they refine"""
+    added = {}
+    for run_dir in run_dirs:
+        path = os.path.join(run_dir, "results")
         for name in os.listdir(path) if os.path.isdir(path) else []:
-            if name.startswith(prefix) and name.endswith(".json"):
-                with open(os.path.join(path, name)) as f:
-                    yield json.load(f)
+            if name.endswith(".json"):
+                r = load(path, name)
+                base = r.get("job", {}).get("refines")
+                if base and r.get("status") == "done" and r.get("shots"):
+                    added.setdefault(base, []).append(r)
+    return added
 
 
 def main():
-    out, run_dirs = sys.argv[1], sys.argv[2:]
-    table = None
-    if run_dirs[:1] == ["--results"]:
-        table, run_dirs = run_dirs[1], run_dirs[2:]
-    jobs = seconds = shots = errors = 0
-    codes, devices, noise, decoders = set(), set(), set(), set()
-    for run_dir in run_dirs:
-        for r in results(run_dir):
-            job = r.get("job", {})
-            jobs += 1
-            seconds += r.get("seconds_total") or r.get("seconds") or 0
-            shots += r.get("shots") or 0
-            errors += r.get("errors") or 0
-            if r.get("status") in ("done", "skipped") and job.get("code"):
-                codes.add(job["code"])
-                devices.add(job.get("backend"))
-                noise.add(job.get("error_type"))
-                if job.get("decoder"):
-                    decoders.add(job["decoder"])
-    effort = {"updated": datetime.date.today().isoformat(), "jobs": jobs, "cpu_hours": round(seconds / 3600),
-              "shots": shots, "logical_errors": errors, "codes": len(codes), "devices": len(devices),
-              "noise_models": len(noise), "decoders": len(decoders)}
-    if table:
-        # The rows of the results explorer: one per configuration and decoder
-        with open(table, newline="") as f:
-            effort["results"] = sum(1 for _ in csv.reader(f)) - 1
+    out, table, run_dirs = sys.argv[1], sys.argv[2], sys.argv[3:]
+    runs = {os.path.basename(os.path.abspath(d)): d for d in run_dirs}
+    added = chunks(run_dirs)
+    with open(table, newline="") as f:
+        rows = [row for row in csv.DictReader(f) if row["status"] in COUNTED]
+    jobs, circuits = [], set()
+    for row in rows:
+        run_dir = runs[row["run"]]
+        decode = load(run_dir, row["result_file"])
+        # A decode that timed out adds nothing; its chunks hold the row's shots
+        if decode["status"] == "done":
+            jobs.append(decode)
+        jobs += added.get(f"{row['run']}/{row['job_id']}", [])
+        needs = decode["job"]["needs"]
+        if (row["run"], needs) not in circuits:
+            circuits.add((row["run"], needs))
+            jobs.append(load(run_dir, f"results/{needs}.json"))
+    seconds = sum(r.get("seconds_total") or r.get("seconds") or 0 for r in jobs)
+    effort = {"updated": datetime.date.today().isoformat(), "results": len(rows), "jobs": len(jobs),
+              "cpu_hours": round(seconds / 3600), "shots": sum(r.get("shots") or 0 for r in jobs),
+              "logical_errors": sum(r.get("errors") or 0 for r in jobs),
+              "codes": len({row["code"] for row in rows}), "devices": len({row["backend"] for row in rows}),
+              "noise_models": len({row["error_type"] for row in rows}),
+              "decoders": len({row["decoder"] for row in rows})}
     with open(out, "w") as f:
         json.dump(effort, f, indent=1)
     print(effort)
