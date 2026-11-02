@@ -21,7 +21,8 @@ import stim
 
 from validation.run_job import decode_adaptively
 
-logging.disable(logging.CRITICAL)
+# Errors still get through: eccentric.decoders.decode logs why a decoder gave up
+logging.disable(logging.WARNING)
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGES = ["stim", "qiskit", "ldpc", "PyMatching", "qldpc", "quits", "relay-bp", "tesseract-decoder", "beliefmatching"]
 TWO_QUBIT = {"CX", "CY", "CZ", "XCX", "XCY", "XCZ", "YCX", "YCY", "YCZ", "SWAP"}
@@ -85,6 +86,17 @@ def circuit_job(job, run_dir):
     return {**result, **circuit_resources(circuit), "seconds_circuit": time.time() - start}
 
 
+class LoggedErrors(logging.Handler):
+    """The errors logged while it is attached"""
+
+    def __init__(self):
+        super().__init__(logging.ERROR)
+        self.messages = []
+
+    def emit(self, record):
+        self.messages.append(record.getMessage())
+
+
 def decode_job(job, run_dir):
     from eccentric.decoders import decode
 
@@ -100,8 +112,16 @@ def decode_job(job, run_dir):
             json.dump({**counts, **origin}, f)
         os.replace(partial + ".tmp", partial)
 
-    result = decode_adaptively(
-        job, lambda n: decode(job["code"], circuit, n, job["decoder"], job["backend"], job["error_type"]), checkpoint)
+    errors = LoggedErrors()
+    logging.getLogger().addHandler(errors)
+    try:
+        result = decode_adaptively(
+            job, lambda n: decode(job["code"], circuit, n, job["decoder"], job["backend"], job["error_type"]), checkpoint)
+    finally:
+        logging.getLogger().removeHandler(errors)
+    if result.get("failed") and errors.messages:
+        # Why the decoder gave up, which decode() only logs
+        result["error"] = " | ".join(errors.messages)[:500]
     if os.path.exists(partial):
         os.remove(partial)
     return {**result, **origin}

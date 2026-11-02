@@ -124,12 +124,17 @@ def decode_adaptively(job, decode_batch, checkpoint=None):
     batch, start = job["first_batch"], time.time()
     while errors < job["target_errors"] and shots < job["max_shots"] and time.time() - start < job["time_budget"]:
         seed_box[0] = job.get("seed_offset", 0) + 1000 + shots
+        batch_start = time.time()
         ler = decode_batch(batch)
         if ler is None:
             return {"failed": True, "shots": shots}
         errors += int(round(ler * batch))
         shots += batch
-        batch = min(2 * batch, job["max_batch"], job["max_shots"] - shots) or batch
+        # Twice the batch, but no more shots than the rest of the time budget fits at this batch's
+        # pace: a doubled batch of a slow decoder would overrun the budget and the job's timeout
+        per_shot = max(time.time() - batch_start, 1e-6) / batch
+        fits = int((job["time_budget"] - (time.time() - start)) / per_shot)
+        batch = min(2 * batch, job["max_batch"], job["max_shots"] - shots, max(fits, 1)) or batch
         if checkpoint:
             checkpoint({"shots": shots, "errors": errors, "seconds": time.time() - start})
     return {"shots": shots, "errors": errors, "logical_error_rate": errors / shots if shots else None,

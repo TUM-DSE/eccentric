@@ -25,6 +25,21 @@ def test_seed_offset_gives_other_shots():
     assert seen[-1]["shots"] == 200
 
 
+def test_batches_fit_the_time_budget():
+    import time
+
+    def slow(n):
+        # 10 ms a shot
+        time.sleep(n / 100)
+        return 0.0
+
+    # Batches of 10, 20 and 40 shots take 0.7 s; a doubled batch of 80 would end at 1.5 s
+    job = dict(first_batch=10, max_batch=10**6, max_shots=10**6, target_errors=1, time_budget=1.0)
+    start = time.time()
+    result = decode_adaptively(job, slow)
+    assert time.time() - start < 1.3 and result["shots"] < 150
+
+
 def test_collect_adds_refinement_chunks(tmp_path):
     from sweep.collect import refinements, rows
 

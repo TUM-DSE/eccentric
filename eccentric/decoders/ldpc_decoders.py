@@ -48,6 +48,10 @@ def union_find(circuit: stim.Circuit, num_shots: int, approximate_disjoint_error
 
 def belief_find(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool) -> float:
     chk, obs, priors = _check_matrices(circuit, approximate_disjoint_errors)
+    # BeliefFind rejects errors that trip no detector. No decoder can correct them (a routed circuit
+    # whose SWAP faults are undetectable logical errors has them); they still occur in the samples
+    seen = np.asarray(chk.sum(axis=0)).ravel() > 0
+    chk, obs, priors = chk[:, seen], obs[:, seen], np.asarray(priors)[seen]
     decoder = BeliefFindDecoder(
         chk,
         error_channel=list(priors),

@@ -79,19 +79,35 @@ def dem_to_check_matrices(dem: stim.DetectorErrorModel, return_col_dict=False, x
     return check_matrix, observables_matrix, priors
 
 
-def bposd_chk(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool):
-    dem = circuit.detector_error_model(approximate_disjoint_errors=approximate_disjoint_errors)
-    chk, obs, priors, col_dict = dem_to_check_matrices(dem, return_col_dict=True)
+# The last circuit's decoder. A sweep decodes one circuit batch by batch, and building BP-OSD for a
+# large circuit takes minutes and tens of GB (OSD-CS of order 7), more than decoding a batch
+_last = {}
 
-    bpd = BpOsdDecoder(
-        chk,
-        error_channel=list(priors),
-        max_iter=10000,
-        bp_method="minimum_sum",
-        ms_scaling_factor=1.0,
-        osd_method="osd_cs",
-        osd_order=7,
-    )
+
+def _bposd_decoder(circuit: stim.Circuit, approximate_disjoint_errors: bool, xor_priors: bool, osd_order):
+    """The error model, check matrices and BP-OSD decoder of the circuit; osd_order None means
+    min(7, columns - rows)"""
+    key = (approximate_disjoint_errors, xor_priors, osd_order)
+    if _last.get("circuit") is not circuit or _last.get("key") != key:
+        _last.clear()
+        dem = circuit.detector_error_model(approximate_disjoint_errors=approximate_disjoint_errors)
+        chk, obs, priors = dem_to_check_matrices(dem, xor_priors=xor_priors)
+        bpd = BpOsdDecoder(
+            chk,
+            error_channel=list(priors),
+            max_iter=10000,
+            bp_method="minimum_sum",
+            ms_scaling_factor=1.0,
+            osd_method="osd_cs",
+            osd_order=min(7, chk.shape[1] - chk.shape[0]) if osd_order is None else osd_order,
+        )
+        # Holding the circuit keeps its id from being reused by another circuit
+        _last.update(circuit=circuit, key=key, value=(dem, chk, obs, bpd))
+    return _last["value"]
+
+
+def bposd_chk(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool):
+    dem, chk, obs, bpd = _bposd_decoder(circuit, approximate_disjoint_errors, xor_priors=False, osd_order=7)
 
     dem_sampler: stim.CompiledDemSampler = dem.compile_sampler()
     det_data, obs_data, err_data = dem_sampler.sample(
@@ -116,17 +132,7 @@ def bposd_batch(circuit: stim.Circuit, num_shots: int, approximate_disjoint_erro
         num_shots, separate_observables=True
     )
 
-    dem = circuit.detector_error_model(approximate_disjoint_errors=approximate_disjoint_errors)
-    chk, obs, priors = dem_to_check_matrices(dem, xor_priors=True)
-    bpd = BpOsdDecoder(
-        chk,
-        error_channel=list(priors),
-        max_iter=10000,
-        bp_method="minimum_sum",
-        ms_scaling_factor=1.0,
-        osd_method="osd_cs",
-        osd_order=min(7, chk.shape[1] - chk.shape[0]),
-    )
+    _, chk, obs, bpd = _bposd_decoder(circuit, approximate_disjoint_errors, xor_priors=True, osd_order=None)
     num_errors = 0
     for shot in range(num_shots):
         predicted_for_shot = (obs @ bpd.decode(detection_events[shot])) % 2
