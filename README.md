@@ -142,6 +142,10 @@ Besides the codes of the paper, these codes are available. They are registered i
 | `rm15` | Punctured quantum Reed-Muller code [[15,1,3]] | 29 | qLDPC |
 | `lp` | Lifted product (lift-connected surface) code [[39,3,3]] | 75 | qLDPC |
 | `qt36`, `qt72` | Quantum Tanner codes [[36,8,3]], [[72,14,4]] on the dihedral group D4 | 68, 136 | qLDPC |
+| `cbb30`, `cbb42`, `cbb70`, `cbb108`, `cbb126`, `cbb154` | Coprime bivariate bicycle codes [[30,4,6]], [[42,6,6]], [[70,6,8]], [[108,12,6]], [[126,12,10]], [[154,6,16]]: bivariate bicycle codes with coprime orders l, m and polynomials in π = xy, weight 6 | 2n | Wang & Mueller, arXiv:2408.10001 (Table 2); circuit from qLDPC |
+| `tb30`, `tb48`, `tb72`, `tb144` | Trivariate bicycle codes [[30,4,5]], [[48,6,6]], [[72,4,8]], [[144,2,12]]: bicycle codes whose polynomials also use z = xy, check weights 5, 6, 5 and 4 | 2n | Voss et al., arXiv:2406.19151 (Appendix A); circuit from qLDPC |
+| `mhc36`, `mhc216` | Many-hypercube codes [[36,16,4]], [[216,64,8]]: [[6,4,2]] concatenated 2 and 3 times, checks of weight 6–24 | 56, 368 | Goto, arXiv:2403.16054; qLDPC |
+| `golay23` | Quantum Golay code [[23,1,7]] from the classical [23,12,7] Golay code, weight-8 checks | 45 | qLDPC |
 | `hyperbolic_floquet_60`, `_120`, `_160`, `_240`, `_256`, `_320` | Hyperbolic Floquet codes [[60,5,3]], [[120,8,3]], [[160,10,4]], [[240,8,4]], [[256,34,4]], [[320,18,5]] (pair measurements, no ancillas) | n | [hyperbolic-floquet-data](https://github.com/oscarhiggott/hyperbolic-floquet-data) |
 | `semi_hyperbolic_floquet_64`, `_144`, `_256`, `_400`, `_576` | Semi-hyperbolic Floquet codes from the Bolza code, k = 4, d = 3/4/6/7/8 (a distance-scaling family) | n | hyperbolic-floquet-data |
 
@@ -150,7 +154,7 @@ Syndrome-extraction schedules (`schedules`), the first being each code's default
 | Codes | Schedules |
 | --- | --- |
 | `bb*` | `ibm` (the depth-8 circuit of Bravyi et al., as for `gross`), `zxcoloration` (QUITS) |
-| `toric`, `hgp_hamming`, `rm15`, `lp`, `gb*`, `qt*` | `edge_coloring` (all checks together), `edge_coloring_xz` (X checks before Z checks) (qLDPC) |
+| `toric`, `hgp_hamming`, `rm15`, `lp`, `gb*`, `qt*`, `cbb*`, `tb*`, `mhc*`, `golay23` | `edge_coloring` (all checks together), `edge_coloring_xz` (X checks before Z checks) (qLDPC) |
 | `bpc*`, `hgp225`/`625`/`900`, `qlp544` | `cardinal`, `cardinalNSmerge`, `zxcoloration` (QUITS) |
 | `lcs*` | `zxcoloration`, `cardinal`, `cardinalNSmerge` (QUITS) |
 | `mitten150` | `custom` (depth 12), `hook_error_free` (depth 24), `zxcoloration` (QUITS) |
@@ -162,7 +166,7 @@ Notes:
 - Decoders: `bposd` works for all of them. `mwpm` works for `repetition`, `xzzx`, `toric`, `honeycomb`, `planar_honeycomb` and the (semi-)hyperbolic Floquet codes; the other codes are not matchable. `chromobius` needs color-annotated detector coordinates, which only the paper's `color` code has.
 - `d` is the code distance. The syndrome-extraction circuits can have a lower circuit-level distance: `lp` (qLDPC's edge-coloring schedule), the `lcs*` codes and the honeycomb codes have circuit distance below `d`, and `bpc72` below 8.
 - `cycles` sets the number of syndrome rounds. Floquet codes count one round as one X, Y and Z sub-round; the planar honeycomb code needs an even number of at least 4 rounds and the hyperbolic Floquet codes run `2 + 2⌈(cycles − 2)/2⌉` rounds.
-- Distances verified by exact computation: `bb54`, `bb98`, `gb46`, `gb48`, `rm15`, `hgp_hamming`, `lp`, `lcs15`, `lcs52`, `qt36`, `qt72`, and `toric` at d = 3. The `hgp*`, other `lcs*`, `qlp544` and `mitten150` distances are upper bounds from QUITS' randomized estimator, which match the cited papers. The others are taken from the cited papers; for `bb756` the distance is an upper bound.
+- Distances verified by exact computation: `bb54`, `bb98`, `gb46`, `gb48`, `rm15`, `hgp_hamming`, `lp`, `lcs15`, `lcs52`, `qt36`, `qt72`, `cbb30`, `cbb42`, `cbb70`, `tb30`, `tb48`, `tb72`, `mhc36`, `golay23`, and `toric` at d = 3. The `hgp*`, other `lcs*`, `qlp544`, `mitten150`, `cbb108`, `cbb126`, `cbb154`, `tb144` and `mhc216` distances are upper bounds from QUITS' randomized estimator, which match the cited papers. The others are taken from the cited papers; for `bb756` the distance is an upper bound.
 - `hgp625`, `hgp900` and `qlp544` take up to a minute to build; their tests only run with `pytest -m slow`.
 
 ### Decoders

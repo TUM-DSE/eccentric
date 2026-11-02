@@ -8,7 +8,7 @@ from itertools import product
 
 from eccentric.codes.catalog import CODES, CodeFamily, FixedCode
 
-QLDPC_PREFIXES = ("bb", "bpc", "gb", "hgp", "lp", "lcs", "qt", "mitten", "qlp")
+QLDPC_PREFIXES = ("bb", "bpc", "gb", "hgp", "lp", "lcs", "qt", "mitten", "qlp", "cbb", "tb", "mhc", "golay")
 QLDPC_CODES = sorted(c for c in CODES if c.startswith(QLDPC_PREFIXES)) + ["gross"]
 
 # Paper codes and their distances in the reference slice

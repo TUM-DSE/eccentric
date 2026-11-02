@@ -42,6 +42,14 @@ def css_matrices(name: str):
     }
     if name.startswith("gb"):
         qldpc[name] = lambda: qldpc_codes.generalized_bicycle_code(int(name[2:]))
+    if name.startswith("cbb"):
+        qldpc[name] = lambda: qldpc_codes.coprime_bicycle_code(int(name[3:]))
+    if name.startswith("tb") and name[2:].isdigit():
+        qldpc[name] = lambda: qldpc_codes.trivariate_bicycle_code(int(name[2:]))
+    if name in ("mhc36", "mhc216"):
+        qldpc[name] = lambda: qldpc_codes.many_hypercube_code({"mhc36": 2, "mhc216": 3}[name])
+    if name == "golay23":
+        qldpc[name] = qldpc_codes.quantum_golay_code
     if name in qldpc:
         code = qldpc[name]()
         return np.asarray(code.matrix_x, dtype=np.uint8), np.asarray(code.matrix_z, dtype=np.uint8)
