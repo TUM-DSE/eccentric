@@ -112,3 +112,34 @@ def test_effort_counts_only_the_work_behind_the_results(tmp_path, monkeypatch):
         e = json.load(f)
     # x's new decode, its finished chunk and its circuit
     assert (e["results"], e["jobs"], e["cpu_hours"], e["shots"], e["logical_errors"]) == (1, 3, 3, 1500, 25)
+
+
+def test_collect_reports_timeouts(tmp_path):
+    from sweep.collect import chunk_timeouts, rows
+
+    def write(run, sub, name, obj):
+        os.makedirs(tmp_path / run / sub, exist_ok=True)
+        with open(tmp_path / run / sub / f"{name}.json", "w") as f:
+            json.dump(obj, f)
+
+    base = dict(id="decode.x", type="decode", needs="circuit.x", decoder="tesseract", target_errors=100, slice="s",
+                code="c", timeout=21600)
+    write("run", "jobs", "decode.x", base)
+    write("run", "results", "circuit.x", {"job": {"id": "circuit.x"}, "status": "done"})
+    write("run", "results", "decode.x", {"job": base, "status": "failed", "error": "timeout after 21600 s"})
+    chunk = {**base, "id": "decode.x.refine0", "refines": "run/decode.x", "timeout": 32400}
+    write("refine", "jobs", chunk["id"], chunk)
+    write("refine", "results", chunk["id"], {"job": chunk, "status": "failed", "error": "timeout after 32400 s"})
+    (row,) = rows(str(tmp_path / "run"), timeouts=chunk_timeouts([str(tmp_path / "run"), str(tmp_path / "refine")]))
+    assert (row["status"], row["note"]) == ("timeout", "timeout after 9 h")
+    (row,) = rows(str(tmp_path / "run"))
+    assert row["note"] == "timeout after 6 h"
+
+
+def test_undetectable_faults():
+    import pytest
+    from sweep.run_job import undetectable_faults
+
+    # Qubit 0's flip changes the logical and trips no detector; qubit 1's trips the detector
+    circuit = stim.Circuit("R 0 1\nX_ERROR(0.1) 0 1\nM 0 1\nDETECTOR rec[-1]\nOBSERVABLE_INCLUDE(0) rec[-2]")
+    assert undetectable_faults(circuit) == {"undetectable_faults": 1, "undetectable_probability": pytest.approx(0.1)}

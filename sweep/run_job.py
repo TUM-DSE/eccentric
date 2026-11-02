@@ -58,6 +58,18 @@ def circuit_resources(circuit: stim.Circuit) -> dict:
     }
 
 
+def undetectable_faults(circuit: stim.Circuit) -> dict:
+    """Error mechanisms that flip a logical observable and trip no detector: single faults the code
+    cannot see, so the circuit has distance 1 (as a SWAP fault on two data qubits after routing can)"""
+    count, probability = 0, 0.0
+    for inst in circuit.detector_error_model(approximate_disjoint_errors=True).flattened():
+        targets = inst.targets_copy() if inst.type == "error" else []
+        if any(t.is_logical_observable_id() for t in targets) and not any(t.is_relative_detector_id() for t in targets):
+            count += 1
+            probability += inst.args_copy()[0]
+    return {"undetectable_faults": count, "undetectable_probability": probability}
+
+
 def task_of(job):
     from eccentric.experiments import Task
     fields = ("backend", "code", "distance", "cycles", "decoder", "error_type", "error_probability",
@@ -83,7 +95,7 @@ def circuit_job(job, run_dir):
     path = os.path.join(run_dir, "circuits", f"{job['id']}.stim")
     circuit.to_file(path + ".tmp")
     os.replace(path + ".tmp", path)
-    return {**result, **circuit_resources(circuit), "seconds_circuit": time.time() - start}
+    return {**result, **circuit_resources(circuit), **undetectable_faults(circuit), "seconds_circuit": time.time() - start}
 
 
 class LoggedErrors(logging.Handler):

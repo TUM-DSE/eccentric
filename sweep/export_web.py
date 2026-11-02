@@ -86,7 +86,7 @@ SLICES = {
 COLUMNS = ["slice", "code", "family", "taxonomy", "schedule", "distance", "rounds", "k", "code_qubits", "backend",
            "error_type", "error_probability", "decoder", "status", "logical_error_rate", "ler_low", "ler_high",
            "ler_per_round", "ler_per_round_high", "shots", "errors", "circuit_qubits", "swaps", "two_qubit_gates",
-           "layers", "device_qubits", "note"]
+           "layers", "device_qubits", "note", "undetectable_faults", "undetectable_probability"]
 
 
 def device_label(backend):

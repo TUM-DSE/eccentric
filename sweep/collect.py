@@ -9,8 +9,9 @@ the result they refine; pass their directory among the run directories.
 Writes results.csv and results.json. Each row says how far its logical error rate can be trusted:
 "measured" (enough logical errors), "low statistics" (stopped by the shot or time limit),
 "upper bound" (no logical error seen, the 95% bound is given), "does not fit", "decoder not
-applicable" or "failed". It also names the run, the job and the result file it came from, for
-sweep.effort.
+applicable", "timeout" (no shot decoded within the time limit) or "failed". It also names the run,
+the job and the result file it came from, for sweep.effort, and counts the circuit's undetectable
+logical faults (sweep.undetectable for circuits built before circuit jobs counted them).
 """
 import json
 import math
@@ -23,7 +24,7 @@ Z95 = 1.959964
 CONFIG = ["slice", "code", "schedule", "distance", "cycles", "backend", "backend_size", "error_type",
           "error_probability", "layout_method", "routing_method", "translating_method"]
 RESOURCES = ["schedule_used", "rounds", "code_qubits", "device_qubits", "circuit_qubits", "detectors", "observables",
-             "two_qubit_gates", "swaps", "layers", "measurements"]
+             "two_qubit_gates", "swaps", "layers", "measurements", "undetectable_faults", "undetectable_probability"]
 
 
 def wilson(errors, shots):
@@ -76,16 +77,36 @@ def refinements(run_dirs):
     return added
 
 
-def rows(run_dir, added=None):
-    results, earlier = load(run_dir), superseded(run_dir)
-    added = added or {}
+def chunk_timeouts(run_dirs):
+    """The longest time limit of refinement chunks that timed out without a shot, keyed like refinements()"""
+    longest = {}
+    for run_dir in run_dirs:
+        for r in load(run_dir).values():
+            base = r["job"].get("refines")
+            if base and r.get("status") == "failed" and str(r.get("error", "")).startswith("timeout"):
+                longest[base] = max(longest.get(base, 0), r["job"]["timeout"])
+    return longest
+
+
+def undetectable(run_dir):
+    """The undetectable logical faults that sweep.undetectable counted for circuits built before circuit jobs did"""
+    path = os.path.join(run_dir, "undetectable.json")
+    if not os.path.exists(path):
+        return {}
+    with open(path) as f:
+        return json.load(f)
+
+
+def rows(run_dir, added=None, timeouts=None):
+    results, earlier, counted = load(run_dir), superseded(run_dir), undetectable(run_dir)
+    added, timeouts = added or {}, timeouts or {}
     run = os.path.basename(os.path.abspath(run_dir))
     for name in sorted(os.listdir(os.path.join(run_dir, "jobs"))):
         with open(os.path.join(run_dir, "jobs", name)) as f:
             job = json.load(f)
         if job["type"] != "decode" or job.get("refines"):
             continue
-        circuit = results.get(job["needs"], {})
+        circuit = {**counted.get(job["needs"], {}), **results.get(job["needs"], {})}
         decode = results.get(job["id"])
         result_file = f"results/{job['id']}.json"
         if decode is None and job["id"].endswith(".long"):
@@ -107,6 +128,11 @@ def rows(run_dir, added=None):
         elif circuit.get("status") == "skipped":
             row["status"] = "does not fit"
             row["note"] = circuit.get("reason")
+        elif decode["status"] == "failed" and str(decode.get("error", "")).startswith("timeout after"):
+            # Not a single batch decoded within the time limit, nor in the refinement chunks
+            seconds = max(int(decode["error"].split()[2]), timeouts.get(f"{run}/{job['id']}", 0))
+            row["status"] = "timeout"
+            row["note"] = f"timeout after {seconds / 3600:g} h"
         elif decode["status"] == "failed":
             row["status"] = "decoder not applicable" if decode.get("failed") else "failed"
             row["note"] = decode.get("error")
@@ -128,8 +154,8 @@ def rows(run_dir, added=None):
 def main():
     run_dirs, out_dir = sys.argv[1:-1], sys.argv[-1]
     os.makedirs(out_dir, exist_ok=True)
-    added = refinements(run_dirs)
-    df = pd.concat([pd.DataFrame(rows(run_dir, added)) for run_dir in run_dirs], ignore_index=True)
+    added, timeouts = refinements(run_dirs), chunk_timeouts(run_dirs)
+    df = pd.concat([pd.DataFrame(rows(run_dir, added, timeouts)) for run_dir in run_dirs], ignore_index=True)
     df = df.drop_duplicates(subset=CONFIG + ["decoder"], keep="last")
     df.to_csv(os.path.join(out_dir, "results.csv"), index=False)
     df.to_json(os.path.join(out_dir, "results.json"), orient="records", indent=1)
