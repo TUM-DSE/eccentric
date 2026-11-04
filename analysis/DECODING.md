@@ -20,10 +20,16 @@ flatters it on large codes.
 4. **Cost grows with circuit size and, far more, with noise.** Time grows as detectors^0.8 (MWPM) to
    detectors^2.6 (Tesseract); above threshold every decoder slows 40–4,750×, and 48% of all decode
    CPU went to configurations with LER > 50%.
-5. **The choice can be automated.** A depth-4 tree on a pilot LER and a few circuit features picks a
-   good-enough decoder for 81% of unseen codes (leave-one-code-out) at 1/5.6 of always-Tesseract's
-   time; trained for accuracy instead, 89% at 60% of it.
-6. **Real-time decoding in software only works for slow platforms.** Median per-round decode time is
+5. **The choice can be automated, without decoding first.** A depth-4 tree on a few circuit features
+   picks a good-enough decoder for 81% of unseen codes (leave-one-code-out) at 1/5.6 of
+   always-Tesseract's time; trained for accuracy instead, 91% at 58% of it. Its regime input can be a
+   pilot run's LER or, as well, the mean detector firing probability computed from the circuit's error
+   model in seconds (section 4).
+6. **The LER itself is predictable from the error model.** Without decoding, a linear model predicts
+   the LER of unseen codes within a factor of 1.9 (median; rank correlation 0.90), and whether a
+   configuration is above threshold for 94% of circuits; mean detector firing alone (saturated above
+   ~23%) gets 91%.
+7. **Real-time decoding in software only works for slow platforms.** Median per-round decode time is
    ~5 µs for MWPM/Chromobius and ~0.1–0.3 s for BP-OSD, Relay-BP and Tesseract; 1% of circuits have
    any decoder under 1 µs per round (superconducting cycles), 29% under 1 ms (ions).
 
@@ -101,14 +107,43 @@ elif matchable and rounds <= 8:              -> MWPM
 else:                                        -> Tesseract
 ```
 
-The single most useful input is a **pilot LER**: a few hundred shots with the fastest decoder tell
-whether the configuration is above threshold, where accuracy no longer separates decoders and only
-cost matters.
+The single most useful input is the **noise regime**: whether the configuration is above threshold,
+where accuracy no longer separates decoders and only cost matters. A pilot run with the fastest
+decoder tells it, and so, without decoding, does the circuit's error model (section 4).
 
-## 4. Systems observations
+## 4. Predicting the LER without decoding
+
+`python analysis/predict_ler.py` (features from `analysis/dem_features.py`, saved in
+`experiment_results/Sweep/dem_features.json`). From each circuit's detector error model, without
+sampling or decoding: the probability that each detector fires (exact for independent error
+mechanisms), the total error probability, and the number and weight of the error mechanisms; a few
+seconds per circuit. Target: the best measured LER of 1,519 circuits; all models leave-one-code-out.
+
+| Features | Median / p90 error of log10 LER | Rank correlation | Above threshold (LER > 0.5): accuracy, recall, precision |
+|---|---|---|---|
+| Table (size, distance, k, rounds, SWAPs, nominal gate error) | 0.41 / 1.27 | 0.79 | 89%, 83%, 87% |
+| Error model | **0.27 / 0.82** | **0.90** | **94%, 88%, 94%** |
+| Both | 0.29 / 0.88 | 0.89 | 91%, 85%, 90% |
+| Mean detector firing alone (one threshold) | — | — | 91%, 80%, 94% |
+
+| Mean detector firing per round | Circuits | Median LER | Above threshold |
+|---|---|---|---|
+| < 2% | 67 | 0.05% | 0% |
+| 2–5% | 122 | 0.5% | 0% |
+| 5–10% | 374 | 3.4% | 8% |
+| 10–20% | 403 | 17% | 12% |
+| 20–50% | 553 | 97% | 87% |
+
+So a pilot run is not needed to decide what to do with a configuration: whether it is worth
+decoding at all, which decoder to use (the tree with the detector firing probability in place of
+the pilot LER reaches 81% / 91% good enough, against 81% / 89% with the pilot), and how many shots to
+plan (≈ 100 / predicted LER). It does not replace decoding for the benchmark's numbers: a factor of
+1.9 is far wider than the ±20% interval of a measured rate.
+
+## 5. Systems observations
 
 - **Spend on hopeless configurations.** 48% of decode CPU went to configurations with LER > 50% (37%
-  to LER > 90%). An early stop after the pilot (or after the first batch shows LER ≈ 1) would have
+  to LER > 90%). Skipping configurations predicted above threshold (section 4), or stopping after the first batch shows LER ≈ 1, would have
   halved the sweep's cost. The 14 configurations no decoder finished are all of this kind.
 - **Skew.** The top 10% of decodes used 55% of the decode CPU; BP-OSD (32%) and Tesseract (29%) used
   most of it, MWPM and Chromobius none to speak of.
