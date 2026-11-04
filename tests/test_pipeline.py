@@ -88,4 +88,6 @@ def test_applicable():
     assert applicable({"decomposable": 1, "color_annotated": 0}) == {
         "mwpm": True, "bposd": True, "bplsd": True, "belief_find": True, "relay_bp": True, "tesseract": True,
         "chromobius": False}
-    assert applicable({"decomposable": math.nan, "graphlike": 0, "color_annotated": 1})["mwpm"] is False
+    assert applicable({"decomposable": math.nan, "graphlike": 0, "color_annotated": 1})["mwpm"] is None
+    assert applicable({"decomposable": math.nan, "graphlike": 1})["mwpm"] is True
+    assert applicable({})["chromobius"] is None
