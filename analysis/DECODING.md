@@ -140,6 +140,23 @@ the pilot LER reaches 81% / 91% good enough, against 81% / 89% with the pilot), 
 plan (≈ 100 / predicted LER). It does not replace decoding for the benchmark's numbers: a factor of
 1.9 is far wider than the ±20% interval of a measured rate.
 
+The decode time per shot is predictable the same way (`python analysis/predict_time.py`): a linear
+model per decoder on the same error-model features plus size, leave-one-code-out, over times that
+span six orders of magnitude.
+
+| Decoder | Median / p90 error | Within 3× | Rank correlation | Dominant feature |
+|---|---|---|---|---|
+| BP-OSD | ×1.7 / ×5.4 | 79% | 0.96 | mechanisms^1.95 |
+| BP-LSD, BeliefFind | ×1.7–1.8 / ×4.7–4.9 | 76–78% | 0.96 | mechanisms^1.7–1.9 |
+| MWPM | ×1.7 / ×3.9 | 85% | 0.85 | error mass, mechanism weight |
+| Relay-BP | ×2.1 / ×11 | 65% | 0.91 | mechanisms^1.4 |
+| Tesseract | ×2.9 / ×7.6 | 52% | 0.97 | mechanism weight^4.5, error mass^1.8 |
+
+BP decoders scale with the number of error mechanisms; Tesseract's search with how many detectors each
+mechanism flips and how many errors occur, which is why it explodes on routed and dense circuits.
+Together with the LER prediction, a scheduler can size jobs (shots ≈ 100 / LER, time ≈ shots ×
+time per shot), set timeouts and skip hopeless configurations before running anything.
+
 ## 5. Systems observations
 
 - **Spend on hopeless configurations.** 48% of decode CPU went to configurations with LER > 50% (37%
