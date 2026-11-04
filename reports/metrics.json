@@ -34,10 +34,10 @@
  },
  "ler": {
   "circuits": 1396,
-  "median_abs_log10_error": 0.11052655419556257,
-  "p90_abs_log10_error": 0.5661867528319277,
-  "spearman": 0.9683119202810627,
-  "coverage_q10_q90": 0.8151862464183381
+  "median_abs_log10_error": 0.10166863896501505,
+  "p90_abs_log10_error": 0.5081165449112753,
+  "spearman": 0.9720588390912415,
+  "coverage_q10_q90": 0.832378223495702
  },
  "regret": {
   "decodes": 5163,
@@ -48,59 +48,59 @@
   "decoders": {
    "all": {
     "decodes": 5737,
-    "median_abs_log10_error": 0.17116860122916866,
-    "p90_abs_log10_error": 0.6992646497366792,
-    "spearman": 0.9673151803905834,
-    "within_3x": 0.8335366916506886,
-    "coverage_q10_q90": 0.8227296496426704
+    "median_abs_log10_error": 0.15396146972155786,
+    "p90_abs_log10_error": 0.6655627778155655,
+    "spearman": 0.9685589062747998,
+    "within_3x": 0.8530590901167858,
+    "coverage_q10_q90": 0.832490848875719
    },
    "mwpm": {
     "decodes": 249,
-    "median_abs_log10_error": 0.190756983681853,
-    "p90_abs_log10_error": 0.5377769746652376,
-    "spearman": 0.8977463211165162,
-    "within_3x": 0.8554216867469879,
-    "coverage_q10_q90": 0.8554216867469879
+    "median_abs_log10_error": 0.17436679746648576,
+    "p90_abs_log10_error": 0.47078937106768964,
+    "spearman": 0.922161858173717,
+    "within_3x": 0.8995983935742972,
+    "coverage_q10_q90": 0.8995983935742972
    },
    "bposd": {
     "decodes": 1582,
-    "median_abs_log10_error": 0.1604049721453422,
-    "p90_abs_log10_error": 0.6257541734983366,
-    "spearman": 0.9743536146414955,
-    "within_3x": 0.8400758533501896,
-    "coverage_q10_q90": 0.8147914032869785
+    "median_abs_log10_error": 0.14128354796849385,
+    "p90_abs_log10_error": 0.5275403520839349,
+    "spearman": 0.9790742932577345,
+    "within_3x": 0.8798988621997471,
+    "coverage_q10_q90": 0.8280657395701644
    },
    "bplsd": {
     "decodes": 898,
-    "median_abs_log10_error": 0.12930377549738803,
-    "p90_abs_log10_error": 0.375539389839493,
-    "spearman": 0.987230769819724,
-    "within_3x": 0.9465478841870824,
-    "coverage_q10_q90": 0.8318485523385301
+    "median_abs_log10_error": 0.12397108917918609,
+    "p90_abs_log10_error": 0.35558676446376614,
+    "spearman": 0.9887463868872215,
+    "within_3x": 0.955456570155902,
+    "coverage_q10_q90": 0.8530066815144766
    },
    "belief_find": {
     "decodes": 974,
-    "median_abs_log10_error": 0.13586054704034134,
-    "p90_abs_log10_error": 0.37512055060789856,
-    "spearman": 0.9864175381574578,
-    "within_3x": 0.946611909650924,
-    "coverage_q10_q90": 0.8203285420944558
+    "median_abs_log10_error": 0.13000837387794673,
+    "p90_abs_log10_error": 0.3442784672546596,
+    "spearman": 0.9879025837413297,
+    "within_3x": 0.9568788501026694,
+    "coverage_q10_q90": 0.8757700205338809
    },
    "relay_bp": {
     "decodes": 1197,
-    "median_abs_log10_error": 0.29574354957670135,
-    "p90_abs_log10_error": 1.4124274615547987,
-    "spearman": 0.8589188797236418,
-    "within_3x": 0.6240601503759399,
-    "coverage_q10_q90": 0.8195488721804511
+    "median_abs_log10_error": 0.2714362840489608,
+    "p90_abs_log10_error": 1.4158694190650811,
+    "spearman": 0.8554178539366893,
+    "within_3x": 0.6307435254803676,
+    "coverage_q10_q90": 0.7719298245614035
    },
    "tesseract": {
     "decodes": 837,
-    "median_abs_log10_error": 0.1919709691462672,
-    "p90_abs_log10_error": 0.5914002033703142,
-    "spearman": 0.9777173477612617,
-    "within_3x": 0.8614097968936678,
-    "coverage_q10_q90": 0.8255675029868578
+    "median_abs_log10_error": 0.15589059296800611,
+    "p90_abs_log10_error": 0.520199691642883,
+    "spearman": 0.9810619958196481,
+    "within_3x": 0.8757467144563919,
+    "coverage_q10_q90": 0.8351254480286738
    }
   },
   "unpredicted": 20,
@@ -115,28 +115,28 @@
    "recommend, accurate": {
     "good_enough": 0.9041916167664671,
     "median_regret": 1.0,
-    "p90_regret": 1.155372605615324,
+    "p90_regret": 1.1559339952197094,
     "median_time_vs_cheapest_good": 1.0,
-    "fallbacks": 429,
+    "fallbacks": 428,
     "chosen": {
-     "tesseract": 811,
-     "relay_bp": 518,
+     "tesseract": 808,
+     "relay_bp": 522,
      "bposd": 4,
-     "belief_find": 3
+     "bplsd": 2
     }
    },
    "recommend, cheapest": {
-    "good_enough": 0.8660179640718563,
+    "good_enough": 0.8675149700598802,
     "median_regret": 1.0,
-    "p90_regret": 1.27731156545621,
+    "p90_regret": 1.2671991220582854,
     "median_time_vs_cheapest_good": 1.0,
-    "fallbacks": 373,
+    "fallbacks": 375,
     "chosen": {
-     "tesseract": 671,
-     "relay_bp": 548,
-     "bposd": 109,
-     "belief_find": 4,
-     "bplsd": 4
+     "tesseract": 664,
+     "relay_bp": 554,
+     "bposd": 110,
+     "bplsd": 7,
+     "belief_find": 1
     }
    },
    "always bposd": {
@@ -157,6 +157,63 @@
     "fallbacks": 656,
     "chosen": {
      "tesseract": 1336
+    }
+   }
+  },
+  "complete": {
+   "decoders": [
+    "belief_find",
+    "bplsd",
+    "bposd",
+    "relay_bp",
+    "tesseract"
+   ],
+   "circuits": 599,
+   "policies": {
+    "recommend, accurate": {
+     "good_enough": 0.9198664440734557,
+     "median_regret": 1.0,
+     "p90_regret": 1.07056712132089,
+     "median_time_vs_cheapest_good": 1.0,
+     "fallbacks": 0,
+     "chosen": {
+      "tesseract": 309,
+      "relay_bp": 288,
+      "bplsd": 2
+     }
+    },
+    "recommend, cheapest": {
+     "good_enough": 0.8530884808013356,
+     "median_regret": 1.0,
+     "p90_regret": 1.2440016866961843,
+     "median_time_vs_cheapest_good": 1.0,
+     "fallbacks": 0,
+     "chosen": {
+      "relay_bp": 307,
+      "tesseract": 247,
+      "bposd": 40,
+      "bplsd": 5
+     }
+    },
+    "always bposd": {
+     "good_enough": 0.5993322203672788,
+     "median_regret": 1.1762114537444934,
+     "p90_regret": 2.2016946266827087,
+     "median_time_vs_cheapest_good": 2.642522197507326,
+     "fallbacks": 0,
+     "chosen": {
+      "bposd": 599
+     }
+    },
+    "always tesseract": {
+     "good_enough": 0.998330550918197,
+     "median_regret": 1.0,
+     "p90_regret": 1.0101010101010102,
+     "median_time_vs_cheapest_good": 3.7769737451372913,
+     "fallbacks": 0,
+     "chosen": {
+      "tesseract": 599
+     }
     }
    }
   },

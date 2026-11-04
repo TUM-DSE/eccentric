@@ -94,36 +94,53 @@ def _time(df, pred):
             "timeouts": {"decodes": len(timeouts), "predicted_above_bound": float(above.mean()) if len(above) else None}}
 
 
+# Circuits on which all of these were measured score every choice without falling back
+COMPLETE = {"bposd", "bplsd", "belief_find", "relay_bp", "tesseract"}
+
+
+def _aggregate(outcomes):
+    """Decoder-choice metrics per policy from per-circuit outcomes"""
+    out = {}
+    for name, label in POLICIES.items():
+        rows = [o[name] for o in outcomes]
+        if not rows:
+            continue
+        chosen = pd.Series([r["chosen"] for r in rows]).value_counts()
+        out[label] = {"good_enough": float(np.mean([r["good"] for r in rows])),
+                      "median_regret": float(np.median([r["regret"] for r in rows])),
+                      "p90_regret": float(np.quantile([r["regret"] for r in rows], 0.9)),
+                      "median_time_vs_cheapest_good": float(np.median([r["time"] for r in rows])),
+                      "fallbacks": int(sum(r["fallback"] for r in rows)),
+                      "chosen": {str(d): int(n) for d, n in chosen.items()}}
+    return out
+
+
 def _recommendation(df, pred):
     m = df[(df.status == "measured") & (df.ms_per_shot > 0)]
     m = m[m.groupby("circuit_key").decoder.transform("size") >= 2]
     m = m[m.circuit_key.isin(set(pred.circuit_key))]
     predicted = dict(tuple(pred.groupby("circuit_key", sort=False)))
-    scores = {name: {"good": [], "regret": [], "time": [], "fallbacks": 0, "chosen": {}} for name in POLICIES}
+    outcomes, complete = [], []
     for key, s in m.groupby("circuit_key", sort=False):
         ler, ms = dict(zip(s.decoder, s.ler)), dict(zip(s.decoder, s.ms_per_shot))
         best = s.loc[s.ler.idxmin()]
-        good = s[~(s.ler_low > best.ler_high)]
-        cheapest_ms = good.ms_per_shot.min()
+        good = set(s[~(s.ler_low > best.ler_high)].decoder)
+        cheapest_ms = s[s.decoder.isin(good)].ms_per_shot.min()
         choices = {"accurate": recommend(predicted[key], "accurate").decoder,
                    "cheapest": recommend(predicted[key], "cheapest").decoder, "bposd": "bposd", "tesseract": "tesseract"}
+        outcome = {}
         for name, d in choices.items():
-            score = scores[name]
-            score["chosen"][d] = score["chosen"].get(d, 0) + 1
-            if d not in ler:
-                score["fallbacks"] += 1
-                d = "bposd" if "bposd" in ler else min(ler, key=ler.get)
-            score["good"].append(d in set(good.decoder))
-            score["regret"].append(ler[d] / best.ler)
-            score["time"].append(ms[d] / cheapest_ms)
-    policies = {POLICIES[name]: {
-        "good_enough": float(np.mean(s["good"])), "median_regret": float(np.median(s["regret"])),
-        "p90_regret": float(np.quantile(s["regret"], 0.9)), "median_time_vs_cheapest_good": float(np.median(s["time"])),
-        "fallbacks": s["fallbacks"], "chosen": {str(d): n for d, n in sorted(s["chosen"].items(), key=lambda x: -x[1])}}
-        for name, s in scores.items()}
+            fallback = d not in ler
+            used = ("bposd" if "bposd" in ler else min(ler, key=ler.get)) if fallback else d
+            outcome[name] = {"chosen": d, "fallback": fallback, "good": used in good, "regret": ler[used] / best.ler,
+                             "time": ms[used] / cheapest_ms}
+        outcomes.append(outcome)
+        if COMPLETE <= set(ler):
+            complete.append(outcome)
     ruled_out = m.merge(pred[["circuit_key", "decoder", "applicable"]], on=["circuit_key", "decoder"])
     ruled_out = ruled_out[~ruled_out.applicable.astype(bool)].decoder.value_counts()
-    return {"circuits": int(m.circuit_key.nunique()), "policies": policies,
+    return {"circuits": len(outcomes), "policies": _aggregate(outcomes),
+            "complete": {"decoders": sorted(COMPLETE), "circuits": len(complete), "policies": _aggregate(complete)},
             "measured_but_inapplicable": {str(d): int(n) for d, n in ruled_out.items()}}
 
 
@@ -189,6 +206,14 @@ def report_markdown(metrics: dict) -> str:
     for name, p in rec["policies"].items():
         lines.append(f"| {name} | {_pct(p['good_enough'])} | {_f(p['median_regret'])} | {_f(p['p90_regret'])} | "
                      f"{_f(p['median_time_vs_cheapest_good'])} | {p['fallbacks']} |")
+    c = rec["complete"]
+    lines += ["", f"On the {c['circuits']} of them on which all of {', '.join(c['decoders'])} were measured, so that "
+              "no choice falls back:", "",
+              "| policy | good enough | median regret | p90 regret | median time vs cheapest good-enough |",
+              "|---|---|---|---|---|"]
+    for name, p in c["policies"].items():
+        lines.append(f"| {name} | {_pct(p['good_enough'])} | {_f(p['median_regret'])} | {_f(p['p90_regret'])} | "
+                     f"{_f(p['median_time_vs_cheapest_good'])} |")
     lines.append("")
     for name, p in rec["policies"].items():
         if name.startswith("recommend"):

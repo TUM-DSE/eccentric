@@ -85,12 +85,15 @@ report in [reports/REPORT.md](reports/REPORT.md)):
 | Prediction | Result |
 |---|---|
 | Above or below threshold | 96% correct (recall 95%, precision 94%) |
-| Logical error rate of the best decoder | median error 0.11 decades (1.3×), rank correlation 0.97 |
-| Time per shot | 83% within 3× (BP-LSD, BeliefFind 95%; Relay-BP 62%), rank correlation 0.97 |
-| Decoder choice ("accurate" / "cheapest") | good enough on 90% / 87% of circuits, against 75% for always BP-OSD |
+| Logical error rate of the best decoder | median error 0.10 decades (1.26×), p90 0.51, rank correlation 0.97 |
+| Time per shot | 85% within 3× (BP-LSD, BeliefFind 96%; Relay-BP 63%), rank correlation 0.97 |
+| Decoder choice, all 1,336 circuits ("accurate" / "cheapest") | good enough on 90% / 87%, against 75% for always BP-OSD |
+| Decoder choice, the 599 circuits where all five BP-type and Tesseract decoders ran | "accurate": good enough on 92% at the cheapest good-enough decoder's time (median); always Tesseract: 100% at 3.8× that time; always BP-OSD: 60% at 2.6× |
 
-The 80% intervals are conformalized on held-out codes and hold 82% of held-out LERs and 81–86% of each
-decoder's times (quantile regression alone held 59% and 69%).
+The 80% intervals are conformalized on held-out codes and hold 83% of held-out LERs and 77–90% of each
+decoder's times (quantile regression alone held 59% and 69%). Model settings come from the experiments in
+[experiments/RESULTS.md](experiments/RESULTS.md) (hyperparameters, monotonic constraints, feature
+importance, learning curve); the learning curve shows more codes still improve every prediction.
 
 Known weaknesses: in this first table the matching and color features are missing, so matching and
 Chromobius are never recommended in the held-out evaluation (they are for new circuits, whose features

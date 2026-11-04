@@ -40,6 +40,9 @@ LER_FLOOR = 1e-8
 FIRST_BATCH = 100
 PARAMS = dict(learning_rate=0.05, max_iter=200, max_leaf_nodes=15, min_samples_leaf=20, l2_regularization=1.0,
               early_stopping=False)
+# The LER and time quantiles gain from more capacity on held-out codes (experiments/RESULTS.md: LER p90
+# error 0.57 -> 0.51 decades, time within 3x 83% -> 85%); the regime and regret models lose from it
+QUANTILE_PARAMS = {**PARAMS, "learning_rate": 0.1, "max_leaf_nodes": 31, "max_iter": 400}
 
 
 class Constant:
@@ -93,15 +96,15 @@ def _qname(prefix, q):
     return f"{prefix}_q{round(100 * q):02d}"
 
 
-def _regressor(quantile, categorical, random_state):
+def _regressor(quantile, categorical, random_state, params=PARAMS):
     return HistGradientBoostingRegressor(loss="quantile", quantile=quantile, random_state=random_state,
-                                         categorical_features=categorical, **PARAMS)
+                                         categorical_features=categorical, **params)
 
 
-def _fit_quantiles(X, y, quantiles, categorical, random_state):
+def _fit_quantiles(X, y, quantiles, categorical, random_state, params=PARAMS):
     if len(y) == 0:
         return {q: Constant(math.nan) for q in quantiles}
-    return {q: _regressor(q, categorical, random_state).fit(X, y) for q in quantiles}
+    return {q: _regressor(q, categorical, random_state, params).fit(X, y) for q in quantiles}
 
 
 def _predict_quantiles(models, X, quantiles):
@@ -133,7 +136,7 @@ def train(df: pd.DataFrame, quantiles=(0.1, 0.5, 0.9), random_state=0, manifest:
 
     measured = labels.best_status.to_numpy() == "measured"
     y = np.log10(np.clip(labels.best_ler.to_numpy()[measured], LER_FLOOR, 1))
-    ler = _fit_quantiles(X[measured], y, quantiles, None, random_state)
+    ler = _fit_quantiles(X[measured], y, quantiles, None, random_state, QUANTILE_PARAMS)
 
     reg = regret_rows(df)
     regret_vocab = sorted(reg.decoder.unique())
@@ -146,11 +149,12 @@ def train(df: pd.DataFrame, quantiles=(0.1, 0.5, 0.9), random_state=0, manifest:
     time_vocab = sorted(set(timed.decoder) | set(censored.decoder))
     Xt = _with_decoder(_matrix(timed, features), timed.decoder, time_vocab)
     yt = np.log10(timed.ms_per_shot.to_numpy(float))
-    time = _fit_quantiles(Xt, yt, quantiles, categorical, random_state)
+    time = _fit_quantiles(Xt, yt, quantiles, categorical, random_state, QUANTILE_PARAMS)
     if len(censored) and len(timed):
         Xc = _with_decoder(_matrix(censored, features), censored.decoder, time_vocab)
         yc = np.maximum(time[0.5].predict(Xc), np.log10(timeout_bound_ms(censored.timeout_s)))
-        time = _fit_quantiles(np.vstack([Xt, Xc]), np.concatenate([yt, yc]), quantiles, categorical, random_state)
+        time = _fit_quantiles(np.vstack([Xt, Xc]), np.concatenate([yt, yc]), quantiles, categorical, random_state,
+                              QUANTILE_PARAMS)
 
     meta = {
         "created": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
@@ -159,7 +163,7 @@ def train(df: pd.DataFrame, quantiles=(0.1, 0.5, 0.9), random_state=0, manifest:
         "features": features,
         "quantiles": quantiles,
         "decoders": {"regret": regret_vocab, "time": time_vocab},
-        "params": PARAMS,
+        "params": {"regime": PARAMS, "regret": PARAMS, "ler": QUANTILE_PARAMS, "time": QUANTILE_PARAMS},
         "random_state": random_state,
         "training": {"rows": len(df), "circuits": len(circuits), "regime_circuits": len(labels),
                      "above_share": float(above.mean()) if len(above) else math.nan, "ler_circuits": int(measured.sum()),
@@ -199,7 +203,7 @@ def _conformal(df, features, quantiles, folds, random_state):
         measured = lab.best_status.to_numpy() == "measured"
         Xl = _matrix(circuits.loc[lab.index[measured]], features)
         yl = np.log10(np.clip(lab.best_ler.to_numpy()[measured], LER_FLOOR, 1))
-        models = _fit_quantiles(Xl, yl, outer, None, random_state)
+        models = _fit_quantiles(Xl, yl, outer, None, random_state, QUANTILE_PARAMS)
         test_lab = labels[labels.index.isin(test_keys) & (labels.best_status == "measured")]
         if len(test_lab):
             Xh = _matrix(circuits.loc[test_lab.index], features)
@@ -212,7 +216,8 @@ def _conformal(df, features, quantiles, folds, random_state):
         if len(timed) and len(held_timed):
             categorical = [False] * len(features) + [True]
             models = _fit_quantiles(_with_decoder(_matrix(timed, features), timed.decoder, vocab),
-                                    np.log10(timed.ms_per_shot.to_numpy(float)), outer, categorical, random_state)
+                                    np.log10(timed.ms_per_shot.to_numpy(float)), outer, categorical, random_state,
+                                    QUANTILE_PARAMS)
             held_timed = held_timed[held_timed.decoder.isin(vocab)]
             pred = _predict_quantiles(models, _with_decoder(_matrix(held_timed, features), held_timed.decoder, vocab), outer)
             time_parts.append(pd.DataFrame({"decoder": held_timed.decoder.to_numpy(), "lo": pred[:, 0], "hi": pred[:, 1],
