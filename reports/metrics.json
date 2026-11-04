@@ -1,0 +1,167 @@
+{
+ "dataset": {
+  "created": "2026-11-04T21:22:07+00:00",
+  "rows": 5965,
+  "circuits": 1633,
+  "codes": 54,
+  "sources": {
+   "eccentric_results": {
+    "path": "../eccentric/experiment_results/Sweep/results.csv",
+    "commit": "79badf0",
+    "sha256": "404566861cbf13980801f255140868eae85b650d72818208cd4180c2d1058be6"
+   },
+   "eccentric_dem_features": {
+    "path": "../eccentric/experiment_results/Sweep/dem_features.json",
+    "commit": "79badf0",
+    "sha256": "09878a9b2fb67933812938be8c1375724e98050ba10fd81c3537aa594932a8dd"
+   }
+  }
+ },
+ "setup": {
+  "folds": 10,
+  "codes": 54,
+  "circuits": 1633,
+  "decodes": 5965,
+  "split": "GroupKFold over codes"
+ },
+ "regime": {
+  "circuits": 1633,
+  "base_rate": 0.3380281690140845,
+  "accuracy": 0.9638701775872627,
+  "recall": 0.9492753623188406,
+  "precision": 0.9441441441441442
+ },
+ "ler": {
+  "circuits": 1396,
+  "median_abs_log10_error": 0.11052655419556257,
+  "p90_abs_log10_error": 0.5661867528319277,
+  "spearman": 0.9683119202810627,
+  "coverage_q10_q90": 0.5924068767908309
+ },
+ "regret": {
+  "decodes": 5163,
+  "median_abs_log10_error": 0.01974368694460632,
+  "p90_abs_log10_error": 0.2589761507890001
+ },
+ "time": {
+  "decoders": {
+   "all": {
+    "decodes": 5737,
+    "median_abs_log10_error": 0.17116860122916866,
+    "p90_abs_log10_error": 0.6992646497366792,
+    "spearman": 0.9673151803905834,
+    "within_3x": 0.8335366916506886,
+    "coverage_q10_q90": 0.6939166811922608
+   },
+   "mwpm": {
+    "decodes": 249,
+    "median_abs_log10_error": 0.190756983681853,
+    "p90_abs_log10_error": 0.5377769746652376,
+    "spearman": 0.8977463211165162,
+    "within_3x": 0.8554216867469879,
+    "coverage_q10_q90": 0.7108433734939759
+   },
+   "bposd": {
+    "decodes": 1582,
+    "median_abs_log10_error": 0.1604049721453422,
+    "p90_abs_log10_error": 0.6257541734983366,
+    "spearman": 0.9743536146414955,
+    "within_3x": 0.8400758533501896,
+    "coverage_q10_q90": 0.6826801517067004
+   },
+   "bplsd": {
+    "decodes": 898,
+    "median_abs_log10_error": 0.12930377549738803,
+    "p90_abs_log10_error": 0.375539389839493,
+    "spearman": 0.987230769819724,
+    "within_3x": 0.9465478841870824,
+    "coverage_q10_q90": 0.7260579064587973
+   },
+   "belief_find": {
+    "decodes": 974,
+    "median_abs_log10_error": 0.13586054704034134,
+    "p90_abs_log10_error": 0.37512055060789856,
+    "spearman": 0.9864175381574578,
+    "within_3x": 0.946611909650924,
+    "coverage_q10_q90": 0.7197125256673511
+   },
+   "relay_bp": {
+    "decodes": 1197,
+    "median_abs_log10_error": 0.29574354957670135,
+    "p90_abs_log10_error": 1.4124274615547987,
+    "spearman": 0.8589188797236418,
+    "within_3x": 0.6240601503759399,
+    "coverage_q10_q90": 0.6491228070175439
+   },
+   "tesseract": {
+    "decodes": 837,
+    "median_abs_log10_error": 0.1919709691462672,
+    "p90_abs_log10_error": 0.5914002033703142,
+    "spearman": 0.9777173477612617,
+    "within_3x": 0.8614097968936678,
+    "coverage_q10_q90": 0.7096774193548387
+   }
+  },
+  "unpredicted": 20,
+  "timeouts": {
+   "decodes": 14,
+   "predicted_above_bound": 0.0
+  }
+ },
+ "recommendation": {
+  "circuits": 1336,
+  "policies": {
+   "recommend, accurate": {
+    "good_enough": 0.9041916167664671,
+    "median_regret": 1.0,
+    "p90_regret": 1.155372605615324,
+    "median_time_vs_cheapest_good": 1.0,
+    "fallbacks": 429,
+    "chosen": {
+     "tesseract": 811,
+     "relay_bp": 518,
+     "bposd": 4,
+     "belief_find": 3
+    }
+   },
+   "recommend, cheapest": {
+    "good_enough": 0.8660179640718563,
+    "median_regret": 1.0,
+    "p90_regret": 1.27731156545621,
+    "median_time_vs_cheapest_good": 1.0,
+    "fallbacks": 373,
+    "chosen": {
+     "tesseract": 671,
+     "relay_bp": 548,
+     "bposd": 109,
+     "belief_find": 4,
+     "bplsd": 4
+    }
+   },
+   "always bposd": {
+    "good_enough": 0.75,
+    "median_regret": 1.0102916254766274,
+    "p90_regret": 1.8757212552179978,
+    "median_time_vs_cheapest_good": 2.774765150378915,
+    "fallbacks": 57,
+    "chosen": {
+     "bposd": 1336
+    }
+   },
+   "always tesseract": {
+    "good_enough": 0.9610778443113772,
+    "median_regret": 1.0,
+    "p90_regret": 1.0369397639675286,
+    "median_time_vs_cheapest_good": 2.580057194603298,
+    "fallbacks": 656,
+    "chosen": {
+     "tesseract": 1336
+    }
+   }
+  },
+  "measured_but_inapplicable": {
+   "mwpm": 208,
+   "chromobius": 18
+  }
+ }
+}

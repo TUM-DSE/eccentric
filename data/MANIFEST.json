@@ -1,0 +1,65 @@
+{
+ "created": "2026-11-04T21:22:07+00:00",
+ "feature_version": 1,
+ "features": [
+  "detectors",
+  "observables",
+  "mechanisms",
+  "mechanism_weight_mean",
+  "mechanism_weight_max",
+  "hyperedge_fraction",
+  "error_mass",
+  "error_mass_per_detector",
+  "det_fire_mean",
+  "det_fire_median",
+  "det_fire_p90",
+  "det_fire_max",
+  "logical_mass",
+  "undetectable_faults",
+  "undetectable_probability",
+  "graphlike",
+  "color_annotated",
+  "qubits",
+  "two_qubit_gates",
+  "swaps",
+  "ticks",
+  "measurements",
+  "rounds",
+  "decomposable"
+ ],
+ "rows": 5965,
+ "circuits": 1633,
+ "codes": 54,
+ "decoders": [
+  "belief_find",
+  "bplsd",
+  "bposd",
+  "chromobius",
+  "mwpm",
+  "relay_bp",
+  "tesseract"
+ ],
+ "status": {
+  "measured": 5357,
+  "upper bound": 306,
+  "low statistics": 279,
+  "timeout": 14,
+  "decoder not applicable": 9
+ },
+ "left_out": {
+  "skipped (no circuit)": 2205,
+  "no features yet": 0
+ },
+ "sources": {
+  "eccentric_results": {
+   "path": "../eccentric/experiment_results/Sweep/results.csv",
+   "commit": "79badf0",
+   "sha256": "404566861cbf13980801f255140868eae85b650d72818208cd4180c2d1058be6"
+  },
+  "eccentric_dem_features": {
+   "path": "../eccentric/experiment_results/Sweep/dem_features.json",
+   "commit": "79badf0",
+   "sha256": "09878a9b2fb67933812938be8c1375724e98050ba10fd81c3537aa594932a8dd"
+  }
+ }
+}
