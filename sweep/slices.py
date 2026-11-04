@@ -190,6 +190,27 @@ def readout_700():
                                error_probability=None, decoders=decoders)
 
 
+FLOQUET_CODES = ["honeycomb", "planar_honeycomb"] + sorted(c for c in CODES if "hyperbolic_floquet" in c)
+
+
+def floquet_devices():
+    """Floquet codes (honeycomb, planar honeycomb, hyperbolic and semi-hyperbolic) on real devices: IBM's
+    (one and several QPUs, the bicycle module; today's and tenfold lower noise), Willow, Quantinuum's
+    ions and the neutral-atom arrays. Their pair checks need only two-qubit gates (or ancillas), and
+    all of them are matchable"""
+    ibm = ["real_flamingo", "real_flamingo_downscaled"]
+    devices = [("real_torino", ["real_heron"]), ("real_loon_1_qpu", ibm), ("real_loon", ibm), ("real_flamingo_1_qpu", ibm),
+               ("real_flamingo", ibm), ("real_bicycle", ibm), ("real_willow", ["real_willow", "real_willow_spec"]),
+               ("real_apollo", ["real_apollo"]), ("real_infleqtion", ["real_infleqtion"]), ("real_harvard", ["real_harvard"])]
+    for code in FLOQUET_CODES:
+        for d in code_distances(code):
+            for backend, noises in devices:
+                for error_type in noises:
+                    yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=error_type,
+                               error_probability=None, decoders=["mwpm", "bposd", "relay_bp", "tesseract"],
+                               decode=dict(time_budget=2 * 3600, max_shots=200_000, timeout=3 * 3600))
+
+
 # The paper's experiments compiled onto sparse devices with circuit qubit i on device qubit i
 PAPER_TOPOLOGY = ["Real_Topology", "Willow", "Connectivity", "Program_stats_topology", "Apollo", "Infleqtion"]
 
@@ -235,4 +256,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices}

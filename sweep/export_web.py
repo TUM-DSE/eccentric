@@ -83,6 +83,7 @@ SLICES = {
     "paper_topology": "Paper: experiments on sparse devices, re-run with placement without SWAPs",
     "readout_700": "IBM devices with 700 ns instead of 1.56 us readout",
     "reference": "Reference: all codes, all-to-all, SD6 noise",
+    "floquet_devices": "Floquet codes on IBM, Google, ion and neutral-atom devices",
 }
 
 COLUMNS = ["slice", "code", "family", "taxonomy", "schedule", "distance", "rounds", "k", "code_qubits", "backend",
