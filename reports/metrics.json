@@ -22,7 +22,8 @@
   "codes": 54,
   "circuits": 1633,
   "decodes": 5965,
-  "split": "GroupKFold over codes"
+  "split": "GroupKFold over codes",
+  "calibrated": true
  },
  "regime": {
   "circuits": 1633,
@@ -36,7 +37,7 @@
   "median_abs_log10_error": 0.11052655419556257,
   "p90_abs_log10_error": 0.5661867528319277,
   "spearman": 0.9683119202810627,
-  "coverage_q10_q90": 0.5924068767908309
+  "coverage_q10_q90": 0.8151862464183381
  },
  "regret": {
   "decodes": 5163,
@@ -51,7 +52,7 @@
     "p90_abs_log10_error": 0.6992646497366792,
     "spearman": 0.9673151803905834,
     "within_3x": 0.8335366916506886,
-    "coverage_q10_q90": 0.6939166811922608
+    "coverage_q10_q90": 0.8227296496426704
    },
    "mwpm": {
     "decodes": 249,
@@ -59,7 +60,7 @@
     "p90_abs_log10_error": 0.5377769746652376,
     "spearman": 0.8977463211165162,
     "within_3x": 0.8554216867469879,
-    "coverage_q10_q90": 0.7108433734939759
+    "coverage_q10_q90": 0.8554216867469879
    },
    "bposd": {
     "decodes": 1582,
@@ -67,7 +68,7 @@
     "p90_abs_log10_error": 0.6257541734983366,
     "spearman": 0.9743536146414955,
     "within_3x": 0.8400758533501896,
-    "coverage_q10_q90": 0.6826801517067004
+    "coverage_q10_q90": 0.8147914032869785
    },
    "bplsd": {
     "decodes": 898,
@@ -75,7 +76,7 @@
     "p90_abs_log10_error": 0.375539389839493,
     "spearman": 0.987230769819724,
     "within_3x": 0.9465478841870824,
-    "coverage_q10_q90": 0.7260579064587973
+    "coverage_q10_q90": 0.8318485523385301
    },
    "belief_find": {
     "decodes": 974,
@@ -83,7 +84,7 @@
     "p90_abs_log10_error": 0.37512055060789856,
     "spearman": 0.9864175381574578,
     "within_3x": 0.946611909650924,
-    "coverage_q10_q90": 0.7197125256673511
+    "coverage_q10_q90": 0.8203285420944558
    },
    "relay_bp": {
     "decodes": 1197,
@@ -91,7 +92,7 @@
     "p90_abs_log10_error": 1.4124274615547987,
     "spearman": 0.8589188797236418,
     "within_3x": 0.6240601503759399,
-    "coverage_q10_q90": 0.6491228070175439
+    "coverage_q10_q90": 0.8195488721804511
    },
    "tesseract": {
     "decodes": 837,
@@ -99,7 +100,7 @@
     "p90_abs_log10_error": 0.5914002033703142,
     "spearman": 0.9777173477612617,
     "within_3x": 0.8614097968936678,
-    "coverage_q10_q90": 0.7096774193548387
+    "coverage_q10_q90": 0.8255675029868578
    }
   },
   "unpredicted": 20,

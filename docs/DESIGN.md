@@ -52,7 +52,9 @@ A mechanism is one `error(p)` instruction (after flattening); a detector fires w
 
 Names as in ECCentric: `mwpm` (PyMatching), `bposd`, `bplsd`, `belief_find` (ldpc), `relay_bp`,
 `tesseract`, `chromobius`. `applicable(features) -> dict[str, bool]`: `mwpm` needs `decomposable`
-(or `graphlike` when only a DEM is known), `chromobius` needs `color_annotated`, the rest always apply.
+(graph-like errors in a DEM settle it in favour), `chromobius` needs `color_annotated`, the rest always
+apply; `None` when the features cannot tell (e.g. matching from a DEM alone), which the recommendation
+treats as not applicable and `advise` reports.
 
 ## Training table (`dataset.py`)
 
@@ -89,6 +91,12 @@ for per-decoder models), never the code name, so that unseen codes are predicted
 the training manifest and, from `qec-matchmaker train --metrics`, the evaluation metrics). The inputs are
 the `FEATURE_NAMES` columns the training table actually fills; a decoder a model did not see in training
 gets no prediction.
+
+With `train(..., calibrate=True)` (what `qec-matchmaker train` and `evaluate` do), the outer LER and time
+quantiles are conformalized: models trained without a group of codes (GroupKFold, 4 folds) predict that
+group, and [q10, q90] is widened in log10 by the amount that makes it hold 80% of those held-out truths
+(per decoder for the time), stored in `meta["conformal"]`. `meta["ranges"]` holds each feature's
+training range; predictions name the features of a circuit outside it (`outside_training`).
 
 ## Recommendation (`recommend.py`)
 

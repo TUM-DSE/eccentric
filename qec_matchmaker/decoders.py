@@ -17,12 +17,11 @@ def _flag(value):
 
 
 def applicable(features: dict) -> dict:
-    """Which decoders can decode a circuit with these features. Matching needs errors that decompose
-    into edges (known from a circuit; from a DEM alone, only graph-like errors are certain); Chromobius
-    needs color-annotated detectors"""
+    """Which decoders can decode a circuit with these features: True, False, or None when the features
+    cannot tell. Matching needs errors that decompose into edges, which only the circuit shows (graph-like
+    errors in a DEM settle it in favour); Chromobius needs color-annotated detectors"""
     decomposable = _flag(features.get("decomposable"))
-    if decomposable is None:
-        decomposable = _flag(features.get("graphlike")) or False
-    return {name: (decomposable if name == "mwpm" else bool(_flag(features.get("color_annotated")))
-                   if name == "chromobius" else True)
-            for name in DECODERS}
+    if decomposable is None and _flag(features.get("graphlike")):
+        decomposable = True
+    color = _flag(features.get("color_annotated"))
+    return {name: decomposable if name == "mwpm" else color if name == "chromobius" else True for name in DECODERS}

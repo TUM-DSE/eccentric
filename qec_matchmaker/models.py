@@ -11,6 +11,12 @@ per-decoder models also take the decoder, as a categorical input.
 - time: per decoder, quantiles of log10 ms per shot. A timed-out decode is right-censored: its time per
   shot exceeds timeout_s over a nominal first batch of 100 shots. After a first fit on the decodes with a
   time, each censored decode joins a second fit at max(its predicted median, that bound).
+
+With calibrate=True, the outer quantiles are conformalized (conformalized quantile regression): models
+trained without a group of codes predict that group, and the interval [q_lo, q_hi] is widened, in
+log10, by the amount that makes it hold the nominal share of those held-out truths; for the time, per
+decoder. Quantile regression alone is too confident on codes it has not seen. The training table also
+records each feature's range, and predictions name the features of a circuit outside it.
 """
 import datetime
 import json
@@ -23,6 +29,7 @@ import numpy as np
 import pandas as pd
 import sklearn
 from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
+from sklearn.model_selection import GroupKFold
 
 from .decoders import DECODERS, applicable
 from .features import FEATURE_NAMES, FEATURE_VERSION
@@ -106,8 +113,10 @@ def _p_above(model, X):
     return model.predict(X) if isinstance(model, Constant) else model.predict_proba(X)[:, 1]
 
 
-def train(df: pd.DataFrame, quantiles=(0.1, 0.5, 0.9), random_state=0, manifest: dict | None = None) -> "ModelBundle":
-    """Train all models on a training table (dataset.py); manifest, if given, is kept in the bundle's meta"""
+def train(df: pd.DataFrame, quantiles=(0.1, 0.5, 0.9), random_state=0, manifest: dict | None = None,
+          calibrate: bool = False, calibration_folds: int = 4) -> "ModelBundle":
+    """Train all models on a training table (dataset.py); manifest, if given, is kept in the bundle's meta;
+    calibrate conformalizes the outer quantiles over `calibration_folds` groups of codes"""
     quantiles = sorted(float(q) for q in quantiles)
     if 0.5 not in quantiles:
         raise ValueError("quantiles must include 0.5")
@@ -156,8 +165,63 @@ def train(df: pd.DataFrame, quantiles=(0.1, 0.5, 0.9), random_state=0, manifest:
                      "above_share": float(above.mean()) if len(above) else math.nan, "ler_circuits": int(measured.sum()),
                      "regret_decodes": len(reg), "time_decodes": len(timed), "time_censored": len(censored)},
         "manifest": manifest,
+        "ranges": {f: [float(np.nanmin(circuits[f])), float(np.nanmax(circuits[f]))] for f in features
+                   if circuits[f].notna().any()},
+        "conformal": _conformal(df, features, quantiles, calibration_folds, random_state) if calibrate else None,
     }
     return ModelBundle({"regime": regime, "ler": ler, "regret": regret, "time": time}, meta)
+
+
+def _cqr(lo, hi, y, coverage):
+    """The widening (in log10) that makes [lo, hi] hold `coverage` of y, with the finite-sample correction"""
+    if len(y) == 0:
+        return 0.0
+    scores = np.maximum(lo - y, y - hi)
+    level = min(1.0, coverage * (1 + 1 / len(y)))
+    return float(max(np.quantile(scores, level), 0.0))
+
+
+def _conformal(df, features, quantiles, folds, random_state):
+    """Widenings of the outer LER and time quantiles from predictions of codes held out of training"""
+    outer = [quantiles[0], quantiles[-1]]
+    coverage = quantiles[-1] - quantiles[0]
+    circuits = circuit_features(df)
+    labels = circuit_labels(df)
+    codes = df.groupby("circuit_key", sort=False).code.first()
+    ler_lo, ler_hi, ler_y = [], [], []
+    time_parts = []
+    keys = circuits.index.to_numpy()
+    groups = codes.loc[keys].to_numpy()
+    for train_idx, test_idx in GroupKFold(n_splits=min(folds, len(set(groups)))).split(keys, groups=groups):
+        train_keys, test_keys = set(keys[train_idx]), set(keys[test_idx])
+        part, held = df[df.circuit_key.isin(train_keys)], df[df.circuit_key.isin(test_keys)]
+        lab = circuit_labels(part)
+        measured = lab.best_status.to_numpy() == "measured"
+        Xl = _matrix(circuits.loc[lab.index[measured]], features)
+        yl = np.log10(np.clip(lab.best_ler.to_numpy()[measured], LER_FLOOR, 1))
+        models = _fit_quantiles(Xl, yl, outer, None, random_state)
+        test_lab = labels[labels.index.isin(test_keys) & (labels.best_status == "measured")]
+        if len(test_lab):
+            Xh = _matrix(circuits.loc[test_lab.index], features)
+            pred = _predict_quantiles(models, Xh, outer)
+            ler_lo.append(pred[:, 0])
+            ler_hi.append(pred[:, 1])
+            ler_y.append(np.log10(np.clip(test_lab.best_ler.to_numpy(), LER_FLOOR, 1)))
+        timed, held_timed = part[part.ms_per_shot > 0], held[held.ms_per_shot > 0]
+        vocab = sorted(timed.decoder.unique())
+        if len(timed) and len(held_timed):
+            categorical = [False] * len(features) + [True]
+            models = _fit_quantiles(_with_decoder(_matrix(timed, features), timed.decoder, vocab),
+                                    np.log10(timed.ms_per_shot.to_numpy(float)), outer, categorical, random_state)
+            held_timed = held_timed[held_timed.decoder.isin(vocab)]
+            pred = _predict_quantiles(models, _with_decoder(_matrix(held_timed, features), held_timed.decoder, vocab), outer)
+            time_parts.append(pd.DataFrame({"decoder": held_timed.decoder.to_numpy(), "lo": pred[:, 0], "hi": pred[:, 1],
+                                            "y": np.log10(held_timed.ms_per_shot.to_numpy(float))}))
+    ler = _cqr(np.concatenate(ler_lo), np.concatenate(ler_hi), np.concatenate(ler_y), coverage) if ler_y else 0.0
+    times = pd.concat(time_parts, ignore_index=True) if time_parts else pd.DataFrame(columns=["decoder", "lo", "hi", "y"])
+    time = {d: _cqr(g.lo.to_numpy(), g.hi.to_numpy(), g.y.to_numpy(), coverage) for d, g in times.groupby("decoder")}
+    return {"coverage": coverage, "folds": folds, "ler": ler, "time": time,
+            "time_all": _cqr(times.lo.to_numpy(), times.hi.to_numpy(), times.y.to_numpy(), coverage) if len(times) else 0.0}
 
 
 class ModelBundle:
@@ -191,12 +255,22 @@ class ModelBundle:
         X = _matrix(frame, self.features)
         q, models = self.quantiles, self.models
 
-        ler = 10 ** _predict_quantiles(models["ler"], X, q)
+        ler = _predict_quantiles(models["ler"], X, q)
+        conformal = self.meta.get("conformal")
+        if conformal:
+            ler[:, 0] -= conformal["ler"]
+            ler[:, -1] += conformal["ler"]
+        ler = 10 ** ler
         Xd, dec = np.repeat(X, k, axis=0), np.tile(np.asarray(decoders, dtype=object), n)
         regret_vocab, time_vocab = self.meta["decoders"]["regret"], self.meta["decoders"]["time"]
         regret = 10 ** np.maximum(models["regret"].predict(_with_decoder(Xd, dec, regret_vocab)), 0)
         regret[~np.isin(dec, regret_vocab)] = np.nan
-        ms = 10 ** _predict_quantiles(models["time"], _with_decoder(Xd, dec, time_vocab), q)
+        ms = _predict_quantiles(models["time"], _with_decoder(Xd, dec, time_vocab), q)
+        if conformal:
+            widen = np.array([conformal["time"].get(d, conformal["time_all"]) for d in dec])
+            ms[:, 0] -= widen
+            ms[:, -1] += widen
+        ms = 10 ** ms
         ms[~np.isin(dec, time_vocab)] = np.nan
 
         out = pd.DataFrame({"circuit_key": np.repeat(keys, k), "decoder": dec,
@@ -210,6 +284,16 @@ class ModelBundle:
         everything = frame.reindex(columns=FEATURE_NAMES).apply(pd.to_numeric, errors="coerce").astype(float)
         fits = [applicable(f) for f in everything.to_dict("records")]
         out["applicable"] = [fit.get(d, True) for fit in fits for d in decoders]
+        out["outside_training"] = np.repeat([", ".join(self.outside_training(f)) for f in everything.to_dict("records")], k)
+        return out
+
+    def outside_training(self, features: dict) -> list:
+        """Features of a circuit beyond the range seen in training, where predictions extrapolate"""
+        out = []
+        for name, (lo, hi) in self.meta.get("ranges", {}).items():
+            v = features.get(name)
+            if v is not None and not (isinstance(v, float) and math.isnan(v)) and not lo <= v <= hi:
+                out.append(f"{name} {v:.4g} (trained on {lo:.4g}-{hi:.4g})")
         return out
 
     def save(self, out_dir: str) -> None:

@@ -24,7 +24,7 @@ def test_evaluate_and_report(table):
     metrics = evaluate(table, folds=3)
     json.dumps(metrics)
     assert metrics["setup"] == {"folds": 3, "codes": 6, "circuits": 120, "decodes": len(table),
-                                "split": "GroupKFold over codes"}
+                                "split": "GroupKFold over codes", "calibrated": False}
     assert 0 <= metrics["regime"]["accuracy"] <= 1 and 0 < metrics["regime"]["base_rate"] < 1
     assert metrics["ler"]["spearman"] > 0.8
     assert set(metrics["time"]["decoders"]) == {"all", "mwpm", "bposd", "tesseract"}

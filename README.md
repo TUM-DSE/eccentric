@@ -74,7 +74,8 @@ factors on yours (`advise(..., speed_factors=...)`, `--calibration`).
    shot, with timed-out decodes as right-censored observations.
 3. **Recommendation** (`qec_matchmaker/recommend.py`): the most accurate, the cheapest within a tolerance
    of the most accurate, or the most accurate within a time budget, among the decoders that apply;
-   above threshold, the cheapest, with a warning.
+   above threshold, the cheapest, with a warning. Whether matching applies needs the circuit (an error
+   model alone cannot tell), so pass circuits where you can.
 
 ## How good it is
 
@@ -88,10 +89,14 @@ report in [reports/REPORT.md](reports/REPORT.md)):
 | Time per shot | 83% within 3× (BP-LSD, BeliefFind 95%; Relay-BP 62%), rank correlation 0.97 |
 | Decoder choice ("accurate" / "cheapest") | good enough on 90% / 87% of circuits, against 75% for always BP-OSD |
 
-Known weaknesses: the 80% intervals hold 59% (LER) and 69% (time) of held-out values, so they are too
-narrow on unseen codes; in this first table the matching and color features are missing, so matching and
+The 80% intervals are conformalized on held-out codes and hold 82% of held-out LERs and 81–86% of each
+decoder's times (quantile regression alone held 59% and 69%).
+
+Known weaknesses: in this first table the matching and color features are missing, so matching and
 Chromobius are never recommended in the held-out evaluation (they are for new circuits, whose features
-are complete); Relay-BP's time is the hardest to predict.
+are complete); Relay-BP's time is the hardest to predict; and trees do not extrapolate: for a circuit
+larger than any in training (say a distance-41 surface code) the predictions stay near the largest seen,
+which `advise` reports as a warning naming the features outside the training range.
 
 ## Keeping up with ECCentric
 

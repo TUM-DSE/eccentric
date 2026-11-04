@@ -49,7 +49,7 @@ def _train(args):
     from .dataset import load_dataset
     from .models import train
     table, manifest = load_dataset(args.data)
-    bundle = train(table, manifest=manifest)
+    bundle = train(table, manifest=manifest, calibrate=not args.no_calibration)
     if args.metrics and os.path.exists(args.metrics):
         with open(args.metrics) as f:
             bundle.meta["metrics"] = json.load(f)
@@ -61,7 +61,7 @@ def _evaluate(args):
     from .dataset import load_dataset
     from .evaluate import evaluate, report_markdown
     table, manifest = load_dataset(args.data)
-    metrics = evaluate(table, folds=args.folds)
+    metrics = evaluate(table, folds=args.folds, calibrate=not args.no_calibration)
     os.makedirs(args.out, exist_ok=True)
     with open(os.path.join(args.out, "metrics.json"), "w") as f:
         json.dump({"dataset": {k: manifest[k] for k in ("created", "rows", "circuits", "codes", "sources")}, **metrics},
@@ -109,12 +109,14 @@ def main(argv=None):
     p.add_argument("--data", default="data")
     p.add_argument("--out", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "model"))
     p.add_argument("--metrics", default="reports/metrics.json", help="evaluation metrics to store with the model")
+    p.add_argument("--no-calibration", action="store_true", help="skip the conformal widening of the intervals")
     p.set_defaults(run=_train)
 
     p = sub.add_parser("evaluate", help="cross-validate over held-out codes and write a report")
     p.add_argument("--data", default="data")
     p.add_argument("--out", default="reports")
     p.add_argument("--folds", type=int, default=10)
+    p.add_argument("--no-calibration", action="store_true")
     p.set_defaults(run=_evaluate)
 
     args = parser.parse_args(argv)

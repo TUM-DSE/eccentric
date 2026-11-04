@@ -99,7 +99,7 @@ def test_features_used_are_those_present_and_filled(bundle):
 def test_prediction_columns_and_consistency(fresh):
     features, pred = fresh
     assert list(pred.columns) == ["circuit_key", "decoder", "p_above", "ler_q10", "ler_q50", "ler_q90", "regret_q50",
-                                  "ler_decoder_q50", "ms_q10", "ms_q50", "ms_q90", "applicable"]
+                                  "ler_decoder_q50", "ms_q10", "ms_q50", "ms_q90", "applicable", "outside_training"]
     assert len(pred) == 3 * len(features)
     assert (pred.ler_q10 <= pred.ler_q50).all() and (pred.ler_q50 <= pred.ler_q90).all()
     assert (pred.ms_q10 <= pred.ms_q50).all() and (pred.ms_q50 <= pred.ms_q90).all()
@@ -178,11 +178,11 @@ def test_load_warns_on_another_sklearn_version(bundle, tmp_path):
         ModelBundle.load(tmp_path)
 
 
-def test_trains_on_the_interim_dataset():
-    if not os.path.exists(os.path.join(ROOT, "data_interim", "MANIFEST.json")):
-        pytest.skip("no data_interim")
+def test_trains_on_the_committed_dataset():
+    if not os.path.exists(os.path.join(ROOT, "data", "MANIFEST.json")):
+        pytest.skip("no data")
     from qec_matchmaker.dataset import load_dataset
-    df, manifest = load_dataset(os.path.join(ROOT, "data_interim"))
+    df, manifest = load_dataset(os.path.join(ROOT, "data"))
     bundle = train(df, manifest=manifest)
     assert bundle.meta["manifest"]["rows"] == len(df)
     for column in ("code", "family", "backend", "slice", "error_type"):
@@ -194,3 +194,21 @@ def test_trains_on_the_interim_dataset():
     ler = pred.groupby("circuit_key").ler_q50.first().loc[labels.index[labels.best_status == "measured"]]
     truth = np.log10(labels.best_ler[labels.best_status == "measured"].clip(1e-8, 1))
     assert pd.Series(np.log10(ler.to_numpy())).corr(pd.Series(truth.to_numpy()), method="spearman") > 0.8
+
+
+def test_conformal_calibration_widens_the_intervals(bundle):
+    calibrated = train(synthetic_table(), calibrate=True, calibration_folds=3)
+    conformal = calibrated.meta["conformal"]
+    assert conformal["ler"] >= 0 and conformal["time"] and all(v >= 0 for v in conformal["time"].values())
+    features = synthetic_features(40, seed=3)
+    plain, wide = bundle.predict(features), calibrated.predict(features)
+    assert (wide.ler_q10 <= plain.ler_q10 * (1 + 1e-9)).all() and (wide.ler_q90 >= plain.ler_q90 * (1 - 1e-9)).all()
+    assert (wide.ler_q50 == plain.ler_q50).all()
+
+
+def test_predictions_name_features_outside_the_training_range(bundle):
+    inside = synthetic_features(1, seed=5).iloc[0].to_dict()
+    assert bundle.outside_training(inside) == []
+    far = {**inside, "mechanisms": 1e12}
+    assert bundle.outside_training(far)[0].startswith("mechanisms 1e+12")
+    assert bundle.predict(far).outside_training.iloc[0].startswith("mechanisms")

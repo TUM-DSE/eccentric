@@ -98,6 +98,13 @@ def advise(source, objective: str = "cheapest", budget_ms: float = None, per_rou
             predictions[col] *= predictions.decoder.map(speed_factors).fillna(1.0)
     else:
         warnings.append("times are for one core of the reference machine; calibrate for yours (qec_matchmaker.calibrate)")
+    unknown = sorted(set(predictions.decoder[predictions.applicable.isna()]))
+    if unknown:
+        warnings.append(f"cannot tell from these features whether {', '.join(unknown)} applies (pass the circuit, "
+                        "not only its error model); left out")
+    outside = predictions.outside_training.iloc[0]
+    if outside:
+        warnings.append(f"outside the training data, predictions extrapolate: {outside}")
     rounds = features.get("rounds") if per_round else None
     choice = recommend(predictions, objective=objective, budget_ms=budget_ms, rounds=rounds, tolerance=tolerance)
     return Advice(features, predictions, choice, warnings)

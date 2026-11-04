@@ -1,6 +1,6 @@
 # Matchmaker evaluation
 
-Held-out codes: GroupKFold over codes, 10 folds over 54 codes (all circuits of a code are held out together); 1633 circuits, 5965 decodes. Errors are in decades (|log10 error|).
+Held-out codes: GroupKFold over codes, 10 folds over 54 codes (all circuits of a code are held out together); 1633 circuits, 5965 decodes. Errors are in decades (|log10 error|). Intervals [q10, q90] conformalized within each fold.
 
 ## Regime (above threshold: best LER > 0.5)
 
@@ -12,7 +12,7 @@ Held-out codes: GroupKFold over codes, 10 folds over 54 codes (all circuits of a
 
 | circuits | median error | p90 error | Spearman | in [q10, q90] |
 |---|---|---|---|---|
-| 1396 | 0.11 | 0.57 | 0.97 | 59% |
+| 1396 | 0.11 | 0.57 | 0.97 | 82% |
 
 ## Regret (a decoder's LER over the best measured)
 
@@ -22,13 +22,13 @@ Held-out codes: GroupKFold over codes, 10 folds over 54 codes (all circuits of a
 
 | decoder | decodes | median error | p90 error | within 3x | Spearman | in [q10, q90] |
 |---|---|---|---|---|---|---|
-| all | 5737 | 0.17 | 0.70 | 83% | 0.97 | 69% |
-| mwpm | 249 | 0.19 | 0.54 | 86% | 0.90 | 71% |
-| bposd | 1582 | 0.16 | 0.63 | 84% | 0.97 | 68% |
-| bplsd | 898 | 0.13 | 0.38 | 95% | 0.99 | 73% |
-| belief_find | 974 | 0.14 | 0.38 | 95% | 0.99 | 72% |
-| relay_bp | 1197 | 0.30 | 1.41 | 62% | 0.86 | 65% |
-| tesseract | 837 | 0.19 | 0.59 | 86% | 0.98 | 71% |
+| all | 5737 | 0.17 | 0.70 | 83% | 0.97 | 82% |
+| mwpm | 249 | 0.19 | 0.54 | 86% | 0.90 | 86% |
+| bposd | 1582 | 0.16 | 0.63 | 84% | 0.97 | 81% |
+| bplsd | 898 | 0.13 | 0.38 | 95% | 0.99 | 83% |
+| belief_find | 974 | 0.14 | 0.38 | 95% | 0.99 | 82% |
+| relay_bp | 1197 | 0.30 | 1.41 | 62% | 0.86 | 82% |
+| tesseract | 837 | 0.19 | 0.59 | 86% | 0.98 | 83% |
 
 Timed-out decodes: 14, predicted median above their bound for 0%. Decodes without a prediction (decoder not in the fold's training): 20.
 
