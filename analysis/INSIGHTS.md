@@ -217,6 +217,9 @@ Surface code, LER per shot, Willow's measured noise:
 - **Upper bounds**: most Apollo entries and several reference entries are bounds, not rates.
 - **Paper DQC**: different codes run at different distances per device, so the comparison is between
   the largest code each device holds, not at equal distance.
-- **Running**: 9 long jobs (until Wednesday) refine the Willow d7, semi-hyperbolic Floquet 400 and
-  Apollo rows; the 13 codes added on 2 November (coprime and trivariate bicycle, many-hypercube,
-  Golay) and the Floquet codes on devices are not in the sweep yet.
+- **Long decodes (finished 4 November)**: Willow d7 over 30 rounds 4.1% / 3.7% (measured /
+  spec-sheet noise); hh, color and Steane d17–27 on Apollo with modsi1000 at p = 0.004 16–20%;
+  semi-hyperbolic Floquet 400 at p = 0.002 0.23% (54 errors in 23,507 shots); the bounds on nsapollo
+  with Apollo noise tightened to < 0.12% (hh d17) and < 0.08% (Steane d27).
+- **Not in the sweep yet**: the 13 codes added on 2 November (coprime and trivariate bicycle,
+  many-hypercube, Golay) and the Floquet codes on devices.
