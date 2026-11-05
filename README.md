@@ -105,7 +105,7 @@ experiments:
 | `num_samples` | Number of shots (or, for `routing` and `translation`, number of repetitions) |
 | `backends` | List of backends (see below) |
 | `codes` | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane), and the codes listed under [Codes](#codes) |
-| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only), `bplsd`, `union_find`, `belief_find`, `belief_matching`, `relay_bp`, `tesseract`, `mwpf` (see [Decoders](#decoders)) |
+| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only), `bplsd`, `union_find`, `belief_find`, `belief_matching`, `relay_bp`, `tesseract`, `mwpf`, `bposd_tuned` (see [Decoders](#decoders)) |
 | `error_types` | List of noise models (see below) |
 | `error_probabilities` | Physical error rates `p` for the artificial noise models |
 | `backends_sizes` | Number of qubits of a `custom_*` backend. The largest code distance that fits is used |
@@ -175,6 +175,7 @@ Notes:
 | --- | --- | --- |
 | `mwpm` | Minimum-weight perfect matching (PyMatching) | Matchable codes: surface, heavy-hex, Bacon-Shor, repetition, XZZX, toric, honeycomb, hyperbolic Floquet |
 | `bposd`, `bposd_batch`, `bposd_chk` | BP + ordered statistics decoding (ldpc) | All codes |
+| `bposd_tuned` | The same BP-OSD with tuned BP: 100 iterations, min-sum scaling 0.625. In a pilot on 80 sweep circuits (paired shots) it gave 20% lower logical error rates on topological and other low-weight codes at a tenth of the time, but up to 3x higher on some qLDPC codes (gross, BPC, Mitten); the sweep runs it next to `bposd` on the former | All codes |
 | `chromobius` | Möbius color-code decoder | The `color` code, whose detectors carry the color and basis annotation Chromobius needs, and the `chromobius` experiment type |
 | `bplsd` | BP + localised statistics decoding (ldpc), same BP settings as `bposd` | All codes |
 | `belief_find` | BP + union-find (ldpc), same BP settings as `bposd` | All codes |

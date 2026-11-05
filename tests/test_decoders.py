@@ -63,7 +63,7 @@ def test_bposd_builds_one_decoder_per_circuit():
     assert bp_osd._last["value"][3] is not first
     # The checked variant has its own matrices (no xor priors) and OSD order
     bp_osd.bposd_chk(other, 10, False)
-    assert bp_osd._last["key"] == (False, False, 7)
+    assert bp_osd._last["key"] == (False, False, 7, "paper")
 
 
 class _Replay:
@@ -146,3 +146,15 @@ def test_mwpf_decodes_errors_that_do_not_decompose():
     assert decode("color", circuit, 200, "mwpm", "custom_full", "sd6") is None
     ler = decode("color", circuit, 2000, "mwpf", "custom_full", "sd6")
     assert ler is not None and ler < 0.05
+
+
+@pytest.mark.parametrize("code", ["surface", "bacon"])
+def test_bposd_tuned_is_bposd_with_tuned_bp(code):
+    # Bacon-Shor and Steane take BP-OSD's other code path (bposd_chk); both get the tuned BP settings
+    from eccentric.decoders import bp_osd
+    circuit = surface_circuit(0.003)
+    for decoder, expected in (("bposd", bp_osd.BP["paper"]), ("bposd_tuned", bp_osd.BP["tuned"])):
+        ler = decode(code, circuit, 300, decoder, "custom_full", "sd6")
+        assert ler is not None and 0.0 <= ler < 0.1
+        bpd = bp_osd._last["value"][3]
+        assert (bpd.max_iter, bpd.ms_scaling_factor) == (expected["max_iter"], expected["ms_scaling_factor"])

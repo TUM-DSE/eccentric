@@ -37,12 +37,14 @@ def decode(
             return chromobius(circuit, num_shots, approximate_disjoint_errors)
         except Exception as e:
             logging.error(f"Chromobius failed: {e}")
-    elif decoder == "bposd":
+    elif decoder in ("bposd", "bposd_tuned"):
+        # bposd_tuned: the same BP-OSD with tuned BP settings (bp_osd.BP)
+        bp = "tuned" if decoder == "bposd_tuned" else "paper"
         try:
             if code_name == "steane" or code_name == "bacon":
-                return bposd_chk(circuit, num_shots, approximate_disjoint_errors)
+                return bposd_chk(circuit, num_shots, approximate_disjoint_errors, bp=bp)
             else:
-                return bposd_batch(circuit, num_shots, approximate_disjoint_errors)
+                return bposd_batch(circuit, num_shots, approximate_disjoint_errors, bp=bp)
         except Exception as e:
             logging.error(f"BP-OSD failed: {e}")
             return None

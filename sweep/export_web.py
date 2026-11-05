@@ -75,7 +75,7 @@ def noise_label(error_type):
 
 DECODERS = {
     "bposd": "BP-OSD", "bplsd": "BP-LSD", "relay_bp": "Relay-BP", "belief_find": "BeliefFind",
-    "tesseract": "Tesseract", "mwpf": "MWPF", "mwpm": "MWPM", "chromobius": "Chromobius", "belief_matching": "BeliefMatching",
+    "tesseract": "Tesseract", "mwpf": "MWPF", "bposd_tuned": "BP-OSD (tuned BP)", "mwpm": "MWPM", "chromobius": "Chromobius", "belief_matching": "BeliefMatching",
     "union_find": "Union-Find",
 }
 
