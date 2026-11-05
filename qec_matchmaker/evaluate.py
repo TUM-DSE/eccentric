@@ -2,7 +2,11 @@
 group_by, without its whole code family, device or noise model).
 
 Groups are split into GroupKFold folds, all circuits of a group in one fold; with as many folds as groups
-this is leave-one-group-out. The decoder choice is scored as in ECCentric's analysis/decoding.py, on
+this is leave-one-group-out. The extrapolation splits (EXTRAPOLATIONS) are single splits instead, each
+predicting circuits beyond the range of its training data: the largest circuits (most detectors) from the
+rest; the quietest (least error mass per detector) from the rest; and, for every series of circuits that
+differ only in distance (same slice, code, device, noise and rounds per distance), its largest distance
+from the smaller ones (and everything else). The decoder choice is scored as in ECCentric's analysis/decoding.py, on
 held-out circuits with at least two measured decodes that have a time: a decoder is good enough when it is
 not significantly worse than the best measured one (its ler_low <= the best's ler_high, 95% Wilson), and
 the cheapest good-enough decoder is the good-enough one with the lowest ms per shot. A choice that was not
@@ -23,6 +27,12 @@ QUANTILE_COLUMNS = ("q10", "q50", "q90")
 # What a fold can hold out: a code, a code family, a device (backend) or a noise model (error type)
 GROUPINGS = ("code", "family", "backend", "error_type")
 GROUP_NAMES = {"code": "code", "family": "code family", "backend": "device", "error_type": "noise model"}
+# Single splits that hold out circuits beyond the training range; the share held out by size and noise
+EXTRAPOLATIONS = ("largest", "quietest", "next_distance")
+EXTRAPOLATION_SHARE = 0.2
+SPLIT_NAMES = {"largest": f"the largest {100 * EXTRAPOLATION_SHARE:.0f}% of circuits (detectors) held out",
+               "quietest": f"the quietest {100 * EXTRAPOLATION_SHARE:.0f}% of circuits (error mass per detector) held out",
+               "next_distance": "the largest distance of every series of distances held out"}
 
 
 def _ordered(decoders):
@@ -30,23 +40,47 @@ def _ordered(decoders):
     return [d for d in DECODERS if d in present] + sorted(present - set(DECODERS))
 
 
-def _fold(df, circuits, train_idx, test_idx, decoders, fold, random_state, calibrate):
-    bundle = train(df[df.circuit_key.isin(circuits.index[train_idx])], random_state=random_state, calibrate=calibrate)
+def _fold(df, circuits, train_idx, test_idx, decoders, fold, random_state, calibrate, train_options=None):
+    bundle = train(df[df.circuit_key.isin(circuits.index[train_idx])], random_state=random_state, calibrate=calibrate,
+                   **(train_options or {}))
     return bundle.predict(circuits.iloc[test_idx].reset_index(), decoders).assign(fold=fold)
 
 
+def held_out_beyond(df: pd.DataFrame, split: str) -> pd.Series:
+    """Per circuit key, whether the extrapolation split holds it out"""
+    first = df.groupby("circuit_key", sort=False).first()
+    if split == "largest":
+        return first.detectors > first.detectors.quantile(1 - EXTRAPOLATION_SHARE)
+    if split == "quietest":
+        return first.error_mass_per_detector < first.error_mass_per_detector.quantile(EXTRAPOLATION_SHARE)
+    if split == "next_distance":
+        ratio = (first.cycles / first.distance).round(2)
+        series = [first[c].map(str) for c in ("slice", "code", "backend", "error_type", "error_probability")] + [ratio.map(str)]
+        key = pd.Series(["|".join(t) for t in zip(*series)], index=first.index)
+        largest = first.distance.groupby(key).transform("max")
+        several = first.distance.groupby(key).transform("nunique") > 1
+        return several & (first.distance == largest)
+    raise ValueError(f"unknown extrapolation split {split!r}")
+
+
 def cross_val_predictions(df: pd.DataFrame, folds: int = 10, random_state: int = 0, calibrate: bool = False,
-                          group_by: str = "code", n_jobs: int = 1) -> pd.DataFrame:
+                          group_by: str = "code", n_jobs: int = 1, **train_options) -> pd.DataFrame:
     """Held-out predictions (`ModelBundle.predict` columns plus `fold`) for every circuit and every decoder
     of the table, holding out whole groups (group_by: one of GROUPINGS); calibrate conformalizes each fold's
-    intervals within its own training codes. n_jobs folds train in parallel"""
-    if group_by not in GROUPINGS:
-        raise ValueError(f"group_by must be one of {GROUPINGS}, got {group_by!r}")
+    intervals within its own training codes. n_jobs folds train in parallel. With group_by one of
+    EXTRAPOLATIONS, one fold: the circuits that split holds out, predicted from the rest"""
     circuits = circuit_features(df)
-    groups = df.groupby("circuit_key", sort=False)[group_by].first().loc[circuits.index].astype(str).to_numpy()
     decoders = _ordered(df.decoder)
-    splits = GroupKFold(n_splits=min(folds, len(set(groups)))).split(circuits, groups=groups)
-    out = Parallel(n_jobs=n_jobs)(delayed(_fold)(df, circuits, train_idx, test_idx, decoders, fold, random_state, calibrate)
+    if group_by in EXTRAPOLATIONS:
+        test = held_out_beyond(df, group_by).loc[circuits.index].to_numpy()
+        splits = [(np.flatnonzero(~test), np.flatnonzero(test))]
+    elif group_by in GROUPINGS:
+        groups = df.groupby("circuit_key", sort=False)[group_by].first().loc[circuits.index].astype(str).to_numpy()
+        splits = GroupKFold(n_splits=min(folds, len(set(groups)))).split(circuits, groups=groups)
+    else:
+        raise ValueError(f"group_by must be one of {GROUPINGS + EXTRAPOLATIONS}, got {group_by!r}")
+    out = Parallel(n_jobs=n_jobs)(delayed(_fold)(df, circuits, train_idx, test_idx, decoders, fold, random_state, calibrate,
+                                                 train_options)
                                   for fold, (train_idx, test_idx) in enumerate(splits))
     return pd.concat(out, ignore_index=True)
 
@@ -181,22 +215,28 @@ def _group_summary(df, pred):
 
 
 def evaluate(df: pd.DataFrame, folds: int = 10, random_state: int = 0, calibrate: bool = False,
-             group_by: str = "code", n_jobs: int = 1) -> dict:
+             group_by: str = "code", n_jobs: int = 1, **train_options) -> dict:
     """Held-out metrics of the regime, LER, regret and time models and of the decoder choice, holding out
-    whole groups (group_by); per_group has the headline numbers of every held-out group. Writes nothing"""
-    pred = cross_val_predictions(df, folds, random_state, calibrate, group_by, n_jobs)
-    groups = int(df[group_by].nunique())
+    whole groups (group_by); per_group has the headline numbers of every held-out group (for an
+    extrapolation split, of every code family among the held-out circuits). The scores cover the held-out
+    circuits only. train_options go to train(). Writes nothing"""
+    pred = cross_val_predictions(df, folds, random_state, calibrate, group_by, n_jobs, **train_options)
+    extrapolation = group_by in EXTRAPOLATIONS
+    df = df[df.circuit_key.isin(set(pred.circuit_key))]
+    by = ("family" if "family" in df.columns else None) if extrapolation else group_by
+    groups = int(df[by].nunique()) if by else 1
     per_group = {}
-    if group_by != "code":
-        keys = df.groupby("circuit_key")[group_by].first().astype(str)
+    if by and by != "code":
+        keys = df.groupby("circuit_key")[by].first().astype(str)
         for g, members in keys.groupby(keys):
             sub = df[df.circuit_key.isin(members.index)]
             per_group[g] = _group_summary(sub, pred[pred.circuit_key.isin(members.index)])
+    split = (SPLIT_NAMES[group_by] if extrapolation else
+             f"leave-one-{group_by}-out" if folds >= groups else f"GroupKFold over {group_by}")
     return {
         "setup": {"folds": int(pred.fold.nunique()), "group_by": group_by, "groups": groups,
                   "codes": int(df.code.nunique()), "circuits": int(df.circuit_key.nunique()), "decodes": len(df),
-                  "split": f"leave-one-{group_by}-out" if folds >= groups else f"GroupKFold over {group_by}",
-                  "calibrated": calibrate},
+                  "split": split, "calibrated": calibrate, **({"train_options": train_options} if train_options else {})},
         "regime": _regime(df, pred),
         "ler": _ler(df, pred),
         "regret": _regret(df, pred),
@@ -217,12 +257,19 @@ def _pct(x):
 def report_markdown(metrics: dict) -> str:
     """The metrics of evaluate() as a Markdown report"""
     s, g, ler, reg, t, rec = (metrics[k] for k in ("setup", "regime", "ler", "regret", "time", "recommendation"))
+    group_by = s.get("group_by", "code")
+    if group_by in EXTRAPOLATIONS:
+        held = (f"Extrapolation: {s['split']} and predicted from the rest; scores on the {s['circuits']} held-out "
+                f"circuits ({s['decodes']} decodes).")
+    else:
+        held = (f"Held-out {GROUP_NAMES[group_by]}s: {s['split']}, {s['folds']} folds over {s.get('groups', s['codes'])} "
+                f"{GROUP_NAMES[group_by]}s (all circuits of one are held out together); {s['circuits']} circuits, "
+                f"{s['decodes']} decodes.")
     lines = [
         "# Matchmaker evaluation", "",
-        f"Held-out {GROUP_NAMES[s.get('group_by', 'code')]}s: {s['split']}, {s['folds']} folds over {s.get('groups', s['codes'])} "
-        f"{GROUP_NAMES[s.get('group_by', 'code')]}s (all circuits of one are held out together); {s['circuits']} circuits, "
-        f"{s['decodes']} decodes. Errors are in decades (|log10 error|). "
-        f"Intervals [q10, q90] {'conformalized within each fold' if s.get('calibrated') else 'not conformalized'}.", "",
+        f"{held} Errors are in decades (|log10 error|). "
+        f"Intervals [q10, q90] {'conformalized within each fold' if s.get('calibrated') else 'not conformalized'}."
+        + (f" Training options: {s['train_options']}." if s.get("train_options") else ""), "",
         "## Regime (above threshold: best LER > 0.5)", "",
         "| circuits | above (base rate) | accuracy | recall | precision |", "|---|---|---|---|---|",
         f"| {g['circuits']} | {_pct(g['base_rate'])} | {_pct(g['accuracy'])} | {_pct(g['recall'])} | {_pct(g['precision'])} |", "",
@@ -268,7 +315,7 @@ def report_markdown(metrics: dict) -> str:
         lines += ["", "Measured decodes that `applicable()` rules out, so never recommended: "
                   + ", ".join(f"{d} {n}" for d, n in rec["measured_but_inapplicable"].items()) + "."]
     if metrics.get("per_group"):
-        lines += ["", f"## Per held-out {GROUP_NAMES[s['group_by']]} (worst LER first)", "",
+        lines += ["", f"## Per held-out {'code family' if group_by in EXTRAPOLATIONS else GROUP_NAMES[group_by]} (worst LER first)", "",
                   "| held out | circuits | above threshold | regime correct | LER median error | LER p90 error | "
                   "time within 3x | choice good enough (accurate) |", "|---|---|---|---|---|---|---|---|"]
         rows = sorted(metrics["per_group"].items(), key=lambda kv: -kv[1].get("ler_median_error", -1))

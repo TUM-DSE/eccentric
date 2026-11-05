@@ -18,7 +18,7 @@ def _advise(args):
         from .calibrate import load
         speed = load(args.calibration)
     advice = advise(args.input, objective=args.objective, budget_ms=args.budget_ms, per_round=args.per_round,
-                    model_dir=args.models, speed_factors=speed, tolerance=args.tolerance)
+                    model_dir=args.models, speed_factors=speed, tolerance=args.tolerance, code_distance=args.distance)
     print(json.dumps(advice.to_dict(), indent=1, default=str) if args.json else advice.summary())
 
 
@@ -61,9 +61,11 @@ def _evaluate(args):
     from .dataset import load_dataset
     from .evaluate import evaluate, report_markdown
     table, manifest = load_dataset(args.data)
-    metrics = evaluate(table, folds=args.folds, calibrate=not args.no_calibration, group_by=args.group_by, n_jobs=args.jobs)
+    options = {"parametric": False} if args.no_laws else {}
+    metrics = evaluate(table, folds=args.folds, calibrate=not args.no_calibration, group_by=args.group_by, n_jobs=args.jobs,
+                       **options)
     os.makedirs(args.out, exist_ok=True)
-    suffix = "" if args.group_by == "code" else f"_{args.group_by}"
+    suffix = ("" if args.group_by == "code" else f"_{args.group_by}") + ("_no_laws" if args.no_laws else "")
     with open(os.path.join(args.out, f"metrics{suffix}.json"), "w") as f:
         json.dump({"dataset": {k: manifest[k] for k in ("created", "rows", "circuits", "codes", "sources")}, **metrics},
                   f, indent=1, default=str)
@@ -87,6 +89,8 @@ def main(argv=None):
     p.add_argument("--budget-ms", type=float, help="time per shot (or per round, with --per-round) for --objective budget")
     p.add_argument("--per-round", action="store_true")
     p.add_argument("--tolerance", type=float, default=1.25, help="LER slack of --objective cheapest")
+    p.add_argument("--distance", type=float, help="the code's distance, if known: below threshold, the LER prediction then "
+                                                   "follows the distance scaling beyond the training data")
     p.add_argument("--calibration", help="speed factors from qec_matchmaker.calibrate")
     p.add_argument("--models", help="model directory (default: the packaged one)")
     p.add_argument("--json", action="store_true")
@@ -113,12 +117,16 @@ def main(argv=None):
     p.add_argument("--no-calibration", action="store_true", help="skip the conformal widening of the intervals")
     p.set_defaults(run=_train)
 
-    p = sub.add_parser("evaluate", help="cross-validate over held-out codes (or families, devices, noise models) and write a report")
+    p = sub.add_parser("evaluate", help="cross-validate over held-out codes (or families, devices, noise models, or "
+                                         "beyond the training range) and write a report")
     p.add_argument("--data", default="data")
     p.add_argument("--out", default="reports")
     p.add_argument("--folds", type=int, default=10, help="GroupKFold folds (more than groups: leave one group out)")
-    p.add_argument("--group-by", default="code", choices=["code", "family", "backend", "error_type"],
-                   help="what a fold holds out; other than code, writes metrics_<group>.json and REPORT_<group>.md")
+    p.add_argument("--group-by", default="code", choices=["code", "family", "backend", "error_type", "largest", "quietest",
+                                                          "next_distance"],
+                   help="what a fold holds out (largest, quietest, next_distance: one split beyond the training range); "
+                        "other than code, writes metrics_<group>.json and REPORT_<group>.md")
+    p.add_argument("--no-laws", action="store_true", help="trees alone, without the scaling laws under them")
     p.add_argument("--jobs", type=int, default=1, help="folds trained in parallel")
     p.add_argument("--no-calibration", action="store_true")
     p.set_defaults(run=_evaluate)

@@ -32,3 +32,8 @@ decoder) in every split.
     toric (0.5), surface (0.3, p90 0.9).
 - **Where ECCentric data helps most**: lower-noise devices and noise models, and noise models with loss. The
   noise-scaling sweep (device noise x0.1-1, Harvard included, started 2026-11-05) targets exactly these.
+
+**Update (scaling laws, [EXTRAPOLATION.md](EXTRAPOLATION.md)):** with the LER and time models fitted on top of
+physical scaling laws, Apollo held out improves from 1.27 to 0.47 decades (median best-LER error, leave-one-device-out),
+the quietest 20% of circuits from 0.74 to 0.30. Harvard's regime and LER are unchanged, its time within 3x
+falls from 79% to 60%.

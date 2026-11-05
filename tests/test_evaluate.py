@@ -1,8 +1,9 @@
 import json
 
+import numpy as np
 import pytest
 
-from qec_matchmaker.evaluate import cross_val_predictions, evaluate, report_markdown
+from qec_matchmaker.evaluate import cross_val_predictions, evaluate, held_out_beyond, report_markdown
 from test_models import synthetic_table
 
 
@@ -52,3 +53,29 @@ def test_hold_out_whole_families(table):
     assert "## Per held-out code family" in report_markdown(metrics)
     with pytest.raises(ValueError):
         cross_val_predictions(families, group_by="decoder")
+
+
+def test_extrapolation_splits_hold_out_beyond_the_training_range(table):
+    first = table.groupby("circuit_key").first()
+    largest = held_out_beyond(table, "largest")
+    assert first.detectors[largest].min() > first.detectors[~largest].max()
+    assert 0.15 < largest.mean() < 0.25
+    quiet = table.assign(error_mass_per_detector=table.error_mass / table.detectors)
+    quietest = held_out_beyond(quiet, "quietest")
+    em = quiet.groupby("circuit_key").error_mass_per_detector.first()
+    assert em[quietest].max() < em[~quietest].min()
+    # Series of distances: each code's circuits at three distances, two slices; the largest of each is held out
+    series = table.assign(distance=table.circuit_key.str.split("c").str[-1].astype(int) // 6 % 3 * 2 + 3, slice="s",
+                          backend="b", error_type="e", error_probability=float("nan"))
+    series = series.assign(cycles=series.distance, slice=np.where(series.circuit_key.str[-1].isin(list("02468")), "s0", "s1"))
+    held = held_out_beyond(series, "next_distance")
+    assert (series.groupby("circuit_key").distance.first()[held] == 7).all() and held.sum() == (series.groupby("circuit_key").distance.first() == 7).sum()
+    pred = cross_val_predictions(table, group_by="largest")
+    assert pred.fold.nunique() == 1 and set(pred.circuit_key) == set(largest.index[largest])
+    metrics = evaluate(table, group_by="largest")
+    assert metrics["setup"]["circuits"] == largest.sum() and metrics["setup"]["split"].startswith("the largest 20%")
+    assert report_markdown(metrics).count("Extrapolation:") == 1
+    trees = evaluate(table, group_by="largest", parametric=False)
+    assert trees["setup"]["train_options"] == {"parametric": False}
+    # The synthetic times are power laws in the size, which the time law extrapolates and the trees cannot
+    assert metrics["time"]["decoders"]["all"]["within_3x"] > trees["time"]["decoders"]["all"]["within_3x"]

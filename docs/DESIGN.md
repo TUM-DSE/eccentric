@@ -84,7 +84,25 @@ for per-decoder models), never the code name, so that unseen codes are predicted
   they are right-censored at `timeout_s * 1000 / 100` ms per shot (they did not finish a first batch of
   100 shots): after a first fit, each joins one refit at max(predicted median, its bound).
 
-`train(df, manifest=None) -> ModelBundle`; `ModelBundle.predict(features_frame or dict) -> DataFrame`
+**Scaling laws under the trees** (`train(..., parametric=True)`, the default; `evaluate --no-laws` turns
+them off). Trees cannot extrapolate: beyond the training data they repeat the value at its edge, so a
+circuit larger or quieter than any in training gets the decode time and LER of the edge. The LER and time
+quantile trees therefore model what is left after a law fitted first (bounded least squares, `Law`):
+
+- LER: `log10 LER = a + b log10 p + c d log10 p + e d + f log10 detectors` with `p` the error mass per
+  detector and `d` the code distance, fitted on circuits whose best LER is below 0.05 (below threshold
+  the LER falls as `(p / p_th)^(d/2)`). The code distance is not a circuit feature: it is an optional input
+  (`code_distance`, `LAW_INPUTS`, never seen by the trees; ECCentric's `distance` in training, `advise
+  --distance` for users). Without it, the same law without the `d` terms. The law does not hold above
+  threshold, so the prediction blends the law (plus trees on its residual) and the trees alone by the
+  trees' own median: the law's below 0.02, the trees' above 0.2, linear in log10 between.
+- Time, per decoder: `log10 ms = a + b log10 mechanisms + c log10 det_fire_mean` (slopes ≥ 0): size and
+  noise apart, because a large circuit at low noise is not a small one at high noise (BP converges in a
+  few iterations below threshold and runs to its limit above).
+
+Fitted coefficients are in `meta["laws"]`; `MODEL_VERSION` (2) guards the saved form.
+
+`train(df, manifest=None, calibrate=False, parametric=True) -> ModelBundle`; `ModelBundle.predict(features_frame or dict) -> DataFrame`
 (per circuit and decoder: `circuit_key`, `decoder`, `applicable`, `p_above`, `ler_q10/q50/q90`,
 `regret_q50`, `ler_decoder_q50`, `ms_q10/q50/q90`); `ModelBundle.save(dir)` / `ModelBundle.load(dir)`
 (`models.joblib` plus `meta.json` with the scikit-learn version, feature version and features used,

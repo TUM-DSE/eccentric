@@ -3,7 +3,8 @@ decoders measured on them. The packaged model never saw these circuits or their 
 
 python experiments/external/predict_external.py <run_dir> [--model <dir>]
 <run_dir> holds circuits.json, circuits/ and results/ (copied from the cluster). Writes
-experiments/results/external.json and experiments/EXTERNAL.md.
+experiments/results/external.json and experiments/EXTERNAL.md. Every circuit's code distance (in its name)
+is given to the model, as a user who knows their code would.
 
 Results are turned into rows as ECCentric's sweep.collect does (measured: at least the target errors; low
 statistics: fewer; upper bound: none, with the 95% Wilson bound; timeout), and scored with the same
@@ -49,7 +50,8 @@ def rows(run_dir):
         job = json.load(open(os.path.join(run_dir, "jobs", f)))
         r = json.load(open(os.path.join(run_dir, "results", f)))
         row = dict(circuit_key=f"external/{name}", source="decoder-bench" if name.startswith("decoder_bench") else "stim",
-                   code=index[name]["code"], family=family(index[name]["code"]), decoder=decoder, **features[name])
+                   code=index[name]["code"], family=family(index[name]["code"]), decoder=decoder,
+                   code_distance=float(re.search(r"_d(\d+)_", name)[1]), **features[name])
         if r["status"] == "failed" and str(r.get("error", "")).startswith("timeout after"):
             row.update(status="timeout", timeout_s=float(re.search(r"(\d+)", r["error"])[1]))
         elif r["status"] != "done" or not r.get("shots"):
@@ -114,8 +116,9 @@ def report(result, bundle):
     lines = ["# Circuits from outside ECCentric", "",
              "Matchmaker's packaged model (trained on ECCentric only) on Stim's generated memory circuits with uniform "
              "circuit noise and on decoder-bench's circuits with SI1000 noise, decoded and timed by ECCentric's sweep "
-             "worker like the training data (target 100 errors, at most 200,000 shots or 10 minutes). Errors are in "
-             "decades (|log10 error|); intervals are the model's conformalized [q10, q90].", "",
+             "worker like the training data (target 100 errors, at most 200,000 shots or 10 minutes). The model is given "
+             "each circuit's code distance. Errors are in decades (|log10 error|); intervals are the model's "
+             "conformalized [q10, q90]. Trees alone, without the scaling laws: see EXTRAPOLATION.md.", "",
              "| set | circuits | regime correct | best-LER median error | p90 | in [q10, q90] | time within 3x | "
              "choice good enough (accurate / cheapest) | always BP-OSD | always Tesseract |",
              "|---|---|---|---|---|---|---|---|---|---|"]

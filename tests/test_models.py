@@ -149,13 +149,73 @@ def test_timeouts_are_censored_not_dropped():
     bound = 300.0
     table = synthetic_table(timeout_ms=bound)
     assert (table.status == "timeout").sum() > 20
-    censored = train(table)
-    dropped = train(table[table.status != "timeout"])
-    assert censored.meta["training"]["time_censored"] == (table.status == "timeout").sum()
     big = synthetic_features(40, seed=11).assign(mechanisms=1e5, detectors=1e4)
-    ms = {name: b.predict(big, ["tesseract"]).ms_q50.median() for name, b in (("censored", censored), ("dropped", dropped))}
-    assert ms["censored"] > ms["dropped"]
-    assert ms["censored"] >= 0.9 * bound
+    for parametric in (False, True):
+        censored = train(table, parametric=parametric)
+        dropped = train(table[table.status != "timeout"], parametric=parametric)
+        assert censored.meta["training"]["time_censored"] == (table.status == "timeout").sum()
+        ms = {name: b.predict(big, ["tesseract"]).ms_q50.median() for name, b in (("censored", censored), ("dropped", dropped))}
+        assert ms["censored"] >= 0.9 * bound
+        if parametric:
+            # The time law extrapolates past the timeouts either way
+            assert abs(math.log10(ms["censored"] / true_ms("tesseract", 1e5))) < 0.3
+        else:
+            assert ms["censored"] > ms["dropped"]
+
+
+def test_time_law_extrapolates_beyond_the_largest_circuit():
+    small = synthetic_table()
+    small = small[small.mechanisms < 1e4]
+    huge = synthetic_features(40, seed=12).assign(mechanisms=1e6, detectors=1e5)
+    for parametric, limit in ((True, 0.3), (False, None)):
+        pred = train(small, parametric=parametric).predict(huge)
+        for decoder in TIME:
+            err = abs(np.log10(pred[pred.decoder == decoder].ms_q50.median() / true_ms(decoder, 1e6)))
+            if parametric:
+                assert err < limit
+            else:
+                assert err > 1  # the trees stay at the edge of the training data, 100x off and more
+
+
+def distance_table(distances, circuits_per_distance=30, seed=0):
+    """Circuits below threshold whose LER is 0.1 (p / 0.01)^(d / 2), p the error mass per detector"""
+    rng = np.random.default_rng(seed)
+    rows = []
+    for d in distances:
+        for i in range(circuits_per_distance):
+            p = 10 ** rng.uniform(-3.3, -2.5)
+            ler = 0.1 * (p / 0.01) ** (d / 2) * 10 ** rng.normal(0, 0.05)
+            shots = int(2000 / ler)
+            errors = int(round(ler * shots))
+            low, high = wilson(errors, shots)
+            rows.append({"circuit_key": f"d{d}/c{i}", "code": f"code{i % 6}", "decoder": "bposd", "status": "measured",
+                         "shots": shots, "errors": errors, "ler": errors / shots, "ler_low": low, "ler_high": high,
+                         "ms_per_shot": 1.0, "code_distance": float(d), "error_mass_per_detector": p,
+                         "detectors": 10.0 * d ** 3, "mechanisms": 100.0 * d ** 3, "det_fire_mean": 4 * p})
+    return pd.DataFrame(rows).reindex(columns=[*rows[0], "timeout_s"])
+
+
+def test_ler_law_extrapolates_to_larger_distances():
+    bundle = train(distance_table([3, 5, 7]))
+    assert bundle.meta["laws"]["ler"]["ler"] is not None
+    assert "code_distance" not in bundle.features and bundle.meta["ranges"]["code_distance"] == [3, 7]
+    test = circuit_features(distance_table([11, 15], seed=1)).reset_index()
+    truth = np.log10(distance_table([11, 15], seed=1).ler.to_numpy())
+    error = lambda pred: np.median(np.abs(np.log10(pred.ler_q50.to_numpy()) - truth))
+    assert error(bundle.predict(test, ["bposd"])) < 0.3
+    assert error(train(distance_table([3, 5, 7]), parametric=False).predict(test, ["bposd"])) > 1
+    # Without the code distance, the law without it: no longer the distance scaling
+    assert error(bundle.predict(test.drop(columns="code_distance"), ["bposd"])) > 1
+    assert "code_distance 11 (trained on 3-7)" in bundle.predict(test.iloc[:1], ["bposd"]).outside_training.iloc[0]
+
+
+def test_ler_law_is_not_used_above_threshold():
+    # Trees that predict an LER near 0.5 keep it, whatever the law says
+    bundle = train(synthetic_table())
+    model = bundle.models["ler"]
+    assert model.law_weight(np.log10([0.5, 0.2, 0.02, 0.001])).tolist() == pytest.approx([0.0, 0.0, 1.0, 1.0])
+    above = synthetic_features(40, seed=13).assign(det_fire_mean=0.3)
+    assert (bundle.predict(above).ler_q50 > 0.3).all()
 
 
 def test_save_load_round_trip(bundle, fresh, tmp_path):
@@ -175,6 +235,15 @@ def test_load_warns_on_another_sklearn_version(bundle, tmp_path):
     meta["sklearn_version"] = "0.0"
     (tmp_path / "meta.json").write_text(json.dumps(meta))
     with pytest.warns(UserWarning, match="scikit-learn 0.0"):
+        ModelBundle.load(tmp_path)
+
+
+def test_load_refuses_models_of_another_version(bundle, tmp_path):
+    bundle.save(tmp_path)
+    meta = json.loads((tmp_path / "meta.json").read_text())
+    del meta["model_version"]
+    (tmp_path / "meta.json").write_text(json.dumps(meta))
+    with pytest.raises(ValueError, match="version 1"):
         ModelBundle.load(tmp_path)
 
 

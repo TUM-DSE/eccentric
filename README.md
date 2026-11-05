@@ -5,9 +5,8 @@ and without decoding a single shot, whether the configuration is above threshold
 logical error rate will be, how long each decoder will take, and which decoder to use.
 
 > **Status: working prototype.** Features, models, recommendation, evaluation, command line and the
-> update pipeline from ECCentric work and are tested. The packaged model is trained on a first table
-> built from features ECCentric had already computed (16 of the 24 features); the next update replaces
-> it with Matchmaker's own extraction of every circuit. See [docs/DESIGN.md](docs/DESIGN.md).
+> update pipeline from ECCentric work and are tested. The packaged model is trained on Matchmaker's own
+> features of 1,810 ECCentric circuits (6,673 decodes, ECCentric 1649beb). See [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Why
 
@@ -28,6 +27,7 @@ pip install -e .                      # add [decoder-bench] to read decoder-benc
 ```bash
 qec-matchmaker advise circuit.stim                         # cheapest decoder within 1.25x of the most accurate
 qec-matchmaker advise circuit.stim --objective accurate
+qec-matchmaker advise circuit.stim --distance 11                # the code distance, if known (better beyond the training data)
 qec-matchmaker advise circuit.stim --objective budget --budget-ms 1 [--per-round]
 qec-matchmaker advise trace.h5                             # a decoder-bench trace
 qec-matchmaker features circuit.stim                       # the features the models see
@@ -71,7 +71,11 @@ factors on yours (`advise(..., speed_factors=...)`, `--calibration`).
    have not seen; they never see the code's name.
 2. **Gradient-boosted trees** (`qec_matchmaker/models.py`): P(above threshold); quantiles of the best
    logical error rate; each decoder's LER relative to the best; quantiles of each decoder's time per
-   shot, with timed-out decodes as right-censored observations.
+   shot, with timed-out decodes as right-censored observations. The LER and time trees sit on top of
+   physical scaling laws (below threshold the LER falls as (p/p_th)^(d/2) with the code distance d, if
+   given; time is a power law in the circuit's size and noise), so that circuits larger or quieter than
+   any in training are not predicted at the edge of the training data
+   ([experiments/EXTRAPOLATION.md](experiments/EXTRAPOLATION.md)).
 3. **Recommendation** (`qec_matchmaker/recommend.py`): the most accurate, the cheapest within a tolerance
    of the most accurate, or the most accurate within a time budget, among the decoders that apply;
    above threshold, the cheapest, with a warning. Whether matching applies needs the circuit (an error
@@ -79,27 +83,29 @@ factors on yours (`advise(..., speed_factors=...)`, `--calibration`).
 
 ## How good it is
 
-Evaluated on codes held out of training (10 folds over 54 codes, 1,633 circuits, 5,965 decodes; full
+Evaluated on codes held out of training (10 folds over 54 codes, 1,810 circuits, 6,673 decodes; full
 report in [reports/REPORT.md](reports/REPORT.md)):
 
 | Prediction | Result |
 |---|---|
-| Above or below threshold | 96% correct (recall 95%, precision 94%) |
-| Logical error rate of the best decoder | median error 0.10 decades (1.26×), p90 0.51, rank correlation 0.97 |
-| Time per shot | 85% within 3× (BP-LSD, BeliefFind 96%; Relay-BP 63%), rank correlation 0.97 |
-| Decoder choice, all 1,336 circuits ("accurate" / "cheapest") | good enough on 90% / 87%, against 75% for always BP-OSD |
+| Above or below threshold | 95% correct (recall 93%, precision 92%) |
+| Logical error rate of the best decoder | median error 0.09 decades (1.23×), p90 0.47, rank correlation 0.97 |
+| Time per shot | 88% within 3× (BP-LSD, BeliefFind 97%; Relay-BP 67%), rank correlation 0.97 |
+| Decoder choice, all 1,496 circuits ("accurate" / "cheapest") | good enough on 91% / 86%, against 75% for always BP-OSD |
 | Decoder choice, the 599 circuits where all five BP-type and Tesseract decoders ran | "accurate": good enough on 92% at the cheapest good-enough decoder's time (median); always Tesseract: 100% at 3.8× that time; always BP-OSD: 60% at 2.6× |
 
-The 80% intervals are conformalized on held-out codes and hold 83% of held-out LERs and 77–90% of each
-decoder's times (quantile regression alone held 59% and 69%). Model settings come from the experiments in
-[experiments/RESULTS.md](experiments/RESULTS.md) (hyperparameters, monotonic constraints, feature
-importance, learning curve); the learning curve shows more codes still improve every prediction.
+The 80% intervals are conformalized on held-out codes and hold 82% of held-out LERs and 81–89% of each
+decoder's times. Harder splits: whole code families, devices or noise models held out
+([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)); circuits beyond the training range
+([experiments/EXTRAPOLATION.md](experiments/EXTRAPOLATION.md): the quietest 20% of circuits held out, LER
+error 0.30 decades, against 0.74 for trees alone); circuits from Stim's generators and decoder-bench
+([experiments/EXTERNAL.md](experiments/EXTERNAL.md): LER error 0.15 decades, time within 3× for 69%).
+Model settings come from the experiments in [experiments/RESULTS.md](experiments/RESULTS.md).
 
-Known weaknesses: in this first table the matching and color features are missing, so matching and
-Chromobius are never recommended in the held-out evaluation (they are for new circuits, whose features
-are complete); Relay-BP's time is the hardest to predict; and trees do not extrapolate: for a circuit
-larger than any in training (say a distance-41 surface code) the predictions stay near the largest seen,
-which `advise` reports as a warning naming the features outside the training range.
+Known weaknesses: Relay-BP's time is the hardest to predict; beyond the training data the 80% intervals
+are too narrow (they are calibrated on held-out codes); a noise model unlike any in training can mislead
+the time law (Harvard's atom loss held out: time within 3× 79% -> 60%); and `advise` warns, naming the
+features, when a circuit is outside the training range.
 
 ## Keeping up with ECCentric
 
@@ -113,7 +119,7 @@ It extracts the features of new circuits on the cluster that holds ECCentric's r
 (`qec-matchmaker extract`, incremental), rebuilds the training table from ECCentric's committed sweep
 table (`qec-matchmaker ingest`; the manifest records the ECCentric commit and file hashes), retrains
 (`train`) and re-evaluates (`evaluate`), and commits `data/`, the packaged model and `reports/` when they
-changed. ECCentric's daily refresh runs it.
+changed. It is run by hand after ECCentric's sweep table changes; ECCentric's daily refresh does not run it.
 
 ## Decoders
 
