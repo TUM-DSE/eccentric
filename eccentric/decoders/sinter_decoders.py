@@ -22,6 +22,7 @@ def relay_bp(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors:
     # decode_shots_bit_packed: that unpacks the detection events without their count, so a circuit whose number
     # of detectors is not a multiple of 8 gets up to 7 extra syndrome bits, and Relay-BP then rarely converges
     # (bivariate bicycle d = 6, 252 detectors: 37x slower and LER 0.120 instead of 0.095)
+    # Fixed upstream in relay-bp 0.2.2 (trmue/relay#34); requirements.txt pins 0.2.1
     from relay_bp.stim.sinter.decoders import SinterDecoder_RelayBP
     dets, actual_obs_flips = circuit.compile_detector_sampler().sample(shots=num_shots, separate_observables=True)
     dem = circuit.detector_error_model(approximate_disjoint_errors=approximate_disjoint_errors)

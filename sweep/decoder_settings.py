@@ -2,6 +2,7 @@
 same shots of a sample of sweep circuits, so that every comparison is paired.
 
     python -m sweep.decoder_settings make <run_dir> <results.csv> <runs base dir> [<circuits>]
+    python -m sweep.decoder_settings extend <run_dir>       # jobs of variants added to VARIANTS since
     python -m sweep.decoder_settings report <run_dir> <out.csv>
 
 Jobs run through sweep.run_job (types settings_shots and settings_decode) with the usual workers. A shots
@@ -25,13 +26,16 @@ VARIANTS = {
     "bposd": {"current": dict(max_iter=10000, ms_scaling_factor=1.0),
               "iter1000": dict(max_iter=1000, ms_scaling_factor=1.0),
               "iter100": dict(max_iter=100, ms_scaling_factor=1.0),
-              "iter100_ms0.625": dict(max_iter=100, ms_scaling_factor=0.625)},
+              "iter100_ms0.625": dict(max_iter=100, ms_scaling_factor=0.625),
+              "iter1000_ms0.625": dict(max_iter=1000, ms_scaling_factor=0.625)},
     "bplsd": {"current": dict(max_iter=10000, lsd_order=7),
               "iter100": dict(max_iter=100, lsd_order=7),
-              "iter100_order10": dict(max_iter=100, lsd_order=10)},
+              "iter100_order10": dict(max_iter=100, lsd_order=10),
+              "iter100_ms0.625": dict(max_iter=100, lsd_order=7, ms_scaling_factor=0.625)},
     "belief_find": {"current": dict(max_iter=10000),
                     "iter1000": dict(max_iter=1000),
-                    "iter100": dict(max_iter=100)},
+                    "iter100": dict(max_iter=100),
+                    "iter100_ms0.625": dict(max_iter=100, ms_scaling_factor=0.625)},
     "relay_bp": {"current": dict(precision="f64", pre_iter=60, stop_nconv=5),
                  "decoder_bench": dict(precision="f32", pre_iter=80, stop_nconv=3)},
 }
@@ -88,6 +92,23 @@ def make(run_dir, results_csv, base, circuits=60):
             count += 1
     print(f"{len(sample)} circuits ({sample.family.nunique()} families), {count} jobs in {run_dir}")
     print(sample.family.value_counts().to_dict())
+
+
+def extend(run_dir):
+    """Jobs for the variants of VARIANTS that the run directory has no jobs of yet, on the same shots"""
+    jobs = [json.load(open(os.path.join(run_dir, "jobs", n))) for n in os.listdir(os.path.join(run_dir, "jobs"))]
+    have = {(j["needs"], j["decoder"], j["variant"]) for j in jobs if j["type"] == "settings_decode"}
+    added = 0
+    for j in jobs:
+        if j["type"] != "settings_decode" or j["variant"] != "current":
+            continue
+        for name in VARIANTS[j["decoder"]]:
+            if (j["needs"], j["decoder"], name) not in have:
+                new = {**j, "variant": name, "id": j["id"].replace(".variant=current", f".variant={name}")}
+                with open(os.path.join(run_dir, "jobs", f"{new['id']}.json"), "w") as f:
+                    json.dump(new, f)
+                added += 1
+    print(f"{added} jobs added to {run_dir}")
 
 
 def _shots_path(run_dir, job):
@@ -235,6 +256,8 @@ def report(run_dir, out_csv):
 def main():
     if sys.argv[1] == "make":
         make(sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5]) if len(sys.argv) > 5 else 60)
+    elif sys.argv[1] == "extend":
+        extend(sys.argv[2])
     elif sys.argv[1] == "report":
         report(sys.argv[2], sys.argv[3])
 
