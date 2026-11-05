@@ -145,7 +145,12 @@ def main():
         job = json.load(f)
     start = time.time()
     try:
-        result = (circuit_job if job["type"] == "circuit" else decode_job)(job, run_dir)
+        if job["type"].startswith("settings_"):
+            # The decoder-settings pilot (sweep.decoder_settings), run here so that it counts as a sweep job
+            from sweep.decoder_settings import run as settings_run
+            result = settings_run(job, run_dir)
+        else:
+            result = (circuit_job if job["type"] == "circuit" else decode_job)(job, run_dir)
         status = result.pop("status", "failed" if result.get("failed") else "done")
     except Exception as e:
         result, status = {"error": f"{type(e).__name__}: {str(e)[:500]}"}, "failed"
