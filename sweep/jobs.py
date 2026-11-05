@@ -1,6 +1,8 @@
-"""Create the jobs of sweep slices in a run directory: python -m sweep.jobs <run_dir> <slice> [<slice> ...]
+"""Create the jobs of sweep slices in a run directory:
+    python -m sweep.jobs <run_dir> <slice> [<slice> ...] [--codes <prefix>,<prefix>,...]
 
-Run them with the validation worker on as many machines as share the run directory:
+--codes keeps only the codes whose names start with one of the prefixes (e.g. new codes added to
+slices that have already run). Run them with the validation worker on as many machines as share the run directory:
     python -m validation.worker <run_dir> <parallel jobs>
 """
 import json
@@ -18,9 +20,11 @@ def config_id(slice_name, config):
     return ".".join(parts).replace("/", "_")
 
 
-def make_jobs(slice_name):
+def make_jobs(slice_name, codes=None):
     jobs = []
     for config in SLICES[slice_name]():
+        if codes and not config["code"].startswith(tuple(codes)):
+            continue
         decoders = config.pop("decoders")
         decode = {**DECODE, **config.pop("decode", {})}
         circuit_id = "circuit." + config_id(slice_name, config)
@@ -34,12 +38,16 @@ def make_jobs(slice_name):
 
 
 def main():
-    run_dir, slices = sys.argv[1], sys.argv[2:]
+    args, codes = sys.argv[1:], None
+    if "--codes" in args:
+        i = args.index("--codes")
+        codes, args = args[i + 1].split(","), args[:i] + args[i + 2:]
+    run_dir, slices = args[0], args[1:]
     for sub in ("jobs", "claims", "results", "logs", "circuits"):
         os.makedirs(os.path.join(run_dir, sub), exist_ok=True)
     total = 0
     for slice_name in slices:
-        jobs = make_jobs(slice_name)
+        jobs = make_jobs(slice_name, codes)
         for job in jobs:
             with open(os.path.join(run_dir, "jobs", f"{job['id']}.json"), "w") as f:
                 json.dump(job, f)
