@@ -1,6 +1,7 @@
 from qiskit.transpiler import Target, CouplingMap
 from qiskit.providers import BackendV2, Options, QubitProperties
 import numpy as np
+from ..seeding import stable_seed
 
 
 class FakeNativeBackend(BackendV2):
@@ -56,8 +57,10 @@ class FakeNativeBackend(BackendV2):
     def addStateOfTheArtQubits(self):
         # Same coherence times as the Loon and Flamingo models
         qubit_props = []
+        # One draw of T1 and T2 per device, the same in every process
+        rng = np.random.default_rng(stable_seed(type(self).__name__, self._num_qubits))
         for i in range(self._num_qubits):
-            t1 = np.clip(np.random.normal(190, 120, 1), 50, 500) * 1e-6
-            t2 = np.clip(np.random.normal(130, 120, 1), 50, 650) * 1e-6
+            t1 = np.clip(rng.normal(190, 120, 1), 50, 500) * 1e-6
+            t2 = np.clip(rng.normal(130, 120, 1), 50, 650) * 1e-6
             qubit_props.append(QubitProperties(t1=t1, t2=t2, frequency=5.0e9))
         self.target.qubit_properties = qubit_props

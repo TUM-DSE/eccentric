@@ -2,6 +2,7 @@ from qiskit.transpiler import Target, CouplingMap
 from qiskit.providers import BackendV2, Options, QubitProperties
 from qiskit.visualization import plot_coupling_map
 import numpy as np
+from ..seeding import stable_seed
 
 
 class FakeIBMLoon(BackendV2):
@@ -107,12 +108,14 @@ class FakeIBMLoon(BackendV2):
     def addStateOfTheArtQubits(self):
         qubit_props = []
 
+        # One draw of T1 and T2 per device, the same in every process
+        rng = np.random.default_rng(stable_seed(type(self).__name__, self._num_qubits))
         for i in range(self._num_qubits):
-            t1 = np.random.normal(190, 120, 1)
+            t1 = rng.normal(190, 120, 1)
             t1 = np.clip(t1, 50, 500)
             t1 = t1 * 1e-6
 
-            t2 = np.random.normal(130, 120, 1)
+            t2 = rng.normal(130, 120, 1)
             t2 = np.clip(t2, 50, 650)
             t2 = t2 * 1e-6
 

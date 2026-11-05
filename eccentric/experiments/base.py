@@ -1,4 +1,5 @@
 import os
+import random
 import time
 import tracemalloc
 from contextlib import contextmanager, nullcontext
@@ -13,6 +14,7 @@ from ..backends import FakeNativeBackend, QubitTracking, get_backend
 from ..codes.gross_code import long_range_pairs
 from ..codes import get_code, get_max_d, num_rounds, resolve_schedule
 from ..noise import get_noise_model
+from ..seeding import stable_seed
 from ..transpilers import run_transpiler, translate
 
 SINGLE_QPU_SIZES = {
@@ -111,6 +113,11 @@ def with_detector_coordinates(circuit: stim.Circuit, source: stim.Circuit) -> st
 
 def noisy_circuit(task: Task, backend, d: int, cycles: int, stage=lambda name: nullcontext()):
     schedule = resolve_code_schedule(task)
+    # The same configuration compiles to the same circuit in every process: Sabre's layout and routing and
+    # the noise model's random choices are seeded by the configuration without its noise, so the same
+    # code on the same device gets the same circuit under every noise model (and noise scale)
+    seed = stable_seed(task.code, d, cycles, schedule, task.backend, task.backend_size, task.layout_method,
+                       task.routing_method, task.translating_method)
     with stage("circuit"):
         code = get_code(task.code, d, cycles, schedule)
     detectors, logicals = code.stim_detectors()
@@ -118,13 +125,14 @@ def noisy_circuit(task: Task, backend, d: int, cycles: int, stage=lambda name: n
         code.qc = translate(code.qc, task.translating_method)
     with stage("transpile"):
         layout_method = task.layout_method or getattr(backend, "layout_method", None)
-        code.qc = run_transpiler(code.qc, backend, layout_method, task.routing_method)
+        code.qc = run_transpiler(code.qc, backend, layout_method, task.routing_method, seed)
     qt = QubitTracking(backend, code.qc)
     with stage("repr"):
         circuit = get_stim_circuits(code.qc, detectors=detectors, logicals=logicals)[0][0]
         circuit = with_detector_coordinates(circuit, code.stim_circuit)
     with stage("noise"):
         noise_model = get_noise_model(task.error_type, qt, task.error_probability, backend)
+        random.seed(seed)
         circuit = noise_model.noisy_circuit(circuit)
     return circuit
 

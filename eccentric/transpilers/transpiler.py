@@ -41,7 +41,7 @@ def perfect_layout(circuit, backend):
     return None
 
 
-def local_layout(circuit, backend):
+def local_layout(circuit, backend, seed=None):
     """SabreLayout's placement of the circuit on the largest group of qubits joined by local couplers,
     with the device's local couplers to route on, or None if the device has no remote couplers or the
     circuit does not fit on the group"""
@@ -58,13 +58,13 @@ def local_layout(circuit, backend):
         return None
     index = {q: i for i, q in enumerate(qubits)}
     group = CouplingMap([[index[a], index[b]] for a, b in local if a in index and b in index])
-    layout_pass = SabreLayout(group, skip_routing=True)
+    layout_pass = SabreLayout(group, skip_routing=True, seed=seed)
     layout_pass.run(circuit_to_dag(circuit))
     layout = layout_pass.property_set["layout"]
     return Layout({q: qubits[layout[q]] for q in circuit.qubits}), CouplingMap(local)
 
 
-def run_transpiler(circuit, backend, layout_method, routing_method):
+def run_transpiler(circuit, backend, layout_method, routing_method, seed=None):
     # Without a layout method, Qiskit's level 0 places circuit qubit i on device qubit i. Place the
     # circuit without SWAPs when the device allows it, as levels 1 to 3 do, else let SabreLayout choose,
     # and routed on one QPU's local couplers if the circuit fits there
@@ -72,7 +72,7 @@ def run_transpiler(circuit, backend, layout_method, routing_method):
     if layout_method is None:
         initial_layout = perfect_layout(circuit, backend)
         if initial_layout is None:
-            initial_layout, coupling_map = local_layout(circuit, backend) or (None, None)
+            initial_layout, coupling_map = local_layout(circuit, backend, seed) or (None, None)
         if initial_layout is None:
             layout_method = "sabre"
     return transpile(
@@ -83,5 +83,7 @@ def run_transpiler(circuit, backend, layout_method, routing_method):
                 coupling_map=coupling_map,
                 initial_layout=initial_layout,
                 layout_method=None if initial_layout else layout_method,
-                routing_method=routing_method
+                routing_method=routing_method,
+                # Sabre's layout and routing are random; a seed makes them the same in every process
+                seed_transpiler=seed
         )
