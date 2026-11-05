@@ -7,7 +7,7 @@ from .mwpm import mwpm
 from .chromobius import chromobius
 from .ldpc_decoders import bplsd, union_find, belief_find
 from .belief_matching import belief_matching
-from .sinter_decoders import relay_bp, tesseract
+from .sinter_decoders import mwpf, relay_bp, tesseract
 
 DECODERS = {
     "bplsd": bplsd,
@@ -16,6 +16,7 @@ DECODERS = {
     "belief_matching": belief_matching,
     "relay_bp": relay_bp,
     "tesseract": tesseract,
+    "mwpf": mwpf,
 }
 
 

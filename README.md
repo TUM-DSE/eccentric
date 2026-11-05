@@ -105,7 +105,7 @@ experiments:
 | `num_samples` | Number of shots (or, for `routing` and `translation`, number of repetitions) |
 | `backends` | List of backends (see below) |
 | `codes` | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane), and the codes listed under [Codes](#codes) |
-| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only), `bplsd`, `union_find`, `belief_find`, `belief_matching`, `relay_bp`, `tesseract` (see [Decoders](#decoders)) |
+| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only), `bplsd`, `union_find`, `belief_find`, `belief_matching`, `relay_bp`, `tesseract`, `mwpf` (see [Decoders](#decoders)) |
 | `error_types` | List of noise models (see below) |
 | `error_probabilities` | Physical error rates `p` for the artificial noise models |
 | `backends_sizes` | Number of qubits of a `custom_*` backend. The largest code distance that fits is used |
@@ -181,6 +181,7 @@ Notes:
 | `union_find` | Weighted union-find (ldpc) | Topological codes; fails on qLDPC codes |
 | `belief_matching` | BP followed by matching with the BP marginals as weights | Matchable codes, and codes whose errors decompose into matching edges |
 | `relay_bp` | Relay-BP (IBM, arXiv:2506.01779) with the paper's parameters, on the exact syndromes (not through its sinter `decode_shots_bit_packed`, which in relay-bp 0.2.1 pads them to a multiple of 8 bits, and then Relay-BP rarely converges; fixed upstream in 0.2.2, trmue/relay#34) | All codes; built for bivariate bicycle codes |
+| `mwpf` | Hypergraph minimum-weight parity factor (Wu et al., arXiv:2508.04969), `cluster_node_limit=50` as in its README and decoder-bench | All codes; matching on the undecomposed error model, so also circuits whose errors do not decompose into edges (where `mwpm` fails) |
 | `tesseract` | Tesseract most-likely-error search decoder (Google) with its default configuration | All codes, but slow beyond a few hundred qubits; use as an accuracy reference on small instances |
 
 ### Backends

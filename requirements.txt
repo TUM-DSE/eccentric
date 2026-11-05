@@ -209,3 +209,5 @@ yarg==0.1.9
 yarl==1.18.3
 z3-solver==4.13.3.0
 zipp==3.21.0
+mwpf==0.2.18
+frozendict==2.5.1

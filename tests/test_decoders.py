@@ -13,7 +13,7 @@ def surface_circuit(p=0.003):
     )
 
 
-@pytest.mark.parametrize("decoder", ["bplsd", "union_find", "belief_find", "belief_matching", "relay_bp", "tesseract"])
+@pytest.mark.parametrize("decoder", ["bplsd", "union_find", "belief_find", "belief_matching", "relay_bp", "tesseract", "mwpf"])
 def test_decoder_on_surface_code(decoder):
     ler = decode("surface", surface_circuit(), 300, decoder, "custom_full", "sd6")
     assert ler is not None and 0.0 <= ler < 0.1
@@ -134,3 +134,15 @@ def test_mwpm_fails_on_errors_that_do_not_decompose():
         OBSERVABLE_INCLUDE(0) rec[-3]
     """)
     assert decode("surface", circuit, 10, "mwpm", "custom_full", "sd6") is None
+
+
+def test_mwpf_decodes_errors_that_do_not_decompose():
+    # Stim's color code circuit at d = 5 has errors that do not decompose into edges: MWPM refuses it, MWPF
+    # decodes it on the hypergraph, the bit-packed detection events' padding bits notwithstanding
+    pytest.importorskip("mwpf")
+    circuit = stim.Circuit.generated("color_code:memory_xyz", distance=5, rounds=5, after_clifford_depolarization=0.002,
+                                     before_measure_flip_probability=0.002, after_reset_flip_probability=0.002)
+    assert circuit.num_detectors % 8 != 0
+    assert decode("color", circuit, 200, "mwpm", "custom_full", "sd6") is None
+    ler = decode("color", circuit, 2000, "mwpf", "custom_full", "sd6")
+    assert ler is not None and ler < 0.05

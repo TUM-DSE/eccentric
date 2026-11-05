@@ -37,6 +37,14 @@ def relay_bp(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors:
     return np.count_nonzero(np.any(predicted.astype(bool) != actual_obs_flips, axis=1)) / num_shots
 
 
+def mwpf(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool) -> float:
+    # Hypergraph minimum-weight parity factor (Wu et al., arXiv:2508.04969): matching that takes errors with
+    # more than two detectors as they are, so it decodes circuits whose errors do not decompose into edges.
+    # cluster_node_limit=50 as in its README and in decoder-bench
+    from mwpf import SinterMWPFDecoder
+    return _decode(SinterMWPFDecoder(cluster_node_limit=50), circuit, num_shots, approximate_disjoint_errors)
+
+
 def tesseract(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool) -> float:
     # Tesseract most-likely-error search decoder (https://github.com/quantumlib/tesseract-decoder)
     from tesseract_decoder import make_tesseract_sinter_decoders_dict

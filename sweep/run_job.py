@@ -24,7 +24,7 @@ from validation.run_job import decode_adaptively
 # Errors still get through: eccentric.decoders.decode logs why a decoder gave up
 logging.disable(logging.WARNING)
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PACKAGES = ["stim", "qiskit", "ldpc", "PyMatching", "qldpc", "quits", "relay-bp", "tesseract-decoder", "beliefmatching"]
+PACKAGES = ["stim", "qiskit", "ldpc", "PyMatching", "qldpc", "quits", "relay-bp", "tesseract-decoder", "beliefmatching", "mwpf"]
 TWO_QUBIT = {"CX", "CY", "CZ", "XCX", "XCY", "XCZ", "YCX", "YCY", "YCZ", "SWAP"}
 
 
