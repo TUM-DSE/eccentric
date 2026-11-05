@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 import stim
 
@@ -63,3 +64,35 @@ def test_bposd_builds_one_decoder_per_circuit():
     # The checked variant has its own matrices (no xor priors) and OSD order
     bp_osd.bposd_chk(other, 10, False)
     assert bp_osd._last["key"] == (False, False, 7)
+
+
+class _Replay:
+    """Stands in for stim's detector sampler: hands out fixed shots"""
+
+    def __init__(self, dets, obs):
+        self.dets, self.obs = dets, obs
+
+    def sample(self, shots, separate_observables=True, bit_packed=False, **kwargs):
+        d, o = self.dets[:shots], self.obs[:shots]
+        if bit_packed:
+            return np.packbits(d, axis=1, bitorder="little"), np.packbits(o, axis=1, bitorder="little")
+        return d, o
+
+
+def test_relay_bp_decodes_the_exact_syndrome(monkeypatch):
+    # 36 detectors, not a multiple of 8: Relay-BP's sinter wrapper would pad each syndrome with 4 bits, and then
+    # Relay-BP rarely converges. Our wrapper must give the same predictions as Relay-BP on the exact syndromes
+    relay = pytest.importorskip("relay_bp")
+    from relay_bp.stim.sinter.check_matrices import CheckMatrices
+    circuit = stim.Circuit.generated("surface_code:unrotated_memory_z", distance=3, rounds=3, after_clifford_depolarization=0.01,
+                                     before_measure_flip_probability=0.01, after_reset_flip_probability=0.01)
+    assert circuit.num_detectors % 8 != 0
+    dets, obs = circuit.compile_detector_sampler(seed=3).sample(400, separate_observables=True)
+    monkeypatch.setattr(stim.Circuit, "compile_detector_sampler", lambda self, *a, **k: _Replay(dets, obs))
+    ler = decode("surface", circuit, 400, "relay_bp", "custom_full", "sd6")
+    m = CheckMatrices.from_dem(circuit.detector_error_model(approximate_disjoint_errors=True))
+    decoder = relay.RelayDecoderF64(m.check_matrix, error_priors=m.error_priors, gamma0=0.1, pre_iter=60, num_sets=60,
+                                    set_max_iter=60, gamma_dist_interval=(-0.24, 0.66), stop_nconv=5)
+    runner = relay.ObservableDecoderRunner(decoder, m.observables_matrix, include_decode_result=False)
+    exact = runner.decode_observables_batch(dets.astype(np.uint8), parallel=False).astype(bool)
+    assert ler == np.any(exact != obs, axis=1).mean()

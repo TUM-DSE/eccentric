@@ -180,7 +180,7 @@ Notes:
 | `belief_find` | BP + union-find (ldpc), same BP settings as `bposd` | All codes |
 | `union_find` | Weighted union-find (ldpc) | Topological codes; fails on qLDPC codes |
 | `belief_matching` | BP followed by matching with the BP marginals as weights | Matchable codes, and codes whose errors decompose into matching edges |
-| `relay_bp` | Relay-BP (IBM, arXiv:2506.01779) with the paper's parameters | All codes; built for bivariate bicycle codes |
+| `relay_bp` | Relay-BP (IBM, arXiv:2506.01779) with the paper's parameters, on the exact syndromes (not through its sinter `decode_shots_bit_packed`, which pads them to a multiple of 8 bits, and then Relay-BP rarely converges) | All codes; built for bivariate bicycle codes |
 | `tesseract` | Tesseract most-likely-error search decoder (Google) with its default configuration | All codes, but slow beyond a few hundred qubits; use as an accuracy reference on small instances |
 
 ### Backends
