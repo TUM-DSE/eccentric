@@ -31,7 +31,8 @@ VARIANTS = {
     "bplsd": {"current": dict(max_iter=10000, lsd_order=7),
               "iter100": dict(max_iter=100, lsd_order=7),
               "iter100_order10": dict(max_iter=100, lsd_order=10),
-              "iter100_ms0.625": dict(max_iter=100, lsd_order=7, ms_scaling_factor=0.625)},
+              "iter100_ms0.625": dict(max_iter=100, lsd_order=7, ms_scaling_factor=0.625),
+              "iter1000_ms0.625": dict(max_iter=1000, lsd_order=7, ms_scaling_factor=0.625)},
     "belief_find": {"current": dict(max_iter=10000),
                     "iter1000": dict(max_iter=1000),
                     "iter100": dict(max_iter=100),
@@ -223,9 +224,9 @@ def report(run_dir, out_csv):
         if cur.empty:
             continue
         cur = cur.iloc[0]
-        wc = np.unpackbits(np.load(os.path.join(run_dir, "outcomes", f"{cur['id']}.npy")))[:cur.shots].astype(bool)
+        wc = np.unpackbits(np.load(os.path.join(run_dir, "outcomes", f"{cur['id']}.npy")))[:int(cur.shots)].astype(bool)
         for v in g.itertuples():
-            wv = np.unpackbits(np.load(os.path.join(run_dir, "outcomes", f"{v.id}.npy")))[:v.shots].astype(bool)
+            wv = np.unpackbits(np.load(os.path.join(run_dir, "outcomes", f"{v.id}.npy")))[:int(v.shots)].astype(bool)
             n = min(len(wc), len(wv))
             b, c = int((wv[:n] & ~wc[:n]).sum()), int((~wv[:n] & wc[:n]).sum())
             out.append({"circuit": needs.split(".", 1)[1], "code": v.code, "family": v.family, "backend": v.backend,
