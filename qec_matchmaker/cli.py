@@ -61,13 +61,14 @@ def _evaluate(args):
     from .dataset import load_dataset
     from .evaluate import evaluate, report_markdown
     table, manifest = load_dataset(args.data)
-    metrics = evaluate(table, folds=args.folds, calibrate=not args.no_calibration)
+    metrics = evaluate(table, folds=args.folds, calibrate=not args.no_calibration, group_by=args.group_by, n_jobs=args.jobs)
     os.makedirs(args.out, exist_ok=True)
-    with open(os.path.join(args.out, "metrics.json"), "w") as f:
+    suffix = "" if args.group_by == "code" else f"_{args.group_by}"
+    with open(os.path.join(args.out, f"metrics{suffix}.json"), "w") as f:
         json.dump({"dataset": {k: manifest[k] for k in ("created", "rows", "circuits", "codes", "sources")}, **metrics},
                   f, indent=1, default=str)
     report = report_markdown(metrics)
-    with open(os.path.join(args.out, "REPORT.md"), "w") as f:
+    with open(os.path.join(args.out, f"REPORT{suffix}.md"), "w") as f:
         f.write(report)
     print(report)
 
@@ -112,10 +113,13 @@ def main(argv=None):
     p.add_argument("--no-calibration", action="store_true", help="skip the conformal widening of the intervals")
     p.set_defaults(run=_train)
 
-    p = sub.add_parser("evaluate", help="cross-validate over held-out codes and write a report")
+    p = sub.add_parser("evaluate", help="cross-validate over held-out codes (or families, devices, noise models) and write a report")
     p.add_argument("--data", default="data")
     p.add_argument("--out", default="reports")
-    p.add_argument("--folds", type=int, default=10)
+    p.add_argument("--folds", type=int, default=10, help="GroupKFold folds (more than groups: leave one group out)")
+    p.add_argument("--group-by", default="code", choices=["code", "family", "backend", "error_type"],
+                   help="what a fold holds out; other than code, writes metrics_<group>.json and REPORT_<group>.md")
+    p.add_argument("--jobs", type=int, default=1, help="folds trained in parallel")
     p.add_argument("--no-calibration", action="store_true")
     p.set_defaults(run=_evaluate)
 

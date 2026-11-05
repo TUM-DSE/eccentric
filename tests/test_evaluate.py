@@ -23,8 +23,9 @@ def test_cross_val_predictions_hold_out_whole_codes(table):
 def test_evaluate_and_report(table):
     metrics = evaluate(table, folds=3)
     json.dumps(metrics)
-    assert metrics["setup"] == {"folds": 3, "codes": 6, "circuits": 120, "decodes": len(table),
-                                "split": "GroupKFold over codes", "calibrated": False}
+    assert metrics["setup"] == {"folds": 3, "group_by": "code", "groups": 6, "codes": 6, "circuits": 120,
+                                "decodes": len(table), "split": "GroupKFold over code", "calibrated": False}
+    assert metrics["per_group"] == {}
     assert 0 <= metrics["regime"]["accuracy"] <= 1 and 0 < metrics["regime"]["base_rate"] < 1
     assert metrics["ler"]["spearman"] > 0.8
     assert set(metrics["time"]["decoders"]) == {"all", "mwpm", "bposd", "tesseract"}
@@ -37,3 +38,17 @@ def test_evaluate_and_report(table):
     assert policies["always tesseract"]["fallbacks"] > 0
     report = report_markdown(metrics)
     assert report.startswith("# Matchmaker evaluation") and "| always bposd |" in report and "| tesseract |" in report
+
+
+def test_hold_out_whole_families(table):
+    # Three families of two codes each: a fold holds out a family, i.e. both of its codes
+    families = table.assign(family=table.code.str[-1].astype(int).mod(3).map(lambda i: f"family{i}"))
+    pred = cross_val_predictions(families, folds=10, group_by="family", n_jobs=2)
+    family = families.groupby("circuit_key").family.first()
+    assert pred.fold.nunique() == 3 and (pred.groupby(pred.circuit_key.map(family)).fold.nunique() == 1).all()
+    metrics = evaluate(families, folds=10, group_by="family")
+    assert metrics["setup"]["split"] == "leave-one-family-out" and set(metrics["per_group"]) == {"family0", "family1", "family2"}
+    assert sum(m["circuits"] for m in metrics["per_group"].values()) == 120
+    assert "## Per held-out code family" in report_markdown(metrics)
+    with pytest.raises(ValueError):
+        cross_val_predictions(families, group_by="decoder")
