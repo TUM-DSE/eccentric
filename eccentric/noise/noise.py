@@ -479,3 +479,50 @@ def parity_measurement_with_correlated_measurement_noise(
     circuit.append_operation('M', [ancilla])
 
     return circuit
+
+
+# Instructions whose arguments are error probabilities: noise channels, and measurements with a flip probability
+PROBABILITY_ARGS = {"DEPOLARIZE1", "DEPOLARIZE2", "X_ERROR", "Y_ERROR", "Z_ERROR", "PAULI_CHANNEL_1", "PAULI_CHANNEL_2",
+                    "E", "CORRELATED_ERROR", "ELSE_CORRELATED_ERROR", "HERALDED_ERASE", "HERALDED_PAULI_CHANNEL_1",
+                    "M", "MX", "MY", "MZ", "MR", "MRX", "MRY", "MRZ", "MPP", "MXX", "MYY", "MZZ"}
+
+
+def scale_noise(circuit: stim.Circuit, factor: float) -> stim.Circuit:
+    """The circuit with every error probability multiplied by factor (inside REPEAT blocks too); everything
+    else, tags included, is unchanged. Probability-1 errors are left alone: they are leakage events, which
+    NoiseModel samples when it builds the circuit (ScaledNoise scales how often they happen instead).
+    ELSE_CORRELATED_ERROR probabilities are conditional, so chains of them scale only approximately (no
+    noise model here emits them)"""
+    result = stim.Circuit()
+    for op in circuit:
+        if isinstance(op, stim.CircuitRepeatBlock):
+            result.append(stim.CircuitRepeatBlock(op.repeat_count, scale_noise(op.body_copy(), factor), tag=op.tag))
+        elif op.name in PROBABILITY_ARGS and op.gate_args_copy() and op.gate_args_copy() != [1.0]:
+            result.append(stim.CircuitInstruction(op.name, op.targets_copy(), [p * factor for p in op.gate_args_copy()],
+                                                  tag=op.tag))
+        else:
+            result.append(op)
+    return result
+
+
+class ScaledNoise:
+    """A noise model with every error probability multiplied by a factor, i.e. a device that many times as
+    noisy (0.1: tenfold better). Gate, measurement, reset, crosstalk and loss errors scale exactly, and so does
+    the rate of leakage events;
+    idle errors from T1/T2 scale like 1/T1 and 1/T2 to first order. Unlike FlamingoNoiseDownscaled (gate
+    errors / 10 with T1 and T2 x 3), one factor applies to every error. Everything but noisy_circuit is the
+    underlying model's"""
+
+    def __init__(self, model: NoiseModel, factor: float):
+        self.model = model
+        self.factor = factor
+        # Leakage is sampled while the circuit is built (a leaked qubit gets a probability-1 error), so scale
+        # how often a qubit leaks and passes leakage on, keeping the base model's leakage at every factor
+        model.leakage *= factor
+        model.leakage_propagation *= factor
+
+    def noisy_circuit(self, circuit: stim.Circuit, **kwargs) -> stim.Circuit:
+        return scale_noise(self.model.noisy_circuit(circuit, **kwargs), self.factor)
+
+    def __getattr__(self, name):
+        return getattr(self.model, name)

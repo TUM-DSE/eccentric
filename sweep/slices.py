@@ -211,6 +211,34 @@ def floquet_devices():
                                decode=dict(time_budget=2 * 3600, max_shots=200_000, timeout=3 * 3600))
 
 
+NOISE_SCALES = (0.1, 0.25, 0.5, 1.0)
+SCALING_DEVICES = [("real_willow", "real_willow"), ("real_torino", "real_heron"), ("real_flamingo_1_qpu", "real_flamingo"),
+                   ("real_flamingo", "real_flamingo"), ("real_loon", "real_flamingo"), ("real_bicycle", "real_flamingo"),
+                   ("real_harvard", "real_harvard"), ("real_infleqtion", "real_infleqtion")]
+# Codes with several distances, or a family of sizes (fixed codes at their own distance)
+SCALING_CODES = {"surface": [3, 5, 7, 9], "color": [3, 5, 7], "hh": [3, 5, 7], "planar_honeycomb": [3, 5, 7],
+                 "bb72": None, "bb90": None, "gross": None, "bpc36": None, "bpc72": None, "bpc90": None}
+
+
+def noise_scaling():
+    """Device noise scaled down, every error probability times 0.1, 0.25, 0.5 or 1 (error type
+    <noise>_x<factor>), for codes with several distances or sizes on IBM, Google and neutral-atom devices:
+    each device's threshold, the suppression per distance step, and how much better a device must get.
+    The topological codes also run twice as many rounds. Apollo is left out: at its own noise the codes
+    are already far below threshold. Up to a million shots, so that low rates are measured"""
+    for code, distances in SCALING_CODES.items():
+        qldpc = code.startswith(QLDPC_PREFIXES) or code == "gross"
+        decoders = ["bposd", "bplsd", "relay_bp"] if qldpc else \
+            ["bposd", "tesseract"] + (["mwpm"] if code in MATCHABLE else ["relay_bp"])
+        for d in distances or code_distances(code):
+            for backend, noise in SCALING_DEVICES:
+                for factor in NOISE_SCALES:
+                    for cycles in ([d] if qldpc else [d, 2 * d]):
+                        yield dict(code=code, schedule=None, distance=d, cycles=cycles, backend=backend,
+                                   error_type=noise if factor == 1 else f"{noise}_x{factor}", error_probability=None,
+                                   decoders=decoders, decode=dict(max_shots=1_000_000))
+
+
 # The paper's experiments compiled onto sparse devices with circuit qubit i on device qubit i
 PAPER_TOPOLOGY = ["Real_Topology", "Willow", "Connectivity", "Program_stats_topology", "Apollo", "Infleqtion"]
 
@@ -256,4 +284,4 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices, "noise_scaling": noise_scaling}

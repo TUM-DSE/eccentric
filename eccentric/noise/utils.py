@@ -7,14 +7,23 @@ from .artificial_noise import ArtificialNoise
 from .artificial_variance_noise import ArtificialVarianceNoise
 from .heron_noise import HeronNoise
 from .harvard_noise import HarvardNoise
+from .noise import ScaledNoise
 from ..backends import *
 from typing import Union
+import re
+
+# A device noise model with every error probability multiplied by a factor: <error_type>_x<factor>, e.g.
+# real_willow_x0.25 for a Willow with a quarter of its errors
+SCALED = re.compile(r"(.+)_x(\d+(?:\.\d+)?)")
 
 def get_noise_model(error_type: str,
                     qt: QubitTracking,
                     p: float = None,
                     backend: Union[FakeIBMFlamingo, FakeInfleqtionBackend] = None,
                     remote = None):
+    scaled = SCALED.fullmatch(error_type)
+    if scaled:
+        return ScaledNoise(get_noise_model(scaled[1], qt, p, backend, remote), float(scaled[2]))
     if p:
         if error_type == "sd6":
             return ArtificialNoise.SD6(p, qt)

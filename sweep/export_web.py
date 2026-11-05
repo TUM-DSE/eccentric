@@ -65,6 +65,14 @@ NOISE = {
     "modsi1000": "SI1000 (superconducting-inspired)",
 }
 
+def noise_label(error_type):
+    """Label of a noise model, also of a scaled one (<noise>_x<factor>: every error probability times factor)"""
+    base, _, factor = error_type.rpartition("_x")
+    if base in NOISE and factor.replace(".", "", 1).isdigit():
+        return f"{NOISE[base]}, errors x{factor}"
+    return NOISE.get(error_type, error_type)
+
+
 DECODERS = {
     "bposd": "BP-OSD", "bplsd": "BP-LSD", "relay_bp": "Relay-BP", "belief_find": "BeliefFind",
     "tesseract": "Tesseract", "mwpm": "MWPM", "chromobius": "Chromobius", "belief_matching": "BeliefMatching",
@@ -84,6 +92,7 @@ SLICES = {
     "readout_700": "IBM devices with 700 ns instead of 1.56 us readout",
     "reference": "Reference: all codes, all-to-all, SD6 noise",
     "floquet_devices": "Floquet codes on IBM, Google, ion and neutral-atom devices",
+    "noise_scaling": "Device noise scaled down (0.1x to 1x) for codes at several distances",
 }
 
 COLUMNS = ["slice", "code", "family", "taxonomy", "schedule", "distance", "rounds", "k", "code_qubits", "backend",
@@ -141,7 +150,7 @@ def main():
         "generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
         "commit": latest_commit(df.commit.dropna().unique()),
         "complete": bool((df.status != "pending").all()),
-        "labels": {"devices": {b: device_label(b) for b in df.backend.unique()}, "noise": NOISE, "decoders": DECODERS, "slices": SLICES},
+        "labels": {"devices": {b: device_label(b) for b in df.backend.unique()}, "noise": {**NOISE, **{e: noise_label(e) for e in df.error_type.dropna().unique()}}, "decoders": DECODERS, "slices": SLICES},
         "columns": COLUMNS,
         "rows": rows,
     }
