@@ -96,3 +96,41 @@ def test_relay_bp_decodes_the_exact_syndrome(monkeypatch):
     runner = relay.ObservableDecoderRunner(decoder, m.observables_matrix, include_decode_result=False)
     exact = runner.decode_observables_batch(dets.astype(np.uint8), parallel=False).astype(bool)
     assert ler == np.any(exact != obs, axis=1).mean()
+
+
+def test_mwpm_matches_on_the_decomposed_error_model(monkeypatch):
+    # CHANGELOG fix 5: PyMatching drops errors with more than two detectors, so MWPM must get them decomposed
+    import pymatching
+    seen = []
+    original = pymatching.Matching.from_detector_error_model
+    monkeypatch.setattr(pymatching.Matching, "from_detector_error_model",
+                        staticmethod(lambda dem, *a, **k: seen.append(dem) or original(dem, *a, **k)))
+    circuit = surface_circuit(0.005)
+    raw = circuit.detector_error_model(approximate_disjoint_errors=True)
+    detectors = lambda targets: sum(t.is_relative_detector_id() for t in targets)
+    assert any(detectors(e.targets_copy()) > 2 for e in raw.flattened() if e.type == "error")
+    decode("surface", circuit, 100, "mwpm", "custom_full", "sd6")
+    for e in seen[0].flattened():
+        if e.type == "error":
+            pieces, current = [], []
+            for t in e.targets_copy():
+                if t.is_separator():
+                    pieces.append(current)
+                    current = []
+                else:
+                    current.append(t)
+            assert all(detectors(p) <= 2 for p in pieces + [current])
+
+
+def test_mwpm_fails_on_errors_that_do_not_decompose():
+    circuit = stim.Circuit("""
+        R 0 1 2
+        X_ERROR(0.1) 0
+        CX 0 1 0 2
+        M 0 1 2
+        DETECTOR rec[-1]
+        DETECTOR rec[-2]
+        DETECTOR rec[-3]
+        OBSERVABLE_INCLUDE(0) rec[-3]
+    """)
+    assert decode("surface", circuit, 10, "mwpm", "custom_full", "sd6") is None

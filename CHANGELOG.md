@@ -37,7 +37,7 @@ which experiments and paper figures it affects, and how it was checked.
 ### 2. Concatenated Steane circuits did not measure the logical qubit
 
 - **File:** `eccentric/codes/concat_steane.py` (`normal_steane_circuit_f`, `concat_steane_circuit_f`,
-  `extended_steane_circuit`), `eccentric/codes/utils.py`. **Not committed yet.**
+  `extended_steane_circuit`), `eccentric/codes/utils.py`. **Commit:** `3c19d09`.
 - **Problem:** the circuits ended by CNOTing a readout ancilla to all data qubits and took that
   ancilla's measurement as the logical result. The ancilla was the control of the CNOTs and
   started in |0>, so the CNOTs did nothing and the "logical" result did not depend on the data:
@@ -58,9 +58,10 @@ which experiments and paper figures it affects, and how it was checked.
 - **Paper:** every figure and table that includes the Steane code, and statements that rely on
   them, e.g. §4.5 "the concatenated Steane code performs best on average" and the
   Steane-specific statements of §4.4. Steane results are being regenerated with the fix.
-- **Checked by:** injecting a logical error (`X_ERROR(1)` on all data qubits) now flips the result
-  without firing detectors, a single data error fires detectors, no single fault flips the
-  result undetected, and the circuit distance is 3 for d = 3 and 9 for d = 9.
+- **Checked by:** `tests/test_steane.py`: injecting a logical error (`X_ERROR(1)` on all data qubits)
+  flips the result without firing detectors, a single data error fires detectors, no single fault
+  flips the result undetected (SD6 noise), the circuit distance is 3 for d = 3 and 9 for d = 9, and
+  the circuits use 13 / 97 / 685 qubits.
 
 ### 3. Results with new columns were appended to existing CSV files misaligned
 
@@ -86,7 +87,7 @@ which experiments and paper figures it affects, and how it was checked.
 
 ### 5. MWPM decoding graph built from an undecomposed error model
 
-- **File:** `eccentric/decoders/mwpm.py`.
+- **File:** `eccentric/decoders/mwpm.py`. **Commit:** `f92b0f1`.
 - **Problem:** the detector error model was generated without `decompose_errors=True`. PyMatching
   then builds its matching graph without the error mechanisms that flip more than two detectors
   (for example Y errors and correlated two-qubit errors), so most edge probabilities were too low
@@ -96,11 +97,13 @@ which experiments and paper figures it affects, and how it was checked.
 - **Affects:** all `mwpm` results. On the circuits checked (surface code d = 5, heavy-hex d = 3 at
   p = 0.001) the logical error rates changed only within the statistical error, so this does not
   explain the gap between MWPM and BP-OSD reported in the paper.
+- **Checked by:** `tests/test_decoders.py::test_mwpm_matches_on_the_decomposed_error_model` (PyMatching
+  gets only edges of at most two detectors) and `::test_mwpm_fails_on_errors_that_do_not_decompose`.
 
 ### 6. "1 QPU" devices were compiled onto the full multi-QPU device
 
 - **File:** `eccentric/backends/utils.py` (with `fake_loon.py` and `fake_flamingo.py`, which now take
-  the number of QPUs).
+  the number of QPUs). **Commit:** `2babdc2`.
 - **Problem:** `real_loon_1_qpu` and `real_flamingo_1_qpu` loaded the full two- and three-QPU
   devices. The single-QPU size (120 and 133 qubits) only chose the code distance, so the compiler
   was free to place and route the code across all QPUs, over the slow and noisy inter-QPU links. In
@@ -119,6 +122,7 @@ which experiments and paper figures it affects, and how it was checked.
 ### 7. Willow idle error applied in every layer instead of once per cycle
 
 - **Files:** `eccentric/noise/noise.py` (new `idle_window` option), `eccentric/noise/willow_noise.py`.
+  **Commit:** `e0e7845`.
 - **Problem:** the Willow models (`real_willow`, `real_willow_spec`) take their idle error, 0.9%,
   from Google's "data qubit idle error during measurement and reset" (arXiv:2408.13687), an error
   per cycle on the data qubits. `NoiseModel` applied it as a depolarizing error to every waiting
@@ -141,7 +145,8 @@ which experiments and paper figures it affects, and how it was checked.
 
 ### 8. Codes were placed qubit by qubit onto sparse devices
 
-- **File:** `eccentric/transpilers/transpiler.py`.
+- **File:** `eccentric/transpilers/transpiler.py`. **Commits:** `dd1bde9`, `a3caa64` (circuits that fit
+  one QPU stay on it).
 - **Problem:** `run_transpiler` compiles with Qiskit's `optimization_level=0` (so that no gate
   optimization changes the syndrome circuit). Without an explicit layout method, level 0 places
   circuit qubit i on device qubit i (`TrivialLayout`) and leaves the rest to routing; it never looks
@@ -171,7 +176,8 @@ which experiments and paper figures it affects, and how it was checked.
 
 - **Files:** `eccentric/noise/noise.py`, `eccentric/noise/flamingo_noise.py`,
   `eccentric/noise/flamingo_noise_downscaled.py`, `eccentric/noise/artificial_variance_noise.py`,
-  `eccentric/noise/utils.py`.
+  `eccentric/noise/utils.py`. **Commits:** `83bf090`, `49006de` (gates of a layer scheduled first),
+  `d07c836` (variance model readout).
 - **Problem:** T1/T2 decoherence was added only to the qubits an operation acts on, for that
   operation's duration. A qubit that waited (a data qubit while the ancillas are measured, or any
   qubit beside a slower operation) got no noise, so the noise models without a fixed `idle` error
@@ -204,6 +210,24 @@ which experiments and paper figures it affects, and how it was checked.
   distributed-QPU (Fig. 17), variance (Fig. 15) and Infleqtion results, and the neutral-atom slice.
   Not affected: `real_willow` (fixed idle error), `real_apollo` and the artificial models.
 - **Checked by:** `tests/test_noise_invariants.py::test_waiting_qubits_decay`.
+
+### 14. A configuration compiled to a different circuit in every process
+
+- **Files:** `eccentric/experiments/base.py`, `eccentric/transpilers/transpiler.py`,
+  `eccentric/backends/fake_flamingo.py`, `fake_loon.py`, `fake_native.py`, new `eccentric/seeding.py`.
+  **Commit:** `6abef98`.
+- **Problem:** the same configuration did not give the same noisy circuit twice: Sabre layout and
+  routing ran unseeded, the noise models' random choices used Python's unseeded generator, and the
+  Flamingo, Loon and native devices drew every qubit's T1/T2 from N(190, 120) us anew in each
+  process. Results were valid draws, but not reproducible, and a test of the waiting-qubit noise
+  (fix 9) failed for some hash seeds.
+- **Fix:** routing and the noise model's random choices are seeded with a hash of the configuration
+  without its noise model (so every noise model and noise scale of a configuration gets the same
+  circuit), and those devices draw T1/T2 once per device (class and size). The `variance` devices
+  stay random on purpose.
+- **Affects:** no stored result needs rerunning: earlier circuits are equally valid draws, and the
+  sweep keeps each decode's circuit file.
+- **Checked by:** `tests/test_reproducible.py`.
 
 ## Changed
 
@@ -283,8 +307,36 @@ which experiments and paper figures it affects, and how it was checked.
    d = 3, 5, 7 over d rounds) while BP-OSD improves; decomposing the error model (entry 5) did not
    change this. Not yet explained.
 
+10. **Leakage errors are frozen into the circuit.** The models with leakage (`real_willow`,
+   `real_apollo`) decide which qubits leak when the circuit is built, and a leaked qubit gets a
+   probability-1 Pauli error, the same in every shot (in the sweep's Willow circuits: none in the surface
+   code at d = 3 and 5, 5 at d = 11, 39 in the gross code). Large circuits on these devices thus carry a fixed error
+   pattern rather than a leakage rate; this may be why the surface code at d = 11 does worse than at
+   d = 7 on Willow.
+
 ## Validation
 
 `validation/` runs the checks behind these entries on a cluster (circuit validity, code and circuit
 distance, cross-decoder comparison including old vs. new BP-OSD); `tests/test_noise_invariants.py`
 pins down the noise model's behaviour.
+
+### Which stored results include the fixes (checked 2026-11-05)
+
+- **The sweep table** (`experiment_results/Sweep/results.csv`): every row with a rate was built and
+  decoded by code that includes each fix that applies to it (its noise model, device, code and
+  decoder), going by the commit each circuit and decode result records. The commit is the cluster
+  checkout's HEAD while its files are synced newer, so it is a lower bound on the code.
+  (Relay-BP, which is new in this branch, is a separate matter: 1,413 of its rows were decoded with
+  padded syndromes and are being decoded again; see README, Decoders.)
+- **The sweep's `paper_dqc` and `paper_topology` slices** rerun, with the fixes and more statistics,
+  every configuration of `DQC_Flamingo`, `DQC_Nighthawk`, `Real_Topology`, `Apollo`, `Infleqtion`,
+  `Willow`, `Connectivity` and `Program_stats_topology`.
+- **`experiment_results/<experiment>`** of the paper predate the fixes (December 2025 to March 2026)
+  except `Variance_*`, `Routing_diamond` and `Routing_*_placed` (rerun 2026-11-01, `858c2c1`), and
+  `Sweep` and `DecoderBench`. Of the others, `Accumulated`, `Program_stats_shots` and
+  `Program_stats_size` are not affected by any fix (all-to-all device, artificial noise, no Steane);
+  the eight listed above have fixed reruns in the sweep; `Decoder` (MWPM, fix 5; Steane, fix 2) and
+  the Steane rows of `Accumulated_Small`, `Size`, `Translation`, `Routing_grid` and `Routing_hh`
+  (fix 2) have not been rerun. `Decoder_Chromobius` comes from the `chromobius` experiment, whose
+  circuits always carried coordinates: no fix applies, but Known issue 2 does.
+
