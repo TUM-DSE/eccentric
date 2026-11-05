@@ -1,5 +1,5 @@
 {
- "created": "2026-11-04T23:41:38+00:00",
+ "created": "2026-11-05T08:19:21+00:00",
  "sklearn_version": "1.9.1",
  "feature_version": 1,
  "features": [
@@ -7,18 +7,26 @@
   "observables",
   "mechanisms",
   "mechanism_weight_mean",
+  "mechanism_weight_max",
+  "hyperedge_fraction",
   "error_mass",
   "error_mass_per_detector",
   "det_fire_mean",
   "det_fire_median",
+  "det_fire_p90",
   "det_fire_max",
+  "logical_mass",
   "undetectable_faults",
   "undetectable_probability",
+  "graphlike",
+  "color_annotated",
   "qubits",
   "two_qubit_gates",
   "swaps",
   "ticks",
-  "measurements"
+  "measurements",
+  "rounds",
+  "decomposable"
  ],
  "quantiles": [
   0.1,
@@ -81,17 +89,17 @@
  },
  "random_state": 0,
  "training": {
-  "rows": 5965,
-  "circuits": 1633,
-  "regime_circuits": 1633,
-  "above_share": 0.3380281690140845,
-  "ler_circuits": 1396,
-  "regret_decodes": 5181,
-  "time_decodes": 5757,
-  "time_censored": 14
+  "rows": 6673,
+  "circuits": 1810,
+  "regime_circuits": 1810,
+  "above_share": 0.3447513812154696,
+  "ler_circuits": 1530,
+  "regret_decodes": 5762,
+  "time_decodes": 6438,
+  "time_censored": 23
  },
  "manifest": {
-  "created": "2026-11-04T21:22:07+00:00",
+  "created": "2026-11-05T08:19:06+00:00",
   "feature_version": 1,
   "features": [
    "detectors",
@@ -119,8 +127,8 @@
    "rounds",
    "decomposable"
   ],
-  "rows": 5965,
-  "circuits": 1633,
+  "rows": 6673,
+  "circuits": 1810,
   "codes": 54,
   "decoders": [
    "belief_find",
@@ -132,26 +140,25 @@
    "tesseract"
   ],
   "status": {
-   "measured": 5357,
-   "upper bound": 306,
-   "low statistics": 279,
-   "timeout": 14,
-   "decoder not applicable": 9
+   "measured": 5938,
+   "low statistics": 350,
+   "upper bound": 335,
+   "decoder not applicable": 27,
+   "timeout": 23
   },
   "left_out": {
-   "skipped (no circuit)": 2205,
+   "skipped (no circuit)": 2585,
    "no features yet": 0
   },
   "sources": {
    "eccentric_results": {
     "path": "../eccentric/experiment_results/Sweep/results.csv",
-    "commit": "79badf0",
-    "sha256": "404566861cbf13980801f255140868eae85b650d72818208cd4180c2d1058be6"
+    "commit": "1649beb",
+    "sha256": "b1dbb9bb618dd455552d9572ecf6a7d09040caef9970337d1ddd5c9ed32d9252"
    },
-   "eccentric_dem_features": {
-    "path": "../eccentric/experiment_results/Sweep/dem_features.json",
-    "commit": "79badf0",
-    "sha256": "09878a9b2fb67933812938be8c1375724e98050ba10fd81c3537aa594932a8dd"
+   "feature_store": {
+    "path": "data/features.jsonl",
+    "sha256": "3060912bc246743121839e178b5adb7eda9057ca5fa42546de91aadb712cf984"
    }
   }
  },
@@ -172,25 +179,41 @@
    1.619047619047619,
    8.529219825757822
   ],
+  "mechanism_weight_max": [
+   2.0,
+   32.0
+  ],
+  "hyperedge_fraction": [
+   0.0,
+   0.9850728586660348
+  ],
   "error_mass": [
    0.0177895977054776,
-   1149.1376389248887
+   1149.1376389247482
   ],
   "error_mass_per_detector": [
-   0.0013932423788807842,
-   1.0707640946472032
+   0.0010576984138401942,
+   1.0707640946471046
   ],
   "det_fire_mean": [
-   0.003014542641128167,
+   0.0019189366737685407,
    0.4986586280266752
   ],
   "det_fire_median": [
-   0.0006899077144287835,
+   0.000689907714428728,
    0.49999967439382736
   ],
+  "det_fire_p90": [
+   0.002510521026151402,
+   0.49999996507244315
+  ],
   "det_fire_max": [
-   0.004080846515068848,
-   0.9993527021253603
+   0.004080846515068792,
+   0.5
+  ],
+  "logical_mass": [
+   0.0034648580657799504,
+   528.9963614155088
   ],
   "undetectable_faults": [
    0.0,
@@ -199,6 +222,14 @@
   "undetectable_probability": [
    0.0,
    0.002133333333333032
+  ],
+  "graphlike": [
+   0.0,
+   1.0
+  ],
+  "color_annotated": [
+   0.0,
+   1.0
   ],
   "qubits": [
    5.0,
@@ -219,21 +250,29 @@
   "measurements": [
    9.0,
    38637.0
+  ],
+  "rounds": [
+   3.0,
+   63.0
+  ],
+  "decomposable": [
+   0.0,
+   1.0
   ]
  },
  "conformal": {
   "coverage": 0.8,
   "folds": 4,
-  "ler": 0.1629900169204403,
+  "ler": 0.1387635107932457,
   "time": {
-   "belief_find": 0.11446089335211022,
-   "bplsd": 0.10871124803987724,
-   "bposd": 0.13554771168669127,
-   "mwpm": 0.16702629494020862,
-   "relay_bp": 0.28116836082421354,
-   "tesseract": 0.14372858775184605
+   "belief_find": 0.09839430987407795,
+   "bplsd": 0.09438924125625646,
+   "bposd": 0.11673450800149052,
+   "mwpm": 0.1762206235878375,
+   "relay_bp": 0.23968799771757668,
+   "tesseract": 0.1322259130211299
   },
-  "time_all": 0.14613344370361706
+  "time_all": 0.1335075875851782
  },
  "metrics": {
   "dataset": {

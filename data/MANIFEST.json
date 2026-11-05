@@ -1,5 +1,5 @@
 {
- "created": "2026-11-04T21:22:07+00:00",
+ "created": "2026-11-05T08:19:06+00:00",
  "feature_version": 1,
  "features": [
   "detectors",
@@ -27,8 +27,8 @@
   "rounds",
   "decomposable"
  ],
- "rows": 5965,
- "circuits": 1633,
+ "rows": 6673,
+ "circuits": 1810,
  "codes": 54,
  "decoders": [
   "belief_find",
@@ -40,26 +40,25 @@
   "tesseract"
  ],
  "status": {
-  "measured": 5357,
-  "upper bound": 306,
-  "low statistics": 279,
-  "timeout": 14,
-  "decoder not applicable": 9
+  "measured": 5938,
+  "low statistics": 350,
+  "upper bound": 335,
+  "decoder not applicable": 27,
+  "timeout": 23
  },
  "left_out": {
-  "skipped (no circuit)": 2205,
+  "skipped (no circuit)": 2585,
   "no features yet": 0
  },
  "sources": {
   "eccentric_results": {
    "path": "../eccentric/experiment_results/Sweep/results.csv",
-   "commit": "79badf0",
-   "sha256": "404566861cbf13980801f255140868eae85b650d72818208cd4180c2d1058be6"
+   "commit": "1649beb",
+   "sha256": "b1dbb9bb618dd455552d9572ecf6a7d09040caef9970337d1ddd5c9ed32d9252"
   },
-  "eccentric_dem_features": {
-   "path": "../eccentric/experiment_results/Sweep/dem_features.json",
-   "commit": "79badf0",
-   "sha256": "09878a9b2fb67933812938be8c1375724e98050ba10fd81c3537aa594932a8dd"
+  "feature_store": {
+   "path": "data/features.jsonl",
+   "sha256": "3060912bc246743121839e178b5adb7eda9057ca5fa42546de91aadb712cf984"
   }
  }
 }
