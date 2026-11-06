@@ -1,13 +1,12 @@
 """The numbers behind the noise-scaling sweep (slice `noise_scaling`: each device's own noise model with
 every error probability multiplied by 0.1, 0.25, 0.5 and 1). No plots.
-python analysis/noise_scaling.py [<results.csv>] [--with-relay]
+python analysis/noise_scaling.py [<results.csv>]
 
 Reads experiment_results/Sweep/results.csv. A configuration's rate is its best decoder's: the lowest
 logical error rate among decodes with at least MIN_ERRORS logical errors, per round (rounds = the
 circuit's syndrome rounds), with its 95% Wilson interval; a configuration whose decodes all saw no
-logical error gets its lowest 95% upper bound, marked "<". Relay-BP decodes made before 2026-11-05
-17:30 UTC used padded syndromes (README, Decoders) and are left out unless --with-relay (or until
-the rerun is merged).
+logical error gets its lowest 95% upper bound, marked "<". Every decoder counts, the tuned BP-OSD
+and the corrected Relay-BP (sweep_relay_fix, merged 2026-11-06) included.
 
 Tables:
 1. coverage: configurations with a rate, per device and noise scale;
@@ -51,15 +50,13 @@ def per_round(p, rounds):
     return (1 - (1 - 2 * p) ** (1 / rounds)) / 2
 
 
-def load(path, with_relay=False):
+def load(path):
     df = pd.read_csv(path, low_memory=False)
     df = df[df.slice == "noise_scaling"].copy()
     parsed = df.error_type.str.extract(SCALED)
     df["noise"] = parsed[0].fillna(df.error_type)
     df["scale"] = parsed[1].astype(float).fillna(1.0)
     df["device"] = df.backend + " / " + df.noise
-    if not with_relay:
-        df = df[df.decoder != "relay_bp"]
     return df
 
 
@@ -177,7 +174,7 @@ def decoder_wins(b):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     path = args[0] if args else os.path.join(ROOT, "experiment_results", "Sweep", "results.csv")
-    df = load(path, with_relay="--with-relay" in sys.argv)
+    df = load(path)
     b = best(df)
     print(f"# Noise scaling: {b[['device', 'code', 'distance', 'cycles', 'scale']].drop_duplicates().shape[0]} "
           f"configurations with a rate, {df[df.status == 'pending'][['device', 'code', 'distance', 'cycles', 'scale']].drop_duplicates().shape[0]} pending\n")
