@@ -29,3 +29,23 @@ def test_add_decoder_copies_the_selected_circuits_with_another_decoder(tmp_path)
     assert sorted(os.listdir(out / "results")) == ["circuit.s.c0.json", "circuit.s.c2.json"]
     # Again, with the rest: only the new circuit is added
     assert run("--query", "code == 'color'").startswith("1 mwpf")
+
+
+def test_missing_keeps_configurations_without_the_decoder(tmp_path):
+    base, out = tmp_path / "base", tmp_path / "out"
+    rows = []
+    for i in range(3):
+        for decoder in (("bposd", "bplsd") if i == 1 else ("bposd",)):
+            job = decode_job(i, decoder)
+            write(base / "run1" / "jobs" / f"{job['id']}.json", job)
+            rows.append({"run": "run1", "job_id": job["id"], "decoder": decoder, "status": "measured", "code": "c",
+                         "slice": "s", "distance": i})
+        write(base / "run1" / "results" / f"circuit.s.c{i}.json", {"status": "done"})
+    df = pd.DataFrame(rows)
+    df.to_csv(tmp_path / "results.csv", index=False)
+    out_text = subprocess.run([sys.executable, "-m", "sweep.add_decoder", str(out), str(tmp_path / "results.csv"), str(base), "bplsd",
+                               "--query", "status == 'measured'", "--missing", "--priority", "2"],
+                              cwd=REPO, capture_output=True, text=True, check=True).stdout
+    assert out_text.startswith("2 bplsd")
+    assert sorted(os.listdir(out / "jobs")) == ["decode.s.c0.decoder=bplsd.json", "decode.s.c2.decoder=bplsd.json"]
+    assert json.load(open(out / "jobs" / "decode.s.c0.decoder=bplsd.json"))["priority"] == 2
