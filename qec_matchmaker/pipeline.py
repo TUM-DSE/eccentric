@@ -33,12 +33,27 @@ def features_of_store(records: dict) -> dict:
 
 
 def _circuit_files(run_dirs, keys=None):
+    """(key, path) of the circuit files of the run directories: their circuits/, and the circuit files of other
+    runs that their decode jobs name (reruns and added decoders, sweep.rerun and sweep.add_decoder), keyed under
+    the run that decoded them"""
     for run_dir in run_dirs:
         run = os.path.basename(os.path.abspath(run_dir))
         folder = os.path.join(run_dir, "circuits")
+        seen = set()
         for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
             if name.endswith(".stim") and (keys is None or f"{run}/{name[:-5]}" in keys):
+                seen.add(name[:-5])
                 yield f"{run}/{name[:-5]}", os.path.join(folder, name)
+        jobs = os.path.join(run_dir, "jobs")
+        for name in sorted(os.listdir(jobs)) if os.path.isdir(jobs) else []:
+            if not name.startswith("decode."):
+                continue
+            with open(os.path.join(jobs, name)) as f:
+                job = json.load(f)
+            needs, path = job.get("needs"), job.get("circuit_file")
+            if needs and path and needs not in seen and (keys is None or f"{run}/{needs}" in keys) and os.path.exists(path):
+                seen.add(needs)
+                yield f"{run}/{needs}", path
 
 
 def _extract(item):

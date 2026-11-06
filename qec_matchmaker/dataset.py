@@ -20,6 +20,9 @@ KEYS = ["circuit_key", "code", "family", "distance", "cycles", "backend", "error
         "decoder"]
 LABELS = ["status", "shots", "errors", "ler", "ler_low", "ler_high", "ms_per_shot", "timeout_s"]
 SKIPPED = ("does not fit", "pending")
+# ECCentric's configuration columns (sweep/collect.py CONFIG): one circuit per configuration
+ECCENTRIC_CONFIG = ["slice", "code", "schedule", "distance", "cycles", "backend", "backend_size", "error_type",
+                    "error_probability", "layout_method", "routing_method", "translating_method"]
 
 # Code families by name prefix, as ECCentric's website groups them (first match wins)
 FAMILIES = [
@@ -54,6 +57,12 @@ def from_eccentric(results: pd.DataFrame, store: dict) -> tuple[pd.DataFrame, di
     also returns counts of rows left out and why"""
     rows = results[~results.status.isin(SKIPPED) & results.result_file.notna()].copy()
     rows["circuit_key"] = [circuit_key(r, j) for r, j in zip(rows.run, rows.job_id)]
+    # A configuration is one circuit, but its decodes can come from several runs (a rerun after a fix, a decoder
+    # added later decode the original run's circuit file under their own run's name): one key per configuration
+    config = [c for c in ECCENTRIC_CONFIG if c in rows.columns]
+    if config:
+        group = rows[config].apply(lambda c: c.map(str)).agg("|".join, axis=1)
+        rows["circuit_key"] = rows.groupby(group).circuit_key.transform("min")
     rows["family"] = rows.code.map(family)
     rows["ler"] = np.where(rows.shots > 0, rows.errors / rows.shots, math.nan)
     rows["ms_per_shot"] = np.where(rows.shots > 0, 1000 * rows.decode_seconds / rows.shots, math.nan)

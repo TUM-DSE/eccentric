@@ -3,7 +3,9 @@ import math
 
 DECODERS = {
     "mwpm": "minimum-weight perfect matching (PyMatching)",
+    "mwpf": "hypergraph minimum-weight parity factor (MWPF)",
     "bposd": "BP with ordered-statistics decoding (ldpc)",
+    "bposd_tuned": "BP-OSD with tuned BP: 100 iterations, min-sum scaling 0.625",
     "bplsd": "BP with localized-statistics decoding (ldpc)",
     "belief_find": "BP with union-find (ldpc)",
     "relay_bp": "Relay-BP",

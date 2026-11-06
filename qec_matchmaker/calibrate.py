@@ -18,7 +18,7 @@ import stim
 
 from .features import features_from_circuit
 
-DECODERS = ("mwpm", "bposd", "bplsd", "belief_find", "relay_bp", "tesseract", "chromobius")
+DECODERS = ("mwpm", "mwpf", "bposd", "bposd_tuned", "bplsd", "belief_find", "relay_bp", "tesseract", "chromobius")
 
 # ms per shot on one core of the reference machine: geometric mean over benchmark_circuits() of
 # measure(shots=2000, seed=0). None until measured there: run fill_reference() on the reference
@@ -105,10 +105,14 @@ def _mwpm(Matching, circuit):
     return Matching.from_detector_error_model(dem).decode_batch
 
 
-def _bposd(BpOsdDecoder, circuit):
+def _bposd(BpOsdDecoder, circuit, bp=_BP):
     chk, obs, priors = _check_matrices(circuit)
     return _per_shot(BpOsdDecoder(chk, error_channel=list(priors), osd_method="osd_cs",
-                                  osd_order=min(7, chk.shape[1] - chk.shape[0]), **_BP), obs)
+                                  osd_order=min(7, chk.shape[1] - chk.shape[0]), **bp), obs)
+
+
+# ECCentric's bposd_tuned
+_BP_TUNED = dict(max_iter=100, bp_method="minimum_sum", ms_scaling_factor=0.625)
 
 
 def _bplsd(BpLsdDecoder, circuit):
@@ -131,6 +135,21 @@ def _sinter(decoder, circuit):
                    circuit.num_observables)
 
 
+def _relay_bp(SinterDecoder_RelayBP, circuit):
+    # On the exact syndromes: relay-bp 0.2.1's sinter decode_shots_bit_packed pads them to a multiple of 8 bits
+    # (trmue/relay#34), after which Relay-BP rarely converges; ECCentric decodes them the same way
+    compiled = SinterDecoder_RelayBP().compile_decoder_for_dem(dem=circuit.detector_error_model(approximate_disjoint_errors=True))
+    m = compiled.check_matrices
+
+    def decode(dets):
+        s = dets.astype(np.uint8)
+        if m.syndrome_bias is not None:
+            s = (s + m.syndrome_bias) % 2
+        pred = compiled.observable_decoder.decode_observables_batch(s, parallel=False).astype(bool)
+        return pred ^ m.observables_bias.astype(bool) if m.observables_bias is not None else pred
+    return decode
+
+
 def _chromobius(compile_decoder_for_dem, circuit):
     compiled = compile_decoder_for_dem(circuit.detector_error_model(approximate_disjoint_errors=True))
     return _packed(compiled.predict_obs_flips_from_dets_bit_packed, circuit.num_observables)
@@ -139,9 +158,11 @@ def _chromobius(compile_decoder_for_dem, circuit):
 _DECODERS = {
     "mwpm": ("pymatching", "Matching", _mwpm),
     "bposd": ("ldpc", "BpOsdDecoder", _bposd),
+    "bposd_tuned": ("ldpc", "BpOsdDecoder", lambda cls, c: _bposd(cls, c, _BP_TUNED)),
+    "mwpf": ("mwpf", "SinterMWPFDecoder", lambda cls, c: _sinter(cls(cluster_node_limit=50), c)),
     "bplsd": ("ldpc", "BpLsdDecoder", _bplsd),
     "belief_find": ("ldpc", "BeliefFindDecoder", _belief_find),
-    "relay_bp": ("relay_bp.stim.sinter.decoders", "SinterDecoder_RelayBP", lambda cls, c: _sinter(cls(), c)),
+    "relay_bp": ("relay_bp.stim.sinter.decoders", "SinterDecoder_RelayBP", _relay_bp),
     "tesseract": ("tesseract_decoder", "make_tesseract_sinter_decoders_dict",
                   lambda make, c: _sinter(make()["tesseract"], c)),
     "chromobius": ("chromobius", "compile_decoder_for_dem", _chromobius),

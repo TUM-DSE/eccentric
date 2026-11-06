@@ -86,8 +86,41 @@ def test_cli_features_extract_ingest(tmp_path, capsys):
 
 def test_applicable():
     assert applicable({"decomposable": 1, "color_annotated": 0}) == {
-        "mwpm": True, "bposd": True, "bplsd": True, "belief_find": True, "relay_bp": True, "tesseract": True,
-        "chromobius": False}
+        "mwpm": True, "mwpf": True, "bposd": True, "bposd_tuned": True, "bplsd": True, "belief_find": True,
+        "relay_bp": True, "tesseract": True, "chromobius": False}
     assert applicable({"decomposable": math.nan, "graphlike": 0, "color_annotated": 1})["mwpm"] is None
     assert applicable({"decomposable": math.nan, "graphlike": 1})["mwpm"] is True
     assert applicable({})["chromobius"] is None
+
+
+def test_extract_follows_circuit_files_of_reruns(tmp_path):
+    # A rerun directory (sweep.rerun, sweep.add_decoder) decodes the circuit files of another run; its rows are
+    # keyed under the rerun directory, so its circuits must be too
+    run = make_run(tmp_path)
+    rerun = tmp_path / "sweep_rerun"
+    (rerun / "jobs").mkdir(parents=True)
+    path = run / "circuits" / "circuit.s.code=surface.distance=3.stim"
+    job = {"id": "decode.s.code=surface.distance=3.decoder=relay_bp", "type": "decode", "needs": path.stem,
+           "circuit_file": str(path)}
+    (rerun / "jobs" / f"{job['id']}.json").write_text(json.dumps(job))
+    store = tmp_path / "store.jsonl"
+    counts = extract([str(run), str(rerun)], str(store))
+    assert counts["extracted"] == 3
+    records = load_store(str(store))
+    assert records[f"sweep_rerun/{path.stem}"]["features"] == records[f"sweep_x/{path.stem}"]["features"]
+
+
+def test_ingest_gives_a_configuration_one_circuit_key(tmp_path):
+    # The Relay-BP decode of a configuration came from a rerun directory: it must join the configuration's
+    # other decodes under one circuit key
+    run = make_run(tmp_path)
+    results = results_frame("sweep_x")
+    rerun = results.iloc[[0]].assign(run="sweep_rerun", decoder="relay_bp", job_id=lambda r: r.job_id.str.replace("mwpm", "relay_bp"))
+    results = pd.concat([results, rerun], ignore_index=True)
+    store = tmp_path / "store.jsonl"
+    extract([str(run)], str(store))
+    records = features_of_store(load_store(str(store)))
+    records["sweep_rerun/circuit.s.code=surface.distance=3"] = records["sweep_x/circuit.s.code=surface.distance=3"]
+    table, left_out = from_eccentric(results, records)
+    d3 = table[table.distance == 3]
+    assert d3.circuit_key.nunique() == 1 and set(d3.decoder) >= {"mwpm", "bposd", "relay_bp"}
