@@ -41,7 +41,7 @@ def main():
     if a.missing:
         from sweep.collect import CONFIG
         columns = [c for c in CONFIG if c in df.columns]
-        key = lambda d: d[columns].astype(str).agg("|".join, axis=1)
+        key = lambda d: d[columns].apply(lambda c: c.map(str)).agg("|".join, axis=1)
         have = set(key(df[df.decoder == a.decoder]))
         rows = rows.assign(config=key(rows))
         rows = rows[~rows.config.isin(have)].drop_duplicates("config")
