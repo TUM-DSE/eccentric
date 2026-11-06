@@ -24,11 +24,26 @@ CATALOG = [
      "A Flamingo QPU as modelled here: the 127-qubit Eagle heavy-hex lattice extended to 133 qubits."),
     ("real_flamingo", None, "IBM Flamingo, 3 QPUs", "IBM", ["real_flamingo", "real_flamingo_downscaled"],
      "Three Flamingo QPUs in a chain, each linked to the next by four l-couplers (remote, 3% error, 300 ns)."),
+    ("real_flamingo_4_qpus", None, "IBM Flamingo, 4 QPUs (projected)", "IBM", ["real_flamingo_downscaled"],
+     "A projected chain of 4 Flamingo QPUs, each linked to the next by four l-couplers, for qLDPC codes larger than "
+     "any announced device (simulated at ten times lower noise)."),
+    ("real_flamingo_5_qpus", None, "IBM Flamingo, 5 QPUs (projected)", "IBM", ["real_flamingo_downscaled"],
+     "A projected chain of 5 Flamingo QPUs, each linked to the next by four l-couplers, for qLDPC codes larger than "
+     "any announced device (simulated at ten times lower noise)."),
     ("real_loon_1_qpu", None, "IBM Loon/Nighthawk, 1 QPU", "IBM", ["real_flamingo", "real_flamingo_downscaled", "real_flamingo_m700", "real_flamingo_downscaled_m700"],
      "An 11 by 11 square lattice with long-range c-couplers (IBM's large-scale fault-tolerance roadmap). "
      "As modelled, the c-couplers start from the first row of the lattice only."),
     ("real_loon", None, "IBM Loon/Nighthawk, 2 QPUs", "IBM", ["real_flamingo", "real_flamingo_downscaled"],
      "Two Loon QPUs linked by four l-couplers."),
+    ("real_loon_3_qpus", None, "IBM Loon/Nighthawk, 3 QPUs (projected)", "IBM", ["real_flamingo_downscaled"],
+     "A projected chain of 3 Loon QPUs, each linked to the next by four l-couplers, for qLDPC codes larger than any "
+     "announced device (simulated at ten times lower noise)."),
+    ("real_loon_4_qpus", None, "IBM Loon/Nighthawk, 4 QPUs (projected)", "IBM", ["real_flamingo_downscaled"],
+     "A projected chain of 4 Loon QPUs, each linked to the next by four l-couplers, for qLDPC codes larger than any "
+     "announced device (simulated at ten times lower noise)."),
+    ("real_loon_5_qpus", None, "IBM Loon/Nighthawk, 5 QPUs (projected)", "IBM", ["real_flamingo_downscaled"],
+     "A projected chain of 5 Loon QPUs, each linked to the next by four l-couplers, for qLDPC codes larger than any "
+     "announced device (simulated at ten times lower noise)."),
     ("real_bicycle", None, "IBM bicycle architecture module", "IBM", ["real_flamingo", "real_flamingo_downscaled", "real_flamingo_m700", "real_flamingo_downscaled_m700"],
      "The 288 qubits of the gross code in its toric layout: four couplers to neighbours on a torus and two "
      "long-range c-couplers per qubit, all as good as local couplers."),
@@ -36,6 +51,9 @@ CATALOG = [
      "The bicycle architecture module with its c-couplers as noisy and slow as remote couplers."),
     ("real_bicycle_2_qpus", None, "IBM bicycle modules, 2 chained", "IBM", ["real_flamingo_downscaled"],
      "Two bicycle architecture modules linked by four remote couplers, for codes larger than one module."),
+    ("real_bicycle_lr_2_qpus", None, "IBM bicycle modules, 2 chained, noisy c-couplers", "IBM", ["real_flamingo_downscaled"],
+     "Two bicycle architecture modules linked by four remote couplers, with their c-couplers as noisy and slow as "
+     "remote couplers."),
     ("real_willow", None, "Google Willow (extended)", "Google", ["real_willow", "real_willow_spec"],
      "Willow's square lattice in the shape of a diamond, extended to 315 qubits."),
     ("real_apollo", None, "Quantinuum Apollo", "Quantinuum", ["real_apollo"],
@@ -360,7 +378,9 @@ def coherence(backend):
 
 def main():
     out = sys.argv[1]
-    np.random.seed(7)  # the IBM devices draw the T1 and T2 of their qubits at random
+    # The planned IBM devices draw their qubits' T1 and T2 once per device from a fixed seed (eccentric.seeding),
+    # so these are the values the simulations use; the seed here only steadies Qiskit's generic backends
+    np.random.seed(7)
     devices = []
     for name, size, label, maker, noises, description in CATALOG:
         backend = get_backend(name, size)
