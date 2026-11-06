@@ -80,19 +80,55 @@ DECODERS = {
 }
 
 SLICES = {
-    "qldpc_ibm": "QLDPC codes on IBM devices",
-    "qldpc_bicycle": "QLDPC and paper codes on IBM's bicycle architecture module",
-    "qldpc_ibm_projected": "QLDPC codes on projected larger IBM devices",
+    "qldpc_ibm": "qLDPC codes on IBM devices",
+    "qldpc_ibm_projected": "qLDPC codes on larger IBM devices (projected)",
+    "qldpc_bicycle": "IBM bicycle architecture module",
+    "qldpc_bicycle_chain": "Chains of IBM bicycle modules",
     "bb_native": "Bivariate bicycle codes in IBM's native layout",
-    "paper_dqc": "Paper: one QPU vs distributed QPUs, re-run with the fixes",
-    "willow_surface": "Surface code on Google Willow, against Google's experiment",
-    "qldpc_bicycle_chain": "QLDPC codes on chained bicycle architecture modules",
-    "qldpc_atoms": "QLDPC codes on neutral atoms and trapped ions",
-    "paper_topology": "Paper: experiments on sparse devices, re-run with placement without SWAPs",
-    "readout_700": "IBM devices with 700 ns instead of 1.56 us readout",
-    "reference": "Reference: all codes, all-to-all, SD6 noise",
-    "floquet_devices": "Floquet codes on IBM, Google, ion and neutral-atom devices",
-    "noise_scaling": "Device noise scaled down (0.1x to 1x) for codes at several distances",
+    "qldpc_atoms": "qLDPC codes on neutral atoms and trapped ions",
+    "readout_700": "IBM devices with 700 ns readout",
+    "willow_surface": "Surface code on Google Willow",
+    "floquet_devices": "Floquet codes on devices",
+    "noise_scaling": "Device noise scaled down",
+    "reference": "Reference: all codes on an all-to-all device",
+    "paper_dqc": "Paper experiment: one QPU vs distributed QPUs",
+    "paper_topology": "Paper experiment: codes on sparse devices",
+}
+# One or two sentences per dataset, shown on the website under the dataset menu
+SLICE_DESCRIPTIONS = {
+    "qldpc_ibm": "qLDPC codes compiled onto IBM Heron, Loon/Nighthawk (one or two QPUs) and Flamingo (one or three "
+                 "QPUs), at the devices' noise and, for Loon and Flamingo, at ten times lower noise.",
+    "qldpc_ibm_projected": "qLDPC codes too large for any IBM device, on projected chains of as many Loon or Flamingo "
+                           "QPUs as they need, at ten times lower noise.",
+    "qldpc_bicycle": "qLDPC codes and the paper's codes on the 288-qubit module of IBM's bicycle architecture, with "
+                     "its long-range couplers as good as local ones or as noisy as remote ones, at IBM noise and ten "
+                     "times lower.",
+    "qldpc_bicycle_chain": "qLDPC codes too large for one bicycle module, on as many modules as they need, linked by "
+                           "remote couplers, at ten times lower noise.",
+    "bb_native": "Bivariate bicycle codes placed one to one on IBM's planned layout for them, with long-range "
+                 "couplers as good as local ones or as noisy as remote ones, to compare with the same codes "
+                 "compiled onto Loon and Flamingo.",
+    "qldpc_atoms": "qLDPC codes on neutral atoms (the Harvard/MIT array, Infleqtion) and Quantinuum's trapped ions, "
+                   "at the devices' own noise. Any two qubits can interact after a move, so no SWAPs are needed.",
+    "readout_700": "The codes of the IBM datasets again, with 700 ns readout instead of the 1.56 us of IBM's "
+                   "calibration data, to see how much faster readout would help.",
+    "willow_surface": "The surface code memory on Google Willow at distances 3 to 7, compiled by Qiskit and placed "
+                      "on the grid as in Google's below-threshold experiment (Nature 638, 920, 2025), to compare "
+                      "with its measurements.",
+    "floquet_devices": "Floquet codes (honeycomb, planar honeycomb, hyperbolic and semi-hyperbolic) on IBM, Google, "
+                       "trapped-ion and neutral-atom devices.",
+    "noise_scaling": "Codes at several distances on IBM, Google and neutral-atom devices, with every error "
+                     "probability of the device's noise multiplied by 0.1, 0.25, 0.5 or 1: where each device "
+                     "crosses threshold, and how much better it must get.",
+    "reference": "Every code at its default schedule on an all-to-all device with uniform SD6 circuit noise: the "
+                 "common baseline that makes the device datasets comparable.",
+    "paper_dqc": "The configurations of the ECCentric paper's (SIGMETRICS 2026) comparison of one QPU with "
+                 "distributed QPUs, rerun with the current, corrected simulator (noise model, Steane readout, "
+                 "single-QPU devices) and decoded with BP-OSD as in the paper.",
+    "paper_topology": "The configurations of the ECCentric paper's (SIGMETRICS 2026) experiments on device "
+                      "topologies (grid, cube and all-to-all connectivity; Willow, Apollo and Infleqtion), rerun "
+                      "with the current simulator, which places codes on a device instead of qubit by qubit and so "
+                      "avoids needless SWAPs; decoded with BP-OSD as in the paper.",
 }
 
 COLUMNS = ["slice", "code", "family", "taxonomy", "schedule", "distance", "rounds", "k", "code_qubits", "backend",
@@ -150,7 +186,8 @@ def main():
         "generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
         "commit": latest_commit(df.commit.dropna().unique()),
         "complete": bool((df.status != "pending").all()),
-        "labels": {"devices": {b: device_label(b) for b in df.backend.unique()}, "noise": {**NOISE, **{e: noise_label(e) for e in df.error_type.dropna().unique()}}, "decoders": DECODERS, "slices": SLICES},
+        "labels": {"devices": {b: device_label(b) for b in df.backend.unique()}, "noise": {**NOISE, **{e: noise_label(e) for e in df.error_type.dropna().unique()}}, "decoders": DECODERS, "slices": SLICES,
+                   "slice_descriptions": SLICE_DESCRIPTIONS},
         "columns": COLUMNS,
         "rows": rows,
     }
