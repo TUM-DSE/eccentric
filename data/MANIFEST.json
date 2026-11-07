@@ -1,5 +1,5 @@
 {
- "created": "2026-11-05T08:19:06+00:00",
+ "created": "2026-11-07T10:15:08+00:00",
  "feature_version": 1,
  "features": [
   "detectors",
@@ -27,38 +27,40 @@
   "rounds",
   "decomposable"
  ],
- "rows": 6673,
- "circuits": 1810,
- "codes": 54,
+ "rows": 20270,
+ "circuits": 3146,
+ "codes": 67,
  "decoders": [
   "belief_find",
   "bplsd",
   "bposd",
+  "bposd_tuned",
   "chromobius",
+  "mwpf",
   "mwpm",
   "relay_bp",
   "tesseract"
  ],
  "status": {
-  "measured": 5938,
-  "low statistics": 350,
-  "upper bound": 335,
-  "decoder not applicable": 27,
-  "timeout": 23
+  "measured": 16399,
+  "low statistics": 2616,
+  "upper bound": 928,
+  "decoder not applicable": 172,
+  "timeout": 155
  },
  "left_out": {
-  "skipped (no circuit)": 2585,
+  "skipped (no circuit)": 3363,
   "no features yet": 0
  },
  "sources": {
   "eccentric_results": {
    "path": "../eccentric/experiment_results/Sweep/results.csv",
-   "commit": "1649beb",
-   "sha256": "b1dbb9bb618dd455552d9572ecf6a7d09040caef9970337d1ddd5c9ed32d9252"
+   "commit": "0e9c091",
+   "sha256": "88c5e3dbded7005d59414af64f64f6968a8e1dbf0776cb1c1351b594dc183004"
   },
   "feature_store": {
    "path": "data/features.jsonl",
-   "sha256": "3060912bc246743121839e178b5adb7eda9057ca5fa42546de91aadb712cf984"
+   "sha256": "d574c7900ed3dda12fa8ef248cd9e35b282038ca3b33aed4288951f600f3f1d7"
   }
  }
 }
