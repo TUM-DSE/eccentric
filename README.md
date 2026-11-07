@@ -6,13 +6,13 @@ logical error rate will be, how long each decoder will take, and which decoder t
 
 > **Status: working prototype.** Features, models, recommendation, evaluation, command line and the
 > update pipeline from ECCentric work and are tested. The packaged model is trained on Matchmaker's own
-> features of 1,810 ECCentric circuits (6,673 decodes, ECCentric 1649beb). See [docs/DESIGN.md](docs/DESIGN.md).
+> features of 3,146 ECCentric circuits (20,270 decodes, ECCentric 0e9c091). See [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Why
 
 Choosing a decoder is usually a guess, and a costly one. In the [ECCentric](https://github.com/TUM-DSE/eccentric)
-benchmark (58 codes compiled onto 25 devices under 12 noise models, decoded by 7 decoders on the same
-shots) no decoder wins everywhere, decoding costs span six orders of magnitude, and 48% of the CPU time
+benchmark (67 codes compiled onto 25 devices under 27 noise models, decoded by up to 9 decoders on
+the same shots) no decoder wins everywhere, decoding costs span six orders of magnitude, and 48% of the CPU time
 went to configurations with a logical error rate above 50%, where every decoder fails. All of this is
 predictable from the circuit alone.
 
@@ -34,15 +34,16 @@ qec-matchmaker features circuit.stim                       # the features the mo
 ```
 
 ```
-$ qec-matchmaker advise surface_d5_p0.001.stim
+$ qec-matchmaker advise surface_d5_p0.001.stim --distance 5
 above threshold: 0%
-logical error rate (best decoder): 5.78e-04 (80% interval 1.7e-04 - 4.7e-03)
-recommended decoder: mwpm (cheapest (0.0117 ms per shot) of the decoders predicted within 1.25x of the lowest LER (0.00058); its predicted LER is 0.00062)
+logical error rate (best decoder): 7.19e-05 (80% interval 4.3e-05 - 2.3e-04)
+recommended decoder: tesseract (cheapest (0.549 ms per shot) of the decoders predicted within 1.25x of the lowest LER (7.2e-05); its predicted LER is 7.2e-05)
 
     decoder  applicable      LER  ms/shot
-       mwpm        True 0.000625   0.0117
-      bposd        True 0.000612     4.58
-  tesseract        True 0.000578     0.57
+       mwpm        True 0.000146  0.00722
+bposd_tuned        True 9.36e-05    0.913
+   relay_bp        True 9.51e-05    0.746
+  tesseract        True 7.19e-05    0.549
        ...
 ```
 
@@ -83,26 +84,27 @@ factors on yours (`advise(..., speed_factors=...)`, `--calibration`).
 
 ## How good it is
 
-Evaluated on codes held out of training (10 folds over 54 codes, 1,810 circuits, 6,673 decodes; full
+Evaluated on codes held out of training (10 folds over 67 codes, 3,146 circuits, 20,270 decodes; full
 report in [reports/REPORT.md](reports/REPORT.md)):
 
 | Prediction | Result |
 |---|---|
-| Above or below threshold | 95% correct (recall 93%, precision 92%) |
-| Logical error rate of the best decoder | median error 0.09 decades (1.23×), p90 0.47, rank correlation 0.97 |
-| Time per shot | 88% within 3× (BP-LSD, BeliefFind 97%; Relay-BP 67%), rank correlation 0.97 |
-| Decoder choice, all 1,496 circuits ("accurate" / "cheapest") | good enough on 91% / 86%, against 75% for always BP-OSD |
-| Decoder choice, the 599 circuits where all five BP-type and Tesseract decoders ran | "accurate": good enough on 92% at the cheapest good-enough decoder's time (median); always Tesseract: 100% at 3.8× that time; always BP-OSD: 60% at 2.6× |
+| Above or below threshold | 98% correct (recall 95%, precision 96%) |
+| Logical error rate of the best decoder | median error 0.08 decades (1.20×), p90 0.37, rank correlation 0.98 |
+| Time per shot | 94% within 3× (Relay-BP 98%, BP-OSD 95%, Tesseract 85%, MWPF 82%), rank correlation 0.99 |
+| Decoder choice, all 2,774 circuits ("accurate" / "cheapest") | good enough on 90% / 83%, against 61% for always BP-OSD |
+| Decoder choice, the 1,820 circuits where all five BP-type and Tesseract decoders ran | "accurate": good enough on 97% at 1.7× the cheapest good-enough decoder's time (median); "cheapest": 84% at 1.0×; always Tesseract: 100% at 12×; always BP-OSD: 52% at 14× |
 
-The 80% intervals are conformalized on held-out codes and hold 82% of held-out LERs and 81–89% of each
+The 80% intervals are conformalized on held-out codes and hold 84% of held-out LERs and 81–87% of each
 decoder's times. Harder splits: whole code families, devices or noise models held out
 ([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)); circuits beyond the training range
 ([experiments/EXTRAPOLATION.md](experiments/EXTRAPOLATION.md): the quietest 20% of circuits held out, LER
-error 0.30 decades, against 0.74 for trees alone); circuits from Stim's generators and decoder-bench
-([experiments/EXTERNAL.md](experiments/EXTERNAL.md): LER error 0.15 decades, time within 3× for 69%).
+error 0.30 decades, against 0.74 for trees alone; these two reports are from the 1,810-circuit table);
+circuits from Stim's generators and decoder-bench ([experiments/EXTERNAL.md](experiments/EXTERNAL.md): LER
+error 0.08 decades, p90 0.28, time within 3× for 84%, decoder choice good enough on 100% / 94%).
 Model settings come from the experiments in [experiments/RESULTS.md](experiments/RESULTS.md).
 
-Known weaknesses: Relay-BP's time is the hardest to predict; beyond the training data the 80% intervals
+Known weaknesses: Tesseract's time is the hardest to predict (85% within 3×); beyond the training data the 80% intervals
 are too narrow (they are calibrated on held-out codes); a noise model unlike any in training can mislead
 the time law (Harvard's atom loss held out: time within 3× 79% -> 60%); and `advise` warns, naming the
 features, when a circuit is outside the training range.
@@ -123,8 +125,9 @@ changed. It is run by hand after ECCentric's sweep table changes; ECCentric's da
 
 ## Decoders
 
-Trained on: PyMatching (MWPM), BP-OSD, BP-LSD and BeliefFind (ldpc), Relay-BP, Tesseract and
-Chromobius. Planned: MWPF.
+Trained on: PyMatching (MWPM), MWPF, BP-OSD with ECCentric's paper settings and with tuned BP (100
+iterations, min-sum scaling 0.625), BP-LSD and BeliefFind (ldpc), Relay-BP, Tesseract and Chromobius.
+MWPF has the least data (83 circuits).
 
 ## Limitations
 
