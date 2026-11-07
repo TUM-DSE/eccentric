@@ -284,4 +284,41 @@ def reference(max_qubits=600):
                            error_type="sd6", error_probability=p, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices, "noise_scaling": noise_scaling}
+# Codes whose circuits exist in both bases, and the asymmetric ones that are not in the device slices yet
+BASIS_CODES = {"surface", "color", "hh", "bacon", "xzzx", "bb72", "bb90", "gross", "bpc36", "bpc72", "bpc90"}
+BASIS_NEW = {"bacon": [3, 5, 7], "xzzx": [3, 5, 7]}
+
+
+def basis_x():
+    """The memory experiment in the X basis (logical |+> prepared and measured), paired with the Z-basis
+    results of the same configurations: the Z basis does not see dephasing of the data qubits, which
+    dominates idling on devices with T2 < T1, and heavy-hex, Bacon-Shor and XZZX protect X and Z
+    differently. The X circuit is compiled with the Z circuit's seed. Covers the Willow surface code
+    (all of willow_surface), the device-noise configurations of noise_scaling (at the device's own noise,
+    d rounds), Bacon-Shor and XZZX on the same devices in both bases, and surface, heavy-hex, Bacon-Shor
+    and XZZX on the all-to-all device with SD6 noise (paired with reference: only the code, not the
+    noise, is asymmetric there)"""
+    for config in willow_surface():
+        yield dict(config, basis="X")
+    for config in noise_scaling():
+        if config["error_type"] == dict(SCALING_DEVICES)[config["backend"]] and config["cycles"] == config["distance"] \
+                and config["code"] in BASIS_CODES:
+            yield dict(config, basis="X", decode=dict(max_shots=200_000))
+    for code, distances in BASIS_NEW.items():
+        for d in distances:
+            for backend, noise in SCALING_DEVICES:
+                for basis in ("Z", "X"):
+                    yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=noise,
+                               error_probability=None, decoders=["bposd", "tesseract", "mwpm"],
+                               decode=dict(max_shots=200_000), **({"basis": "X"} if basis == "X" else {}))
+    from eccentric.codes import get_min_n
+    for code in ("surface", "hh", "bacon", "xzzx"):
+        for d in code_distances(code):
+            n = get_min_n(code, d)
+            for p in (1e-3, 2e-3):
+                # As in reference (all four are matchable)
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend="custom_full", backend_size=n,
+                           error_type="sd6", error_probability=p, decoders=["bposd", "mwpm"], basis="X")
+
+
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices, "noise_scaling": noise_scaling, "basis_x": basis_x}

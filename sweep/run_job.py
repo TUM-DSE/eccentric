@@ -73,7 +73,7 @@ def undetectable_faults(circuit: stim.Circuit) -> dict:
 def task_of(job):
     from eccentric.experiments import Task
     fields = ("backend", "code", "distance", "cycles", "decoder", "error_type", "error_probability",
-              "layout_method", "routing_method", "translating_method", "schedule")
+              "layout_method", "routing_method", "translating_method", "schedule", "basis")
     return Task(experiment="sweep", num_samples=1, backend_size=job.get("backend_size"),
                 **{f: job.get(f) for f in fields})
 

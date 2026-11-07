@@ -7,48 +7,31 @@ from .surface_code import get_surface_code
 from .hh_code import get_hh_code
 from .catalog import CODES, MemoryCodeCircuit, make_circuit, max_distance, min_num_qubits, num_rounds, resolve_schedule
 
-def get_code(code_name: str, d: int, cycles: int, schedule: str = None):
+def get_code(code_name: str, d: int, cycles: int, schedule: str = None, basis: str = "Z"):
+    """The noiseless memory circuit of a code, preparing and measuring the logical state in `basis` (Z or X)"""
     resolve_schedule(code_name, schedule)
+    if basis not in ("Z", "X"):
+        raise ValueError(f"basis must be Z or X, got {basis}")
     if code_name in CODES:
-        return MemoryCodeCircuit(stim_circuit=make_circuit(code_name, d, cycles, schedule))
-    elif code_name == "hh":
-        if cycles == None:
-            return get_hh_code(d, None)
-        else:
-             return get_hh_code(d, cycles)
+        return MemoryCodeCircuit(stim_circuit=make_circuit(code_name, d, cycles, schedule, basis))
+    if cycles is None:
+        # The builders' own defaults: the gross code's 12 rounds, Bacon-Shor's single round
+        cycles = {"gross": 12, "bacon": 1}.get(code_name, d)
+    if code_name == "hh":
+        return get_hh_code(d, cycles, basis)
     elif code_name == "gross":
-        if cycles == None:
-            return get_gross_code()
-        else:
-            return get_gross_code(T=cycles)
+        return get_gross_code(T=cycles, basis=basis)
     elif code_name == "surface":
-        if cycles == None:
-            code = get_surface_code(d=d, T=d)
-        else:
-            code = get_surface_code(d=d, T=cycles)
-        return code
+        return get_surface_code(d=d, T=cycles, basis=basis)
     elif code_name == "color":
-        if cycles == None:
-            return get_color_code(d, rounds=d)
-        else:
-            return get_color_code(d, rounds=cycles)
+        return get_color_code(d, rounds=cycles, basis=basis)
     elif code_name == "bacon":
-        if cycles == None:
-            return get_bacon_shor_code(d)
-        else:
-            return get_bacon_shor_code(d, cycles)
+        return get_bacon_shor_code(d, cycles, basis)
     elif code_name == 'steane':
-        if d == 3:
-            m = 1
-        elif d == 9:
-            m = 2
-        elif d == 27:
-            m = 3
-        else:
+        m = {3: 1, 9: 2, 27: 3}.get(d)
+        if m is None:
             raise ValueError("Steane code only supports m = 1, 2, 3")
-        if cycles == None:
-            cycles = d
-        return get_concat_steane_code(m,cycles, basis="Z")
+        return get_concat_steane_code(m, cycles, basis=basis)
 
 
 def get_max_d(code_name: str, n: int):

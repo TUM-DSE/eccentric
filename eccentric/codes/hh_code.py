@@ -636,12 +636,12 @@ def make_heavy_hex_circuit(
     return head + builder.circuit
 
 
-def get_hh_code(d, T = None):
+def get_hh_code(d, T = None, basis="Z"):
     if T == None:
         T = d
     stim_circuit = make_heavy_hex_circuit(
         diam=d,
-        time_boundary_basis='Z',
+        time_boundary_basis=basis,
         rounds=T,
         gate_set='cx',
     )

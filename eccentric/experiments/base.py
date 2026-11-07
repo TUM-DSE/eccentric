@@ -45,6 +45,8 @@ class Task:
     gate_set: Optional[str] = None
     optimization_level: Optional[int] = None
     schedule: Optional[str] = None
+    # Memory basis, Z or X (None: Z)
+    basis: Optional[str] = None
 
     def describe(self) -> str:
         return ", ".join(
@@ -65,7 +67,8 @@ def native_backend(task: Task):
     native_lr the long-range couplers of IBM's layout of bivariate bicycle codes are remote gates"""
     if task.distance is None:
         raise Skip("the native device needs a fixed distance")
-    qc = get_code(task.code, task.distance, resolve_cycles(task, task.distance), resolve_code_schedule(task)).qc
+    qc = get_code(task.code, task.distance, resolve_cycles(task, task.distance), resolve_code_schedule(task),
+                  task.basis or "Z").qc
     pairs = {tuple(qc.find_bit(q).index for q in inst.qubits) for inst in qc.data if len(inst.qubits) == 2}
     remote = long_range_pairs(task.code, pairs) if task.backend == "native_lr" else ()
     return FakeNativeBackend(qc.num_qubits, pairs, remote)
@@ -115,11 +118,12 @@ def noisy_circuit(task: Task, backend, d: int, cycles: int, stage=lambda name: n
     schedule = resolve_code_schedule(task)
     # The same configuration compiles to the same circuit in every process: Sabre's layout and routing and
     # the noise model's random choices are seeded by the configuration without its noise, so the same
-    # code on the same device gets the same circuit under every noise model (and noise scale)
+    # code on the same device gets the same circuit under every noise model (and noise scale); the seed
+    # leaves out the memory basis, so the X-basis circuit is compiled with the Z-basis circuit's seed
     seed = stable_seed(task.code, d, cycles, schedule, task.backend, task.backend_size, task.layout_method,
                        task.routing_method, task.translating_method)
     with stage("circuit"):
-        code = get_code(task.code, d, cycles, schedule)
+        code = get_code(task.code, d, cycles, schedule, task.basis or "Z")
     detectors, logicals = code.stim_detectors()
     if task.translating_method:
         code.qc = translate(code.qc, task.translating_method)

@@ -90,6 +90,7 @@ SLICES = {
     "willow_surface": "Surface code on Google Willow",
     "floquet_devices": "Floquet codes on devices",
     "noise_scaling": "Device noise scaled down",
+    "basis_x": "Memory in the X basis",
     "reference": "Reference: all codes on an all-to-all device",
     "paper_dqc": "Paper experiment: one QPU vs distributed QPUs",
     "paper_topology": "Paper experiment: codes on sparse devices",
@@ -120,6 +121,10 @@ SLICE_DESCRIPTIONS = {
     "noise_scaling": "Codes at several distances on IBM, Google and neutral-atom devices, with every error "
                      "probability of the device's noise multiplied by 0.1, 0.25, 0.5 or 1: where each device "
                      "crosses threshold, and how much better it must get.",
+    "basis_x": "The same memory experiments with the logical |+> state prepared and measured in the X basis, "
+               "paired with their Z-basis results: the Willow surface code, codes on IBM, Google and neutral-atom "
+               "devices at their own noise, Bacon-Shor and XZZX in both bases, and asymmetric codes under uniform "
+               "SD6 noise.",
     "reference": "Every code at its default schedule on an all-to-all device with uniform SD6 circuit noise: the "
                  "common baseline that makes the device datasets comparable.",
     "paper_dqc": "The configurations of the ECCentric paper's (SIGMETRICS 2026) comparison of one QPU with "
@@ -131,7 +136,7 @@ SLICE_DESCRIPTIONS = {
                       "avoids needless SWAPs; decoded with BP-OSD as in the paper.",
 }
 
-COLUMNS = ["slice", "code", "family", "taxonomy", "schedule", "distance", "rounds", "k", "code_qubits", "backend",
+COLUMNS = ["slice", "code", "family", "taxonomy", "schedule", "basis", "distance", "rounds", "k", "code_qubits", "backend",
            "error_type", "error_probability", "decoder", "status", "logical_error_rate", "ler_low", "ler_high",
            "ler_per_round", "ler_per_round_high", "shots", "errors", "circuit_qubits", "swaps", "two_qubit_gates",
            "layers", "device_qubits", "note", "undetectable_faults", "undetectable_probability"]
@@ -181,6 +186,8 @@ def main():
     df["family"], df["taxonomy"] = zip(*df.code.map(family))
     df["schedule"] = df.schedule_used.fillna(df.schedule)
     df["k"] = df.observables
+    # Tables from before the memory basis was a column are all Z-basis memories
+    df["basis"] = df["basis"].fillna("Z") if "basis" in df else "Z"
     rows = [[clean(r.get(c)) for c in COLUMNS] for r in df.to_dict("records")]
     out = {
         "generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),

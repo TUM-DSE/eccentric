@@ -1,3 +1,4 @@
+import stim
 import pytest
 
 from eccentric.codes import get_code, get_max_d, get_min_n
@@ -112,3 +113,52 @@ def test_logical_error_end_to_end(name, decoder):
     (row,) = logical_error.run(task)
     assert row["distance"] == d and row["cycles"] == 2
     assert 0.0 <= float(row["logical_error_rate"]) < 0.5
+
+
+# Codes whose memory circuits exist in both bases; the others must refuse the X basis
+Z_ONLY = {"repetition", "honeycomb", "planar_honeycomb"} | {n for n in CODES if "hyperbolic_floquet" in n}
+
+
+@pytest.mark.parametrize("name", all_codes(sorted(set(CODES) - Z_ONLY)) + ["surface", "hh", "color", "bacon", "gross"])
+def test_x_basis_circuit_matches_z_basis(name):
+    d = smallest_distance(name) if name in CODES else {"gross": 12}.get(name, 3)
+    z = get_code(name, d, 2, None, "Z").stim_circuit
+    x = get_code(name, d, 2, None, "X").stim_circuit
+    # Raises if a detector or observable is not deterministic
+    x.detector_error_model()
+    assert x.num_qubits == z.num_qubits
+    assert x.num_observables == z.num_observables and x.num_detectors > 0
+    # The observable is sensitive to other errors: its detecting region (the Pauli errors that flip it) differs
+    # (circuits may measure X as H then M, and Bacon-Shor toggles the data qubits' frame every half-round)
+    zr, xr = (logical_region(c) for c in (z, x))
+    assert any(zr[t] != xr[t] for t in zr)
+    if name in ("surface", "hh", "color", "gross", "bb72", "toric", "bpc36"):
+        # Standard CSS circuits: mid-circuit, X errors flip the Z-basis observable and Z errors the X-basis one
+        middle = sorted(zr)[len(zr) // 2]
+        assert set(str(zr[middle])[1:]) <= {"_", "Z"} and set(str(xr[middle])[1:]) <= {"_", "X"}
+
+
+def logical_region(circuit):
+    return circuit.detecting_regions(targets=["L0"])[stim.DemTarget.logical_observable_id(0)]
+
+
+@pytest.mark.parametrize("name", sorted(Z_ONLY) + ["steane"])
+def test_z_only_codes_refuse_x_basis(name):
+    with pytest.raises((ValueError, NotImplementedError)):
+        get_code(name, smallest_distance(name) if name in CODES else 3, 2, None, "X")
+
+
+@pytest.mark.parametrize("name,d", [("surface", 3), ("hh", 3), ("color", 3), ("bacon", 3), ("xzzx", 3)])
+def test_x_basis_keeps_the_distance(name, d):
+    # Under uniform depolarizing noise, the shortest graphlike logical error is as long in X as in Z
+    def noisy(c, p=1e-3):
+        out = stim.Circuit()
+        for inst in c.flattened():
+            if inst.name in ("M", "MX", "MR", "MRX", "MZ", "MRZ"):
+                out.append("Z_ERROR" if "X" in inst.name else "X_ERROR", [t.value for t in inst.targets_copy()], p)
+            out.append(inst)
+            if inst.name in ("CX", "CZ", "XCX"):
+                out.append("DEPOLARIZE2", [t.value for t in inst.targets_copy()], p)
+        return out
+    lengths = [len(noisy(get_code(name, d, d, None, b).stim_circuit).shortest_graphlike_error()) for b in ("Z", "X")]
+    assert lengths[0] == lengths[1]

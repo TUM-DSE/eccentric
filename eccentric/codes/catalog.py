@@ -1,9 +1,11 @@
 """Codes that are built as noiseless Stim memory circuits and converted with StimCodeCircuit.
 
 A ``CodeFamily`` is parametrized by its distance, a ``FixedCode`` is a single [[n, k, d]] instance.
-``make`` returns the circuit for a number of syndrome rounds (and a distance, for families) and a
-syndrome-extraction schedule out of ``schedules``, the first of which is the default. Codes with
-no ``schedules`` have a single, fixed circuit.
+``make`` returns the circuit for a number of syndrome rounds (and a distance, for families), a
+syndrome-extraction schedule out of ``schedules``, the first of which is the default, and the memory
+basis ("Z" or "X": the logical state prepared and measured). Codes with no ``schedules`` have a
+single, fixed circuit. Codes whose circuits exist only for the Z basis (the repetition code, and the
+Floquet codes, whose observables are not X or Z) raise for "X".
 """
 import math
 from collections import Counter
@@ -38,7 +40,7 @@ def _hyperbolic_rounds(rounds):
 
 @dataclass(frozen=True)
 class CodeFamily:
-    make: Callable[[int, int, Optional[str]], stim.Circuit]
+    make: Callable[[int, int, Optional[str], str], stim.Circuit]
     num_qubits: Callable[[int], int]
     min_d: int = 3
     step: int = 2
@@ -49,63 +51,72 @@ class CodeFamily:
 
 @dataclass(frozen=True)
 class FixedCode:
-    make: Callable[[int, Optional[str]], stim.Circuit]
+    make: Callable[[int, Optional[str], str], stim.Circuit]
     distance: int
     schedules: tuple = ()
     rounds: Callable[[int], int] = _same_rounds
 
 
-def _repetition(d, rounds, schedule):
+def _z_only(name, basis):
+    if basis != "Z":
+        raise ValueError(f"{name} circuits exist only for the Z basis, not {basis}")
+
+
+def _repetition(d, rounds, schedule, basis):
+    _z_only("repetition", basis)
     return stim.Circuit.generated("repetition_code:memory", rounds=rounds, distance=d)
 
 
-def _xzzx(d, rounds, schedule):
+def _xzzx(d, rounds, schedule, basis):
     from .xzzx_code import make_xzzx_circuit
-    return make_xzzx_circuit(d, rounds)
+    return make_xzzx_circuit(d, rounds, basis)
 
 
-def _toric(d, rounds, schedule):
+def _toric(d, rounds, schedule, basis):
     from .qldpc_codes import make_memory_circuit, toric_code
-    return make_memory_circuit(toric_code(d), rounds, schedule)
+    return make_memory_circuit(toric_code(d), rounds, schedule, basis)
 
 
 def _qldpc(builder_name, *args):
-    def make(rounds, schedule):
+    def make(rounds, schedule, basis):
         from . import qldpc_codes
-        return qldpc_codes.make_memory_circuit(getattr(qldpc_codes, builder_name)(*args), rounds, schedule)
+        return qldpc_codes.make_memory_circuit(getattr(qldpc_codes, builder_name)(*args), rounds, schedule, basis)
     return make
 
 
 def _bb(n):
-    def make(rounds, schedule):
+    def make(rounds, schedule, basis):
         if schedule == "ibm":
             from .gross_code import make_bb_circuit
-            return make_bb_circuit(n, rounds)
+            return make_bb_circuit(n, rounds, basis)
         from .quits_codes import make_bb_circuit
-        return make_bb_circuit(n, rounds, schedule)
+        return make_bb_circuit(n, rounds, schedule, basis)
     return make
 
 
 def _quits(builder_name, *args):
-    def make(rounds, schedule):
+    def make(rounds, schedule, basis):
         from . import quits_codes
-        return getattr(quits_codes, builder_name)(*args, rounds, schedule)
+        return getattr(quits_codes, builder_name)(*args, rounds, schedule, basis)
     return make
 
 
 def _hyperbolic(filename):
-    def make(rounds, schedule):
+    def make(rounds, schedule, basis):
+        _z_only(filename, basis)
         from .hyperbolic_floquet import make_hyperbolic_floquet_circuit
         return make_hyperbolic_floquet_circuit(filename, rounds)
     return make
 
 
-def _periodic_honeycomb(d, rounds, schedule):
+def _periodic_honeycomb(d, rounds, schedule, basis):
+    _z_only("honeycomb", basis)
     from .honeycomb import make_periodic_honeycomb_circuit
     return make_periodic_honeycomb_circuit(d, rounds)
 
 
-def _planar_honeycomb(d, rounds, schedule):
+def _planar_honeycomb(d, rounds, schedule, basis):
+    _z_only("planar_honeycomb", basis)
     from .honeycomb import make_planar_honeycomb_circuit
     return make_planar_honeycomb_circuit(d, rounds)
 
@@ -248,15 +259,18 @@ def resolve_schedule(code_name: str, schedule: Optional[str]) -> Optional[str]:
     return schedule
 
 
-def make_circuit(code_name: str, d: int, rounds: Optional[int], schedule: Optional[str] = None) -> stim.Circuit:
+def make_circuit(code_name: str, d: int, rounds: Optional[int], schedule: Optional[str] = None,
+                 basis: str = "Z") -> stim.Circuit:
     code = CODES[code_name]
     schedule = resolve_schedule(code_name, schedule)
+    if basis not in ("Z", "X"):
+        raise ValueError(f"basis must be Z or X, got {basis}")
     if isinstance(code, FixedCode):
         if d is not None and d != code.distance:
             raise ValueError(f"{code_name} only has distance {code.distance}, got {d}")
-        circuit = code.make(rounds or code.distance, schedule)
+        circuit = code.make(rounds or code.distance, schedule, basis)
     else:
-        circuit = code.make(d, rounds or d, schedule)
+        circuit = code.make(d, rounds or d, schedule, basis)
     return _flatten_and_compact(circuit)
 
 

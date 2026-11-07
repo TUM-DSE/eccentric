@@ -45,41 +45,41 @@ LCS_CODES = {
 QLP_BASE = np.array([[0, 0, 0, 0, 0], [0, 2, 4, 7, 11], [0, 3, 10, 14, 15]])
 
 
-def _circuit(code, rounds: int, strategy: str) -> stim.Circuit:
+def _circuit(code, rounds: int, strategy: str, basis: str = "Z") -> stim.Circuit:
     kwargs = {"seed": 1} if strategy.startswith("cardinal") else {}
-    circuit = code.build_circuit(strategy=strategy, num_rounds=rounds, basis="Z", **kwargs)
+    circuit = code.build_circuit(strategy=strategy, num_rounds=rounds, basis=basis, **kwargs)
     return circuit.without_noise()
 
 
-def make_bpc_circuit(n: int, rounds: int, schedule: str) -> stim.Circuit:
-    return _circuit(BpcCode(**BPC_CODES[n], factor=3), rounds, schedule)
+def make_bpc_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+    return _circuit(BpcCode(**BPC_CODES[n], factor=3), rounds, schedule, basis)
 
 
-def make_hgp_circuit(n: int, rounds: int, schedule: str) -> stim.Circuit:
+def make_hgp_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
     h = np.loadtxt(os.path.join(HGP_DIR, HGP_MATRICES[n]), dtype=int)
-    return _circuit(HgpCode(h, h), rounds, schedule)
+    return _circuit(HgpCode(h, h), rounds, schedule, basis)
 
 
-def make_lcs_circuit(n: int, rounds: int, schedule: str) -> stim.Circuit:
-    return _circuit(LcsCode(*LCS_CODES[n]), rounds, schedule)
+def make_lcs_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+    return _circuit(LcsCode(*LCS_CODES[n]), rounds, schedule, basis)
 
 
-def make_qlp_circuit(rounds: int, schedule: str) -> stim.Circuit:
-    return _circuit(QlpCode(QLP_BASE, QLP_BASE, 16), rounds, schedule)
+def make_qlp_circuit(rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+    return _circuit(QlpCode(QLP_BASE, QLP_BASE, 16), rounds, schedule, basis)
 
 
-def make_mitten_circuit(rounds: int, schedule: str) -> stim.Circuit:
+def make_mitten_circuit(rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
     # The [[150,30]] instance over C5 x S3 used in QUITS' Mitten demo. These random base matrices
     # give distance <= 8, below the [[150,30,10]] instance of arXiv:2607.28795.
     group = direct_product(cyclic(5), symmetric(3))
     A, B = sample_mitten_base_matrices(group, np.random.default_rng(2))
-    return _circuit(MittenCode(A, B, group), rounds, schedule)
+    return _circuit(MittenCode(A, B, group), rounds, schedule, basis)
 
 
-def make_bb_circuit(n: int, rounds: int, schedule: str) -> stim.Circuit:
+def make_bb_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
     # Bivariate bicycle codes of BBCODE_DICT with a QUITS schedule instead of the IBM circuit
     from .gross_code import BBCODE_DICT
 
     (k, d), = [(k, d) for (n_, k, d) in BBCODE_DICT if n_ == n]
     l, m, (a_x, *a_y), (b_y, *b_x) = BBCODE_DICT[(n, k, d)]
-    return _circuit(BbCode(l, m, [a_x], a_y, b_x, [b_y]), rounds, schedule)
+    return _circuit(BbCode(l, m, [a_x], a_y, b_x, [b_y]), rounds, schedule, basis)

@@ -269,24 +269,24 @@ BBCODE_DICT = {
     (756,16,34): [21,18,[3,10,17],[5,3,19]]
 }
 
-def get_gross_code(d=12, T=12):
+def get_gross_code(d=12, T=12, basis="Z"):
     code, A_list, B_list = create_bivariate_bicycle_codes(12, 6, [3], [1,2], [1,2], [3])
     stim_circuit =  build_circuit(code, A_list, B_list,
         num_repeat=T,
-        z_basis=True,
+        z_basis=basis == "Z",
         use_both=False,
     )
     return StimCodeCircuit(stim_circuit = stim_circuit)
 
 
-def make_bb_circuit(n, T):
+def make_bb_circuit(n, T, basis="Z"):
     """Bivariate bicycle code [[n, k, d]] from BBCODE_DICT, with the same circuit as the gross code"""
     (k, d), = [(k, d) for (n_, k, d) in BBCODE_DICT if n_ == n]
     l, m, (a_x, *a_y), (b_y, *b_x) = BBCODE_DICT[(n, k, d)]
     code, A_list, B_list = create_bivariate_bicycle_codes(l, m, [a_x], a_y, b_x, [b_y], code_distance=d)
     return build_circuit(code, A_list, B_list,
         num_repeat=T,
-        z_basis=True,
+        z_basis=basis == "Z",
         use_both=False,
     )
 
