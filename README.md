@@ -149,4 +149,22 @@ MWPF has the least data (83 circuits).
 
 ## License and citation
 
-To be decided.
+MIT ([LICENSE](LICENSE)). If you use Matchmaker in your research, please cite it, and ECCentric, whose
+measurements train it ([CITATION.cff](CITATION.cff), which GitHub's "Cite this repository" button reads):
+
+```bibtex
+@software{giortamis2026matchmaker,
+  title  = {qec-matchmaker: pick a decoder before you decode},
+  author = {Giortamis, Emmanouil},
+  year   = {2026},
+  url    = {https://github.com/manosgior/qec-matchmaker}
+}
+
+@inproceedings{swierkowska2026eccentric,
+  title     = {ECCentric: An Empirical Analysis of Quantum Error Correction Codes},
+  author    = {{\'S}wierkowska, Aleksandra and Pflieger, Jannik and Giortamis, Emmanouil and Bhatotia, Pramod},
+  booktitle = {Proceedings of the ACM SIGMETRICS Conference (SIGMETRICS'26)},
+  year      = {2026},
+  note      = {arXiv:2511.01062}
+}
+```
