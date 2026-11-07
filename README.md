@@ -1,36 +1,20 @@
 # qec-matchmaker
 
-**Pick a decoder before you decode.** Matchmaker reads a noisy QEC circuit and predicts, in seconds
-and without decoding a single shot, whether the configuration is above threshold, roughly what its
-logical error rate will be, how long each decoder will take, and which decoder to use.
+**Pick a decoder before you decode.**
 
-> **Status: working prototype.** Features, models, recommendation, evaluation, command line and the
-> update pipeline from ECCentric work and are tested. The packaged model is trained on Matchmaker's own
-> features of 3,146 ECCentric circuits (20,270 decodes, ECCentric 0e9c091). See [docs/DESIGN.md](docs/DESIGN.md).
+Matchmaker reads a noisy quantum error correction circuit and tells you, in seconds and without decoding
+a single shot, whether it is below threshold, roughly what its logical error rate will be, how long each
+decoder will take, and which decoder to use.
 
-## Why
+> [!NOTE]
+> **Working prototype, v0.1.0.** The packaged model is trained on 3,146 circuits and 20,270 measured
+> decodes from the [ECCentric](https://github.com/TUM-DSE/eccentric) benchmark. MIT licensed.
 
-Choosing a decoder is usually a guess, and a costly one. In the [ECCentric](https://github.com/TUM-DSE/eccentric)
-benchmark (67 codes compiled onto 25 devices under 27 noise models, decoded by up to 9 decoders on
-the same shots) no decoder wins everywhere, decoding costs span six orders of magnitude, and 48% of the CPU time
-went to configurations with a logical error rate above 50%, where every decoder fails. All of this is
-predictable from the circuit alone.
-
-## Install
+## Quick start
 
 ```bash
-pip install -e .                      # add [decoder-bench] to read decoder-bench traces, [test] for the tests
-```
-
-## Use
-
-```bash
-qec-matchmaker advise circuit.stim                         # cheapest decoder within 1.25x of the most accurate
-qec-matchmaker advise circuit.stim --objective accurate
-qec-matchmaker advise circuit.stim --distance 11                # the code distance, if known (better beyond the training data)
-qec-matchmaker advise circuit.stim --objective budget --budget-ms 1 [--per-round]
-qec-matchmaker advise trace.h5                             # a decoder-bench trace
-qec-matchmaker features circuit.stim                       # the features the models see
+pip install -e .
+qec-matchmaker advise circuit.stim
 ```
 
 ```
@@ -47,105 +31,126 @@ bposd_tuned        True 9.36e-05    0.913
        ...
 ```
 
+From Python:
+
 ```python
 import stim
 from qec_matchmaker.api import advise
 
-advice = advise(stim.Circuit.from_file("circuit.stim"), objective="accurate")
-advice.decoder                 # e.g. "tesseract"
-advice.above_threshold         # probability
-advice.ler                     # (q10, q50, q90) of the best decoder's logical error rate
-advice.time_per_shot_ms        # {decoder: ms}
+advice = advise(stim.Circuit.from_file("circuit.stim"), objective="accurate", code_distance=5)
+advice.decoder                     # "tesseract"
+advice.above_threshold             # probability
+advice.ler                         # (q10, q50, q90) of the best decoder's logical error rate
+advice.time_per_shot_ms            # {decoder: ms}
 advice.expected_cost(errors=100)   # shots and core-hours per decoder
 ```
 
-Times are for one core of the machine ECCentric ran on. `qec_matchmaker.calibrate` measures speed
-factors on yours (`advise(..., speed_factors=...)`, `--calibration`).
+| Option | |
+|---|---|
+| `--objective cheapest` (default) | the cheapest decoder predicted within 1.25× of the most accurate |
+| `--objective accurate` | the decoder with the lowest predicted logical error rate |
+| `--objective budget --budget-ms 1 [--per-round]` | the most accurate decoder within a time budget |
+| `--distance 11` | the code distance, if you know it: better predictions beyond the training data |
+| `qec-matchmaker advise trace.h5` | a [decoder-bench](https://github.com/satvikmaurya/decoder-bench) trace instead of a circuit |
+| `qec-matchmaker features circuit.stim` | the features the models see |
+
+Times are for one core of the machine ECCentric ran on; `qec_matchmaker.calibrate` measures speed factors
+for yours (`--calibration`). Add `[decoder-bench]` to the install to read decoder-bench traces, `[test]` for
+the tests.
 
 ## How it works
 
-1. **Features from the detector error model** (`qec_matchmaker/features.py`): the probability that
-   each detector fires (exact for independent error mechanisms), the total and the logical error mass,
-   the number and weight of the error mechanisms, undetectable logical faults, whether errors decompose
-   into edges (matching) and carry color annotations (Chromobius), and the circuit's size. Routing,
-   remote couplers and device noise show up in these, so the models apply to codes and devices they
-   have not seen; they never see the code's name.
-2. **Gradient-boosted trees** (`qec_matchmaker/models.py`): P(above threshold); quantiles of the best
-   logical error rate; each decoder's LER relative to the best; quantiles of each decoder's time per
-   shot, with timed-out decodes as right-censored observations. The LER and time trees sit on top of
-   physical scaling laws (below threshold the LER falls as (p/p_th)^(d/2) with the code distance d, if
-   given; time is a power law in the circuit's size and noise), so that circuits larger or quieter than
-   any in training are not predicted at the edge of the training data
-   ([experiments/EXTRAPOLATION.md](experiments/EXTRAPOLATION.md)).
-3. **Recommendation** (`qec_matchmaker/recommend.py`): the most accurate, the cheapest within a tolerance
-   of the most accurate, or the most accurate within a time budget, among the decoders that apply;
-   above threshold, the cheapest, with a warning. Whether matching applies needs the circuit (an error
-   model alone cannot tell), so pass circuits where you can.
+```mermaid
+flowchart LR
+    C["Stim circuit"] --> F["24 features of its<br/>detector error model"]
+    F --> M["Gradient-boosted trees<br/>on physical scaling laws"]
+    M --> R["below threshold?"]
+    M --> L["logical error rate"]
+    M --> T["time per shot,<br/>per decoder"]
+    R & L & T --> D["recommended decoder"]
+```
+
+1. **Features.** From the circuit's detector error model: how often each detector fires, the total and the
+   logical error mass, the number and weight of the error mechanisms, whether errors decompose into edges
+   (matching) or carry color annotations (Chromobius), and the circuit's size. Routing, remote couplers and
+   device noise all show up here, so the models apply to codes and devices they have never seen; they never
+   see a code's name.
+2. **Models.** Gradient-boosted trees predict the probability of being above threshold, quantiles of the best
+   logical error rate, each decoder's error rate relative to the best, and each decoder's time per shot. The
+   error-rate and time trees sit on top of scaling laws, so larger or quieter circuits than any in training
+   are not predicted at the edge of the training data.
+3. **Recommendation.** Among the decoders that apply: the most accurate, the cheapest within a tolerance of
+   the most accurate, or the most accurate within a time budget.
+
+## The dataset
+
+Matchmaker learns from [ECCentric](https://github.com/TUM-DSE/eccentric), an end-to-end benchmark that
+compiles QEC codes onto real and projected quantum devices, simulates them under each device's noise, and
+decodes every circuit with several decoders on the same shots.
+
+| | |
+|---|---|
+| Circuits | 3,146 memory experiments, 8 to 9,405 detectors |
+| Codes | 67 codes from 25 families: surface, color, heavy-hex, Floquet, bivariate bicycle, hypergraph and lifted product, quantum Tanner, ... |
+| Devices | 25: IBM Heron, Flamingo, Loon and the bicycle module (one and several QPUs), Google Willow, Quantinuum Apollo, Harvard/MIT and Infleqtion neutral atoms, and ideal grid, all-to-all and cube layouts |
+| Noise | 27 models: each device's own, scaled versions of them, and standard circuit noise |
+| Decoders | 9: MWPM, MWPF, BP-OSD (paper and tuned settings), BP-LSD, BeliefFind, Relay-BP, Tesseract, Chromobius |
+| Decodes | 20,270, from 1.7 billion shots |
+
+Every decoder trades accuracy against time differently, and none wins everywhere. Tesseract is the most
+accurate wherever it finishes, but it is among the slowest and timed out on 120 of the largest circuits;
+matching and Chromobius are fast but apply to few codes and lose accuracy on compiled circuits:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/decoders-dark.png">
+  <img alt="Per decoder: how often it is as accurate as the best decoder on a circuit, and its time per shot, which spans eight orders of magnitude across decoders and circuits" src="docs/figures/decoders-light.png">
+</picture>
+
+The training table is [data/dataset.csv](data/dataset.csv) (one row per circuit and decoder, with the features)
+and its provenance [data/MANIFEST.json](data/MANIFEST.json) (ECCentric commit and file hashes).
 
 ## How good it is
 
-Evaluated on codes held out of training (10 folds over 67 codes, 3,146 circuits, 20,270 decodes; full
-report in [reports/REPORT.md](reports/REPORT.md)):
+Every number below is for codes held out of training (10 folds over the 67 codes): the model never saw the
+code it is predicting.
 
-| Prediction | Result |
-|---|---|
-| Above or below threshold | 98% correct (recall 95%, precision 96%) |
-| Logical error rate of the best decoder | median error 0.08 decades (1.20×), p90 0.37, rank correlation 0.98 |
-| Time per shot | 94% within 3× (Relay-BP 98%, BP-OSD 95%, Tesseract 85%, MWPF 82%), rank correlation 0.99 |
-| Decoder choice, all 2,774 circuits ("accurate" / "cheapest") | good enough on 90% / 83%, against 61% for always BP-OSD |
-| Decoder choice, the 1,820 circuits where all five BP-type and Tesseract decoders ran | "accurate": good enough on 97% at 1.7× the cheapest good-enough decoder's time (median); "cheapest": 84% at 1.0×; always Tesseract: 100% at 12×; always BP-OSD: 52% at 14× |
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/accuracy-dark.png">
+  <img alt="Predicted against measured logical error rate and time per shot on held-out codes; points cluster around the diagonal" src="docs/figures/accuracy-light.png">
+</picture>
 
-The 80% intervals are conformalized on held-out codes and hold 84% of held-out LERs and 81–87% of each
-decoder's times. Harder splits: whole code families, devices or noise models held out
-([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)); circuits beyond the training range
-([experiments/EXTRAPOLATION.md](experiments/EXTRAPOLATION.md): the quietest 20% of circuits held out, LER
-error 0.30 decades, against 0.74 for trees alone; these two reports are from the 1,810-circuit table);
-circuits from Stim's generators and decoder-bench ([experiments/EXTERNAL.md](experiments/EXTERNAL.md): LER
-error 0.08 decades, p90 0.28, time within 3× for 84%, decoder choice good enough on 100% / 94%).
-Model settings come from the experiments in [experiments/RESULTS.md](experiments/RESULTS.md).
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/choice-dark.png">
+  <img alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 97% at 1.7 times the cheapest good decoder's time, always Tesseract on 100% at 12 times, always BP-OSD on 52% at 14 times" src="docs/figures/choice-light.png">
+</picture>
 
-Known weaknesses: Tesseract's time is the hardest to predict (85% within 3×); beyond the training data the 80% intervals
-are too narrow (they are calibrated on held-out codes); a noise model unlike any in training can mislead
-the time law (Harvard's atom loss held out: time within 3× 79% -> 60%); and `advise` warns, naming the
-features, when a circuit is outside the training range.
+Threshold regime: 98% correct. Matchmaker's "accurate" choice is as good as always running Tesseract at a
+fraction of its time; "cheapest" trades a few percent of accuracy for the cheapest decoder.
+
+More: the full report ([reports/REPORT.md](reports/REPORT.md)), whole code families, devices and noise models
+held out ([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)), circuits beyond the training range
+([experiments/EXTRAPOLATION.md](experiments/EXTRAPOLATION.md)), and circuits from outside ECCentric, Stim's
+generators and decoder-bench ([experiments/EXTERNAL.md](experiments/EXTERNAL.md): error rate within 1.2×,
+time within 3× for 84%).
+
+## Limitations
+
+- Timings are for single-core software decoders, including the decoder's construction; FPGA and ASIC decoders
+  are not modelled.
+- The training data are memory experiments; logical operations such as lattice surgery are future work.
+- Predicted error rates are for planning, not for publication. Beyond the training data the 80% intervals are
+  too narrow, and a noise model unlike any in training (atom loss, for example) can mislead the time
+  predictions. `advise` warns when a circuit is outside the training range.
 
 ## Keeping up with ECCentric
-
-ECCentric keeps producing results. One command brings Matchmaker up to date:
 
 ```bash
 scripts/update_from_eccentric.sh          # MM_PUSH=1 to push; see the script for settings
 ```
 
-It extracts the features of new circuits on the cluster that holds ECCentric's run directories
-(`qec-matchmaker extract`, incremental), rebuilds the training table from ECCentric's committed sweep
-table (`qec-matchmaker ingest`; the manifest records the ECCentric commit and file hashes), retrains
-(`train`) and re-evaluates (`evaluate`), and commits `data/`, the packaged model and `reports/` when they
-changed. It is run by hand after ECCentric's sweep table changes; ECCentric's daily refresh does not run it.
-
-## Decoders
-
-Trained on: PyMatching (MWPM), MWPF, BP-OSD with ECCentric's paper settings and with tuned BP (100
-iterations, min-sum scaling 0.625), BP-LSD and BeliefFind (ldpc), Relay-BP, Tesseract and Chromobius.
-MWPF has the least data (83 circuits).
-
-## Limitations
-
-- Timings are single-core software decoders, including the decoder's construction; hardware (FPGA/ASIC)
-  decoders are not modelled.
-- Training data are memory experiments; logical operations such as lattice surgery are future work.
-- Predicted logical error rates are for planning, not for publication: they are far wider than the
-  interval of a measured rate.
-- decoder-bench traces keep only unique syndromes, so their syndromes cannot give a physical logical
-  error rate; Matchmaker reads only their circuit or check matrix.
-
-## Related work
-
-- [ECCentric](https://github.com/TUM-DSE/eccentric): the end-to-end QEC benchmark whose measurements
-  train Matchmaker.
-- [decoder-bench](https://github.com/satvikmaurya/decoder-bench) (Maurya et al., IISWC 2025):
-  benchmarks decoders on fixed decoding problems; Matchmaker predicts how they will do before running
-  them.
+extracts the features of new circuits on the cluster that holds ECCentric's runs, rebuilds the training table
+from ECCentric's sweep table, retrains, re-evaluates, and commits the data, the packaged model and the report.
+`scripts/make_figures.py` redraws the figures. Design notes: [docs/DESIGN.md](docs/DESIGN.md).
 
 ## License and citation
 
