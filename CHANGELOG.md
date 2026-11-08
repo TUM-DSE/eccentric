@@ -320,7 +320,7 @@ which experiments and paper figures it affects, and how it was checked.
 distance, cross-decoder comparison including old vs. new BP-OSD); `tests/test_noise_invariants.py`
 pins down the noise model's behaviour.
 
-### Which stored results include the fixes (checked 2026-11-05)
+### Which stored results include the fixes (checked 2026-11-05, updated 2026-11-08)
 
 - **The sweep table** (`experiment_results/Sweep/results.csv`): every row with a rate was built and
   decoded by code that includes each fix that applies to it (its noise model, device, code and
@@ -335,8 +335,14 @@ pins down the noise model's behaviour.
   except `Variance_*`, `Routing_diamond` and `Routing_*_placed` (rerun 2026-11-01, `858c2c1`), and
   `Sweep` and `DecoderBench`. Of the others, `Accumulated`, `Program_stats_shots` and
   `Program_stats_size` are not affected by any fix (all-to-all device, artificial noise, no Steane);
-  the eight listed above have fixed reruns in the sweep; `Decoder` (MWPM, fix 5; Steane, fix 2) and
-  the Steane rows of `Accumulated_Small`, `Size`, `Translation`, `Routing_grid` and `Routing_hh`
-  (fix 2) have not been rerun. `Decoder_Chromobius` comes from the `chromobius` experiment, whose
+  the eight listed above have fixed reruns in the sweep. `Decoder` (MWPM, fix 5; Steane, fix 2) and
+  the Steane rows of `Size`, `Translation`, `Routing_grid` and `Routing_hh` (fix 2) were rerun on
+  2026-11-06/07 and replaced (`paper_reruns.yaml`; metadata files of those dates): MWPM now refuses
+  the color and Steane circuits, so those 4 `Decoder` rows are gone; Steane's circuit has 3,024
+  instead of 3,121 gates; its `Translation` rows keep the old method names (qiskit = optimization
+  level 0, qiskit_optimized = level 3, identical to level 2; tket = level 0, tket_optimized = level 2;
+  TKET's level 3 pass sequence fails on these gate sets). The Steane rows of `Accumulated_Small` are
+  being rerun. Its `idle_error_rate` is 0 for every code, before and after: the idle reference
+  circuit gets no noise. `Decoder_Chromobius` comes from the `chromobius` experiment, whose
   circuits always carried coordinates: no fix applies, but Known issue 2 does.
 
