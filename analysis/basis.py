@@ -1,9 +1,8 @@
 """X-basis against Z-basis memory (slice basis_x). No plots.
 python analysis/basis.py [<results.csv>]
 
-Each X-basis configuration of basis_x is paired with the Z-basis results of the same code, distance,
-rounds, device and noise: from willow_surface, noise_scaling (at the device's own noise), reference
-(SD6) and basis_x itself (Bacon-Shor and XZZX on devices). A configuration's rate in a basis is its
+Each X-basis configuration of basis_x is paired with the Z-basis results of the same configuration
+(code, schedule, distance, rounds, device and its size, noise, compiler settings) in any slice. A configuration's rate in a basis is its
 best decoder's per-round logical error rate among decodes with at least MIN_ERRORS errors, with its 95%
 Wilson interval, the best taken over the decoders rated in both bases; ratio = X / Z, significant when
 the intervals do not overlap.
@@ -18,8 +17,8 @@ pd.set_option("display.width", 250)
 pd.set_option("display.max_rows", 500)
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MIN_ERRORS = 10
-PAIR = ["code", "distance", "cycles", "backend", "error_type", "error_probability"]
-Z_SLICES = ("willow_surface", "noise_scaling", "reference", "basis_x")
+PAIR = ["code", "schedule", "distance", "cycles", "backend", "backend_size", "error_type", "error_probability",
+        "layout_method", "routing_method", "translating_method"]
 
 
 def per_round(p, rounds):
@@ -33,7 +32,8 @@ def rated(df):
     rounds = r.rounds.fillna(r.cycles).astype(float)
     for col, src in (("pr", "logical_error_rate"), ("lo", "ler_low"), ("hi", "ler_high")):
         r[col] = [per_round(p, n) for p, n in zip(r[src], rounds)]
-    r["error_probability"] = r.error_probability.fillna(-1)
+    for c in PAIR:
+        r[c] = r[c].map(str)
     return r[PAIR + ["decoder", "pr", "lo", "hi"]]
 
 
@@ -51,7 +51,6 @@ def main():
     path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "experiment_results", "Sweep", "results.csv")
     df = pd.read_csv(path, low_memory=False)
     df["basis"] = df.basis.fillna("Z")
-    df = df[df.slice.isin(Z_SLICES)]
     x = rated(df[(df.slice == "basis_x") & (df.basis == "X")])
     z = rated(df[df.basis == "Z"])
     p = best_common(x, z)

@@ -1,4 +1,4 @@
-# X- against Z-basis memory (2026-11-08)
+# X- against Z-basis memory (2026-11-08, whole sweep 2026-11-09)
 
 Until now every ECCentric circuit was a Z-basis memory: logical |0> prepared and measured, so only X
 and Y errors on the data qubits can flip the result. The `basis_x` slice runs 272 configurations in the
@@ -9,6 +9,41 @@ means the 95% intervals do not overlap.
 
 210 pairs. 29 are above threshold in both bases (per-round rate 0.5) and say nothing; of the rest, 49
 differ significantly, 40 of them worse in X.
+
+## 0. Whole sweep (2026-11-09)
+
+`sweep.add_basis` then ran the X basis for every other configuration below threshold in Z (1,639
+configurations; the most accurate decoder in Z and the cheapest within 1.5x of it; run `sweep_basis_all`,
+35 Tesseract timeouts). With the pairs of sections 1-4, 1,521 pairs; leaving out the 29 above threshold in
+both bases, 791 of 1,492 are significantly worse in X and 100 better. X/Z ratio of the per-round rate:
+
+| devices | code kind | pairs | median | 90th percentile | worse / better in X |
+|---|---|---|---|---|---|
+| IBM (Heron, Flamingo, Loon, bicycle module), today's noise | topological | 162 | 1.32 | 3.2 | 51 / 6 |
+| | qLDPC | 40 | 2.70 | 21 | 31 / 0 |
+| IBM, gate errors / 10 and T1, T2 x 3 | topological | 68 | 2.31 | 9.9 | 48 / 2 |
+| | qLDPC | 383 | 2.43 | 8.6 | 319 / 1 |
+| IBM, scaled noise (x0.1 to x0.5) | topological | 241 | 1.74 | 5.7 | 130 / 14 |
+| | qLDPC | 25 | 2.20 | 8.5 | 20 / 0 |
+| Infleqtion | topological | 69 | 4.26 | 14 | 65 / 3 |
+| | qLDPC | 100 | 7.64 | 183 | 97 / 0 |
+| Willow | topological | 89 | 0.95 | 1.7 | 11 / 9 |
+| | qLDPC | 11 | 0.79 | 1.3 | 0 / 1 |
+| Harvard/MIT | topological | 67 | 1.03 | 1.7 | 9 / 0 |
+| | qLDPC | 34 | 0.90 | 1.2 | 0 / 5 |
+| Apollo | qLDPC | 28 | 0.95 | 1.2 | 0 / 8 |
+| all-to-all, SD6 | topological | 65 | 0.99 | 1.4 | 6 / 8 |
+| | qLDPC | 110 | 0.78 | 1.2 | 4 / 43 |
+
+The devices whose idling has T2 < T1 (IBM, Infleqtion) are worse in X wherever the codes are below
+threshold, and the gap grows with the code's size (bb: 2.4 at bb54 to 31 at bb288; bpc: 1.5 at bpc36 to 170
+at bpc180, on the devices above). With symmetric noise (SD6) the bivariate bicycle and BPC codes are the same
+in both bases (0.86 to 1.15, none significant), so their X circuits are not to blame. Some qLDPC circuits are
+asymmetric themselves: the coprime bivariate bicycle, generalized bicycle and lifted product codes from the
+qLDPC library are better in X under SD6 (cbb30 at p = 5e-4: 0.25), so their Z-basis results are the
+pessimistic ones. Willow, Harvard/MIT and Apollo are basis-neutral. Every Z-basis result on IBM devices and
+Infleqtion below threshold is thus optimistic, typically by a factor of 2 to 8 and for large qLDPC codes by
+one to two orders of magnitude.
 
 ## 1. The basis does not explain the Willow gap
 
