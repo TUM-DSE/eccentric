@@ -93,7 +93,7 @@ NOISE_LABELS = {
 # Noise model attribute -> label, for the parameters shown on the page
 NOISE_PARAMS = [
     ("sq", "1-qubit gate"), ("tq", "2-qubit gate"), ("measure", "Measurement"), ("reset", "Reset"),
-    ("idle", "Idle"), ("crosstalk", "Crosstalk"), ("leakage", "Leakage"), ("remote", "Remote gate"),
+    ("idle", "Idle"), ("leakage", "Leakage"), ("remote", "Remote gate"),
     ("shuttle", "Move (shuttling)"), ("loss", "Loss per gate"), ("loss_remote", "Loss per move"),
     ("loss_measure", "Loss per measurement"),
 ]

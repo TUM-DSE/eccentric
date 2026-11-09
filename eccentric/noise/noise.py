@@ -27,7 +27,6 @@ class NoiseModel:
         sq: Optional[float] = 0,
         tq: Optional[float] = 0,
         idle: Optional[float] = 0,
-        crosstalk: Optional[float] = 0,
         leakage: Optional[float] = 0,
         leakage_propagation: Optional[float] = 0,
         reset: Optional[float] = 0,
@@ -54,7 +53,6 @@ class NoiseModel:
         if idle_window not in ("layer", "measurement"):
             raise ValueError(f"idle_window must be 'layer' or 'measurement', got {idle_window}")
         self.idle_window = idle_window
-        self.crosstalk = crosstalk
         self.leakage = leakage
         self.leakage_propagation = leakage_propagation if leakage_propagation != 0 else leakage
         self.reset = reset
@@ -109,18 +107,6 @@ class NoiseModel:
             p_z = np.clip(p_z, 0.0, 1.0)
 
             circuit.append_operation("PAULI_CHANNEL_1", [qubit], [p_x, p_y, p_z])
-
-    def add_crosstalk_errors(self, touched_qubits: set[int], post: stim.Circuit):
-        if self.backend == None:
-            return
-        already_noised = set()
-        for q in touched_qubits:
-            for neighbor in self.qt.get_neighbours(q):
-                if neighbor in touched_qubits and (neighbor, q) not in already_noised and (q, neighbor) not in already_noised:
-                    noise_op = "X_ERROR" if random.random() < 0.5 else "Z_ERROR"
-                    post.append_operation(noise_op, [stim.target_qubit(neighbor)], self.crosstalk)
-                    already_noised.add((q, neighbor))
-                    already_noised.add((neighbor, q))
 
     def propagate_leakage(self, circuit: stim.Circuit, pair: List[int]):
         if any(self.qt.check_leaked(q) for q in pair) and random.random() < self.leakage_propagation:
@@ -383,9 +369,6 @@ class NoiseModel:
                 if op.name in ANNOTATION_OPS:
                     touched_qubits.clear()
 
-                if self.crosstalk > 0:
-                    self.add_crosstalk_errors(touched_qubits, post)
-
                 used_qubits |= touched_qubits
                 if self.decoheres():
                     for qubits, duration in self.durations(op):
@@ -507,7 +490,7 @@ def scale_noise(circuit: stim.Circuit, factor: float) -> stim.Circuit:
 
 class ScaledNoise:
     """A noise model with every error probability multiplied by a factor, i.e. a device that many times as
-    noisy (0.1: tenfold better). Gate, measurement, reset, crosstalk and loss errors scale exactly, and so does
+    noisy (0.1: tenfold better). Gate, measurement, reset and loss errors scale exactly, and so does
     the rate of leakage events;
     idle errors from T1/T2 scale like 1/T1 and 1/T2 to first order. Unlike FlamingoNoiseDownscaled (gate
     errors / 10 with T1 and T2 x 3), one factor applies to every error. Everything but noisy_circuit is the

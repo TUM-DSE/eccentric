@@ -11,7 +11,6 @@ class HarvardNoise(NoiseModel):
             # Local single-qubit gates are ~99.9% fidelity, CZ gates ~99.5% (Methods)
             sq=1e-3,
             tq=5e-3,
-            crosstalk=0,
             leakage=0,
             # Bit-flip error of the non-destructive readout (Fig. 1b)
             measure=4.6e-3,

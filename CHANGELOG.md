@@ -278,6 +278,23 @@ which experiments and paper figures it affects, and how it was checked.
 - **Affects:** `idle_error_rate` of `Accumulated` and `Accumulated_Small`.
 - **Paper:** any figure that compares a code with the idle qubit.
 
+### 16. Crosstalk errors were never applied, and could not have worked
+
+- **Files:** `eccentric/noise/noise.py`, `eccentric/noise/willow_noise.py`, `apollo_noise.py`,
+  `harvard_noise.py`, `infleqtion_noise.py`, `sweep/export_devices.py`. **Commit:** see git log.
+- **Problem:** `NoiseModel(crosstalk=...)` was meant to add errors on neighbouring qubits. The two
+  models that set it (`real_willow`, `real_willow_spec`: 5.5e-4, Google's CZ crosstalk; `real_apollo`:
+  6.3e-7) are built without a device, and the code returned early without one, so it never ran. Had it
+  run, it would have failed (`stim.target_qubit` does not exist), its errors went into a circuit that
+  had already been copied into the layer, and its "neighbours" were the other qubit of the same gate,
+  not the qubits of parallel gates.
+- **Fix:** removed. Crosstalk is not modelled; the Willow model's comment says so, and the Devices page
+  no longer lists a crosstalk rate.
+- **Affects:** nothing: the code returned before drawing any random number, and circuits built before
+  and after the removal are identical (checked for Willow, Willow spec, Apollo, Infleqtion, Harvard).
+- **Paper:** statements that the Willow model includes crosstalk. See analysis/WILLOW.md for what
+  crosstalk would change.
+
 ## Known issues (found, not fixed)
 
 1. **Fig. 17 c/d legend is swapped.** The Nighthawk results are stored as `real_loon` /

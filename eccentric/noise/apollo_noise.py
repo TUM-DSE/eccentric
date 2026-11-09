@@ -10,7 +10,6 @@ class ApolloNoise(NoiseModel):
             sq=8.0e-5 / 10,
             tq=1.4e-3 / 10,
             idle=5.3e-4 / 10,
-            crosstalk=6.3e-6 / 10,
             measure=1.33e-3 / 10,
             leakage=4.3e-4 / 10,
             shuttle=6.3e-06 / 10,

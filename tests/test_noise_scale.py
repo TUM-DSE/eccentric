@@ -65,7 +65,6 @@ def test_leakage_rate_is_scaled():
     scaled = ScaledNoise(WillowNoise.get_noise(None), 0.1)
     assert scaled.leakage == pytest.approx(base_model.leakage * 0.1)
     assert scaled.leakage_propagation == pytest.approx(base_model.leakage_propagation * 0.1)
-    assert scaled.crosstalk == base_model.crosstalk  # the circuit's crosstalk errors are scaled instead
 
 
 @pytest.mark.parametrize("backend, error_type", [("real_flamingo_1_qpu", "real_flamingo"), ("real_torino", "real_heron"),
