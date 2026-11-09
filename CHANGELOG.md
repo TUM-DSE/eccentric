@@ -265,6 +265,19 @@ which experiments and paper figures it affects, and how it was checked.
   brute force (same circuits).
 - `pytest` skips tests marked `slow` by default (`pytest -m slow` runs them).
 
+### 15. The accumulated-error experiment's idle reference never idled
+
+- **File:** `eccentric/experiments/accumulated_error.py`. **Commit:** `1a29979`.
+- **Problem:** the idle reference, meant to show how a bare qubit fares over the same time as the code,
+  was a circuit of empty TICKs and a measurement without an observable: its error rate counted no logical
+  flip and was 0 for every code at every noise level.
+- **Fix:** one extra qubit per logical qubit of the code, reset with the code's first layer, idle
+  through every later layer of the code's compiled circuit and measured with its last, each its own
+  observable, so the noise model gives it the idling of a qubit left alone for as long as the code runs
+  (tested against the exact error model: under modified SI1000, 7p plus 2/3 of p/10 per idle layer).
+- **Affects:** `idle_error_rate` of `Accumulated` and `Accumulated_Small`.
+- **Paper:** any figure that compares a code with the idle qubit.
+
 ## Known issues (found, not fixed)
 
 1. **Fig. 17 c/d legend is swapped.** The Nighthawk results are stored as `real_loon` /
@@ -341,8 +354,8 @@ pins down the noise model's behaviour.
   the color and Steane circuits, so those 4 `Decoder` rows are gone; Steane's circuit has 3,024
   instead of 3,121 gates; its `Translation` rows keep the old method names (qiskit = optimization
   level 0, qiskit_optimized = level 3, identical to level 2; tket = level 0, tket_optimized = level 2;
-  TKET's level 3 pass sequence fails on these gate sets). The Steane rows of `Accumulated_Small` are
-  being rerun. Its `idle_error_rate` is 0 for every code, before and after: the idle reference
-  circuit gets no noise. `Decoder_Chromobius` comes from the `chromobius` experiment, whose
+  TKET's level 3 pass sequence fails on these gate sets). `Accumulated_Small` was rerun in full
+  on 2026-11-08 (all codes, p = 0.001 to 0.01) after fix 15; `Accumulated` is being rerun (its old
+  table was already partial: BP-OSD at 10,000 samples does not finish at the higher noise levels). `Decoder_Chromobius` comes from the `chromobius` experiment, whose
   circuits always carried coordinates: no fix applies, but Known issue 2 does.
 
