@@ -332,66 +332,62 @@ def gari_pp_alpha(code_name):
     return GARI_PP_ALPHA["surface"]
 
 
-def _original_errors(enc, big):
-    """GARI's estimate of the error model's errors, from its estimate of the GARI matrix's variables"""
-    nx, nz = enc.nx, enc.nz
-    e = np.zeros(enc.h.shape[1], dtype=big.dtype)
-    e[enc.i_x] = big[nx + nz:2 * nx + nz]
-    e[enc.i_z] = big[2 * nx + nz:2 * (nx + nz)]
-    e[enc.i_y] = big[2 * (nx + nz):]
-    return e
-
-
 def gari_pp_decode(enc, detection_events, alpha, iterations=GARI_PP_ITERATIONS, seed=1):
-    """Predicted observable flips (shots x observables) and per shot whether GARI converged"""
+    """Predicted observable flips (shots x observables) and per shot whether GARI converged. Like the authors'
+    decoder, everything is in terms of GARI's effective errors on the side that flips the observables (its
+    convergence test is on those; the original error variables are not resolved): the residual syndrome of that
+    side, its matrix dz for the second stage, and the posterior LLRs of its effective errors as union-find's
+    guidance"""
     from ldpc import UnionFindDecoder
 
     one = _library()[1]
-    graphlike = np.diff(sp.csc_matrix(enc.h).indptr).max(initial=0) <= 2
-    residual = UnionFindDecoder(enc.h, uf_method="peeling" if graphlike else "inversion")
+    dz = sp.csr_matrix(enc.dz)
+    graphlike = np.diff(sp.csc_matrix(dz).indptr).max(initial=0) <= 2
+    residual = UnionFindDecoder(dz, uf_method="peeling" if graphlike else "inversion")
     P = ctypes.POINTER
     llr = np.ascontiguousarray(enc.llr, np.float64)
     hrows, hcols = np.ascontiguousarray(enc.hrows), np.ascontiguousarray(enc.hcols)
     n_big = len(llr)
     est = np.zeros(n_big, dtype=np.int8)
     lam = np.zeros(n_big, dtype=np.float64)
-    h = sp.csr_matrix(enc.h)
-    l = sp.csr_matrix(enc.l)
+    nx, nz, mx, m = enc.nx, enc.nz, enc.mx, len(enc.order)
+    l_dz = enc.l_dz.astype(np.int64)
     shots = detection_events.shape[0]
-    predicted = np.zeros((shots, l.shape[0]), dtype=np.int8)
+    predicted = np.zeros((shots, l_dz.shape[0]), dtype=np.int8)
     converged = np.zeros(shots, dtype=bool)
 
     def run(syndrome, n_iter, early):
-        it = one(llr.ctypes.data_as(P(ctypes.c_double)), n_iter, hrows.ctypes.data_as(P(ctypes.c_int)),
-                 hrows.shape[0], hrows.shape[1], hcols.ctypes.data_as(P(ctypes.c_int)), hcols.shape[0], hcols.shape[1],
-                 alpha, syndrome.ctypes.data_as(P(ctypes.c_int8)), seed, enc.shape_h[0], enc.shape_dx[0], 2, int(early),
-                 est.ctypes.data_as(P(ctypes.c_int8)), lam.ctypes.data_as(P(ctypes.c_double)))
-        return it
+        return one(llr.ctypes.data_as(P(ctypes.c_double)), n_iter, hrows.ctypes.data_as(P(ctypes.c_int)),
+                   hrows.shape[0], hrows.shape[1], hcols.ctypes.data_as(P(ctypes.c_int)), hcols.shape[0],
+                   hcols.shape[1], alpha, syndrome.ctypes.data_as(P(ctypes.c_int8)), seed, enc.shape_h[0],
+                   enc.shape_dx[0], 2, int(early), est.ctypes.data_as(P(ctypes.c_int8)),
+                   lam.ctypes.data_as(P(ctypes.c_double)))
 
     with _quiet():
         for shot in range(shots):
-            dets = detection_events[shot].astype(np.int8)
+            ordered = detection_events[shot, enc.order].astype(np.int8)
             syndrome = np.ones(hrows.shape[0], dtype=np.int8)
-            syndrome[:len(enc.order)] = 1 - 2 * dets[enc.order]
+            syndrome[:m] = 1 - 2 * ordered
+            s_z = ordered[mx:m]
             if run(syndrome, iterations, True) < iterations:
                 converged[shot] = True
-                predicted[shot] = (l @ _original_errors(enc, est)) % 2
+                predicted[shot] = (l_dz @ est[nx:nx + nz]) % 2
                 continue
-            # The iteration whose estimate leaves the lightest residual syndrome (the first of equals). The C
-            # decoder's random schedule is seeded, so t iterations reproduce the first t of a longer run
+            # The iteration whose effective errors leave the lightest residual syndrome on the observables' side
+            # (the first of equals). The decoder's random schedule is seeded, so t iterations reproduce the first t
+            # of a longer run
             best = None
             for t in range(1, iterations + 1):
                 run(syndrome, t, False)
-                e = _original_errors(enc, est)
-                res = (dets + h @ e) % 2
+                e = est[nx:nx + nz].copy()
+                res = (s_z + dz @ e) % 2
                 weight = int(res.sum())
                 if best is None or weight < best[0]:
-                    best = (weight, e.copy(), res.astype(np.uint8), _original_errors(enc, lam.copy()).astype(float))
+                    best = (weight, e, res.astype(np.uint8), lam[nx:nx + nz].copy())
             weight, e, res, posterior = best
             if weight:
-                # Union-find on the residual, its clusters grown along the errors GARI found most likely
                 e = (e + residual.decode(res, llrs=np.clip(np.abs(posterior), 1e-6, 50))) % 2
-            predicted[shot] = (l @ e) % 2
+            predicted[shot] = (l_dz @ e) % 2
     return predicted.astype(bool), converged
 
 
