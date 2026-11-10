@@ -60,15 +60,10 @@ the tests.
 
 ## How it works
 
-```mermaid
-flowchart LR
-    C["Stim circuit"] --> F["24 features of its<br/>detector error model"]
-    F --> M["Gradient-boosted trees<br/>on physical scaling laws"]
-    M --> R["below threshold?"]
-    M --> L["logical error rate"]
-    M --> T["time per shot,<br/>per decoder"]
-    R & L & T --> D["recommended decoder"]
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/overview-dark.png">
+  <img alt="A noisy circuit (Stim circuit, detector error model or decoder-bench trace) is reduced to 24 features of its detector error model; trees on scaling laws predict the regime, the best error rate, each decoder's regret and each decoder's time; a recommendation among the applicable decoders gives the advice. Options: the code distance and the machine's speed feed the models, the objective feeds the recommendation" src="docs/figures/overview-light.png">
+</picture>
 
 1. **Features.** From the circuit's detector error model: how often each detector fires, the total and the
    logical error mass, the number and weight of the error mechanisms, whether errors decompose into edges
@@ -81,6 +76,15 @@ flowchart LR
    are not predicted at the edge of the training data.
 3. **Recommendation.** Among the decoders that apply: the most accurate, the cheapest within a tolerance of
    the most accurate, or the most accurate within a time budget.
+
+`qec_matchmaker.runtime.execute` then decodes with the predictions checked as it goes: it skips a circuit
+predicted above threshold, pilots the recommended decoder on its first 100 shots under a time cap, moves to the
+next candidate if the pilot is too slow or fails, and commits to the full decode only once a pilot passes.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/runtime-dark.png">
+  <img alt="Predict and rank the candidate decoders; skip the circuit if it is above threshold with probability over 0.9; pilot the next candidate on its first 100 shots, capped at 10 times its predicted time; if the pilot does not finish, or over half its shots are logical errors, pilot the next candidate, giving the circuit up as above threshold when the most accurate decoder or two decoders failed; otherwise commit to the full decode" src="docs/figures/runtime-light.png">
+</picture>
 
 ## The dataset
 
@@ -157,7 +161,13 @@ scripts/update_from_eccentric.sh          # MM_PUSH=1 to push; see the script fo
 
 extracts the features of new circuits on the cluster that holds ECCentric's runs, rebuilds the training table
 from ECCentric's sweep table, retrains, re-evaluates, and commits the data, the packaged model and the report.
-`scripts/make_figures.py` redraws the figures. Design notes: [docs/DESIGN.md](docs/DESIGN.md).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/training-dark.png">
+  <img alt="ECCentric's circuits go through extract into the feature store; the store and ECCentric's decode results go through ingest into the training table; train gives the packaged model and evaluate the report; scripts/update_from_eccentric.sh runs the four steps" src="docs/figures/training-light.png">
+</picture>
+
+`scripts/make_figures.py` redraws the figures and `scripts/make_diagrams.py` the diagrams. Design notes: [docs/DESIGN.md](docs/DESIGN.md).
 
 ## License and citation
 
