@@ -372,7 +372,7 @@ pins down the noise model's behaviour.
   instead of 3,121 gates; its `Translation` rows keep the old method names (qiskit = optimization
   level 0, qiskit_optimized = level 3, identical to level 2; tket = level 0, tket_optimized = level 2;
   TKET's level 3 pass sequence fails on these gate sets). `Accumulated_Small` was rerun in full
-  on 2026-11-08 (all codes, p = 0.001 to 0.01) after fix 15; `Accumulated` is being rerun (its old
-  table was already partial: BP-OSD at 10,000 samples does not finish at the higher noise levels). `Decoder_Chromobius` comes from the `chromobius` experiment, whose
+  on 2026-11-08 (all codes, p = 0.001 to 0.01) and `Accumulated` in full on 2026-11-08/10 (all six
+  codes at all ten noise levels, 10,000 samples; its old table was partial), both after fix 15. `Decoder_Chromobius` comes from the `chromobius` experiment, whose
   circuits always carried coordinates: no fix applies, but Known issue 2 does.
 
