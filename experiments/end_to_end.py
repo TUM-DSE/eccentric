@@ -19,8 +19,11 @@ timed out), so that every policy's choice has a measured cost and outcome. Polic
   matchmaker        skip the circuit if P(above threshold) > --skip-above, else the recommended decoder
                     ("accurate", or "cheapest" within 1.25x of the most accurate)
   matchmaker + pilot  qec_matchmaker.runtime.execute: skip only if P(above) > 0.9, pilot the recommended decoder
-                    on 100 shots under a time cap, stop if the pilot is above threshold, switch decoder if
-                    the pilot does not finish (pilots simulated from the measured time per shot and rate)
+                    on 100 shots under a time cap (10x its predicted time, at most 30 min), switch decoder if
+                    the pilot does not finish, stop if the pilots show the circuit above threshold (pilots
+                    simulated from the measured time per shot and rate). With the cap at 10 min / 30 min / 2 h
+                    the cheapest objective gives 89.7% / 92.3% / 92.2% good enough at 1,088 / 1,314 / 1,609
+                    CPU-h: 30 min is the default
   oracle            skip above threshold, else the cheapest good-enough decoder (hindsight)
 Writes experiments/END_TO_END.md and experiments/results/end_to_end.json.
 """

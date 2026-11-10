@@ -131,7 +131,8 @@ Replaying ECCentric's whole sweep with Matchmaker deciding what to decode and wi
 ([experiments/END_TO_END.md](experiments/END_TO_END.md)) reaches the quality of always running Tesseract (92%
 of circuits good enough for both) at 45% of its CPU time and 15% of the sweep's, mostly by skipping 95% of
 the circuits that are above threshold. Piloting each decode on its first 100 shots
-(`qec_matchmaker.runtime.execute`) cuts the cost by another quarter to a third, for one to four points of quality.
+(`qec_matchmaker.runtime.execute`) then checks each prediction as it runs: the same quality (92%) at 40% of always-Tesseract's CPU time, with
+99% of the above-threshold circuits caught.
 
 More: the full report ([reports/REPORT.md](reports/REPORT.md)), whole code families, devices and noise models
 held out ([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)), circuits beyond the training range

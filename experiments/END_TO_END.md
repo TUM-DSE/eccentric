@@ -14,6 +14,6 @@ Not decoded: skipped on the prediction, stopped by a pilot, or given up; "useful
 | always tesseract | 3,290 | 33.2% | 92.2% | 0.0% | 0.0% | 0.0% | 1,407 |
 | matchmaker, accurate | 1,852 | 18.7% | 91.2% | 1.2% | 0.2% | 95.1% | 35 |
 | matchmaker, cheapest | 1,479 | 14.9% | 91.9% | 1.2% | 0.2% | 95.1% | 26 |
-| matchmaker + pilot, accurate | 1,196 | 12.1% | 90.2% | 5.3% | 0.9% | 98.6% | 11 |
-| matchmaker + pilot, cheapest | 1,084 | 10.9% | 87.6% | 5.8% | 1.5% | 98.8% | 11 |
+| matchmaker + pilot, accurate | 1,451 | 14.6% | 92.9% | 3.0% | 0.4% | 99.0% | 18 |
+| matchmaker + pilot, cheapest | 1,314 | 13.2% | 92.3% | 2.5% | 0.3% | 98.8% | 19 |
 | oracle | 758 | 7.6% | 100.0% | 0.0% | 0.0% | 100.0% | 0 |
