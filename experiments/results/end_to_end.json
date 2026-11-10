@@ -1,0 +1,88 @@
+{
+ "circuits_below": 2281,
+ "circuits_above": 690,
+ "skip_above": 0.5,
+ "policies": {
+  "everything": {
+   "cpu_hours": 9916.528947689136,
+   "cpu_hours_below": 7216.813039276202,
+   "cpu_hours_above": 2699.7159084129335,
+   "good_below": 1.0,
+   "scored_below": 2039,
+   "skipped_below": 0.0,
+   "skipped_above": 0.0
+  },
+  "always belief_find": {
+   "cpu_hours": 1373.9373478356335,
+   "cpu_hours_below": 1044.3972248981397,
+   "cpu_hours_above": 329.54012293749383,
+   "good_below": 0.21284943599803827,
+   "scored_below": 2039,
+   "skipped_below": 0.0,
+   "skipped_above": 0.0
+  },
+  "always bplsd": {
+   "cpu_hours": 1522.1287768946092,
+   "cpu_hours_below": 1180.2705520484183,
+   "cpu_hours_above": 341.85822484619086,
+   "good_below": 0.2535556645414419,
+   "scored_below": 2039,
+   "skipped_below": 0.0,
+   "skipped_above": 0.0
+  },
+  "always bposd": {
+   "cpu_hours": 1863.0613703548909,
+   "cpu_hours_below": 1452.2526401799917,
+   "cpu_hours_above": 410.8087301748991,
+   "good_below": 0.3952918097106425,
+   "scored_below": 2039,
+   "skipped_below": 0.0,
+   "skipped_above": 0.0
+  },
+  "always relay_bp": {
+   "cpu_hours": 851.2639672876066,
+   "cpu_hours_below": 768.0198824439447,
+   "cpu_hours_above": 83.24408484366205,
+   "good_below": 0.7130946542422756,
+   "scored_below": 2039,
+   "skipped_below": 0.0,
+   "skipped_above": 0.0
+  },
+  "always tesseract": {
+   "cpu_hours": 3289.7785822932588,
+   "cpu_hours_below": 1882.859933622413,
+   "cpu_hours_above": 1406.9186486708456,
+   "good_below": 0.9220205983325159,
+   "scored_below": 2039,
+   "skipped_below": 0.0,
+   "skipped_above": 0.0
+  },
+  "matchmaker, accurate": {
+   "cpu_hours": 1851.548139135109,
+   "cpu_hours_below": 1816.3830507922173,
+   "cpu_hours_above": 35.1650883428918,
+   "good_below": 0.9127023050514959,
+   "scored_below": 2039,
+   "skipped_below": 0.012275317843051293,
+   "skipped_above": 0.9507246376811594
+  },
+  "matchmaker, cheapest": {
+   "cpu_hours": 1076.8206023296382,
+   "cpu_hours_below": 1073.5773955217996,
+   "cpu_hours_above": 3.243206807838546,
+   "good_below": 0.7969592937714566,
+   "scored_below": 2039,
+   "skipped_below": 0.012275317843051293,
+   "skipped_above": 0.9507246376811594
+  },
+  "oracle": {
+   "cpu_hours": 757.603327240679,
+   "cpu_hours_below": 757.603327240679,
+   "cpu_hours_above": 0.0,
+   "good_below": 1.0,
+   "scored_below": 2039,
+   "skipped_below": 0.0,
+   "skipped_above": 1.0
+  }
+ }
+}
