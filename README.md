@@ -7,7 +7,7 @@ a single shot, whether it is below threshold, roughly what its logical error rat
 decoder will take, and which decoder to use.
 
 > [!NOTE]
-> **Working prototype, v0.1.0.** The packaged model is trained on 3,146 circuits and 20,270 measured
+> **Working prototype, v0.1.0.** The packaged model is trained on 5,044 circuits and 23,507 measured
 > decodes from the [ECCentric](https://github.com/TUM-DSE/eccentric) benchmark. MIT licensed.
 
 ## Quick start
@@ -20,14 +20,14 @@ qec-matchmaker advise circuit.stim
 ```
 $ qec-matchmaker advise surface_d5_p0.001.stim --distance 5
 above threshold: 0%
-logical error rate (best decoder): 7.19e-05 (80% interval 4.3e-05 - 2.3e-04)
-recommended decoder: tesseract (cheapest (0.549 ms per shot) of the decoders predicted within 1.25x of the lowest LER (7.2e-05); its predicted LER is 7.2e-05)
+logical error rate (best decoder): 1.00e-04 (80% interval 5.5e-05 - 3.2e-04)
+recommended decoder: tesseract (cheapest (0.556 ms per shot) of the decoders predicted within 1.25x of the lowest LER (0.0001); its predicted LER is 0.0001)
 
     decoder  applicable      LER  ms/shot
-       mwpm        True 0.000146  0.00722
-bposd_tuned        True 9.36e-05    0.913
-   relay_bp        True 9.51e-05    0.746
-  tesseract        True 7.19e-05    0.549
+       mwpm        True 0.000183  0.00685
+bposd_tuned        True 0.000125    0.894
+   relay_bp        True 0.000128    0.614
+  tesseract        True   0.0001    0.556
        ...
 ```
 
@@ -90,15 +90,15 @@ decodes every circuit with several decoders on the same shots.
 
 | | |
 |---|---|
-| Circuits | 3,146 memory experiments, 8 to 9,405 detectors |
+| Circuits | 5,044 memory experiments (3,146 in the Z basis, 1,898 of them also in the X basis), 8 to 9,405 detectors |
 | Codes | 67 codes from 25 families: surface, color, heavy-hex, Floquet, bivariate bicycle, hypergraph and lifted product, quantum Tanner, ... |
 | Devices | 25: IBM Heron, Flamingo, Loon and the bicycle module (one and several QPUs), Google Willow, Quantinuum Apollo, Harvard/MIT and Infleqtion neutral atoms, and ideal grid, all-to-all and cube layouts |
 | Noise | 27 models: each device's own, scaled versions of them, and standard circuit noise |
 | Decoders | 9: MWPM, MWPF, BP-OSD (paper and tuned settings), BP-LSD, BeliefFind, Relay-BP, Tesseract, Chromobius |
-| Decodes | 20,270, from 1.7 billion shots |
+| Decodes | 23,507, from 1.9 billion shots |
 
 Every decoder trades accuracy against time differently, and none wins everywhere. Tesseract is the most
-accurate wherever it finishes, but it is among the slowest and timed out on 120 of the largest circuits;
+accurate wherever it finishes, but it is among the slowest and timed out on 157 of the largest circuits;
 matching and Chromobius are fast but apply to few codes and lose accuracy on compiled circuits:
 
 <picture>
@@ -121,17 +121,22 @@ code it is predicting.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/figures/choice-dark.png">
-  <img alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 97% at 1.7 times the cheapest good decoder's time, always Tesseract on 100% at 12 times, always BP-OSD on 52% at 14 times" src="docs/figures/choice-light.png">
+  <img alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 98% at 1.7 times the cheapest good decoder's time, always Tesseract on 100% at 12 times, always BP-OSD on 52% at 14 times" src="docs/figures/choice-light.png">
 </picture>
 
 Threshold regime: 98% correct. Matchmaker's "accurate" choice is as good as always running Tesseract at a
 fraction of its time; "cheapest" trades a few percent of accuracy for the cheapest decoder.
 
+Replaying ECCentric's whole sweep with Matchmaker deciding what to decode and with which decoder
+([experiments/END_TO_END.md](experiments/END_TO_END.md)) reaches the quality of always running Tesseract (91%
+against 92% of circuits good enough) at 56% of its CPU time and 19% of the sweep's, mostly by skipping 95% of
+the circuits that are above threshold.
+
 More: the full report ([reports/REPORT.md](reports/REPORT.md)), whole code families, devices and noise models
 held out ([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)), circuits beyond the training range
 ([experiments/EXTRAPOLATION.md](experiments/EXTRAPOLATION.md)), and circuits from outside ECCentric, Stim's
-generators and decoder-bench ([experiments/EXTERNAL.md](experiments/EXTERNAL.md): error rate within 1.2×,
-time within 3× for 84%).
+generators and decoder-bench ([experiments/EXTERNAL.md](experiments/EXTERNAL.md): error rate within 1.1×,
+time within 3× for 87%).
 
 ## Limitations
 
