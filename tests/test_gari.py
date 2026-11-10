@@ -21,7 +21,10 @@ def test_gari_matrix_has_the_effective_error_structure(basis):
     # errors, then the Y-type ones
     assert enc.hrows.shape[0] == len(enc.order) + enc.nx + enc.nz
     assert enc.hcols.shape[0] >= 2 * (enc.nx + enc.nz)
-    assert enc.flip_sides == (basis == "x")
+    # Detectors are labelled in the data qubits' preparation frame, so an X-basis memory (prepared with RX) has its
+    # observable on the same side as a Z-basis one
+    assert not enc.flip_sides
+    assert enc.nx > 0 and enc.nz > 0 and len(enc.i_y) > 0
     assert (enc.llr[:enc.nx + enc.nz] == 0).all()
 
 

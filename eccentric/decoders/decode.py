@@ -8,7 +8,7 @@ from .chromobius import chromobius
 from .ldpc_decoders import bplsd, union_find, belief_find
 from .belief_matching import belief_matching
 from .sinter_decoders import mwpf, relay_bp, tesseract
-from .gari import gari
+from .gari import gari, gari_pp
 
 DECODERS = {
     "bplsd": bplsd,
@@ -61,6 +61,13 @@ def decode(
             return bposd_batch(circuit, num_shots, approximate_disjoint_errors)
         except Exception as e:
             logging.error(f"BP-OSD BATCH failed: {e}")
+            return None
+    elif decoder == "gari_pp":
+        # GARI++, beta reimplementation (eccentric/decoders/gari): its first stage's setting depends on the code
+        try:
+            return gari_pp(circuit, num_shots, approximate_disjoint_errors, code_name)
+        except Exception as e:
+            logging.error(f"gari_pp failed: {e}")
             return None
     elif decoder in DECODERS:
         try:
