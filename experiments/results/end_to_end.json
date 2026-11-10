@@ -10,6 +10,7 @@
    "good_below": 1.0,
    "scored_below": 2039,
    "skipped_below": 0.0,
+   "skipped_useful": 0.0,
    "skipped_above": 0.0
   },
   "always belief_find": {
@@ -19,6 +20,7 @@
    "good_below": 0.21284943599803827,
    "scored_below": 2039,
    "skipped_below": 0.0,
+   "skipped_useful": 0.0,
    "skipped_above": 0.0
   },
   "always bplsd": {
@@ -28,6 +30,7 @@
    "good_below": 0.2535556645414419,
    "scored_below": 2039,
    "skipped_below": 0.0,
+   "skipped_useful": 0.0,
    "skipped_above": 0.0
   },
   "always bposd": {
@@ -37,6 +40,7 @@
    "good_below": 0.3952918097106425,
    "scored_below": 2039,
    "skipped_below": 0.0,
+   "skipped_useful": 0.0,
    "skipped_above": 0.0
   },
   "always relay_bp": {
@@ -46,6 +50,7 @@
    "good_below": 0.7130946542422756,
    "scored_below": 2039,
    "skipped_below": 0.0,
+   "skipped_useful": 0.0,
    "skipped_above": 0.0
   },
   "always tesseract": {
@@ -55,25 +60,48 @@
    "good_below": 0.9220205983325159,
    "scored_below": 2039,
    "skipped_below": 0.0,
+   "skipped_useful": 0.0,
    "skipped_above": 0.0
   },
   "matchmaker, accurate": {
-   "cpu_hours": 1851.548139135109,
-   "cpu_hours_below": 1816.3830507922173,
+   "cpu_hours": 1851.5137856469553,
+   "cpu_hours_below": 1816.3486973040633,
    "cpu_hours_above": 35.1650883428918,
-   "good_below": 0.9127023050514959,
+   "good_below": 0.912211868563021,
    "scored_below": 2039,
    "skipped_below": 0.012275317843051293,
+   "skipped_useful": 0.0015037593984962407,
    "skipped_above": 0.9507246376811594
   },
   "matchmaker, cheapest": {
-   "cpu_hours": 1076.8206023296382,
-   "cpu_hours_below": 1073.5773955217996,
-   "cpu_hours_above": 3.243206807838546,
-   "good_below": 0.7969592937714566,
+   "cpu_hours": 1478.5755136278603,
+   "cpu_hours_below": 1452.273819009463,
+   "cpu_hours_above": 26.30169461839729,
+   "good_below": 0.9190779794016675,
    "scored_below": 2039,
    "skipped_below": 0.012275317843051293,
+   "skipped_useful": 0.0015037593984962407,
    "skipped_above": 0.9507246376811594
+  },
+  "matchmaker + pilot, accurate": {
+   "cpu_hours": 1195.5017696135353,
+   "cpu_hours_below": 1184.0268794488686,
+   "cpu_hours_above": 11.474890164666705,
+   "good_below": 0.9019127023050515,
+   "scored_below": 2039,
+   "skipped_below": 0.0530469092503288,
+   "skipped_useful": 0.008521303258145364,
+   "skipped_above": 0.9855072463768116
+  },
+  "matchmaker + pilot, cheapest": {
+   "cpu_hours": 1083.8731897377525,
+   "cpu_hours_below": 1073.0861278533273,
+   "cpu_hours_above": 10.787061884425306,
+   "good_below": 0.8764100049043649,
+   "scored_below": 2039,
+   "skipped_below": 0.05786935554581324,
+   "skipped_useful": 0.015037593984962405,
+   "skipped_above": 0.9884057971014493
   },
   "oracle": {
    "cpu_hours": 757.603327240679,
@@ -82,6 +110,7 @@
    "good_below": 1.0,
    "scored_below": 2039,
    "skipped_below": 0.0,
+   "skipped_useful": 0.0,
    "skipped_above": 1.0
   }
  }

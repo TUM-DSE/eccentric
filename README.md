@@ -47,7 +47,7 @@ advice.expected_cost(errors=100)   # shots and core-hours per decoder
 
 | Option | |
 |---|---|
-| `--objective cheapest` (default) | the cheapest decoder predicted within 1.25× of the most accurate |
+| `--objective cheapest` (default) | the cheapest decoder predicted within 1.25× of the most accurate, with 80% confidence |
 | `--objective accurate` | the decoder with the lowest predicted logical error rate |
 | `--objective budget --budget-ms 1 [--per-round]` | the most accurate decoder within a time budget |
 | `--distance 11` | the code distance, if you know it: better predictions beyond the training data |
@@ -128,9 +128,10 @@ Threshold regime: 98% correct. Matchmaker's "accurate" choice is as good as alwa
 fraction of its time; "cheapest" trades a few percent of accuracy for the cheapest decoder.
 
 Replaying ECCentric's whole sweep with Matchmaker deciding what to decode and with which decoder
-([experiments/END_TO_END.md](experiments/END_TO_END.md)) reaches the quality of always running Tesseract (91%
-against 92% of circuits good enough) at 56% of its CPU time and 19% of the sweep's, mostly by skipping 95% of
-the circuits that are above threshold.
+([experiments/END_TO_END.md](experiments/END_TO_END.md)) reaches the quality of always running Tesseract (92%
+of circuits good enough for both) at 45% of its CPU time and 15% of the sweep's, mostly by skipping 95% of
+the circuits that are above threshold. Piloting each decode on its first 100 shots
+(`qec_matchmaker.runtime.execute`) cuts the cost by another quarter to a third, for one to four points of quality.
 
 More: the full report ([reports/REPORT.md](reports/REPORT.md)), whole code families, devices and noise models
 held out ([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)), circuits beyond the training range

@@ -57,7 +57,10 @@ PARAMS = dict(learning_rate=0.05, max_iter=200, max_leaf_nodes=15, min_samples_l
 # error 0.57 -> 0.51 decades, time within 3x 83% -> 85%); the regime and regret models lose from it
 QUANTILE_PARAMS = {**PARAMS, "learning_rate": 0.1, "max_leaf_nodes": 31, "max_iter": 400}
 # Bump when the saved models change form: bundles of another version cannot be loaded
-MODEL_VERSION = 2
+MODEL_VERSION = 3
+# Quantiles of a decoder's regret: the median, and pessimistic ones for choosing a cheaper decoder with some
+# confidence that it is within the tolerance (recommend(..., confidence=))
+REGRET_QUANTILES = (0.5, 0.7, 0.8, 0.9)
 # The LER law is fitted on circuits whose best LER is below this, clearly below threshold
 LER_LAW_BELOW = 0.05
 # Inputs of the laws that are not circuit features, so the trees never see them: the code's distance, which
@@ -326,7 +329,7 @@ def train(df: pd.DataFrame, quantiles=(0.1, 0.5, 0.9), random_state=0, manifest:
     regret_vocab = sorted(reg.decoder.unique())
     categorical = [False] * len(features) + [True]
     regret = _fit_quantiles(_with_decoder(_matrix(reg, features), reg.decoder, regret_vocab), reg.regret.to_numpy(),
-                            [0.5], categorical, random_state)[0.5]
+                            list(REGRET_QUANTILES), categorical, random_state)
 
     time, timed, censored = _fit_time(df, features, quantiles, random_state, parametric)
 
@@ -440,7 +443,8 @@ class ModelBundle:
         ler = 10 ** ler
         Xd, dec = np.repeat(X, k, axis=0), np.tile(np.asarray(decoders, dtype=object), n)
         regret_vocab, time_vocab = self.meta["decoders"]["regret"], self.meta["decoders"]["time"]
-        regret = 10 ** np.maximum(models["regret"].predict(_with_decoder(Xd, dec, regret_vocab)), 0)
+        regret = 10 ** np.maximum(_predict_quantiles(models["regret"], _with_decoder(Xd, dec, regret_vocab),
+                                                     REGRET_QUANTILES), 0)
         regret[~np.isin(dec, regret_vocab)] = np.nan
         ms = models["time"].predict(frame.iloc[np.repeat(np.arange(n), k)].reset_index(drop=True), dec)
         if conformal:
@@ -454,8 +458,9 @@ class ModelBundle:
                             "p_above": np.repeat(_p_above(models["regime"], X), k)})
         for j, quantile in enumerate(q):
             out[_qname("ler", quantile)] = np.repeat(ler[:, j], k)
-        out["regret_q50"] = regret
-        out["ler_decoder_q50"] = out.ler_q50 * regret
+        for j, quantile in enumerate(REGRET_QUANTILES):
+            out[_qname("regret", quantile)] = regret[:, j]
+        out["ler_decoder_q50"] = out.ler_q50 * out.regret_q50
         for j, quantile in enumerate(q):
             out[_qname("ms", quantile)] = ms[:, j]
         everything = frame.reindex(columns=[*FEATURE_NAMES, *LAW_INPUTS]).apply(pd.to_numeric, errors="coerce").astype(float)

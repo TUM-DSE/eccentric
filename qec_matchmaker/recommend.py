@@ -23,8 +23,10 @@ class Recommendation:
 
 
 def recommend(predictions: pd.DataFrame, objective: str = "cheapest", budget_ms: float | None = None,
-              rounds: int | None = None, tolerance: float = 1.25) -> Recommendation:
-    """The decoder to use on one circuit, given its rows of `ModelBundle.predict`"""
+              rounds: int | None = None, tolerance: float = 1.25, confidence: float = 0.8) -> Recommendation:
+    """The decoder to use on one circuit, given its rows of `ModelBundle.predict`. For "cheapest", a decoder is
+    eligible if its regret (its LER over the best decoder's) is predicted within the tolerance with the given
+    confidence: the regret quantile at that level (0.5, 0.7, 0.8 or 0.9), not the median, must be within it"""
     if objective not in OBJECTIVES:
         raise ValueError(f"objective must be one of {', '.join(OBJECTIVES)}")
     if "circuit_key" in predictions.columns and predictions.circuit_key.nunique() > 1:
@@ -58,11 +60,17 @@ def recommend(predictions: pd.DataFrame, objective: str = "cheapest", budget_ms:
         reason = f"lowest predicted LER ({top.ler_decoder_q50:.2g}; {top.ms_q50:.3g} ms per shot)"
     elif objective == "cheapest":
         lowest = candidates.ler_decoder_q50.min()
-        table = candidates.assign(eligible=candidates.ler_decoder_q50 <= tolerance * lowest).sort_values(
+        column = f"regret_q{round(100 * confidence)}"
+        if column not in candidates.columns:
+            raise ValueError(f"confidence must be one of the predicted regret quantiles, got {confidence}")
+        # The lowest predicted LER is the best decoder's times the smallest median regret
+        pessimistic = candidates.ler_q50 * candidates[column]
+        table = candidates.assign(eligible=pessimistic <= tolerance * lowest).sort_values(
             ["eligible", "ms_q50", "ler_decoder_q50"], ascending=[False, True, True])
         top = table.iloc[0]
         reason = (f"cheapest ({top.ms_q50:.3g} ms per shot) of the decoders predicted within {tolerance:g}x of the "
-                  f"lowest LER ({lowest:.2g}); its predicted LER is {top.ler_decoder_q50:.2g}")
+                  f"lowest LER ({lowest:.2g}) with {confidence:.0%} confidence; its predicted LER is "
+                  f"{top.ler_decoder_q50:.2g}")
     else:
         unit = "round" if rounds else "shot"
         cost = candidates.ms_q50 / rounds if rounds else candidates.ms_q50
