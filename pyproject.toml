@@ -21,3 +21,4 @@ include = ["eccentric*"]
 
 [tool.setuptools.package-data]
 "eccentric.codes" = ["data/*/*"]
+"eccentric.decoders.gari" = ["hbp_decoder_v2.c", "LICENSE"]
