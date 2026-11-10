@@ -1,6 +1,8 @@
+import contextlib
 import ctypes
 import hashlib
 import os
+import sys
 import subprocess
 import tempfile
 from dataclasses import dataclass
@@ -38,6 +40,22 @@ def _library():
                   I, I, I, I, P(C8), I, I, P(C8), I, I, P(C8), P(I)]
     f.restype = None
     return f
+
+
+@contextlib.contextmanager
+def _quiet():
+    """The C decoder prints debugging lines on every call: send the process's stdout to /dev/null meanwhile"""
+    sys.stdout.flush()
+    saved, null = os.dup(1), os.open(os.devnull, os.O_WRONLY)
+    try:
+        os.dup2(null, 1)
+        yield
+    finally:
+        # C's own stdout buffer, or its lines come out after stdout is restored
+        ctypes.CDLL(None).fflush(None)
+        os.dup2(saved, 1)
+        os.close(saved)
+        os.close(null)
 
 
 def _data_qubits(circuit):
@@ -188,18 +206,32 @@ def decode_observables(enc: Encoding, detection_events: np.ndarray, settings: di
     hrows, hcols = np.ascontiguousarray(enc.hrows), np.ascontiguousarray(enc.hcols)
     dz, l_dz = np.ascontiguousarray(enc.dz), np.ascontiguousarray(enc.l_dz)
     syndromes = np.ascontiguousarray(syndromes)
-    _library()(arr(llr, ctypes.c_double), arr(llr_ab, ctypes.c_double), shots, len(llr), settings["iterations"],
-               arr(hrows, ctypes.c_int), hrows.shape[0], hrows.shape[1], arr(hcols, ctypes.c_int), hcols.shape[0],
-               hcols.shape[1], settings["alpha"], arr(syndromes, ctypes.c_int8), settings["seed"], enc.shape_h[0],
-               enc.shape_dx[0], settings["custom_schedule"], int(settings["early_stopping"]), 1, settings["ensemble"],
-               b"i", enc.nx, enc.nz, enc.mx, enc.shape_h[0], arr(dz, ctypes.c_int8), dz.shape[0], dz.shape[1],
-               arr(l_dz, ctypes.c_int8), l_dz.shape[0], l_dz.shape[1], predicted.ctypes.data_as(P(ctypes.c_int8)),
-               iterations.ctypes.data_as(P(ctypes.c_int)))
+    decoder = _library()
+    with _quiet():
+        decoder(arr(llr, ctypes.c_double), arr(llr_ab, ctypes.c_double), shots, len(llr), settings["iterations"],
+                arr(hrows, ctypes.c_int), hrows.shape[0], hrows.shape[1], arr(hcols, ctypes.c_int), hcols.shape[0],
+                hcols.shape[1], settings["alpha"], arr(syndromes, ctypes.c_int8), settings["seed"], enc.shape_h[0],
+                enc.shape_dx[0], settings["custom_schedule"], int(settings["early_stopping"]), 1, settings["ensemble"],
+                b"i", enc.nx, enc.nz, enc.mx, enc.shape_h[0], arr(dz, ctypes.c_int8), dz.shape[0], dz.shape[1],
+                arr(l_dz, ctypes.c_int8), l_dz.shape[0], l_dz.shape[1], predicted.ctypes.data_as(P(ctypes.c_int8)),
+                iterations.ctypes.data_as(P(ctypes.c_int)))
     return predicted.astype(bool)
 
 
+_ENCODINGS = {}
+
+
+def cached_encoding(circuit: stim.Circuit, approximate_disjoint_errors: bool) -> Encoding:
+    """gari_encoding, kept per circuit: ECCentric's adaptive decode calls the decoder once per batch"""
+    key = (hashlib.sha1(str(circuit).encode()).hexdigest(), approximate_disjoint_errors)
+    if key not in _ENCODINGS:
+        _ENCODINGS.clear()
+        _ENCODINGS[key] = gari_encoding(circuit, approximate_disjoint_errors)
+    return _ENCODINGS[key]
+
+
 def gari(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool) -> float:
-    enc = gari_encoding(circuit, approximate_disjoint_errors)
+    enc = cached_encoding(circuit, approximate_disjoint_errors)
     dets, actual = circuit.compile_detector_sampler().sample(shots=num_shots, separate_observables=True)
     predicted = decode_observables(enc, dets)
     return np.count_nonzero(np.any(predicted != actual, axis=1)) / num_shots
