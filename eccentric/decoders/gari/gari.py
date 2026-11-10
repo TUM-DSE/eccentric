@@ -223,7 +223,7 @@ def gari_encoding(circuit: stim.Circuit, approximate_disjoint_errors: bool = Fal
     dx, dz = hx[:, i_x], hz[:, i_z]
     mx, nx = dx.shape
     mz, nz = dz.shape
-    m, n = h.shape
+    m = h.shape[0]
     # Each column's part on a side, matched to the single-type error with the same detectors there
     index_x = {c: i for i, c in reversed(list(enumerate(_columns(dx))))}
     index_z = {c: i for i, c in reversed(list(enumerate(_columns(dz))))}
@@ -245,6 +245,10 @@ def gari_encoding(circuit: stim.Circuit, approximate_disjoint_errors: bool = Fal
     rows += list(m + k); cols += list(nx + nz + k)
     rows += list(m + x_of_y); cols += list(2 * (nx + nz) + np.arange(ny))
     rows += list(m + nx + z_of_y); cols += list(2 * (nx + nz) + np.arange(ny))
+    # Errors that flip no detector (at most an observable) are left out: no decoder can see them, and the C decoder
+    # needs exactly one prior per column (it sizes its buffers by the columns and writes them into ones sized by the
+    # priors, so an extra empty column overflowed the heap)
+    n = nx + nz + ny
     big = sp.csr_matrix((np.ones(len(rows), dtype=np.int8), (rows, cols)), shape=(m + nx + nz, n + nx + nz))
     big.sum_duplicates()
     if big.data.max(initial=1) > 1:
@@ -264,6 +268,7 @@ def gari_encoding(circuit: stim.Circuit, approximate_disjoint_errors: bool = Fal
     np.add.at(ab, nx + all_z[all_z >= 0], priors[all_z >= 0])
     with np.errstate(divide="ignore"):
         llr_ab = np.log((1 - ab) / np.where(ab > 0, ab, 1e-300))
+    assert hcols.shape[0] == len(llr) == big.shape[1], "one prior per column of the GARI matrix"
     order = np.concatenate([np.flatnonzero(det_type == X_DETECTOR), np.flatnonzero(det_type == Z_DETECTOR)])
     return Encoding(order=order, hrows=hrows, hcols=hcols, llr=llr, llr_ab=llr_ab, shape_h=(m, n), shape_dx=(mx, nx),
                     nx=nx, nz=nz, mx=mx, dz=dz.toarray().astype(np.int8), l_dz=l[:, i_z].toarray().astype(np.int8),

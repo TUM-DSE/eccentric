@@ -38,6 +38,19 @@ def test_gari_decodes_the_surface_code_below_threshold(basis):
     assert ler < 10 * max(mwpm(circuit, 4000, False), 1e-3)
 
 
+def test_gari_leaves_out_errors_no_detector_sees():
+    # An extra qubit in the observable whose flip no detector sees: an error with no detector. It used to become
+    # an empty column without a prior, and the C decoder then wrote past its output buffers
+    circuit = surface(d=3)
+    extra = circuit.num_qubits
+    circuit.append("X_ERROR", [extra], 0.01)
+    circuit.append("M", [extra])
+    circuit.append("OBSERVABLE_INCLUDE", [stim.target_rec(-1)], 0)
+    enc = gari_encoding(circuit)
+    assert enc.hcols.shape[0] == len(enc.llr) == 2 * (enc.nx + enc.nz) + len(enc.i_y)
+    assert gari(circuit, 2000, False) < 0.1
+
+
 def test_gari_refuses_non_css_circuits():
     from eccentric.codes import get_code
     xzzx = get_code("xzzx", 3, 3).stim_circuit
