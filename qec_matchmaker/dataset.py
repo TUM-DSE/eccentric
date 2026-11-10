@@ -16,13 +16,13 @@ import pandas as pd
 
 from .features import FEATURE_NAMES, FEATURE_VERSION
 
-KEYS = ["circuit_key", "code", "family", "distance", "cycles", "backend", "error_type", "error_probability", "slice",
+KEYS = ["circuit_key", "code", "family", "distance", "cycles", "backend", "error_type", "error_probability", "slice", "basis",
         "decoder"]
 LABELS = ["status", "shots", "errors", "ler", "ler_low", "ler_high", "ms_per_shot", "timeout_s"]
 SKIPPED = ("does not fit", "pending")
 # ECCentric's configuration columns (sweep/collect.py CONFIG): one circuit per configuration
 ECCENTRIC_CONFIG = ["slice", "code", "schedule", "distance", "cycles", "backend", "backend_size", "error_type",
-                    "error_probability", "layout_method", "routing_method", "translating_method"]
+                    "error_probability", "layout_method", "routing_method", "translating_method", "basis"]
 
 # Code families by name prefix, as ECCentric's website groups them (first match wins)
 FAMILIES = [
@@ -59,6 +59,8 @@ def from_eccentric(results: pd.DataFrame, store: dict) -> tuple[pd.DataFrame, di
     rows["circuit_key"] = [circuit_key(r, j) for r, j in zip(rows.run, rows.job_id)]
     # A configuration is one circuit, but its decodes can come from several runs (a rerun after a fix, a decoder
     # added later decode the original run's circuit file under their own run's name): one key per configuration
+    # Memory basis (Z or X): tables from before ECCentric had the setting are all Z
+    rows["basis"] = rows["basis"].fillna("Z") if "basis" in rows.columns else "Z"
     config = [c for c in ECCENTRIC_CONFIG if c in rows.columns]
     if config:
         group = rows[config].apply(lambda c: c.map(str)).agg("|".join, axis=1)
