@@ -83,7 +83,7 @@ next candidate if the pilot is too slow or fails, and commits to the full decode
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/figures/runtime-dark.png">
-  <img alt="Predict and rank the candidate decoders; skip the circuit if it is above threshold with probability over 0.9; pilot the next candidate on its first 100 shots, capped at 10 times its predicted time; if the pilot does not finish, or over half its shots are logical errors, pilot the next candidate, giving the circuit up as above threshold when the most accurate decoder or two decoders failed; otherwise commit to the full decode" src="docs/figures/runtime-light.png">
+  <img alt="Predict and rank the candidate decoders; skip the circuit if it is above threshold with probability over 0.9; pilot the next candidate on its first 100 shots, capped at 10 times its predicted time; if the pilot does not finish, or over half its shots are logical errors, pilot the next candidate, giving the circuit up as above threshold when the most accurate decoder that can finish failed (a stand-in for a too-slow one only with another decoder failing too); otherwise commit to the full decode" src="docs/figures/runtime-light.png">
 </picture>
 
 ## The dataset
@@ -125,18 +125,18 @@ code it is predicting.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/figures/choice-dark.png">
-  <img alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 98% at 1.7 times the cheapest good decoder's time, always Tesseract on 100% at 12 times, always BP-OSD on 52% at 14 times" src="docs/figures/choice-light.png">
+  <img alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 97% at 1.8 times the cheapest good decoder's time, always Tesseract on 100% at 14 times, always BP-OSD on 52% at 18 times" src="docs/figures/choice-light.png">
 </picture>
 
 Threshold regime: 98% correct. Matchmaker's "accurate" choice is as good as always running Tesseract at a
 fraction of its time; "cheapest" trades a few percent of accuracy for the cheapest decoder.
 
 Replaying ECCentric's whole sweep with Matchmaker deciding what to decode and with which decoder
-([experiments/END_TO_END.md](experiments/END_TO_END.md)) reaches the quality of always running Tesseract (92%
-of circuits good enough for both) at 45% of its CPU time and 15% of the sweep's, mostly by skipping 95% of
-the circuits that are above threshold. Piloting each decode on its first 100 shots
-(`qec_matchmaker.runtime.execute`) then checks each prediction as it runs: the same quality (92%) at 40% of always-Tesseract's CPU time, with
-99% of the above-threshold circuits caught.
+([experiments/END_TO_END.md](experiments/END_TO_END.md)) reaches the quality of always running Tesseract (92% of circuits good enough for both) at 54% of its CPU time
+and 18% of the sweep's, mostly by skipping 95% of the circuits that are above threshold. Piloting each decode on
+its first 100 shots (`qec_matchmaker.runtime.execute`) then checks each prediction as it runs: 93% good enough at
+43% of always-Tesseract's CPU time (92% at 38% with the cheapest objective), with 99% of the above-threshold
+circuits caught.
 
 More: the full report ([reports/REPORT.md](reports/REPORT.md)), whole code families, devices and noise models
 held out ([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)), circuits beyond the training range

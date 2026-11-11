@@ -10,17 +10,22 @@ import math
 import numpy as np
 import stim
 
+from .detector_types import FEATURES as DETECTOR_TYPE_FEATURES, detector_type_features
+
 # Bump when a feature's definition changes: stored features of another version are recomputed
-FEATURE_VERSION = 1
+FEATURE_VERSION = 2
+# Features added by each version, which a record of the version before can be upgraded with alone
+# (pipeline.extract): version 2 added the detector types (detector_types.py)
+ADDED_IN = {2: DETECTOR_TYPE_FEATURES}
 
 FEATURE_NAMES = [
     "detectors", "observables", "mechanisms", "mechanism_weight_mean", "mechanism_weight_max",
     "hyperedge_fraction", "error_mass", "error_mass_per_detector", "det_fire_mean", "det_fire_median",
     "det_fire_p90", "det_fire_max", "logical_mass", "undetectable_faults", "undetectable_probability",
     "graphlike", "color_annotated", "qubits", "two_qubit_gates", "swaps", "ticks", "measurements", "rounds",
-    "decomposable",
+    "decomposable", *DETECTOR_TYPE_FEATURES,
 ]
-CIRCUIT_ONLY = ("qubits", "two_qubit_gates", "swaps", "ticks", "measurements", "decomposable")
+CIRCUIT_ONLY = ("qubits", "two_qubit_gates", "swaps", "ticks", "measurements", "decomposable", *DETECTOR_TYPE_FEATURES)
 
 
 def _summarize(num_detectors, num_observables, probs, weights, fire, has_obs):
@@ -82,7 +87,9 @@ def features_from_dem(dem: stim.DetectorErrorModel) -> dict:
 def features_from_circuit(circuit: stim.Circuit, check_decomposition: bool = True) -> dict:
     """Features of a noisy circuit: its detector error model's, plus its size and, optionally, whether
     its errors decompose into edges (whether matching applies)"""
-    features = features_from_dem(circuit.detector_error_model(approximate_disjoint_errors=True))
+    dem = circuit.detector_error_model(approximate_disjoint_errors=True)
+    features = features_from_dem(dem)
+    features.update(detector_type_features(circuit, dem))
     pairs = swaps = 0
     for inst in circuit.flattened():
         data = stim.gate_data(inst.name)

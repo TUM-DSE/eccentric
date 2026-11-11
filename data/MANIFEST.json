@@ -1,6 +1,6 @@
 {
- "created": "2026-11-11T08:17:47+00:00",
- "feature_version": 1,
+ "created": "2026-11-11T12:04:45+00:00",
+ "feature_version": 2,
  "features": [
   "detectors",
   "observables",
@@ -25,7 +25,11 @@
   "ticks",
   "measurements",
   "rounds",
-  "decomposable"
+  "decomposable",
+  "mixed_detectors",
+  "y_mechanisms",
+  "y_parts_unmatched",
+  "observables_both_sides"
  ],
  "rows": 32814,
  "circuits": 5044,
@@ -62,7 +66,7 @@
   },
   "feature_store": {
    "path": "data/features.jsonl",
-   "sha256": "1e4da16142ccf41c84dce747d4452111f0f0e1fe4845a32a50b2622478748bea"
+   "sha256": "e9ad8c4c5c0b57fc221eb287d72da9fe63269b21ed76ecda5fcba5e776a6de92"
   }
  }
 }

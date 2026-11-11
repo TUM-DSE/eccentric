@@ -12,9 +12,11 @@ continuing from the pilot.
    quantile) as a cap, at most `max_cap` seconds. A decoder that does not finish its pilot is slower than
    predicted: switch to the next candidate (at most `switches` times), having paid only the cap, not a timeout.
 3. If more than `above` of the pilot's shots are logical errors, the circuit looks above threshold. A weak
-   decoder can fail where a better one works, so the circuit is given up as "above" only when the decoder
-   predicted most accurate fails its pilot too (it is piloted next), or two decoders do; otherwise the next
-   candidate is piloted. No decoder is piloted twice, and only the pilots were paid.
+   decoder can fail where a better one works, so the circuit is given up as "above" only when the reference
+   fails its pilot too: the decoder predicted most accurate among those not yet found too slow (a pilot that
+   does not finish passes the reference to the next most accurate), and, when the reference stands in for a
+   more accurate decoder, another decoder has failed as well. After a failure the reference is piloted next. No decoder is piloted twice, and only the pilots were paid. (Counting any two failures instead gave
+   up useful circuits near threshold once two cheap decoders of one family, GARI and GARI++, were candidates.)
 4. Otherwise commit: the full decode with the piloted decoder.
 
 The candidates are `recommend`'s table in its order (for "cheapest": the eligible decoders by predicted time,
@@ -71,25 +73,37 @@ def execute(predictions: pd.DataFrame, decode: Callable[[str, Optional[int], Opt
         return pilot
 
     failed = lambda pilot: pilot.shots and pilot.errors / pilot.shots > above
-    most_accurate = table.sort_values("ler_decoder_q50").iloc[0].decoder
+    by_accuracy = list(table.sort_values("ler_decoder_q50", kind="stable").decoder)
+    unusable = set()  # piloted too slowly, or not runnable
+
+    def reference():
+        return next((d for d in by_accuracy if d not in unusable), None)
+
     queue = list(table.itertuples())
-    tried, failures = 0, 0
+    tried, seen_failure, failures = 0, False, 0
     while queue and tried <= switches:
         row = queue.pop(0)
         pilot = run_pilot(row)
         if pilot is None:
+            unusable.add(row.decoder)
             continue
         tried += 1
         if not pilot.complete:
+            unusable.add(row.decoder)
+            if seen_failure:
+                queue.sort(key=lambda r: r.decoder != reference())
             continue
         if failed(pilot):
             # A weak decoder can fail where a better one works: the circuit is above threshold only if the
-            # decoder predicted most accurate fails too, or two decoders do. The most accurate goes next
+            # reference (the most accurate decoder not found too slow) fails too, and, when the reference stands in
+            # for a more accurate decoder that was too slow, one more decoder has failed. The reference goes next
             failures += 1
-            if row.decoder == most_accurate or failures >= 2:
+            if row.decoder == reference() and (row.decoder == by_accuracy[0] or failures >= 2):
                 outcome.status, outcome.decoder, outcome.result = "above", row.decoder, pilot
                 return outcome
-            queue.sort(key=lambda r: r.decoder != most_accurate)
+            unusable.add(row.decoder)
+            seen_failure = True
+            queue.sort(key=lambda r: r.decoder != reference())
             continue
         full = decode(row.decoder, None, None)
         # The full decode continues from the pilot: its time includes the pilot's

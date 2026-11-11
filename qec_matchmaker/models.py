@@ -499,10 +499,12 @@ class ModelBundle:
         everything = frame.reindex(columns=[*FEATURE_NAMES, *LAW_INPUTS]).apply(pd.to_numeric, errors="coerce").astype(float)
         fits = [applicable(f) for f in everything.to_dict("records")]
         rule = np.array([fit.get(d, True) for fit in fits for d in decoders], dtype=object)
-        # Decoders with learned applicability: applicable unless the model says it more likely refuses
+        # Decoders with learned applicability: where the features settle it the rule decides; where they cannot
+        # (rule None: no circuit), the model's probability
         learned = np.column_stack([p_applicable(models.get("applicability", {}), X, d) for d in decoders]).ravel()
         out["p_applicable"] = learned
-        out["applicable"] = np.where(learned < 0.5, False, rule)
+        undecided = np.array([r is None for r in rule]) & ~np.isnan(learned)
+        out["applicable"] = np.where(undecided, learned >= 0.5, rule)
         out["outside_training"] = np.repeat([", ".join(self.outside_training(f)) for f in everything.to_dict("records")], k)
         return out
 

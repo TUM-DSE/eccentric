@@ -12,6 +12,7 @@ from multiprocessing import Pool
 
 import stim
 
+from .detector_types import detector_type_features
 from .features import FEATURE_VERSION, features_from_circuit
 
 
@@ -57,10 +58,12 @@ def _circuit_files(run_dirs, keys=None):
 
 
 def _extract(item):
-    key, path, stat = item
+    key, path, stat, old = item
     start = time.time()
     try:
-        features = features_from_circuit(stim.Circuit.from_file(path))
+        circuit = stim.Circuit.from_file(path)
+        # A record of the version before needs only the features added since (features.ADDED_IN)
+        features = ({**old, **detector_type_features(circuit)} if old is not None else features_from_circuit(circuit))
         return {"key": key, **stat, "version": FEATURE_VERSION, "seconds": round(time.time() - start, 3),
                 "features": features}
     except Exception as e:
@@ -76,9 +79,11 @@ def extract(run_dirs, store_path: str, processes: int = 1, keys=None, log=print)
         st = os.stat(path)
         stat = {"size": st.st_size, "mtime": int(st.st_mtime)}
         old = store.get(key)
-        if old and old.get("version") == FEATURE_VERSION and old.get("size") == stat["size"] and old.get("mtime") == stat["mtime"]:
+        same = old and old.get("size") == stat["size"] and old.get("mtime") == stat["mtime"]
+        if same and old.get("version") == FEATURE_VERSION:
             continue
-        todo.append((key, path, stat))
+        upgrade = same and old.get("version") == FEATURE_VERSION - 1 and "features" in old
+        todo.append((key, path, stat, old["features"] if upgrade else None))
     # Big circuits first, so no straggler is left at the end
     todo.sort(key=lambda t: -t[2]["size"])
     done = failed = 0

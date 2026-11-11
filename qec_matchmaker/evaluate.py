@@ -109,19 +109,19 @@ def _regime(df, pred):
 
 
 def _applicability(df, pred):
-    """Per decoder with learned applicability: how often the held-out prediction (p_applicable >= 0.5) matches
-    whether ECCentric's decode applied; refusals caught: the refused circuits predicted as refused; wrongly
-    refused: the circuits it applied to predicted as refused"""
+    """Per decoder with learned applicability: how often the held-out decision (`applicable`: the rule where the
+    features settle it, else p_applicable >= 0.5) matches whether ECCentric's decode applied; refusals caught: the
+    refused circuits predicted as refused; wrongly refused: the circuits it applied to predicted as refused"""
     out = {}
     if "p_applicable" not in pred.columns:
         return out
     for source in sorted(set(LEARNED_APPLICABILITY.values())):
         truth = applicability_rows(df, source)
-        guess = pred[pred.decoder == source].groupby("circuit_key").p_applicable.first().reindex(truth.index)
+        guess = pred[pred.decoder == source].groupby("circuit_key").applicable.first().reindex(truth.index)
         known = guess.notna()
         if not known.any():
             continue
-        t, g = truth[known].to_numpy(bool), (guess[known] >= 0.5).to_numpy()
+        t, g = truth[known].to_numpy(bool), guess[known].astype(bool).to_numpy()
         out[source] = {"circuits": int(known.sum()), "refused": int((~t).sum()), "accuracy": float((t == g).mean()),
                        "refusals_caught": float((~g[~t]).mean()) if (~t).any() else math.nan,
                        "wrongly_refused": float((~g[t]).mean()) if t.any() else math.nan}
@@ -279,7 +279,7 @@ def _pct(x):
 def _applicability_lines(app: dict) -> list:
     if not app:
         return []
-    lines = ["## Applicability (learned, for decoders that refuse circuits no feature shows)", "",
+    lines = ["## Applicability of decoders that refuse circuits (rule from the detector types, else learned)", "",
              "| decoder | circuits | refused | accuracy | refusals caught | wrongly refused |", "|---|---|---|---|---|---|"]
     lines += [f"| {d} | {m['circuits']} | {m['refused']} | {_pct(m['accuracy'])} | {_pct(m['refusals_caught'])} | "
               f"{_pct(m['wrongly_refused'])} |" for d, m in app.items()]

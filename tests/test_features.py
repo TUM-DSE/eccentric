@@ -69,3 +69,35 @@ def test_hyperedges_and_decomposition():
     f = features_from_circuit(circuit)
     assert f["mechanism_weight_max"] == 3 and f["hyperedge_fraction"] == 1 and f["graphlike"] == 0
     assert f["decomposable"] == 0 and f["two_qubit_gates"] == 2
+
+
+def test_detector_types_tell_css_circuits_from_others():
+    from qec_matchmaker.detector_types import detector_type_features
+    for basis in "zx":
+        css = stim.Circuit.generated(f"surface_code:rotated_memory_{basis}", distance=3, rounds=3,
+                                     after_clifford_depolarization=0.001, before_measure_flip_probability=0.001)
+        f = detector_type_features(css)
+        assert f["mixed_detectors"] == 0 and f["y_parts_unmatched"] == 0 and f["observables_both_sides"] == 0
+    xyz = stim.Circuit.generated("color_code:memory_xyz", distance=3, rounds=3, after_clifford_depolarization=0.001)
+    assert detector_type_features(xyz)["mixed_detectors"] > 0.5
+
+
+def test_compiled_hadamard_frames_keep_a_css_circuit_css():
+    # The X-basis memory written with R + H and H + M instead of RX and MX, as compilers emit it: the data qubits
+    # sit in a Hadamard frame, and their regions read as X there
+    from qec_matchmaker.detector_types import detector_type_features
+    css = stim.Circuit.generated("surface_code:rotated_memory_x", distance=3, rounds=3,
+                                 after_clifford_depolarization=0.001).flattened()
+    compiled = stim.Circuit()
+    for inst in css:
+        targets = inst.targets_copy()
+        if inst.name == "RX":
+            compiled.append("R", targets)
+            compiled.append("H", targets)
+        elif inst.name == "MX":
+            compiled.append("H", targets)
+            compiled.append("M", targets, inst.gate_args_copy())
+        else:
+            compiled.append(inst)
+    assert compiled.detector_error_model().num_errors == css.detector_error_model().num_errors
+    assert detector_type_features(compiled)["mixed_detectors"] == 0

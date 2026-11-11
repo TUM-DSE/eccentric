@@ -154,7 +154,7 @@ def fig_runtime(theme, out):
 
     skipped = box(ax, t, xs[1], r2, cw, "Skipped", ["nothing decoded"], kind="result", h=h2)
     more = box(ax, t, xs[2], r2, cw, body=["Candidates left,", "under 4 piloted?"], kind="question", h=h2, center=True)
-    weak = box(ax, t, xs[4], r2, cw, body=["Most accurate", "decoder failed,", "or two did?"], kind="question", h=h2,
+    weak = box(ax, t, xs[4], r2, cw, body=["Most accurate", "decoder that can", "finish failed?"], kind="question", h=h2,
                center=True)
     decoded = box(ax, t, xs[5], r2, cw, "Decoded", ["to the error target"], kind="result", h=h2)
     gave_up = box(ax, t, xs[2], r3, cw, "Gave up", ["only pilots paid"], kind="result")

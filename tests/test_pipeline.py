@@ -87,7 +87,7 @@ def test_cli_features_extract_ingest(tmp_path, capsys):
 def test_applicable():
     assert applicable({"decomposable": 1, "color_annotated": 0}) == {
         "mwpm": True, "mwpf": True, "bposd": True, "bposd_tuned": True, "bplsd": True, "belief_find": True,
-        "relay_bp": True, "tesseract": True, "chromobius": False, "gari": True, "gari_pp": True}
+        "relay_bp": True, "tesseract": True, "chromobius": False, "gari": None, "gari_pp": None}
     assert applicable({"decomposable": math.nan, "graphlike": 0, "color_annotated": 1})["mwpm"] is None
     assert applicable({"decomposable": math.nan, "graphlike": 1})["mwpm"] is True
     assert applicable({})["chromobius"] is None
@@ -124,3 +124,11 @@ def test_ingest_gives_a_configuration_one_circuit_key(tmp_path):
     table, left_out = from_eccentric(results, records)
     d3 = table[table.distance == 3]
     assert d3.circuit_key.nunique() == 1 and set(d3.decoder) >= {"mwpm", "bposd", "relay_bp"}
+
+
+def test_gari_applies_to_css_structure_only():
+    css = {"mixed_detectors": 0.0, "observables_both_sides": 0, "y_parts_unmatched": 0.0}
+    assert applicable(css)["gari"] is True and applicable(css)["gari_pp"] is True
+    for broken in ({"mixed_detectors": 0.2}, {"observables_both_sides": 1}, {"y_parts_unmatched": 0.1}):
+        assert applicable({**css, **broken})["gari"] is False
+    assert applicable({})["gari"] is None
