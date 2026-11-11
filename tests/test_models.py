@@ -99,7 +99,8 @@ def test_features_used_are_those_present_and_filled(bundle):
 def test_prediction_columns_and_consistency(fresh):
     features, pred = fresh
     assert list(pred.columns) == ["circuit_key", "decoder", "p_above", "ler_q10", "ler_q50", "ler_q90", "regret_q50",
-                                  "regret_q70", "regret_q80", "regret_q90", "ler_decoder_q50", "ms_q10", "ms_q50", "ms_q90", "applicable", "outside_training"]
+                                  "regret_q70", "regret_q80", "regret_q90", "ler_decoder_q50", "ms_q10", "ms_q50", "ms_q90", "p_applicable", "applicable",
+                                  "outside_training"]
     assert len(pred) == 3 * len(features)
     assert (pred.ler_q10 <= pred.ler_q50).all() and (pred.ler_q50 <= pred.ler_q90).all()
     assert (pred.ms_q10 <= pred.ms_q50).all() and (pred.ms_q50 <= pred.ms_q90).all()
@@ -281,3 +282,25 @@ def test_predictions_name_features_outside_the_training_range(bundle):
     far = {**inside, "mechanisms": 1e12}
     assert bundle.outside_training(far)[0].startswith("mechanisms 1e+12")
     assert bundle.predict(far).outside_training.iloc[0].startswith("mechanisms")
+
+
+def test_applicability_of_gari_is_learned_from_its_refusals():
+    # GARI refuses the circuits with many mechanisms per detector here (a stand-in for the structure it needs);
+    # GARI++ shares GARI's model, other decoders keep their rules
+    table = synthetic_table()
+    gari = []
+    for key, f in table.groupby("circuit_key").first().iterrows():
+        refused = f.mechanisms > 3000
+        gari.append({**f.to_dict(), "circuit_key": key, "decoder": "gari",
+                     **({"status": "decoder not applicable"} if refused else
+                        {"status": "measured", "shots": 1000, "errors": 100, "ler": 0.1, "ms_per_shot": 0.01})})
+    model = train(pd.concat([table, pd.DataFrame(gari)], ignore_index=True))
+    assert model.meta["applicability"]["gari"]["refused"] > 0
+    features = synthetic_features(120, seed=7)
+    pred = model.predict(features, decoders=["gari", "gari_pp", "bposd"])
+    many = features.set_index("circuit_key").mechanisms > 3000
+    for decoder in ("gari", "gari_pp"):
+        p = pred[pred.decoder == decoder].set_index("circuit_key")
+        assert ((p.applicable.astype(bool)) == ~many.loc[p.index]).mean() > 0.9
+    assert pred[pred.decoder == "bposd"].p_applicable.isna().all()
+    assert pred[pred.decoder == "bposd"].applicable.astype(bool).all()

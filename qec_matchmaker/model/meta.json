@@ -1,7 +1,7 @@
 {
- "created": "2026-11-10T12:41:18+00:00",
+ "created": "2026-11-11T08:18:23+00:00",
  "sklearn_version": "1.9.1",
- "model_version": 3,
+ "model_version": 4,
  "feature_version": 1,
  "features": [
   "detectors",
@@ -41,6 +41,8 @@
    "bposd",
    "bposd_tuned",
    "chromobius",
+   "gari",
+   "gari_pp",
    "mwpf",
    "mwpm",
    "relay_bp",
@@ -52,6 +54,8 @@
    "bposd",
    "bposd_tuned",
    "chromobius",
+   "gari",
+   "gari_pp",
    "mwpf",
    "mwpm",
    "relay_bp",
@@ -96,16 +100,16 @@
  "laws": {
   "ler": {
    "ler": [
-    -1.2486977615473427,
-    0.28812604821685184,
-    0.37044645889020333,
-    0.3117432174814655,
-    0.46991214751500415
+    -1.2409343420933387,
+    0.30353296457120676,
+    0.36210168643837193,
+    0.30794288363182254,
+    0.45670698547281946
    ],
    "ler_without_distance": [
-    0.0587677677836659,
-    1.3483854297341247,
-    4.380031203393386e-21
+    0.05864720868384205,
+    1.3478099989778511,
+    4.2053151483857014e-21
    ]
   },
   "time": {
@@ -120,24 +124,34 @@
     1.3418073785669264
    ],
    "bposd": [
-    -1.7707628927694485,
-    1.5689470244912416,
-    1.4158548013110508
+    -1.7708683365210325,
+    1.5689834925533164,
+    1.4158687230429041
    ],
    "bposd_tuned": [
-    -4.798159125569614,
-    1.998492179329516,
-    0.7841136962327107
+    -4.8001450371697825,
+    1.9990549953465082,
+    0.7840018023511315
    ],
    "chromobius": [
     -2.0670550645335073,
     0.5912290223286752,
     0.9711896358942269
    ],
+   "gari": [
+    -2.698238719680419,
+    1.5766917138358683,
+    1.8388425022433796
+   ],
+   "gari_pp": [
+    -2.2860912889081337,
+    1.3211609517829266,
+    1.514052903863483
+   ],
    "mwpf": [
-    -3.3037782649150333,
-    2.1813127405862485,
-    1.91193069648192
+    -3.318118364705187,
+    2.182711485210213,
+    1.9036283961025364
    ],
    "mwpm": [
     -2.202715566919624,
@@ -150,25 +164,31 @@
     1.2405552331872864
    ],
    "tesseract": [
-    -2.142726846680917,
-    1.9312481079971218,
-    2.2884804466607567
+    -2.139163215609506,
+    1.929982790201611,
+    2.288008866393366
    ]
   }
  },
  "random_state": 0,
+ "applicability": {
+  "gari": {
+   "circuits": 5044,
+   "refused": 781
+  }
+ },
  "training": {
-  "rows": 23507,
+  "rows": 32814,
   "circuits": 5044,
-  "regime_circuits": 5017,
-  "above_share": 0.18178194139924259,
-  "ler_circuits": 3439,
-  "regret_decodes": 18357,
-  "time_decodes": 22953,
+  "regime_circuits": 5044,
+  "above_share": 0.18457573354480572,
+  "ler_circuits": 3482,
+  "regret_decodes": 26633,
+  "time_decodes": 31479,
   "time_censored": 193
  },
  "manifest": {
-  "created": "2026-11-10T12:04:59+00:00",
+  "created": "2026-11-11T08:17:47+00:00",
   "feature_version": 1,
   "features": [
    "detectors",
@@ -196,7 +216,7 @@
    "rounds",
    "decomposable"
   ],
-  "rows": 23507,
+  "rows": 32814,
   "circuits": 5044,
   "codes": 67,
   "decoders": [
@@ -205,17 +225,19 @@
    "bposd",
    "bposd_tuned",
    "chromobius",
+   "gari",
+   "gari_pp",
    "mwpf",
    "mwpm",
    "relay_bp",
    "tesseract"
   ],
   "status": {
-   "measured": 18854,
-   "low statistics": 3310,
-   "upper bound": 974,
-   "timeout": 193,
-   "decoder not applicable": 176
+   "measured": 26818,
+   "low statistics": 3736,
+   "upper bound": 1110,
+   "decoder not applicable": 957,
+   "timeout": 193
   },
   "left_out": {
    "skipped (no circuit)": 3402,
@@ -224,12 +246,12 @@
   "sources": {
    "eccentric_results": {
     "path": "../eccentric/experiment_results/Sweep/results.csv",
-    "commit": "badcb2f",
-    "sha256": "b8206761bea7f11d628e7ccc991aaed7341bd1a32161f963f915ee76eabc539f"
+    "commit": "7246a34",
+    "sha256": "ca790f2d7571b7905ae2c0b2ac198245d501aec99fe4aef554b7412e67ed531c"
    },
    "feature_store": {
     "path": "data/features.jsonl",
-    "sha256": "ea9f32f185ce212186149000617b0cd9cbb97a9a5215e3f9ab6c77d0334b2fe4"
+    "sha256": "1e4da16142ccf41c84dce747d4452111f0f0e1fe4845a32a50b2622478748bea"
    }
   }
  },
@@ -338,18 +360,20 @@
  "conformal": {
   "coverage": 0.8,
   "folds": 4,
-  "ler": 0.14374128569144853,
+  "ler": 0.14095107725186562,
   "time": {
-   "belief_find": 0.10836467829546666,
-   "bplsd": 0.11096246953921793,
-   "bposd": 0.10993606783856637,
-   "bposd_tuned": 0.06312684301439964,
-   "mwpf": 0.17840390542964252,
-   "mwpm": 0.10164422178669308,
-   "relay_bp": 0.09066073063208932,
-   "tesseract": 0.19302145634492998
+   "belief_find": 0.10104026951130775,
+   "bplsd": 0.10024537187376953,
+   "bposd": 0.1008003575952775,
+   "bposd_tuned": 0.06348269031752846,
+   "gari": 0.14819867335706555,
+   "gari_pp": 0.1369651708387334,
+   "mwpf": 0.19608892799490213,
+   "mwpm": 0.11100479202077841,
+   "relay_bp": 0.09190977562819017,
+   "tesseract": 0.1730664775319708
   },
-  "time_all": 0.11261727911753854
+  "time_all": 0.11479052049654787
  },
  "metrics": {
   "dataset": {

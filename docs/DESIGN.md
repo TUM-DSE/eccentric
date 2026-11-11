@@ -51,10 +51,13 @@ A mechanism is one `error(p)` instruction (after flattening); a detector fires w
 ## Decoders (`decoders.py`)
 
 Names as in ECCentric: `mwpm` (PyMatching), `bposd`, `bplsd`, `belief_find` (ldpc), `relay_bp`,
-`tesseract`, `chromobius`. `applicable(features) -> dict[str, bool]`: `mwpm` needs `decomposable`
-(graph-like errors in a DEM settle it in favour), `chromobius` needs `color_annotated`, the rest always
-apply; `None` when the features cannot tell (e.g. matching from a DEM alone), which the recommendation
-treats as not applicable and `advise` reports.
+`tesseract`, `chromobius`, `gari`, `gari_pp`. `applicable(features) -> dict[str, bool]`: `mwpm` needs
+`decomposable` (graph-like errors in a DEM settle it in favour), `chromobius` needs `color_annotated`, the rest
+always apply; `None` when the features cannot tell (e.g. matching from a DEM alone), which the recommendation
+treats as not applicable and `advise` reports. GARI and GARI++ refuse circuits for reasons no feature shows
+(non-CSS detectors, observables on both sides: Floquet, subsystem and XZZX circuits); `LEARNED_APPLICABILITY`
+lists them, and a classifier trained on ECCentric's "decoder not applicable" decodes (models.py, GARI++ sharing
+GARI's) sets `p_applicable`; a decoder with `p_applicable < 0.5` is not applicable.
 
 ## Training table (`dataset.py`)
 

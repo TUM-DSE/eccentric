@@ -98,8 +98,8 @@ decodes every circuit with several decoders on the same shots.
 | Codes | 67 codes from 25 families: surface, color, heavy-hex, Floquet, bivariate bicycle, hypergraph and lifted product, quantum Tanner, ... |
 | Devices | 25: IBM Heron, Flamingo, Loon and the bicycle module (one and several QPUs), Google Willow, Quantinuum Apollo, Harvard/MIT and Infleqtion neutral atoms, and ideal grid, all-to-all and cube layouts |
 | Noise | 27 models: each device's own, scaled versions of them, and standard circuit noise |
-| Decoders | 9: MWPM, MWPF, BP-OSD (paper and tuned settings), BP-LSD, BeliefFind, Relay-BP, Tesseract, Chromobius |
-| Decodes | 23,507, from 1.9 billion shots |
+| Decoders | 11: MWPM, MWPF, BP-OSD (paper and tuned settings), BP-LSD, BeliefFind, Relay-BP, Tesseract, Chromobius, GARI, GARI++ (ECCentric's beta reimplementation) |
+| Decodes | 32,814, from 2.3 billion shots |
 
 Every decoder trades accuracy against time differently, and none wins everywhere. Tesseract is the most
 accurate wherever it finishes, but it is among the slowest and timed out on 157 of the largest circuits;

@@ -1,5 +1,5 @@
 {
- "created": "2026-11-10T12:04:59+00:00",
+ "created": "2026-11-11T08:17:47+00:00",
  "feature_version": 1,
  "features": [
   "detectors",
@@ -27,7 +27,7 @@
   "rounds",
   "decomposable"
  ],
- "rows": 23507,
+ "rows": 32814,
  "circuits": 5044,
  "codes": 67,
  "decoders": [
@@ -36,17 +36,19 @@
   "bposd",
   "bposd_tuned",
   "chromobius",
+  "gari",
+  "gari_pp",
   "mwpf",
   "mwpm",
   "relay_bp",
   "tesseract"
  ],
  "status": {
-  "measured": 18854,
-  "low statistics": 3310,
-  "upper bound": 974,
-  "timeout": 193,
-  "decoder not applicable": 176
+  "measured": 26818,
+  "low statistics": 3736,
+  "upper bound": 1110,
+  "decoder not applicable": 957,
+  "timeout": 193
  },
  "left_out": {
   "skipped (no circuit)": 3402,
@@ -55,12 +57,12 @@
  "sources": {
   "eccentric_results": {
    "path": "../eccentric/experiment_results/Sweep/results.csv",
-   "commit": "badcb2f",
-   "sha256": "b8206761bea7f11d628e7ccc991aaed7341bd1a32161f963f915ee76eabc539f"
+   "commit": "7246a34",
+   "sha256": "ca790f2d7571b7905ae2c0b2ac198245d501aec99fe4aef554b7412e67ed531c"
   },
   "feature_store": {
    "path": "data/features.jsonl",
-   "sha256": "ea9f32f185ce212186149000617b0cd9cbb97a9a5215e3f9ab6c77d0334b2fe4"
+   "sha256": "1e4da16142ccf41c84dce747d4452111f0f0e1fe4845a32a50b2622478748bea"
   }
  }
 }

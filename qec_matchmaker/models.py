@@ -44,10 +44,11 @@ from scipy.optimize import lsq_linear
 from sklearn.ensemble import HistGradientBoostingClassifier, HistGradientBoostingRegressor
 from sklearn.model_selection import GroupKFold
 
-from .decoders import DECODERS, applicable
+from .decoders import DECODERS, LEARNED_APPLICABILITY, applicable
 from .features import FEATURE_NAMES, FEATURE_VERSION
 
 RATED = ("measured", "low statistics", "upper bound")
+NOT_APPLICABLE = "decoder not applicable"
 ABOVE = 0.5
 LER_FLOOR = 1e-8
 FIRST_BATCH = 100
@@ -57,7 +58,7 @@ PARAMS = dict(learning_rate=0.05, max_iter=200, max_leaf_nodes=15, min_samples_l
 # error 0.57 -> 0.51 decades, time within 3x 83% -> 85%); the regime and regret models lose from it
 QUANTILE_PARAMS = {**PARAMS, "learning_rate": 0.1, "max_leaf_nodes": 31, "max_iter": 400}
 # Bump when the saved models change form: bundles of another version cannot be loaded
-MODEL_VERSION = 3
+MODEL_VERSION = 4
 # Quantiles of a decoder's regret: the median, and pessimistic ones for choosing a cheaper decoder with some
 # confidence that it is within the tolerance (recommend(..., confidence=))
 REGRET_QUANTILES = (0.5, 0.7, 0.8, 0.9)
@@ -101,6 +102,35 @@ def regret_rows(df: pd.DataFrame) -> pd.DataFrame:
     m = df[(df.status == "measured") & (df.ler > 0)]
     m = m[m.groupby("circuit_key").decoder.transform("size") >= 2]
     return m.assign(regret=np.log10(m.ler / m.groupby("circuit_key").ler.transform("min")))
+
+
+def applicability_rows(df: pd.DataFrame, decoder: str) -> pd.Series:
+    """Per circuit the decoder was run on: whether it applied (any status but NOT_APPLICABLE), by circuit key"""
+    runs = df[df.decoder == decoder]
+    return (runs.groupby("circuit_key").status.agg(lambda s: (s != NOT_APPLICABLE).any())).astype(bool)
+
+
+def _fit_applicability(df, circuits, features, random_state):
+    """A classifier per decoder in LEARNED_APPLICABILITY's values that ECCentric ran, and what it was trained on"""
+    models, meta = {}, {}
+    for source in sorted(set(LEARNED_APPLICABILITY.values())):
+        fits = applicability_rows(df, source)
+        if fits.empty:
+            continue
+        y = fits.to_numpy(int)
+        X = _matrix(circuits.loc[fits.index], features)
+        models[source] = (Constant(float(y[0])) if len(np.unique(y)) < 2 else
+                          HistGradientBoostingClassifier(random_state=random_state, **PARAMS).fit(X, y))
+        meta[source] = {"circuits": int(len(y)), "refused": int((y == 0).sum())}
+    return models, meta
+
+
+def p_applicable(models: dict, X: np.ndarray, decoder: str) -> np.ndarray:
+    """Probability that `decoder` applies to the circuits of X, NaN if no learned model covers it"""
+    model = models.get(LEARNED_APPLICABILITY.get(decoder))
+    if model is None:
+        return np.full(len(X), math.nan)
+    return model.predict(X) if isinstance(model, Constant) else model.predict_proba(X)[:, 1]
 
 
 def timeout_bound_ms(timeout_s):
@@ -332,6 +362,7 @@ def train(df: pd.DataFrame, quantiles=(0.1, 0.5, 0.9), random_state=0, manifest:
                             list(REGRET_QUANTILES), categorical, random_state)
 
     time, timed, censored = _fit_time(df, features, quantiles, random_state, parametric)
+    applicability, applicability_meta = _fit_applicability(df, circuits, features, random_state)
 
     meta = {
         "created": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
@@ -346,6 +377,7 @@ def train(df: pd.DataFrame, quantiles=(0.1, 0.5, 0.9), random_state=0, manifest:
         "laws": {"ler": {law.name: None if law.coef is None else [float(c) for c in law.coef] for law in ler.laws},
                  "time": {d: None if law.coef is None else [float(c) for c in law.coef] for d, law in time.laws.items()}},
         "random_state": random_state,
+        "applicability": applicability_meta,
         "training": {"rows": len(df), "circuits": len(circuits), "regime_circuits": len(labels),
                      "above_share": float(above.mean()) if len(above) else math.nan,
                      "ler_circuits": int((labels.best_status == "measured").sum()),
@@ -355,7 +387,8 @@ def train(df: pd.DataFrame, quantiles=(0.1, 0.5, 0.9), random_state=0, manifest:
                    if f in circuits.columns and circuits[f].notna().any()},
         "conformal": _conformal(df, features, quantiles, calibration_folds, random_state, parametric) if calibrate else None,
     }
-    return ModelBundle({"regime": regime, "ler": ler, "regret": regret, "time": time}, meta)
+    return ModelBundle({"regime": regime, "ler": ler, "regret": regret, "time": time, "applicability": applicability},
+                       meta)
 
 
 def _cqr(lo, hi, y, coverage):
@@ -465,7 +498,11 @@ class ModelBundle:
             out[_qname("ms", quantile)] = ms[:, j]
         everything = frame.reindex(columns=[*FEATURE_NAMES, *LAW_INPUTS]).apply(pd.to_numeric, errors="coerce").astype(float)
         fits = [applicable(f) for f in everything.to_dict("records")]
-        out["applicable"] = [fit.get(d, True) for fit in fits for d in decoders]
+        rule = np.array([fit.get(d, True) for fit in fits for d in decoders], dtype=object)
+        # Decoders with learned applicability: applicable unless the model says it more likely refuses
+        learned = np.column_stack([p_applicable(models.get("applicability", {}), X, d) for d in decoders]).ravel()
+        out["p_applicable"] = learned
+        out["applicable"] = np.where(learned < 0.5, False, rule)
         out["outside_training"] = np.repeat([", ".join(self.outside_training(f)) for f in everything.to_dict("records")], k)
         return out
 

@@ -11,7 +11,16 @@ DECODERS = {
     "relay_bp": "Relay-BP",
     "tesseract": "Tesseract search decoder",
     "chromobius": "Chromobius color-code decoder",
+    "gari": "GARI: normalized min-sum on the GARI-transformed correlated error model (CSS circuits only)",
+    "gari_pp": "GARI++ (ECCentric's beta reimplementation): short GARI plus union-find on its residual",
 }
+
+
+# Decoders that refuse circuits for reasons no feature shows (GARI needs CSS detectors and observables on one side,
+# which Floquet, subsystem and XZZX circuits break): whether they apply is learned from the decodes that refused
+# ("decoder not applicable" in ECCentric). A decoder maps to the decoder whose refusals train its model: GARI++
+# was only run where GARI applies, so it shares GARI's
+LEARNED_APPLICABILITY = {"gari": "gari", "gari_pp": "gari"}
 
 
 def _flag(value):

@@ -12,13 +12,14 @@ not significantly worse than the best measured one (its ler_low <= the best's le
 the cheapest good-enough decoder is the good-enough one with the lowest ms per shot. A choice that was not
 run on a circuit falls back to BP-OSD (to the best decoder run, without BP-OSD) and is counted.
 """
+import math
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 from sklearn.model_selection import GroupKFold
 
-from .decoders import DECODERS
-from .models import LER_FLOOR, circuit_features, circuit_labels, regret_rows, timeout_bound_ms, train
+from .decoders import DECODERS, LEARNED_APPLICABILITY
+from .models import LER_FLOOR, applicability_rows, circuit_features, circuit_labels, regret_rows, timeout_bound_ms, train
 from .recommend import recommend
 
 POLICIES = {"accurate": "recommend, accurate", "cheapest": "recommend, cheapest", "bposd": "always bposd",
@@ -105,6 +106,26 @@ def _regime(df, pred):
     tp = int((truth & guess).sum())
     return {"circuits": len(truth), "base_rate": float(truth.mean()), "accuracy": float((truth == guess).mean()),
             "recall": tp / max(int(truth.sum()), 1), "precision": tp / max(int(guess.sum()), 1)}
+
+
+def _applicability(df, pred):
+    """Per decoder with learned applicability: how often the held-out prediction (p_applicable >= 0.5) matches
+    whether ECCentric's decode applied; refusals caught: the refused circuits predicted as refused; wrongly
+    refused: the circuits it applied to predicted as refused"""
+    out = {}
+    if "p_applicable" not in pred.columns:
+        return out
+    for source in sorted(set(LEARNED_APPLICABILITY.values())):
+        truth = applicability_rows(df, source)
+        guess = pred[pred.decoder == source].groupby("circuit_key").p_applicable.first().reindex(truth.index)
+        known = guess.notna()
+        if not known.any():
+            continue
+        t, g = truth[known].to_numpy(bool), (guess[known] >= 0.5).to_numpy()
+        out[source] = {"circuits": int(known.sum()), "refused": int((~t).sum()), "accuracy": float((t == g).mean()),
+                       "refusals_caught": float((~g[~t]).mean()) if (~t).any() else math.nan,
+                       "wrongly_refused": float((~g[t]).mean()) if t.any() else math.nan}
+    return out
 
 
 def _ler(df, pred):
@@ -238,6 +259,7 @@ def evaluate(df: pd.DataFrame, folds: int = 10, random_state: int = 0, calibrate
                   "codes": int(df.code.nunique()), "circuits": int(df.circuit_key.nunique()), "decodes": len(df),
                   "split": split, "calibrated": calibrate, **({"train_options": train_options} if train_options else {})},
         "regime": _regime(df, pred),
+        "applicability": _applicability(df, pred),
         "ler": _ler(df, pred),
         "regret": _regret(df, pred),
         "time": _time(df, pred),
@@ -252,6 +274,16 @@ def _f(x, digits=2):
 
 def _pct(x):
     return "n/a" if x is None or (isinstance(x, float) and np.isnan(x)) else f"{100 * x:.0f}%"
+
+
+def _applicability_lines(app: dict) -> list:
+    if not app:
+        return []
+    lines = ["## Applicability (learned, for decoders that refuse circuits no feature shows)", "",
+             "| decoder | circuits | refused | accuracy | refusals caught | wrongly refused |", "|---|---|---|---|---|---|"]
+    lines += [f"| {d} | {m['circuits']} | {m['refused']} | {_pct(m['accuracy'])} | {_pct(m['refusals_caught'])} | "
+              f"{_pct(m['wrongly_refused'])} |" for d, m in app.items()]
+    return lines + [""]
 
 
 def report_markdown(metrics: dict) -> str:
@@ -273,6 +305,7 @@ def report_markdown(metrics: dict) -> str:
         "## Regime (above threshold: best LER > 0.5)", "",
         "| circuits | above (base rate) | accuracy | recall | precision |", "|---|---|---|---|---|",
         f"| {g['circuits']} | {_pct(g['base_rate'])} | {_pct(g['accuracy'])} | {_pct(g['recall'])} | {_pct(g['precision'])} |", "",
+        *_applicability_lines(metrics.get("applicability") or {}),
         "## Best LER (circuits whose best decode is measured)", "",
         "| circuits | median error | p90 error | Spearman | in [q10, q90] |", "|---|---|---|---|---|",
         f"| {ler['circuits']} | {_f(ler['median_abs_log10_error'])} | {_f(ler['p90_abs_log10_error'])} | "
