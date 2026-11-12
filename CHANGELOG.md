@@ -24,10 +24,12 @@ which experiments and paper figures it affects, and how it was checked.
   gates (all-to-all or shuttling devices) are affected most.
 - **Paper:** Fig. 15 (variance), Fig. 17 (distributed QPUs) and the Infleqtion bars of Fig. 19.
   Re-runs with BP-OSD and the paper's settings (1000 shots):
-  - Fig. 15: almost all bars at about 0.5 were caused by this bug. With the fix, at 1× T1/T2,
-    surface 0.49 → 0.000, heavy-hex 0.50 → ≤ 0.011, color 0.50 → ≤ 0.012, gross 1.00 → 0.000.
-    Codes stay nearly flat across variance levels, so Takeaway #3 still holds, but for a different
-    reason (the codes now work).
+  - Fig. 15: almost all bars at about 0.5 were caused by this bug. With this fix alone, at 1× T1/T2,
+    surface 0.49 → 0.000, heavy-hex 0.50 → ≤ 0.011, color 0.50 → ≤ 0.012, gross 1.00 → 0.000, and
+    the codes stayed nearly flat across variance levels. With fix 9 as well (the stored
+    `Variance_Decoherence` rerun of 2026-10-29), at 1× T1/T2: surface ≤ 0.006, color 0.04–0.06,
+    heavy-hex 0.07–0.19, gross 0.03–0.17 (Bacon-Shor and Steane stay near 0.5), and gross and
+    heavy-hex now vary several-fold across variance levels, so Takeaway #3 ("flat") needs revisiting.
   - Fig. 17 (Nighthawk): most error rates drop; single-QPU execution beats the distributed one for
     every code under normal noise.
   - Fig. 19 (Infleqtion): no significant change for surface, heavy-hex and Bacon-Shor.
@@ -60,8 +62,12 @@ which experiments and paper figures it affects, and how it was checked.
   Steane-specific statements of §4.4. Steane results are being regenerated with the fix.
 - **Checked by:** `tests/test_steane.py`: injecting a logical error (`X_ERROR(1)` on all data qubits)
   flips the result without firing detectors, a single data error fires detectors, no single fault
-  flips the result undetected (SD6 noise), the circuit distance is 3 for d = 3 and 9 for d = 9, and
-  the circuits use 13 / 97 / 685 qubits.
+  flips the result undetected (SD6 noise), the graph-like circuit distance is 3 for d = 3 and 9 for
+  d = 9, and the circuits use 13 / 97 / 685 qubits.
+- **Open (2026-11-12):** the test checks the code's own circuit and only graph-like errors. The d = 3
+  circuit as the pipeline compiles it (`custom_full`, SD6 1e-3) has distance 2 counting all error
+  mechanisms: a two-qubit Y⊗Y fault on data qubits 0 and 4 plus a Y fault on data qubit 2 flip the
+  result undetected. The uncompiled circuit with the same noise has distance 3 (hyperedges included).
 
 ### 3. Results with new columns were appended to existing CSV files misaligned
 
@@ -94,9 +100,10 @@ which experiments and paper figures it affects, and how it was checked.
   (surface code d = 5: 466 of 502 edges, mean probability 2.0e-3 instead of 3.3e-3).
 - **Fix:** the error model is decomposed into graph edges, the standard way to use PyMatching. A
   circuit whose errors cannot be decomposed now makes MWPM fail instead of decoding with a wrong graph.
-- **Affects:** all `mwpm` results. On the circuits checked (surface code d = 5, heavy-hex d = 3 at
-  p = 0.001) the logical error rates changed only within the statistical error, so this does not
-  explain the gap between MWPM and BP-OSD reported in the paper.
+- **Affects:** all `mwpm` results. On the same 200,000 shots (SD6, p = 0.001) the fix lowers MWPM's
+  logical error rate by 12–19%: surface code d = 5 6.8e-4 → 5.5e-4, heavy-hex d = 3 1.08e-2 → 9.5e-3
+  (re-measured 2026-11-12; an earlier check with fewer shots saw no significant change). This is far
+  too small to explain the gap between MWPM and BP-OSD reported in the paper.
 - **Checked by:** `tests/test_decoders.py::test_mwpm_matches_on_the_decomposed_error_model` (PyMatching
   gets only edges of at most two detectors) and `::test_mwpm_fails_on_errors_that_do_not_decompose`.
 
@@ -105,7 +112,7 @@ which experiments and paper figures it affects, and how it was checked.
 - **File:** `eccentric/backends/utils.py` (with `fake_loon.py` and `fake_flamingo.py`, which now take
   the number of QPUs). **Commit:** `2babdc2`.
 - **Problem:** `real_loon_1_qpu` and `real_flamingo_1_qpu` loaded the full two- and three-QPU
-  devices. The single-QPU size (120 and 133 qubits) only chose the code distance, so the compiler
+  devices. The single-QPU size (121 and 133 qubits) only chose the code distance, so the compiler
   was free to place and route the code across all QPUs, over the slow and noisy inter-QPU links. In
   the sweep, 84 of 102 "1 QPU" circuits used more qubits than one QPU has. The paper-era `main.py`
   did the same.
@@ -137,11 +144,13 @@ which experiments and paper figures it affects, and how it was checked.
 - **Affects:** every Willow result, including the paper's (`experiment_results/Willow`, the Willow
   rows of `Real_Topology`).
 - **Checked by:** `tests/test_noise_invariants.py::test_idle_window`, and against Google's
-  experiment: the surface code memory placed on the grid, 10 cycles, MWPM, now gives 0.44%, 0.20%
-  and 0.076% per cycle at d = 3, 5, 7 (Λ = 2.4) with the paper's Willow model and 0.50%, 0.23%,
-  0.097% (Λ = 2.3) with the spec-sheet model, against about 0.65%, 0.31% and 0.143% (Λ = 2.14)
-  measured. The remaining difference (the model is slightly optimistic) fits what the model leaves
-  out, such as leakage accumulation and stray couplings.
+  experiment (analysis/WILLOW.md, which supersedes the numbers first given here): the surface code
+  memory placed on the grid, 10 cycles, MWPM, gives 0.57%, 0.28% and 0.138% per cycle at d = 3, 5, 7
+  (Λ = 2.05) with the paper's Willow model and 0.54%, 0.32%, 0.150% (Λ = 2.11) with the spec-sheet
+  model, against 0.71%, 0.35% and 0.171% (Λ = 2.04) with Google's ensembled matching decoder: the model
+  is 1.15 to 1.25 times optimistic and gets Λ right. (The first check gave 0.44%, 0.20%, 0.076% and
+  compared them with Google's neural-network decoder; the sweep's circuits do not reproduce them.) What
+  the model leaves out, such as leakage accumulation and stray couplings, fits the difference.
 
 ### 8. Codes were placed qubit by qubit onto sparse devices
 
@@ -170,7 +179,9 @@ which experiments and paper figures it affects, and how it was checked.
   routing experiments (`Routing_grid`, `Routing_hh`, which set the layout method) and the `native`
   devices. Exact fits are rare: of 2049 earlier results on sparse devices, 40 had one (18 of them in
   the routing experiments); the change comes mostly from choosing a placement at all.
-- **Checked by:** `tests/test_platforms.py::test_layout_of_codes_that_fit_the_device`.
+- **Checked by:** `tests/test_platforms.py::test_layout_of_codes_that_fit_the_device`. Re-measured on
+  2026-11-12 (routing seeded since fix 14): surface code d = 5 on Torino 225 SWAPs placed vs 574
+  trivial, bb72 on Loon 2152 vs 3300 (two cycles); the surface code at d = 3, 5, 7 on Willow needs none.
 
 ### 9. Qubits did not decohere while they waited, and IBM readout took 70 ns
 
@@ -197,7 +208,9 @@ which experiments and paper figures it affects, and how it was checked.
 - **Effect:** with the median T1/T2 of the IBM models (about 175 and 143 us), a data qubit waiting
   out one readout and reset (2.85 us) gets about 1.4% error, seven times the two-qubit gate error.
   Surface code d = 5 on one Loon QPU (MWPM, 5 rounds): 0.42% -> 2.6% logical error at IBM noise
-  (1.7% with 700 ns readout); 0.021% -> 0.055% at tenfold lower noise with T1/T2 x 3.
+  (1.7% with 700 ns readout); 0.021% -> 0.055% at tenfold lower noise with T1/T2 x 3. Re-measured
+  on 2026-11-12 with today's circuits (fix 14 draws each device's T1/T2 once, so the draw differs):
+  3.0% ± 0.17%, 2.2% ± 0.15% and 0.066% ± 0.006%.
 - **History:** until July 2025 the noise model gave the qubits that were not measured in a
   measurement layer a depolarizing error equal to the measurement error (likewise for reset);
   commit `6775675` ("Quick fix", 7 July 2025) removed it without a stated reason. From then on,
@@ -342,13 +355,24 @@ which experiments and paper figures it affects, and how it was checked.
    probability-1 Pauli error, the same in every shot (in the sweep's Willow circuits: none in the surface
    code at d = 3 and 5, 5 at d = 11, 39 in the gross code). Large circuits on these devices thus carry a fixed error
    pattern rather than a leakage rate; this may be why the surface code at d = 11 does worse than at
-   d = 7 on Willow.
+   d = 7 on Willow. Since fix 14 a configuration always gets the same draw, and today's builds of the
+   Willow surface code memory over 10 cycles carry 1, 1 and 2 probability-1 errors at d = 3, 5, 7
+   (none at d = 3 and 5 over d cycles). MWPM refuses such circuits (PyMatching's edge weight overflows),
+   so rerunning the `willow_surface` slice with today's code would lose its MWPM results; the sweep's
+   stored circuits (built 2026-10-27) decode normally.
 
 ## Validation
 
 `validation/` runs the checks behind these entries on a cluster (circuit validity, code and circuit
 distance, cross-decoder comparison including old vs. new BP-OSD); `tests/test_noise_invariants.py`
 pins down the noise model's behaviour.
+
+### Cross-check of the fixes (2026-11-12)
+
+Every fix's commit is in the history and its code in place; the 48 tests named under "Checked by" pass on
+the cluster's environment (ldpc 2.4.1), and each fix's main claim was re-measured through the pipeline.
+All fixes hold. Numbers that had gone stale were updated above (fixes 1, 5, 6, 7, 8, 9); open points are
+the compiled Steane circuit's distance (fix 2) and the Willow circuits' frozen leakage (Known issue 10).
 
 ### Which stored results include the fixes (checked 2026-11-05, updated 2026-11-08)
 

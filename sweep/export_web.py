@@ -32,7 +32,7 @@ FAMILIES = [
 DEVICES = {
     "real_torino": "IBM Heron (133 qubits)",
     "real_willow": "Google Willow (extended, 315 qubits)",
-    "real_loon_1_qpu": "IBM Loon/Nighthawk, 1 QPU (120 qubits)",
+    "real_loon_1_qpu": "IBM Loon/Nighthawk, 1 QPU (121 qubits)",
     "real_loon": "IBM Loon/Nighthawk, 2 QPUs (242 qubits)",
     "real_flamingo_1_qpu": "IBM Flamingo, 1 QPU (133 qubits)",
     "real_flamingo": "IBM Flamingo, 3 QPUs (399 qubits)",
