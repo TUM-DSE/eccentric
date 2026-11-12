@@ -6,6 +6,15 @@ ECCentric is a benchmarking framework for evaluating Quantum Error Correction (Q
 > Aleksandra Świerkowska, Jannik Pflieger, Emmanouil Giortamis, Pramod Bhatotia.
 > [arXiv:2511.01062 (PDF)](https://arxiv.org/pdf/2511.01062)
 
+## This branch (`new-codes`)
+
+Beyond the paper's version, this branch adds about 60 codes (qLDPC, Floquet, color, Golay, ...), ten decoders
+(BP-LSD, BeliefFind, Relay-BP, Tesseract, MWPF, GARI, GARI++, ...), devices (IBM's bicycle module, Harvard
+neutral atoms, single-QPU IBM devices, code-native layouts), noise models (loss, scaled device noise, 700 ns
+IBM readout), X-basis memory experiments, and a large sweep over all of them (see [Sweep](#sweep)). Fixes to
+functionality that existed before, with their effect on the paper's results and how each was checked, are
+listed in [CHANGELOG.md](CHANGELOG.md).
+
 ## Overview
 
 ![ECCentric pipeline](docs/pipeline.png)
@@ -23,16 +32,22 @@ eccentric/                 the framework (Python package)
 ├── codes/                 QEC code circuits: surface, heavy-hex, gross, color, Bacon-Shor, concatenated Steane,
 │                          and the catalog of further codes (see "Codes")
 ├── noise/                 artificial and hardware-inspired noise models
-├── decoders/              MWPM, BP-OSD and Chromobius
+├── decoders/              MWPM, BP-OSD, Chromobius and the decoders listed under "Decoders"
 ├── transpilers/           layout/routing and gate-set translation (Qiskit, BQSKit, TKET)
 ├── metrics/               gate and resource counting
 ├── plots/                 paper figures: python -m eccentric.plots
-└── hardware/              comparison against real IBM hardware
+├── hardware/              comparison against real IBM hardware
+└── seeding.py             per-configuration seeds (the same configuration compiles to the same circuit)
 configs/                   YAML configurations of all paper experiments, plus example.yaml
-experiment_results/        raw results used in the paper
+experiment_results/        results of the paper's experiments (some rerun with the fixes, see CHANGELOG.md),
+                           the sweep table (Sweep/) and other result sets
+sweep/                     the sweep: job generation, cluster job runner, result collection, website exports
+analysis/                  analyses of the sweep (decoders, X vs Z basis, noise scaling, Willow, ...)
+validation/                cluster checks of circuits, code and circuit distances, and decoders
 figures/                   generated figures
 docs/                      pipeline overview figure
 tests/                     unit and end-to-end tests
+CHANGELOG.md               fixes to functionality that existed before this branch
 external/                  submodules: qiskit-qec fork, more-bacon-less-threshold, honeycomb_threshold, honeycomb-boundaries
 ```
 
@@ -52,6 +67,8 @@ cd external/qiskit_qec
 python setup.py build_ext --inplace
 cd ../..
 ```
+
+The `gari` and `gari_pp` decoders compile the authors' C decoder on first use with `cc` and OpenMP (into `~/.cache/eccentric`, or `$ECCENTRIC_CACHE`), so they need a C compiler.
 
 `pip install -e .` installs the dependencies from `requirements.txt` and adds an `eccentric` command, equivalent to `python -m eccentric`. If you cloned without `--recurse-submodules`, fetch the submodules first with `git submodule update --init --recursive`.
 
@@ -105,7 +122,7 @@ experiments:
 | `num_samples` | Number of shots (or, for `routing` and `translation`, number of repetitions) |
 | `backends` | List of backends (see below) |
 | `codes` | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane), and the codes listed under [Codes](#codes) |
-| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only), `bplsd`, `union_find`, `belief_find`, `belief_matching`, `relay_bp`, `tesseract`, `mwpf`, `bposd_tuned` (see [Decoders](#decoders)) |
+| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only), `bplsd`, `union_find`, `belief_find`, `belief_matching`, `relay_bp`, `tesseract`, `mwpf`, `bposd_tuned`, `gari`, `gari_pp` (see [Decoders](#decoders)) |
 | `error_types` | List of noise models (see below) |
 | `error_probabilities` | Physical error rates `p` for the artificial noise models |
 | `backends_sizes` | Number of qubits of a `custom_*` backend. The largest code distance that fits is used |
@@ -116,6 +133,7 @@ experiments:
 | `translating_methods` | Gate translation: `qiskit`, `bqskit`, `tket` |
 | `gate_sets` | Target gate sets for `translation`: `h2`, `ibm_heron` |
 | `optimization_levels` | Translation optimization levels for `translation` (default `[0, 2, 3]`) |
+| `bases` | Memory bases, `Z` (default) and/or `X`. Result rows report the `basis`. The concatenated Steane, repetition and Floquet circuits exist only in the Z basis |
 | `schedules` | Syndrome-extraction schedules (see [Codes](#codes)). Each code uses its default when omitted; configurations whose code does not support a schedule are skipped |
 
 If neither `backends_sizes` nor `distances` is given, the backend's own size is used and the largest code distance that fits is chosen. Configurations whose code does not fit (distance < 3) are skipped and logged.
@@ -173,7 +191,7 @@ Notes:
 
 | Value | Decoder | Works for |
 | --- | --- | --- |
-| `mwpm` | Minimum-weight perfect matching (PyMatching) | Matchable codes: surface, heavy-hex, Bacon-Shor, repetition, XZZX, toric, honeycomb, hyperbolic Floquet |
+| `mwpm` | Minimum-weight perfect matching (PyMatching) on the error model decomposed into edges | Matchable codes: surface, heavy-hex, Bacon-Shor, repetition, XZZX, toric, honeycomb, hyperbolic Floquet. It refuses (decoder not applicable) circuits whose errors do not decompose into edges, which includes some routed heavy-hex, honeycomb and surface circuits |
 | `bposd`, `bposd_batch`, `bposd_chk` | BP + ordered statistics decoding (ldpc) | All codes |
 | `bposd_tuned` | The same BP-OSD with tuned BP: 100 iterations, min-sum scaling 0.625. In a pilot on 80 sweep circuits (paired shots) it gave 20% lower logical error rates on topological and other low-weight codes at a tenth of the time, but up to 3x higher on some qLDPC codes (gross, BPC, Mitten); the sweep runs it next to `bposd` on the former | All codes |
 | `chromobius` | Möbius color-code decoder | The `color` code, whose detectors carry the color and basis annotation Chromobius needs, and the `chromobius` experiment type |
@@ -200,6 +218,7 @@ Notes:
 | `real_apollo`, `real_nsapollo` | Quantinuum Apollo with and without shuttling |
 | `real_infleqtion`, `real_nsinfleqtion` | Infleqtion with and without shuttling |
 | `real_harvard` | Harvard/MIT reconfigurable neutral-atom array with 448 atoms (Bluvstein et al., Nature 649, 2025): grid neighbours interact in place, all other pairs after moving an atom |
+| `native`, `native_lr` | A device whose couplers are exactly the qubit pairs of the code's circuit (needs `distances`), so the code runs without SWAPs; in `native_lr` the long-range couplers of IBM's bivariate bicycle layout are as noisy as remote gates |
 | `variance_<level>_<scale>` | Flamingo-like device with T1/T2 variance `<level>` ∈ {`none`, `low`, `mid`, `high`} and coherence times scaled by `<scale>`, e.g. `variance_mid_10` |
 | `ibm_<device>` | A real IBM device through `QiskitRuntimeService` (requires an IBM token) |
 
@@ -213,7 +232,9 @@ Notes:
 | `real_willow_spec` | Willow with the gate and measurement errors of Google's Willow spec sheet (Dec 2024) instead of arXiv:2408.13687; the other parameters, which the spec sheet does not report, are shared with `real_willow`. Use with the `real_willow` backend |
 | `real_harvard` | Harvard/MIT neutral atoms from arXiv:2506.20661: 0.1% single-qubit and 0.5% CZ error, 0.46% readout error, atom loss of 0.25% per move and 0.24% per readout that is detected when the atom is next imaged, measured gate, readout and move durations, T2 = 1 s (T1 is not reported and set to T2) |
 | `real_harvard_undetected` | `real_harvard` with undetected atom loss |
-| `real_flamingo`, `real_flamingo_downscaled` | IBM Flamingo noise, and the same noise scaled down 10× |
+| `real_flamingo`, `real_flamingo_downscaled` | IBM Flamingo noise (1.56 us readout), and the same with error probabilities divided by 10 and T1/T2 multiplied by 3 |
+| `real_flamingo_m700`, `real_flamingo_downscaled_m700` | The same with 700 ns readout |
+| `<model>_x<factor>` | Any hardware noise model with every error probability multiplied by `factor`, e.g. `real_willow_x0.25` |
 | `variance` | Decoherence driven by the T1/T2 values of a `variance_*` backend |
 | `variance_low`, `variance_mid`, `variance_high` | Readout error drawn from a log-normal distribution with increasing variance |
 
@@ -245,7 +266,11 @@ bash run_experiments.sh                 # all experiments, then all plots
 python -m eccentric.plots               # only regenerate the figures
 ```
 
-The full suite takes a long time. The results used in the paper are already in `experiment_results/`, so `python -m eccentric.plots` regenerates the figures in `figures/` without re-running anything.
+The full suite takes a long time. The results are already in `experiment_results/`, so `python -m eccentric.plots` regenerates the figures in `figures/` without re-running anything. Most of them predate the fixes in [CHANGELOG.md](CHANGELOG.md); its section "Which stored results include the fixes" says which were rerun, and the sweep reruns the others with the fixes.
+
+## Sweep
+
+The sweep runs the codes over devices, noise models and decoders, in slices defined in `sweep/slices.py`, and adds X-basis runs of the configurations below threshold in the Z basis. `sweep/` generates the jobs, runs them on a cluster (`python -m sweep.run_job <run_dir> <job_id>`, one job per circuit or decode, each until 100 logical errors or its time budget), and collects them (`python -m sweep.collect <run dirs> <out>`). The collected table is [`experiment_results/Sweep/results.csv`](experiment_results/Sweep/results.csv): 36,216 decodes of 67 codes on 25 devices under 27 noise models with 11 decoders, about 20,700 CPU-hours. Each row records the commit of the code that produced it. The website ([eccentric-benchmark.github.io](https://eccentric-benchmark.github.io)) shows it, and `analysis/` holds what we learned from it (decoder rankings, X vs Z basis, noise scaling, the Willow model against Google's experiment).
 
 ## Running with Docker
 

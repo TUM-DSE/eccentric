@@ -153,6 +153,7 @@ def base_row(task: Task, d: int, cycles: int) -> dict:
         "error_type": task.error_type,
         "error_probability": task.error_probability,
         "schedule": resolve_code_schedule(task) or "N/A",
+        "basis": task.basis or "Z",
     }
 
 

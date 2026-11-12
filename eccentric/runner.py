@@ -20,6 +20,7 @@ SWEEPS = {
     "gate_sets": "gate_set",
     "optimization_levels": "optimization_level",
     "schedules": "schedule",
+    "bases": "basis",
 }
 
 

@@ -95,5 +95,13 @@ def test_logical_error_end_to_end():
         error_probability=0.001,
     )
     (row,) = logical_error.run(task)
-    assert row["distance"] == 3 and row["cycles"] == 3
+    assert row["distance"] == 3 and row["cycles"] == 3 and row["basis"] == "Z"
     assert 0.0 <= float(row["logical_error_rate"]) <= 1.0
+
+
+def test_bases_sweep_the_memory_basis():
+    _, tasks = expand(experiment(bases=["Z", "X"]))
+    assert len(tasks) == 2 * 2 * 2 * 2
+    assert {t.basis for t in tasks} == {"Z", "X"}
+    _, default = expand(experiment())
+    assert {t.basis for t in default} == {None}

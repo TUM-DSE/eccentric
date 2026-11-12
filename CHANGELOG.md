@@ -270,7 +270,8 @@ which experiments and paper figures it affects, and how it was checked.
 - Rows with a logical error rate (`logical_error`, `decoder`, `program_stats`, `chromobius`) now
   also contain `schedule`, `rounds` (the syndrome rounds the circuit runs) and
   `logical_error_rate_per_round`; `accumulated_error`, `routing` and `translation` rows contain
-  `schedule`. Existing columns are unchanged.
+  `schedule`. Every row also contains `basis` (`Z` unless a config sets `bases`; added 2026-11-12).
+  Existing columns are unchanged.
 
 ### 13. Minor
 
