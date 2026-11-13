@@ -47,6 +47,8 @@ class Task:
     schedule: Optional[str] = None
     # Memory basis, Z or X (None: Z)
     basis: Optional[str] = None
+    # A fault-tolerant operation on the code instead of its memory (codes/operations.py)
+    operation: Optional[str] = None
 
     def describe(self) -> str:
         return ", ".join(
@@ -77,6 +79,8 @@ def native_backend(task: Task):
 def resolve_distance(task: Task, backend) -> int:
     if task.distance is not None:
         return task.distance
+    if task.operation:
+        raise Skip("operations need a fixed distance (set distances)")
     num_qubits = SINGLE_QPU_SIZES.get(task.backend, backend.coupling_map.size())
     d = get_max_d(task.code, num_qubits)
     if d < 3:
@@ -121,9 +125,9 @@ def noisy_circuit(task: Task, backend, d: int, cycles: int, stage=lambda name: n
     # code on the same device gets the same circuit under every noise model (and noise scale); the seed
     # leaves out the memory basis, so the X-basis circuit is compiled with the Z-basis circuit's seed
     seed = stable_seed(task.code, d, cycles, schedule, task.backend, task.backend_size, task.layout_method,
-                       task.routing_method, task.translating_method)
+                       task.routing_method, task.translating_method, *([task.operation] if task.operation else []))
     with stage("circuit"):
-        code = get_code(task.code, d, cycles, schedule, task.basis or "Z")
+        code = get_code(task.code, d, cycles, schedule, task.basis or "Z", task.operation)
     detectors, logicals = code.stim_detectors()
     if task.translating_method:
         code.qc = translate(code.qc, task.translating_method)
@@ -154,6 +158,7 @@ def base_row(task: Task, d: int, cycles: int) -> dict:
         "error_probability": task.error_probability,
         "schedule": resolve_code_schedule(task) or "N/A",
         "basis": task.basis or "Z",
+        "operation": task.operation or "memory",
     }
 
 
@@ -166,7 +171,7 @@ def per_round_error_rate(logical_error_rate: float, rounds: int) -> float:
 
 
 def result_row(task: Task, d: int, cycles: int, logical_error_rate: str, **extra) -> dict:
-    rounds = num_rounds(task.code, cycles)
+    rounds = num_rounds(task.code, cycles, task.operation)
     return {
         **base_row(task, d, cycles),
         "rounds": rounds,

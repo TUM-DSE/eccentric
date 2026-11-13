@@ -73,7 +73,7 @@ def undetectable_faults(circuit: stim.Circuit) -> dict:
 def task_of(job):
     from eccentric.experiments import Task
     fields = ("backend", "code", "distance", "cycles", "decoder", "error_type", "error_probability",
-              "layout_method", "routing_method", "translating_method", "schedule", "basis")
+              "layout_method", "routing_method", "translating_method", "schedule", "basis", "operation")
     return Task(experiment="sweep", num_samples=1, backend_size=job.get("backend_size"),
                 **{f: job.get(f) for f in fields})
 
@@ -85,9 +85,9 @@ def circuit_job(job, run_dir):
     task = task_of(job)
     backend = load_backend(task)
     capacity = SINGLE_QPU_SIZES.get(task.backend, backend.num_qubits)
-    needed = get_min_n(task.code, task.distance)
+    needed = get_min_n(task.code, task.distance, task.operation)
     result = {"code_qubits": needed, "device_qubits": capacity, "schedule_used": resolve_code_schedule(task),
-              "rounds": num_rounds(task.code, task.cycles), **provenance()}
+              "rounds": num_rounds(task.code, task.cycles, task.operation), **provenance()}
     if needed > capacity:
         return {**result, "status": "skipped", "reason": f"does not fit: needs {needed} qubits, device has {capacity}"}
     start = time.time()

@@ -349,4 +349,36 @@ def lattice_surgery():
                            error_probability=None, decoders=decoders)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices, "noise_scaling": noise_scaling, "basis_x": basis_x, "lattice_surgery": lattice_surgery}
+OPS_CODES = [("surface", 3), ("surface", 5), ("toric", 3), ("hgp_hamming", 3), ("golay23", 7), ("mhc36", 4), ("cbb42", 6),
+             ("tb48", 6), ("bb72", 6), ("bb90", 10), ("gross", 12), ("bpc72", 8), ("lcs52", 4)]
+OPS_DEVICES = [("real_harvard", "real_harvard"), ("real_infleqtion", "real_infleqtion"), ("real_apollo", "real_apollo"),
+               ("real_flamingo", "real_flamingo")]
+
+
+def fault_tolerant_ops():
+    """Fault-tolerant operations on CSS codes (codes/operations.py, built with the qLDPC library): the memory
+    with qLDPC's syndrome extraction as the baseline, a logical Z and X measurement by surgery, a joint ZZ and XX
+    measurement of two blocks, and a transversal CNOT between two blocks, on surface, toric, hypergraph product,
+    Golay, many-hypercube, coprime and trivariate bicycle, bivariate bicycle, balanced product and
+    lift-connected surface codes; under SD6 noise on an all-to-all device and on the neutral-atom, trapped-ion
+    and IBM Flamingo devices with their own noise (configurations too large for a device are recorded as
+    such). BP-OSD, Tesseract and Relay-BP, and matching where it applies"""
+    from eccentric.codes import get_min_n
+    from eccentric.codes.operations import BASIS_OF, OPERATIONS
+
+    for code, d in OPS_CODES:
+        for operation in OPERATIONS:
+            decoders = ["bposd", "tesseract", "relay_bp"] + (["mwpm"] if code in ("surface", "toric") else [])
+            basis = BASIS_OF.get(operation)
+            extra = dict(operation=operation, **({"basis": basis} if basis == "X" else {}))
+            n = get_min_n(code, d, operation)
+            for p in (1e-3, 2e-3):
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend="custom_full", backend_size=n,
+                           error_type="sd6", error_probability=p, decoders=decoders,
+                           decode=dict(time_budget=1800, max_shots=100_000), **extra)
+            for backend, noise in OPS_DEVICES:
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=noise,
+                           error_probability=None, decoders=decoders, decode=dict(time_budget=1800, max_shots=100_000), **extra)
+
+
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices, "noise_scaling": noise_scaling, "basis_x": basis_x, "lattice_surgery": lattice_surgery, "fault_tolerant_ops": fault_tolerant_ops}

@@ -51,35 +51,67 @@ def _circuit(code, rounds: int, strategy: str, basis: str = "Z") -> stim.Circuit
     return circuit.without_noise()
 
 
-def make_bpc_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
-    return _circuit(BpcCode(**BPC_CODES[n], factor=3), rounds, schedule, basis)
+def bpc_code(n: int):
+    return BpcCode(**BPC_CODES[n], factor=3)
 
 
-def make_hgp_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+def hgp_code(n: int):
     h = np.loadtxt(os.path.join(HGP_DIR, HGP_MATRICES[n]), dtype=int)
-    return _circuit(HgpCode(h, h), rounds, schedule, basis)
+    return HgpCode(h, h)
 
 
-def make_lcs_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
-    return _circuit(LcsCode(*LCS_CODES[n]), rounds, schedule, basis)
+def lcs_code(n: int):
+    return LcsCode(*LCS_CODES[n])
 
 
-def make_qlp_circuit(rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
-    return _circuit(QlpCode(QLP_BASE, QLP_BASE, 16), rounds, schedule, basis)
+def qlp_code():
+    return QlpCode(QLP_BASE, QLP_BASE, 16)
 
 
-def make_mitten_circuit(rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+def mitten_code():
     # The [[150,30]] instance over C5 x S3 used in QUITS' Mitten demo. These random base matrices
     # give distance <= 8, below the [[150,30,10]] instance of arXiv:2607.28795.
     group = direct_product(cyclic(5), symmetric(3))
     A, B = sample_mitten_base_matrices(group, np.random.default_rng(2))
-    return _circuit(MittenCode(A, B, group), rounds, schedule, basis)
+    return MittenCode(A, B, group)
 
 
-def make_bb_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
-    # Bivariate bicycle codes of BBCODE_DICT with a QUITS schedule instead of the IBM circuit
+def bb_code(n: int):
+    # Bivariate bicycle codes of BBCODE_DICT (with a QUITS schedule instead of the IBM circuit)
     from .gross_code import BBCODE_DICT
 
     (k, d), = [(k, d) for (n_, k, d) in BBCODE_DICT if n_ == n]
     l, m, (a_x, *a_y), (b_y, *b_x) = BBCODE_DICT[(n, k, d)]
-    return _circuit(BbCode(l, m, [a_x], a_y, b_x, [b_y]), rounds, schedule, basis)
+    return BbCode(l, m, [a_x], a_y, b_x, [b_y])
+
+
+def make_bpc_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+    return _circuit(bpc_code(n), rounds, schedule, basis)
+
+
+def make_hgp_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+    return _circuit(hgp_code(n), rounds, schedule, basis)
+
+
+def make_lcs_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+    return _circuit(lcs_code(n), rounds, schedule, basis)
+
+
+def make_qlp_circuit(rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+    return _circuit(qlp_code(), rounds, schedule, basis)
+
+
+def make_mitten_circuit(rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+    return _circuit(mitten_code(), rounds, schedule, basis)
+
+
+def make_bb_circuit(n: int, rounds: int, schedule: str, basis: str = "Z") -> stim.Circuit:
+    return _circuit(bb_code(n), rounds, schedule, basis)
+
+
+def css_code(builder_name: str, *args):
+    """The qLDPC CSSCode (check matrices) of the QUITS code that `make_<x>_circuit` builds"""
+    from qldpc import codes
+
+    code = globals()[builder_name.replace("make_", "").replace("_circuit", "_code")](*args)
+    return codes.CSSCode(np.asarray(code.hx, dtype=int), np.asarray(code.hz, dtype=int))

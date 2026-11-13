@@ -134,6 +134,7 @@ experiments:
 | `gate_sets` | Target gate sets for `translation`: `h2`, `ibm_heron` |
 | `optimization_levels` | Translation optimization levels for `translation` (default `[0, 2, 3]`) |
 | `bases` | Memory bases, `Z` (default) and/or `X`. Result rows report the `basis`. The concatenated Steane, repetition and Floquet circuits exist only in the Z basis |
+| `operations` | Fault-tolerant operations instead of the memory (see [Fault-tolerant operations](#fault-tolerant-operations-on-css-codes)); needs `distances` |
 | `schedules` | Syndrome-extraction schedules (see [Codes](#codes)). Each code uses its default when omitted; configurations whose code does not support a schedule are skipped |
 
 If neither `backends_sizes` nor `distances` is given, the backend's own size is used and the largest code distance that fits is chosen. Configurations whose code does not fit (distance < 3) are skipped and logged.
@@ -190,6 +191,32 @@ Lattice-surgery operations on rotated surface-code patches are available as code
 | `ls_cnot` | The lattice-surgery CNOT of tqec's gallery (control, target and ancilla patch); its observables are the Z (Z basis) or X (X basis) correlations a CNOT maps | 6d² + 4d − 1 | 4d |
 
 `analysis/LATTICE_SURGERY.md` checks the memory and the merge against lattice-sim (Maurya and Tannu, ISCA'25) under the same noise.
+
+### Fault-tolerant operations on CSS codes
+
+The `operations` field runs a fault-tolerant operation on a code instead of its memory (`eccentric/codes/operations.py`, built with the [qLDPC](https://github.com/qLDPCOrg/qLDPC) library, whose surgery subpackage its authors mark experimental). Every operation is a noiseless Stim circuit with detectors and observables that goes through the pipeline like a memory circuit; a shot fails if any observable is wrong. All use qLDPC's syndrome extraction (edge coloring, one ancilla per check), so `memory_ec` is their baseline; the catalog's memory circuits may use another schedule. They need `distances`; `cycles` defaults to the distance.
+
+| Operation | What it does | Basis |
+| --- | --- | --- |
+| `memory_ec` | The memory experiment with qLDPC's syndrome extraction | Z or X |
+| `measure_z`, `measure_x` | Fault-tolerant measurement of the first logical qubit's Z (X) by code surgery: a gadget of ancillas attached to the logical operator's support for `cycles` rounds, then detached (Webster, Smith, Cohen, arXiv:2511.15989; circuit per Cain et al., arXiv:2603.28627); gadgets are augmented to a boundary Cheeger constant of 1 where qLDPC can (Williamson and Yoder, Nature Physics 2026) | Z (X) |
+| `joint_zz`, `joint_xx` | Joint ZZ (XX) measurement of the first logical qubits of two blocks, the gadgets joined by a universal adapter (Swaroop, Jochym-O'Connor, Yoder, arXiv:2410.03628) | Z (X) |
+| `transversal_cnot` | Two blocks, `cycles` rounds each, one layer of CX between corresponding data qubits (a logical CNOT between every pair of logical qubits), `cycles` more rounds; decoders see the errors that cross the gate as hyperedges between the blocks | Z or X |
+
+Available for the catalog's CSS codes (bicycle, balanced product, hypergraph and lifted product, lift-connected surface, quantum Tanner, many-hypercube, Golay, Reed-Muller, toric), the surface code, the gross code and the Steane code at d = 3. The circuit-level distance is that of qLDPC's syndrome extraction (the Steane code's drops to 2 from hook errors; the surface code keeps its distance). Result rows report the `operation` (`memory` for a memory experiment).
+
+```yaml
+experiments:
+  - name: "Operations"
+    num_samples: 100000
+    backends: ["custom_full"]
+    codes: ["bb72", "hgp_hamming"]
+    distances: [6, 3]
+    error_types: ["sd6"]
+    error_probabilities: [0.001]
+    decoders: ["bposd"]
+    operations: ["memory_ec", "measure_z", "transversal_cnot"]
+```
 
 Notes:
 

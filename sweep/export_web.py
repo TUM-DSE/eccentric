@@ -74,6 +74,12 @@ def noise_label(error_type):
     return NOISE.get(error_type, error_type)
 
 
+OPERATIONS = {
+    "memory": "Memory", "memory_ec": "Memory (qLDPC syndrome extraction)", "measure_z": "Logical Z measurement (surgery)",
+    "measure_x": "Logical X measurement (surgery)", "joint_zz": "Joint ZZ measurement (surgery)",
+    "joint_xx": "Joint XX measurement (surgery)", "transversal_cnot": "Transversal CNOT (two blocks)",
+}
+
 DECODERS = {
     "bposd": "BP-OSD", "bplsd": "BP-LSD", "relay_bp": "Relay-BP", "belief_find": "BeliefFind",
     "tesseract": "Tesseract", "mwpf": "MWPF", "gari": "GARI", "gari_pp": "GARI++ (beta reimplementation)", "bposd_tuned": "BP-OSD (tuned BP)", "mwpm": "MWPM", "chromobius": "Chromobius", "belief_matching": "BeliefMatching",
@@ -94,6 +100,7 @@ SLICES = {
     "basis_x": "Memory in the X basis",
     "reference": "Reference: all codes on an all-to-all device",
     "lattice_surgery": "Lattice surgery: memory, merge and CNOT of surface-code patches",
+    "fault_tolerant_ops": "Fault-tolerant operations on CSS codes: logical measurements, joint measurements, transversal CNOT",
     "paper_dqc": "Paper experiment: one QPU vs distributed QPUs",
     "paper_topology": "Paper experiment: codes on sparse devices",
 }
@@ -129,6 +136,10 @@ SLICE_DESCRIPTIONS = {
                "SD6 noise.",
     "reference": "Every code at its default schedule on an all-to-all device with uniform SD6 circuit noise: the "
                  "common baseline that makes the device datasets comparable.",
+    "fault_tolerant_ops": "Fault-tolerant operations on CSS codes, built with the qLDPC library: the memory with qLDPC's "
+                          "syndrome extraction as the baseline, a logical Z or X measurement by code surgery, a joint ZZ or "
+                          "XX measurement of two code blocks, and a transversal CNOT between two blocks; under SD6 noise and "
+                          "on neutral-atom, trapped-ion and IBM devices. A shot fails if any observable is wrong.",
     "lattice_surgery": "Lattice-surgery operations on rotated surface-code patches, built with tqec: a patch's "
                        "memory, a merge of two patches (a ZZ measurement in the Z basis, XX in the X basis) and a "
                        "CNOT, at d = 3, 5, 7, under uniform SD6 noise on an all-to-all device in both bases and on "
@@ -142,7 +153,7 @@ SLICE_DESCRIPTIONS = {
                       "avoids needless SWAPs; decoded with BP-OSD as in the paper.",
 }
 
-COLUMNS = ["slice", "code", "family", "taxonomy", "schedule", "basis", "distance", "rounds", "k", "code_qubits", "backend",
+COLUMNS = ["slice", "code", "family", "taxonomy", "schedule", "basis", "operation", "distance", "rounds", "k", "code_qubits", "backend",
            "error_type", "error_probability", "decoder", "status", "logical_error_rate", "ler_low", "ler_high",
            "ler_per_round", "ler_per_round_high", "shots", "errors", "circuit_qubits", "swaps", "two_qubit_gates",
            "layers", "device_qubits", "note", "undetectable_faults", "undetectable_probability"]
@@ -194,12 +205,13 @@ def main():
     df["k"] = df.observables
     # Tables from before the memory basis was a column are all Z-basis memories
     df["basis"] = df["basis"].fillna("Z") if "basis" in df else "Z"
+    df["operation"] = df["operation"].fillna("memory") if "operation" in df else "memory"
     rows = [[clean(r.get(c)) for c in COLUMNS] for r in df.to_dict("records")]
     out = {
         "generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
         "commit": latest_commit(df.commit.dropna().unique()),
         "complete": bool((df.status != "pending").all()),
-        "labels": {"devices": {b: device_label(b) for b in df.backend.unique()}, "noise": {**NOISE, **{e: noise_label(e) for e in df.error_type.dropna().unique()}}, "decoders": DECODERS, "slices": SLICES,
+        "labels": {"devices": {b: device_label(b) for b in df.backend.unique()}, "noise": {**NOISE, **{e: noise_label(e) for e in df.error_type.dropna().unique()}}, "decoders": DECODERS, "operations": OPERATIONS, "slices": SLICES,
                    "slice_descriptions": SLICE_DESCRIPTIONS},
         "columns": COLUMNS,
         "rows": rows,

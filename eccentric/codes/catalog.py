@@ -81,10 +81,24 @@ def _toric(d, rounds, schedule, basis):
     return make_memory_circuit(toric_code(d), rounds, schedule, basis)
 
 
+def _toric_code(d):
+    from .qldpc_codes import toric_code
+    return toric_code(d)
+
+
+_toric.code = _toric_code
+
+
 def _qldpc(builder_name, *args):
     def make(rounds, schedule, basis):
         from . import qldpc_codes
         return qldpc_codes.make_memory_circuit(getattr(qldpc_codes, builder_name)(*args), rounds, schedule, basis)
+
+    def code(d=None):
+        from . import qldpc_codes
+        return getattr(qldpc_codes, builder_name)(*args)
+
+    make.code = code
     return make
 
 
@@ -95,6 +109,12 @@ def _bb(n):
             return make_bb_circuit(n, rounds, basis)
         from .quits_codes import make_bb_circuit
         return make_bb_circuit(n, rounds, schedule, basis)
+
+    def code(d=None):
+        from .quits_codes import css_code
+        return css_code("make_bb_circuit", n)
+
+    make.code = code
     return make
 
 
@@ -102,6 +122,12 @@ def _quits(builder_name, *args):
     def make(rounds, schedule, basis):
         from . import quits_codes
         return getattr(quits_codes, builder_name)(*args, rounds, schedule, basis)
+
+    def code(d=None):
+        from . import quits_codes
+        return quits_codes.css_code(builder_name, *args)
+
+    make.code = code
     return make
 
 
@@ -253,7 +279,10 @@ def _fixed_num_qubits(code_name: str) -> int:
     return make_circuit(code_name, CODES[code_name].distance, 2).num_qubits
 
 
-def num_rounds(code_name: str, rounds: int) -> int:
+def num_rounds(code_name: str, rounds: int, operation: Optional[str] = None) -> int:
+    if operation:
+        from .operations import operation_rounds
+        return operation_rounds(operation, rounds)
     return CODES[code_name].rounds(rounds) if code_name in CODES else rounds
 
 

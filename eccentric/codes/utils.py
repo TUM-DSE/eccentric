@@ -7,11 +7,16 @@ from .surface_code import get_surface_code
 from .hh_code import get_hh_code
 from .catalog import CODES, MemoryCodeCircuit, make_circuit, max_distance, min_num_qubits, num_rounds, resolve_schedule
 
-def get_code(code_name: str, d: int, cycles: int, schedule: str = None, basis: str = "Z"):
-    """The noiseless memory circuit of a code, preparing and measuring the logical state in `basis` (Z or X)"""
+def get_code(code_name: str, d: int, cycles: int, schedule: str = None, basis: str = "Z", operation: str = None):
+    """The noiseless memory circuit of a code, preparing and measuring the logical state in `basis` (Z or X);
+    with `operation`, the circuit of that fault-tolerant operation on the code (codes/operations.py)"""
     resolve_schedule(code_name, schedule)
     if basis not in ("Z", "X"):
         raise ValueError(f"basis must be Z or X, got {basis}")
+    if operation:
+        from .catalog import _flatten_and_compact as compact
+        from .operations import make_operation_circuit
+        return MemoryCodeCircuit(stim_circuit=compact(make_operation_circuit(code_name, d, cycles, basis, operation)))
     if code_name in CODES:
         return MemoryCodeCircuit(stim_circuit=make_circuit(code_name, d, cycles, schedule, basis))
     if cycles is None:
@@ -71,7 +76,10 @@ def get_max_d(code_name: str, n: int):
     return 0
 
 
-def get_min_n(code_name: str, d: int):
+def get_min_n(code_name: str, d: int, operation: str = None):
+    if operation:
+        from .operations import operation_num_qubits
+        return operation_num_qubits(code_name, d, operation)
     if code_name in CODES:
         return min_num_qubits(code_name, d)
     elif code_name == "surface":

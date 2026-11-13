@@ -11,9 +11,9 @@ import sys
 
 from sweep.slices import DECODE, SLICES
 
-# basis last and only when set (X), so that Z-basis configurations keep their ids
+# basis and operation last and only when set, so that Z-basis memory configurations keep their ids
 KEY = ("code", "schedule", "distance", "cycles", "backend", "backend_size", "error_type", "error_probability",
-       "layout_method", "routing_method", "translating_method", "basis")
+       "layout_method", "routing_method", "translating_method", "basis", "operation")
 
 
 def config_id(slice_name, config):

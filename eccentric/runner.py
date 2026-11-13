@@ -21,6 +21,7 @@ SWEEPS = {
     "optimization_levels": "optimization_level",
     "schedules": "schedule",
     "bases": "basis",
+    "operations": "operation",
 }
 
 
@@ -53,7 +54,7 @@ def expand(experiment):
     for *values, size, d in product(*axes.values(), sizes, distances):
         params = dict(zip(axes, values))
         if d is not None:
-            size = get_min_n(params["code"], d)
+            size = get_min_n(params["code"], d, params.get("operation"))
         tasks.append(Task(
             experiment=experiment["name"],
             num_samples=experiment["num_samples"],

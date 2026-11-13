@@ -22,7 +22,7 @@ import pandas as pd
 
 Z95 = 1.959964
 CONFIG = ["slice", "code", "schedule", "distance", "cycles", "backend", "backend_size", "error_type",
-          "error_probability", "layout_method", "routing_method", "translating_method", "basis"]
+          "error_probability", "layout_method", "routing_method", "translating_method", "basis", "operation"]
 RESOURCES = ["schedule_used", "rounds", "code_qubits", "device_qubits", "circuit_qubits", "detectors", "observables",
              "two_qubit_gates", "swaps", "layers", "measurements", "undetectable_faults", "undetectable_probability"]
 
@@ -121,6 +121,7 @@ def rows(run_dir, added=None, timeouts=None):
         row = {k: job.get(k) for k in CONFIG}
         # Jobs from before the memory basis was a setting are Z-basis memories
         row["basis"] = row["basis"] or "Z"
+        row["operation"] = row["operation"] or "memory"
         row["decoder"] = job["decoder"]
         row.update({k: circuit.get(k) for k in RESOURCES})
         row["commit"] = (decode or circuit).get("commit")
