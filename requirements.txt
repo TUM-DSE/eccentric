@@ -193,6 +193,7 @@ tinycss2==1.4.0
 tomlkit==0.13.2
 tornado==6.4.2
 tqdm==4.67.1
+tqec==0.1.0
 traitlets==5.14.3
 types-Deprecated==1.2.15.20241117
 typing==3.7.4.3

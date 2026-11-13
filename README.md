@@ -179,6 +179,18 @@ Syndrome-extraction schedules (`schedules`), the first being each code's default
 
 The other codes have a single circuit. Result rows report the schedule used.
 
+### Lattice surgery
+
+Lattice-surgery operations on rotated surface-code patches are available as codes, built with [tqec](https://github.com/tqec/tqec) (`eccentric/codes/lattice_surgery.py`): each is a tqec block graph compiled into a noiseless Stim circuit with tqec's detectors and observables, which then goes through ECCentric's pipeline like any memory circuit (devices, routing, noise models, decoders). Patches have odd distance `d ≥ 3` and every block lasts `d` syndrome rounds, so `cycles` must be left unset (or equal `d`). Rows report a failure when any of the operation's observables is wrong.
+
+| Name | Operation | Qubits | Rounds |
+| --- | --- | --- | --- |
+| `ls_memory` | One patch, prepared and read out in the basis (tqec's memory) | 2d² − 1 | d |
+| `ls_merge` | Two patches merged for one block and split again: a ZZ measurement in the Z basis, XX in the X basis; the observable is both patches' joint logical operator, which the merge must preserve | 4d² + 2d − 1 | 3d |
+| `ls_cnot` | The lattice-surgery CNOT of tqec's gallery (control, target and ancilla patch); its observables are the Z (Z basis) or X (X basis) correlations a CNOT maps | 6d² + 4d − 1 | 4d |
+
+`analysis/LATTICE_SURGERY.md` checks the memory and the merge against lattice-sim (Maurya and Tannu, ISCA'25) under the same noise.
+
 Notes:
 
 - Decoders: `bposd` works for all of them. `mwpm` works for `repetition`, `xzzx`, `toric`, `honeycomb`, `planar_honeycomb` and the (semi-)hyperbolic Floquet codes; the other codes are not matchable. `chromobius` needs color-annotated detector coordinates, which only the paper's `color` code has.

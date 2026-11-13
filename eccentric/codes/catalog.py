@@ -16,6 +16,8 @@ from typing import Callable, Optional
 import stim
 from qiskit_qec.circuits import StimCodeCircuit
 
+from . import lattice_surgery as _ls
+
 
 QLDPC_SCHEDULES = ("edge_coloring", "edge_coloring_xz")
 PRODUCT_SCHEDULES = ("cardinal", "cardinalNSmerge", "zxcoloration")
@@ -47,6 +49,8 @@ class CodeFamily:
     schedules: tuple = ()
     # Syndrome rounds the circuit actually runs when asked for a number of rounds
     rounds: Callable[[int], int] = _same_rounds
+    # The circuit runs d rounds (per block) and refuses any other number (lattice-surgery operations)
+    rounds_fixed: bool = False
 
 
 @dataclass(frozen=True)
@@ -197,6 +201,10 @@ CODES = {
     "semi_hyperbolic_floquet_256": FixedCode(_hyperbolic("semi_l=4_8.8.8_n=256_k=4_d=6.stim"), 6, rounds=_hyperbolic_rounds),
     "semi_hyperbolic_floquet_400": FixedCode(_hyperbolic("semi_l=5_8.8.8_n=400_k=4_d=7.stim"), 7, rounds=_hyperbolic_rounds),
     "semi_hyperbolic_floquet_576": FixedCode(_hyperbolic("semi_l=6_8.8.8_n=576_k=4_d=8.stim"), 8, rounds=_hyperbolic_rounds),
+    # Lattice-surgery operations on surface-code patches (lattice_surgery.py, built with tqec); d rounds per block
+    **{name: CodeFamily(_ls.make(name), _ls.NUM_QUBITS[name], rounds=lambda r, n=_ls.LAYERS[name]: n * r,
+                       rounds_fixed=True)
+       for name in _ls.LAYERS},
 }
 
 

@@ -3,6 +3,11 @@ import pytest
 
 from eccentric.codes import get_code, get_max_d, get_min_n
 from eccentric.codes.catalog import CODES, CodeFamily, FixedCode, make_circuit
+
+
+def few_rounds(name, d):
+    """Two rounds keep the tests fast; codes with a fixed number of rounds (lattice surgery) run d"""
+    return d if getattr(CODES.get(name), "rounds_fixed", False) else 2
 from eccentric.experiments import Task, logical_error
 from qiskit_qec.utils import get_stim_circuits
 
@@ -26,7 +31,7 @@ def smallest_distance(name):
 @pytest.mark.parametrize("name", all_codes())
 def test_circuit_is_noiseless_with_deterministic_detectors(name):
     d = smallest_distance(name)
-    circuit = make_circuit(name, d, 2)
+    circuit = make_circuit(name, d, few_rounds(name, d))
     ops = {inst.name for inst in circuit.flattened()}
     assert not ops & NOISE_OPS
     assert circuit.num_detectors > 0 and circuit.num_observables > 0
@@ -39,7 +44,7 @@ def test_circuit_is_noiseless_with_deterministic_detectors(name):
 def test_family_size_formula(name):
     code = CODES[name]
     for d in (code.min_d, code.min_d + code.step):
-        assert code.num_qubits(d) == make_circuit(name, d, 2).num_qubits
+        assert code.num_qubits(d) == make_circuit(name, d, few_rounds(name, d)).num_qubits
 
 
 @pytest.mark.parametrize("name", all_codes())
@@ -62,7 +67,7 @@ def test_rounds_change_circuit_length():
 
 @pytest.mark.parametrize("name", all_codes())
 def test_qiskit_round_trip_keeps_detectors(name):
-    code = get_code(name, smallest_distance(name), 2)
+    code = get_code(name, smallest_distance(name), few_rounds(name, smallest_distance(name)))
     detectors, logicals = code.stim_detectors()
     assert code.qc.num_qubits == code.stim_circuit.num_qubits
     circuit = get_stim_circuits(code.qc, detectors=detectors, logicals=logicals)[0][0]
@@ -122,8 +127,8 @@ Z_ONLY = {"repetition", "honeycomb", "planar_honeycomb"} | {n for n in CODES if 
 @pytest.mark.parametrize("name", all_codes(sorted(set(CODES) - Z_ONLY)) + ["surface", "hh", "color", "bacon", "gross"])
 def test_x_basis_circuit_matches_z_basis(name):
     d = smallest_distance(name) if name in CODES else {"gross": 12}.get(name, 3)
-    z = get_code(name, d, 2, None, "Z").stim_circuit
-    x = get_code(name, d, 2, None, "X").stim_circuit
+    z = get_code(name, d, few_rounds(name, d), None, "Z").stim_circuit
+    x = get_code(name, d, few_rounds(name, d), None, "X").stim_circuit
     # Raises if a detector or observable is not deterministic
     x.detector_error_model()
     assert x.num_qubits == z.num_qubits
