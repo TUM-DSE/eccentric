@@ -123,8 +123,8 @@ def main(argv=None):
     p.add_argument("--out", default="reports")
     p.add_argument("--folds", type=int, default=10, help="GroupKFold folds (more than groups: leave one group out)")
     p.add_argument("--group-by", default="code", choices=["code", "family", "backend", "error_type", "largest", "quietest",
-                                                          "next_distance"],
-                   help="what a fold holds out (largest, quietest, next_distance: one split beyond the training range); "
+                                                          "next_distance", "operations"],
+                   help="what a fold holds out (largest, quietest, next_distance, operations: one split beyond the training range); "
                         "other than code, writes metrics_<group>.json and REPORT_<group>.md")
     p.add_argument("--no-laws", action="store_true", help="trees alone, without the scaling laws under them")
     p.add_argument("--jobs", type=int, default=1, help="folds trained in parallel")

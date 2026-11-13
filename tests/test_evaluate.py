@@ -79,3 +79,19 @@ def test_extrapolation_splits_hold_out_beyond_the_training_range(table):
     assert trees["setup"]["train_options"] == {"parametric": False}
     # The synthetic times are power laws in the size, which the time law extrapolates and the trees cannot
     assert metrics["time"]["decoders"]["all"]["within_3x"] > trees["time"]["decoders"]["all"]["within_3x"]
+
+
+def test_operations_split_holds_out_the_logical_operations(table):
+    keys = table.circuit_key.unique()
+    ops = {k: ("transversal_cnot" if i % 5 == 0 else "ls_merge" if i % 7 == 0 else "memory") for i, k in enumerate(keys)}
+    with_ops = table.assign(operation=table.circuit_key.map(ops))
+    held = held_out_beyond(with_ops, "operations")
+    assert set(held.index[held]) == {k for k, o in ops.items() if o != "memory"}
+    assert not held_out_beyond(table, "operations").any()
+    with pytest.raises(ValueError):
+        cross_val_predictions(table, group_by="operations")
+    pred = cross_val_predictions(with_ops, group_by="operations")
+    assert pred.fold.nunique() == 1 and set(pred.circuit_key) == set(held.index[held])
+    metrics = evaluate(with_ops, group_by="operations")
+    assert set(metrics["per_group"]) == {"transversal_cnot", "ls_merge"}
+    assert "memory experiments" in report_markdown(metrics)

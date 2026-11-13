@@ -132,3 +132,16 @@ def test_gari_applies_to_css_structure_only():
     for broken in ({"mixed_detectors": 0.2}, {"observables_both_sides": 1}, {"y_parts_unmatched": 0.1}):
         assert applicable({**css, **broken})["gari"] is False
     assert applicable({})["gari"] is None
+
+
+def test_ingest_records_the_operation(tmp_path):
+    run, store = make_run(tmp_path), str(tmp_path / "store.jsonl")
+    extract([str(run)], store)
+    results = results_frame("sweep_x")
+    assert "operation" not in results.columns
+    table, _ = from_eccentric(results, features_of_store(load_store(store)))
+    assert (table.operation == "memory").all()
+    results["operation"] = results.decoder.map(lambda d: "transversal_cnot" if d == "mwpm" else None)
+    table, _ = from_eccentric(results, features_of_store(load_store(store)))
+    assert (table[table.decoder == "mwpm"].operation == "transversal_cnot").all()
+    assert (table[table.decoder != "mwpm"].operation == "memory").all()

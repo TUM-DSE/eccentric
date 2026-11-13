@@ -148,7 +148,7 @@ time within 3× for 87%).
 
 - Timings are for single-core software decoders, including the decoder's construction; FPGA and ASIC decoders
   are not modelled.
-- The training data are memory experiments; logical operations such as lattice surgery are future work.
+- The training data are memory experiments; the sweep's logical operations (surgery measurements, a transversal CNOT, lattice surgery on surface-code patches) are held out in the `operations` evaluation split (`qec-matchmaker evaluate --group-by operations`) to test whether the models carry over to them before they join the training set.
 - Predicted error rates are for planning, not for publication. Beyond the training data the 80% intervals are
   too narrow, and a noise model unlike any in training (atom loss, for example) can mislead the time
   predictions. `advise` warns when a circuit is outside the training range.

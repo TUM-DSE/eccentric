@@ -18,6 +18,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 from sklearn.model_selection import GroupKFold
 
+from .dataset import MEMORY
 from .decoders import DECODERS, LEARNED_APPLICABILITY
 from .models import LER_FLOOR, applicability_rows, circuit_features, circuit_labels, regret_rows, timeout_bound_ms, train
 from .recommend import recommend
@@ -29,11 +30,13 @@ QUANTILE_COLUMNS = ("q10", "q50", "q90")
 GROUPINGS = ("code", "family", "backend", "error_type")
 GROUP_NAMES = {"code": "code", "family": "code family", "backend": "device", "error_type": "noise model"}
 # Single splits that hold out circuits beyond the training range; the share held out by size and noise
-EXTRAPOLATIONS = ("largest", "quietest", "next_distance")
+EXTRAPOLATIONS = ("largest", "quietest", "next_distance", "operations")
 EXTRAPOLATION_SHARE = 0.2
 SPLIT_NAMES = {"largest": f"the largest {100 * EXTRAPOLATION_SHARE:.0f}% of circuits (detectors) held out",
                "quietest": f"the quietest {100 * EXTRAPOLATION_SHARE:.0f}% of circuits (error mass per detector) held out",
-               "next_distance": "the largest distance of every series of distances held out"}
+               "next_distance": "the largest distance of every series of distances held out",
+               "operations": "every logical operation (surgery measurements, transversal CNOT, lattice surgery) held out, "
+                             "predicted from the memory experiments"}
 
 
 def _ordered(decoders):
@@ -54,6 +57,8 @@ def held_out_beyond(df: pd.DataFrame, split: str) -> pd.Series:
         return first.detectors > first.detectors.quantile(1 - EXTRAPOLATION_SHARE)
     if split == "quietest":
         return first.error_mass_per_detector < first.error_mass_per_detector.quantile(EXTRAPOLATION_SHARE)
+    if split == "operations":
+        return first.operation.fillna(MEMORY) != MEMORY if "operation" in first.columns else pd.Series(False, index=first.index)
     if split == "next_distance":
         ratio = (first.cycles / first.distance).round(2)
         series = [first[c].map(str) for c in ("slice", "code", "backend", "error_type", "error_probability")] + [ratio.map(str)]
@@ -74,6 +79,8 @@ def cross_val_predictions(df: pd.DataFrame, folds: int = 10, random_state: int =
     decoders = _ordered(df.decoder)
     if group_by in EXTRAPOLATIONS:
         test = held_out_beyond(df, group_by).loc[circuits.index].to_numpy()
+        if not test.any() or test.all():
+            raise ValueError(f"the {group_by} split holds out {'nothing' if not test.any() else 'everything'}")
         splits = [(np.flatnonzero(~test), np.flatnonzero(test))]
     elif group_by in GROUPINGS:
         groups = df.groupby("circuit_key", sort=False)[group_by].first().loc[circuits.index].astype(str).to_numpy()
@@ -244,7 +251,11 @@ def evaluate(df: pd.DataFrame, folds: int = 10, random_state: int = 0, calibrate
     pred = cross_val_predictions(df, folds, random_state, calibrate, group_by, n_jobs, **train_options)
     extrapolation = group_by in EXTRAPOLATIONS
     df = df[df.circuit_key.isin(set(pred.circuit_key))]
-    by = ("family" if "family" in df.columns else None) if extrapolation else group_by
+    if extrapolation:
+        # Scores per code family; the operations split per operation
+        by = "operation" if group_by == "operations" and "operation" in df.columns else "family" if "family" in df.columns else None
+    else:
+        by = group_by
     groups = int(df[by].nunique()) if by else 1
     per_group = {}
     if by and by != "code":
