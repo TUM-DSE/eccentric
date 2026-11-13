@@ -14,6 +14,7 @@ QLDPC_CODES = sorted(c for c in CODES if c.startswith(QLDPC_PREFIXES)) + ["gross
 # Paper codes and their distances in the reference slice
 PAPER_DISTANCES = {"surface": [3, 5, 7], "color": [3, 5, 7], "hh": [3, 5, 7], "bacon": [3, 5, 7], "steane": [3, 9], "gross": [12]}
 MATCHABLE = {"surface", "hh", "bacon", "repetition", "xzzx", "toric", "honeycomb", "planar_honeycomb"}
+LATTICE_SURGERY = ("ls_memory", "ls_merge", "ls_cnot")
 
 DECODE = dict(target_errors=100, max_shots=100_000, time_budget=3600, first_batch=100, max_batch=5000, timeout=3 * 3600)
 
@@ -267,7 +268,7 @@ def reference(max_qubits=600):
     that makes the device slices comparable"""
     from eccentric.codes import get_min_n
 
-    for code in list(CODES) + list(PAPER_DISTANCES):
+    for code in [c for c in CODES if c not in LATTICE_SURGERY] + list(PAPER_DISTANCES):
         for d in code_distances(code):
             n = get_min_n(code, d)
             if n > max_qubits:
@@ -321,4 +322,31 @@ def basis_x():
                            error_type="sd6", error_probability=p, decoders=["bposd", "mwpm"], basis="X")
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices, "noise_scaling": noise_scaling, "basis_x": basis_x}
+LS_DEVICES = [("real_willow", "real_willow"), ("real_torino", "real_heron"), ("real_flamingo_1_qpu", "real_flamingo"),
+              ("real_loon", "real_flamingo"), ("real_flamingo", "real_flamingo"), ("real_harvard", "real_harvard"),
+              ("real_apollo", "real_apollo"), ("real_infleqtion", "real_infleqtion")]
+
+
+def lattice_surgery():
+    """Lattice-surgery operations on surface-code patches (memory, ZZ/XX merge, CNOT; built with tqec) at
+    d = 3, 5, 7: on the all-to-all device with SD6 noise at the reference error rates in both bases (the merge
+    measures ZZ in the Z basis and XX in the X basis, the CNOT's observables are its Z or X correlations), and
+    in the Z basis on the real devices with their own noise (configurations too large for a device are
+    recorded as such). Matching, BP-OSD, Tesseract and Relay-BP on every configuration"""
+    from eccentric.codes import get_min_n
+
+    decoders = ["mwpm", "bposd", "tesseract", "relay_bp"]
+    for code in LATTICE_SURGERY:
+        for d in code_distances(code):
+            n = get_min_n(code, d)
+            for p in (5e-4, 1e-3, 2e-3, 4e-3):
+                for basis in ("Z", "X"):
+                    yield dict(code=code, schedule=None, distance=d, cycles=d, backend="custom_full", backend_size=n,
+                               error_type="sd6", error_probability=p, decoders=decoders,
+                               **({"basis": "X"} if basis == "X" else {}))
+            for backend, noise in LS_DEVICES:
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=noise,
+                           error_probability=None, decoders=decoders)
+
+
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices, "noise_scaling": noise_scaling, "basis_x": basis_x, "lattice_surgery": lattice_surgery}

@@ -13,6 +13,7 @@ import sys
 import pandas as pd
 
 FAMILIES = [
+    ("ls_", "Lattice surgery (surface-code patches)", "Logical operations"),
     ("bb", "Bivariate bicycle", "QLDPC"), ("gross", "Bivariate bicycle", "QLDPC"),
     ("cbb", "Coprime bivariate bicycle", "QLDPC"), ("tb", "Trivariate bicycle", "QLDPC"),
     ("bpc", "Balanced product cyclic", "QLDPC"), ("gb", "Generalized bicycle", "QLDPC"),
@@ -92,6 +93,7 @@ SLICES = {
     "noise_scaling": "Device noise scaled down",
     "basis_x": "Memory in the X basis",
     "reference": "Reference: all codes on an all-to-all device",
+    "lattice_surgery": "Lattice surgery: memory, merge and CNOT of surface-code patches",
     "paper_dqc": "Paper experiment: one QPU vs distributed QPUs",
     "paper_topology": "Paper experiment: codes on sparse devices",
 }
@@ -127,6 +129,10 @@ SLICE_DESCRIPTIONS = {
                "SD6 noise.",
     "reference": "Every code at its default schedule on an all-to-all device with uniform SD6 circuit noise: the "
                  "common baseline that makes the device datasets comparable.",
+    "lattice_surgery": "Lattice-surgery operations on rotated surface-code patches, built with tqec: a patch's "
+                       "memory, a merge of two patches (a ZZ measurement in the Z basis, XX in the X basis) and a "
+                       "CNOT, at d = 3, 5, 7, under uniform SD6 noise on an all-to-all device in both bases and on "
+                       "real devices with their own noise. A shot fails if any of the operation's observables is wrong.",
     "paper_dqc": "The configurations of the ECCentric paper's (SIGMETRICS 2026) comparison of one QPU with "
                  "distributed QPUs, rerun with the current, corrected simulator (noise model, Steane readout, "
                  "single-QPU devices) and decoded with BP-OSD as in the paper.",
