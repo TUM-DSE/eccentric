@@ -1,5 +1,5 @@
 {
- "created": "2026-11-11T12:04:45+00:00",
+ "created": "2026-11-14T07:42:33+00:00",
  "feature_version": 2,
  "features": [
   "detectors",
@@ -31,9 +31,9 @@
   "y_parts_unmatched",
   "observables_both_sides"
  ],
- "rows": 32814,
- "circuits": 5044,
- "codes": 67,
+ "rows": 34798,
+ "circuits": 5624,
+ "codes": 70,
  "decoders": [
   "belief_find",
   "bplsd",
@@ -48,25 +48,25 @@
   "tesseract"
  ],
  "status": {
-  "measured": 26818,
-  "low statistics": 3736,
-  "upper bound": 1110,
-  "decoder not applicable": 957,
-  "timeout": 193
+  "measured": 27761,
+  "low statistics": 4416,
+  "upper bound": 1310,
+  "decoder not applicable": 983,
+  "timeout": 328
  },
  "left_out": {
-  "skipped (no circuit)": 3402,
+  "skipped (no circuit)": 3506,
   "no features yet": 0
  },
  "sources": {
   "eccentric_results": {
    "path": "../eccentric/experiment_results/Sweep/results.csv",
-   "commit": "7246a34",
-   "sha256": "ca790f2d7571b7905ae2c0b2ac198245d501aec99fe4aef554b7412e67ed531c"
+   "commit": "deeb90c",
+   "sha256": "0184f0cdba530812d026383612b72f37ebadb08f0c976fefc2b2afa0553b7b5c"
   },
   "feature_store": {
    "path": "data/features.jsonl",
-   "sha256": "e9ad8c4c5c0b57fc221eb287d72da9fe63269b21ed76ecda5fcba5e776a6de92"
+   "sha256": "01195f029a1bb7ae4cde8271977a957717db559a14e5cbacfbe9dcd40173875f"
   }
  }
 }
