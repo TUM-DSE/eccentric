@@ -7,7 +7,7 @@ a single shot, whether it is below threshold, roughly what its logical error rat
 decoder will take, and which decoder to use.
 
 > [!NOTE]
-> **Working prototype, v0.1.0.** The packaged model is trained on 5,044 circuits and 23,507 measured
+> **Working prototype, v0.1.0.** The packaged model is trained on 5,624 circuits and 33,487 measured
 > decodes from the [ECCentric](https://github.com/TUM-DSE/eccentric) benchmark. MIT licensed.
 
 ## Quick start
@@ -94,15 +94,15 @@ decodes every circuit with several decoders on the same shots.
 
 | | |
 |---|---|
-| Circuits | 5,044 memory experiments (3,146 in the Z basis, 1,898 of them also in the X basis), 8 to 9,405 detectors |
-| Codes | 67 codes from 25 families: surface, color, heavy-hex, Floquet, bivariate bicycle, hypergraph and lifted product, quantum Tanner, ... |
+| Circuits | 5,624: 5,044 memory experiments (3,194 in the Z basis, 1,850 in the X basis) and 580 logical operations (surgery measurements, transversal CNOT, lattice surgery), 8 to 9,405 detectors |
+| Codes | 70 codes from 26 families: surface, color, heavy-hex, Floquet, bivariate bicycle, hypergraph and lifted product, quantum Tanner, ... |
 | Devices | 25: IBM Heron, Flamingo, Loon and the bicycle module (one and several QPUs), Google Willow, Quantinuum Apollo, Harvard/MIT and Infleqtion neutral atoms, and ideal grid, all-to-all and cube layouts |
 | Noise | 27 models: each device's own, scaled versions of them, and standard circuit noise |
 | Decoders | 11: MWPM, MWPF, BP-OSD (paper and tuned settings), BP-LSD, BeliefFind, Relay-BP, Tesseract, Chromobius, GARI, GARI++ (ECCentric's beta reimplementation) |
-| Decodes | 32,814, from 2.3 billion shots |
+| Decodes | 34,798, from 2.4 billion shots |
 
 Every decoder trades accuracy against time differently, and none wins everywhere. Tesseract is the most
-accurate wherever it finishes, but it is among the slowest and timed out on 157 of the largest circuits;
+accurate wherever it finishes, but it is among the slowest and timed out on 256 of the largest circuits;
 matching and Chromobius are fast but apply to few codes and lose accuracy on compiled circuits:
 
 <picture>
@@ -115,7 +115,7 @@ and its provenance [data/MANIFEST.json](data/MANIFEST.json) (ECCentric commit an
 
 ## How good it is
 
-Every number below is for codes held out of training (10 folds over the 67 codes): the model never saw the
+Every number below is for codes held out of training (10 folds over the 70 codes): the model never saw the
 code it is predicting.
 
 <picture>
@@ -128,7 +128,7 @@ code it is predicting.
   <img alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 97% at 1.8 times the cheapest good decoder's time, always Tesseract on 100% at 14 times, always BP-OSD on 52% at 18 times" src="docs/figures/choice-light.png">
 </picture>
 
-Threshold regime: 98% correct. Matchmaker's "accurate" choice is as good as always running Tesseract at a
+Threshold regime: 97% correct. Matchmaker's "accurate" choice is as good as always running Tesseract at a
 fraction of its time; "cheapest" trades a few percent of accuracy for the cheapest decoder.
 
 Replaying ECCentric's whole sweep with Matchmaker deciding what to decode and with which decoder
@@ -140,7 +140,8 @@ circuits caught.
 
 More: the full report ([reports/REPORT.md](reports/REPORT.md)), whole code families, devices and noise models
 held out ([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)), circuits beyond the training range
-([experiments/EXTRAPOLATION.md](experiments/EXTRAPOLATION.md)), and circuits from outside ECCentric, Stim's
+([experiments/EXTRAPOLATION.md](experiments/EXTRAPOLATION.md)), logical operations predicted from memory
+experiments ([experiments/OPERATIONS.md](experiments/OPERATIONS.md)), and circuits from outside ECCentric, Stim's
 generators and decoder-bench ([experiments/EXTERNAL.md](experiments/EXTERNAL.md): error rate within 1.1×,
 time within 3× for 87%).
 
@@ -148,7 +149,7 @@ time within 3× for 87%).
 
 - Timings are for single-core software decoders, including the decoder's construction; FPGA and ASIC decoders
   are not modelled.
-- The training data are memory experiments; the sweep's logical operations (surgery measurements, a transversal CNOT, lattice surgery on surface-code patches) are held out in the `operations` evaluation split (`qec-matchmaker evaluate --group-by operations`) to test whether the models carry over to them before they join the training set.
+- Most of the training data are memory experiments. Predicted from memory alone, logical operations keep their decode times (92% within 3x) but surgery measurements' error rates are off by about 0.5 decades ([experiments/OPERATIONS.md](experiments/OPERATIONS.md)); the packaged model now also trains on the 580 operation circuits, but a new kind of gadget is an extrapolation.
 - Predicted error rates are for planning, not for publication. Beyond the training data the 80% intervals are
   too narrow, and a noise model unlike any in training (atom loss, for example) can mislead the time
   predictions. `advise` warns when a circuit is outside the training range.

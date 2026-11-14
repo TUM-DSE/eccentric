@@ -38,7 +38,7 @@ FAMILIES = [
     ("color", "Color"), ("rm15", "Quantum Reed-Muller"), ("planar_honeycomb", "Planar honeycomb"),
     ("honeycomb", "Honeycomb"), ("semi_hyperbolic", "Semi-hyperbolic Floquet"), ("hyperbolic", "Hyperbolic Floquet"),
     ("bacon", "Bacon-Shor"), ("steane", "Concatenated Steane"), ("hh", "Heavy-hex"), ("mhc", "Many-hypercube"),
-    ("golay", "Quantum Golay"),
+    ("golay", "Quantum Golay"), ("ls_", "Lattice surgery"),
 ]
 
 

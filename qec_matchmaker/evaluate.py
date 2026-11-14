@@ -302,7 +302,7 @@ def report_markdown(metrics: dict) -> str:
     s, g, ler, reg, t, rec = (metrics[k] for k in ("setup", "regime", "ler", "regret", "time", "recommendation"))
     group_by = s.get("group_by", "code")
     if group_by in EXTRAPOLATIONS:
-        held = (f"Extrapolation: {s['split']} and predicted from the rest; scores on the {s['circuits']} held-out "
+        held = (f"Extrapolation: {s['split']}{'' if 'predicted from' in s['split'] else ' and predicted from the rest'}; scores on the {s['circuits']} held-out "
                 f"circuits ({s['decodes']} decodes).")
     else:
         held = (f"Held-out {GROUP_NAMES[group_by]}s: {s['split']}, {s['folds']} folds over {s.get('groups', s['codes'])} "
@@ -359,7 +359,7 @@ def report_markdown(metrics: dict) -> str:
         lines += ["", "Measured decodes that `applicable()` rules out, so never recommended: "
                   + ", ".join(f"{d} {n}" for d, n in rec["measured_but_inapplicable"].items()) + "."]
     if metrics.get("per_group"):
-        lines += ["", f"## Per held-out {'code family' if group_by in EXTRAPOLATIONS else GROUP_NAMES[group_by]} (worst LER first)", "",
+        lines += ["", f"## Per held-out {'operation' if group_by == 'operations' else 'code family' if group_by in EXTRAPOLATIONS else GROUP_NAMES[group_by]} (worst LER first)", "",
                   "| held out | circuits | above threshold | regime correct | LER median error | LER p90 error | "
                   "time within 3x | choice good enough (accurate) |", "|---|---|---|---|---|---|---|---|"]
         rows = sorted(metrics["per_group"].items(), key=lambda kv: -kv[1].get("ler_median_error", -1))
