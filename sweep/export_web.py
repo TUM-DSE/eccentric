@@ -13,7 +13,7 @@ import sys
 import pandas as pd
 
 FAMILIES = [
-    ("ls_", "Lattice surgery (surface-code patches)", "Logical operations"),
+    ("ls_", "Lattice surgery (surface-code patches)", "Topological"),
     ("bb", "Bivariate bicycle", "QLDPC"), ("gross", "Bivariate bicycle", "QLDPC"),
     ("cbb", "Coprime bivariate bicycle", "QLDPC"), ("tb", "Trivariate bicycle", "QLDPC"),
     ("bpc", "Balanced product cyclic", "QLDPC"), ("gb", "Generalized bicycle", "QLDPC"),
@@ -78,6 +78,8 @@ OPERATIONS = {
     "memory": "Memory", "memory_ec": "Memory (qLDPC syndrome extraction)", "measure_z": "Logical Z measurement (surgery)",
     "measure_x": "Logical X measurement (surgery)", "joint_zz": "Joint ZZ measurement (surgery)",
     "joint_xx": "Joint XX measurement (surgery)", "transversal_cnot": "Transversal CNOT (two blocks)",
+    "ls_memory": "Memory (lattice-surgery patch)", "ls_merge": "Merge: ZZ or XX measurement (lattice surgery)",
+    "ls_cnot": "CNOT (lattice surgery)",
 }
 
 DECODERS = {
@@ -206,6 +208,9 @@ def main():
     # Tables from before the memory basis was a column are all Z-basis memories
     df["basis"] = df["basis"].fillna("Z") if "basis" in df else "Z"
     df["operation"] = df["operation"].fillna("memory") if "operation" in df else "memory"
+    # Lattice-surgery codes are one operation each (memory, merge, CNOT of surface-code patches)
+    lattice_surgery = df.code.str.startswith("ls_")
+    df.loc[lattice_surgery, "operation"] = df.loc[lattice_surgery, "code"]
     rows = [[clean(r.get(c)) for c in COLUMNS] for r in df.to_dict("records")]
     out = {
         "generated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
