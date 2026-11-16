@@ -128,7 +128,7 @@ code it is predicting.
   <img alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 97% at 1.8 times the cheapest good decoder's time, always Tesseract on 100% at 14 times, always BP-OSD on 52% at 18 times" src="docs/figures/choice-light.png">
 </picture>
 
-Threshold regime: 97% correct. Matchmaker's "accurate" choice is as good as always running Tesseract at a
+Threshold regime: 98% correct. Matchmaker's "accurate" choice is as good as always running Tesseract at a
 fraction of its time; "cheapest" trades a few percent of accuracy for the cheapest decoder.
 
 Replaying ECCentric's whole sweep with Matchmaker deciding what to decode and with which decoder
