@@ -86,7 +86,7 @@ def test_cli_features_extract_ingest(tmp_path, capsys):
 
 def test_applicable():
     assert applicable({"decomposable": 1, "color_annotated": 0}) == {
-        "mwpm": True, "mwpf": True, "bposd": True, "bposd_tuned": True, "bplsd": True, "belief_find": True,
+        "mwpm": True, "mwpm_corr": True, "mwpf": True, "bposd": True, "bposd_tuned": True, "bplsd": True, "belief_find": True,
         "relay_bp": True, "tesseract": True, "chromobius": False, "gari": None, "gari_pp": None}
     assert applicable({"decomposable": math.nan, "graphlike": 0, "color_annotated": 1})["mwpm"] is None
     assert applicable({"decomposable": math.nan, "graphlike": 1})["mwpm"] is True

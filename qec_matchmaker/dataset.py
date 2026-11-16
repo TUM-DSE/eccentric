@@ -20,6 +20,10 @@ KEYS = ["circuit_key", "code", "family", "distance", "cycles", "backend", "error
         "operation", "decoder"]
 LABELS = ["status", "shots", "errors", "ler", "ler_low", "ler_high", "ms_per_shot", "timeout_s"]
 SKIPPED = ("does not fit", "pending")
+# Decoders left out of training: ECCentric's level-by-level BP-OSD needs the levels of a concatenated code's
+# checks, which only the code's construction gives (not the circuit's features), and ran on four codes only;
+# hier_bposd_hard is its ablation (hard decisions between levels)
+EXCLUDED_DECODERS = ("hier_bposd", "hier_bposd_hard")
 # ECCentric's configuration columns (sweep/collect.py CONFIG): one circuit per configuration
 ECCENTRIC_CONFIG = ["slice", "code", "schedule", "distance", "cycles", "backend", "backend_size", "error_type",
                     "error_probability", "layout_method", "routing_method", "translating_method", "basis", "operation"]
@@ -59,7 +63,8 @@ def _timeout_seconds(note) -> float:
 def from_eccentric(results: pd.DataFrame, store: dict) -> tuple[pd.DataFrame, dict]:
     """The training table from ECCentric's collected results and a feature store {circuit key: features};
     also returns counts of rows left out and why"""
-    rows = results[~results.status.isin(SKIPPED) & results.result_file.notna()].copy()
+    excluded = results.decoder.isin(EXCLUDED_DECODERS)
+    rows = results[~results.status.isin(SKIPPED) & results.result_file.notna() & ~excluded].copy()
     rows["circuit_key"] = [circuit_key(r, j) for r, j in zip(rows.run, rows.job_id)]
     # A configuration is one circuit, but its decodes can come from several runs (a rerun after a fix, a decoder
     # added later decode the original run's circuit file under their own run's name): one key per configuration
@@ -78,7 +83,8 @@ def from_eccentric(results: pd.DataFrame, store: dict) -> tuple[pd.DataFrame, di
     known = rows.circuit_key.isin(store.keys())
     features = pd.DataFrame([store[k] for k in rows.circuit_key[known]], index=rows.index[known])
     table = rows[known][KEYS + LABELS].join(features.reindex(columns=FEATURE_NAMES))
-    left_out = {"skipped (no circuit)": int(results.status.isin(SKIPPED).sum()), "no features yet": int((~known).sum())}
+    left_out = {"skipped (no circuit)": int(results.status.isin(SKIPPED).sum()), "no features yet": int((~known).sum()),
+                "decoder left out (EXCLUDED_DECODERS)": int(excluded.sum())}
     return table.reset_index(drop=True), left_out
 
 

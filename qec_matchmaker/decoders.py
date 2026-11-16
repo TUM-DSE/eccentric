@@ -3,6 +3,7 @@ import math
 
 DECODERS = {
     "mwpm": "minimum-weight perfect matching (PyMatching)",
+    "mwpm_corr": "correlated MWPM (PyMatching two-pass correlated matching; splits errors stim cannot decompose)",
     "mwpf": "hypergraph minimum-weight parity factor (MWPF)",
     "bposd": "BP with ordered-statistics decoding (ldpc)",
     "bposd_tuned": "BP-OSD with tuned BP: 100 iterations, min-sum scaling 0.625",
