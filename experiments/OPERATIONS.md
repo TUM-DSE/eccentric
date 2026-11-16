@@ -1,6 +1,7 @@
 # Logical operations: predicted from memory experiments
 
-ECCentric's sweep now has logical operations besides memory (ECCentric deeb90c):
+ECCentric's sweep now has logical operations besides memory (ECCentric 8d37171, after the overnight refinement
+of these sweeps and the fix of refined decode times, CHANGELOG fix 17):
 
 - **fault_tolerant_ops**: 13 CSS codes (bivariate bicycle, coprime and trivariate bicycle, balanced product,
   lift-connected surface, hypergraph product, many-hypercube, Golay, Steane, surface, toric, ...) built with the
@@ -19,46 +20,50 @@ Errors are in decades (|log10 error|).
 
 | | regime correct (recall) | best LER median / p90 error | in [q10, q90] | time within 3x | choice good enough (accurate / cheapest) |
 |---|---|---|---|---|---|
-| held-out codes (baseline) | 97% (91%) | 0.10 / 0.41 | 83% | 94% | 92% / 90% |
-| operations, from memory only | 96% (64%) | 0.15 / 0.60 | 74% | 92% | 88% / 86% |
+| held-out codes (baseline) | 98% (91%) | 0.10 / 0.41 | 82% | 94% | 92% / 90% |
+| operations, from memory only | 96% (63%) | 0.23 / 0.80 | 68% | 91% | 90% / 87% |
 
 Per operation (worst LER first):
 
 | operation | circuits | above threshold | regime correct | best LER median / p90 error | time within 3x | choice good enough (accurate) |
 |---|---|---|---|---|---|---|
-| measure_x | 77 | 1% | 99% | 0.48 / 0.75 | 84% | 77% |
-| measure_z | 77 | 7% | 93% | 0.46 / 0.82 | 90% | 74% |
-| joint_xx | 71 | 7% | 93% | 0.35 / 0.48 | 93% | 84% |
-| ls_cnot | 42 | 12% | 93% | 0.34 / 0.65 | 87% | 100% |
-| joint_zz | 66 | 2% | 98% | 0.27 / 0.54 | 92% | 71% |
-| ls_merge | 46 | 0% | 100% | 0.19 / 0.51 | 96% | 100% |
-| transversal_cnot | 75 | 35% | 93% | 0.16 / 0.40 | 92% | 85% |
-| ls_memory | 48 | 0% | 100% | 0.09 / 0.20 | 99% | 88% |
-| memory_ec | 78 | 17% | 96% | 0.03 / 0.19 | 93% | 94% |
+| measure_x | 77 | 4% | 96% | 0.54 / 0.97 | 83% | 81% |
+| measure_z | 77 | 7% | 93% | 0.48 / 1.14 | 88% | 83% |
+| ls_cnot | 42 | 12% | 93% | 0.35 / 0.99 | 91% | 100% |
+| joint_xx | 71 | 6% | 94% | 0.28 / 0.60 | 91% | 90% |
+| ls_merge | 46 | 0% | 100% | 0.27 / 0.60 | 95% | 98% |
+| transversal_cnot | 75 | 35% | 93% | 0.25 / 0.59 | 91% | 92% |
+| joint_zz | 66 | 2% | 98% | 0.22 / 0.64 | 92% | 83% |
+| ls_memory | 48 | 0% | 100% | 0.10 / 0.35 | 99% | 100% |
+| memory_ec | 78 | 17% | 96% | 0.06 / 0.27 | 94% | 90% |
+
+The refinement doubled the operation circuits whose best decode is measured (232 -> 441), many of them at
+lower error rates; the LER errors are larger than before the refinement (0.15 / 0.60) because those are harder
+to predict, not because the model got worse.
 
 ## What this says
 
-- **Decode time carries over.** 92% of operation decodes are within 3x (94% on held-out memory codes);
-  Relay-BP 95%, BP-OSD 92%, MWPM 92%, Tesseract 87%. Time depends on the size and noise of the detector error
+- **Decode time carries over.** 91% of operation decodes are within 3x (94% on held-out memory codes);
+  MWPM 95%, Relay-BP 94%, BP-OSD 92%, Tesseract 86%. Time depends on the size and noise of the detector error
   model, which the features describe whatever the circuit does.
-- **Memory-like circuits are predicted as well as memory.** `memory_ec` (0.03 decades) and `ls_memory` (0.09)
+- **Memory-like circuits are predicted as well as memory.** `memory_ec` (0.06 decades) and `ls_memory` (0.10)
   are memory experiments built by another tool; the features see no difference.
-- **The LER of surgery measurements is the furthest from anything in training**: 0.46-0.48 decades median for
-  the single-logical measurements, 0.27-0.35 for joint measurements and the lattice-surgery CNOT. The gadget
+- **The LER of surgery measurements is the furthest from anything in training**: 0.48-0.54 decades median for
+  the single-logical measurements, 0.22-0.35 for joint measurements and the lattice-surgery CNOT. The gadget
   (an ancilla system merged with the code for several rounds) changes how errors become logical failures in
-  ways the circuit-level features do not capture. The intervals cover 74% instead of 80%.
-- **Above-threshold operations are missed more often**: regime recall 64% (91% on held-out codes), mostly
+  ways the circuit-level features do not capture. The intervals cover 68% instead of 80%.
+- **Above-threshold operations are missed more often**: regime recall 63% (91% on held-out codes), mostly
   transversal CNOTs, the only operation with many circuits above threshold (35%).
 - **Decoder choice holds up, with a caveat.** The operation sweeps ran three or four decoders, so the
-  recommended decoder was often not measured (97 of 264 circuits for the accurate choice) and is scored as
+  recommended decoder was often not measured (153 of 451 circuits for the accurate choice) and is scored as
   BP-OSD; no operation circuit has all five BP-type and Tesseract decoders. The choice numbers are a lower
-  bound. Matchmaker picks Tesseract on 224 of 264 circuits, and is as good as always running Tesseract (88%)
-  at slightly less time (3.75x vs 3.92x the cheapest good-enough decoder).
+  bound. Matchmaker picks Tesseract on 398 of 451 circuits, and is about as good as always running Tesseract
+  (90% vs 91%) at slightly less time (3.72x vs 3.92x the cheapest good-enough decoder).
 
 ## Now in training
 
-The packaged model is retrained on everything (34,798 decodes, 5,624 circuits, b282764). Adding the operations
-leaves the held-out-code scores essentially unchanged (regime 98% -> 97%, LER 0.10 / 0.40 -> 0.10 / 0.41,
-time 94% -> 94%, choice 92% / 90% -> 92% / 90%). Operations of a kind already in training will be predicted
+The packaged model is retrained on everything (34,798 decodes, 5,624 circuits, ECCentric 8d37171). Adding the
+operations leaves the held-out-code scores essentially unchanged (regime 98%, LER 0.10 / 0.40 -> 0.10 / 0.41,
+time 94%, choice 92% / 90%). Operations of a kind already in training will be predicted
 better than in the split above; a new kind of gadget should be expected to behave like the surgery
 measurements here.
