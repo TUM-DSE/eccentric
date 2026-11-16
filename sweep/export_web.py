@@ -85,7 +85,8 @@ OPERATIONS = {
 DECODERS = {
     "bposd": "BP-OSD", "bplsd": "BP-LSD", "relay_bp": "Relay-BP", "belief_find": "BeliefFind",
     "tesseract": "Tesseract", "mwpf": "MWPF", "gari": "GARI", "gari_pp": "GARI++ (beta reimplementation)", "bposd_tuned": "BP-OSD (tuned BP)", "mwpm": "MWPM", "chromobius": "Chromobius", "belief_matching": "BeliefMatching",
-    "union_find": "Union-Find",
+    "union_find": "Union-Find", "mwpm_corr": "Correlated MWPM", "hier_bposd": "Level-by-level BP-OSD (soft)",
+    "hier_bposd_hard": "Level-by-level BP-OSD (hard decisions)",
 }
 
 SLICES = {

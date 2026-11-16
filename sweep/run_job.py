@@ -128,7 +128,8 @@ def decode_job(job, run_dir):
     logging.getLogger().addHandler(errors)
     try:
         result = decode_adaptively(
-            job, lambda n: decode(job["code"], circuit, n, job["decoder"], job["backend"], job["error_type"]), checkpoint)
+            job, lambda n: decode(job["code"], circuit, n, job["decoder"], job["backend"], job["error_type"],
+                                   distance=job.get("distance")), checkpoint)
     finally:
         logging.getLogger().removeHandler(errors)
     if result.get("failed") and errors.messages:

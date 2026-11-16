@@ -9,6 +9,8 @@ from .ldpc_decoders import bplsd, union_find, belief_find
 from .belief_matching import belief_matching
 from .sinter_decoders import mwpf, relay_bp, tesseract
 from .gari import gari, gari_pp
+from .correlated_matching import mwpm_corr
+from .hierarchical import hierarchical
 
 DECODERS = {
     "bplsd": bplsd,
@@ -19,11 +21,13 @@ DECODERS = {
     "tesseract": tesseract,
     "mwpf": mwpf,
     "gari": gari,
+    "mwpm_corr": mwpm_corr,
 }
 
 
 def decode(
-        code_name: str, circuit: stim.Circuit, num_shots: int, decoder: str, backend_name: str, error_type: str
+        code_name: str, circuit: stim.Circuit, num_shots: int, decoder: str, backend_name: str, error_type: str,
+        distance=None
 ) -> float:
     approximate_disjoint_errors = False
     if backend_name.split("_")[0] in ("variance", "real", "native") and (error_type == "variance" or error_type.split("_")[0] == "real"):
@@ -68,6 +72,14 @@ def decode(
             return gari_pp(circuit, num_shots, approximate_disjoint_errors, code_name)
         except Exception as e:
             logging.error(f"gari_pp failed: {e}")
+            return None
+    elif decoder in ("hier_bposd", "hier_bposd_hard"):
+        # Level-by-level decoding of concatenated codes (decoders/hierarchical.py): needs the code's levels
+        try:
+            return hierarchical(circuit, num_shots, approximate_disjoint_errors, code_name, distance,
+                                soft=decoder == "hier_bposd")
+        except Exception as e:
+            logging.error(f"{decoder} failed: {e}")
             return None
     elif decoder in DECODERS:
         try:
