@@ -1,5 +1,5 @@
 {
- "created": "2026-11-16T10:10:42+00:00",
+ "created": "2026-11-16T10:31:03+00:00",
  "feature_version": 2,
  "features": [
   "detectors",
@@ -61,8 +61,8 @@
  "sources": {
   "eccentric_results": {
    "path": "../eccentric/experiment_results/Sweep/results.csv",
-   "commit": "c28f9ac",
-   "sha256": "188914257ace89ce5c46fada000e28b9835527625d523a212fd44e4eb0dbf733"
+   "commit": "8d37171",
+   "sha256": "d7d97a637e42c8af3248e496d5d7181ff1935c45974ed5b33bc61701a3e68c97"
   },
   "feature_store": {
    "path": "data/features.jsonl",
