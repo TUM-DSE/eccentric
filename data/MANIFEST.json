@@ -1,5 +1,5 @@
 {
- "created": "2026-11-16T10:31:03+00:00",
+ "created": "2026-11-16T15:15:17+00:00",
  "feature_version": 2,
  "features": [
   "detectors",
@@ -31,7 +31,7 @@
   "y_parts_unmatched",
   "observables_both_sides"
  ],
- "rows": 34798,
+ "rows": 36480,
  "circuits": 5624,
  "codes": 70,
  "decoders": [
@@ -44,29 +44,31 @@
   "gari_pp",
   "mwpf",
   "mwpm",
+  "mwpm_corr",
   "relay_bp",
   "tesseract"
  ],
  "status": {
-  "measured": 28285,
-  "low statistics": 3929,
-  "upper bound": 1273,
-  "decoder not applicable": 983,
+  "measured": 29756,
+  "low statistics": 4083,
+  "upper bound": 1324,
+  "decoder not applicable": 989,
   "timeout": 328
  },
  "left_out": {
   "skipped (no circuit)": 3506,
-  "no features yet": 0
+  "no features yet": 0,
+  "decoder left out (EXCLUDED_DECODERS)": 224
  },
  "sources": {
   "eccentric_results": {
    "path": "../eccentric/experiment_results/Sweep/results.csv",
-   "commit": "8d37171",
-   "sha256": "d7d97a637e42c8af3248e496d5d7181ff1935c45974ed5b33bc61701a3e68c97"
+   "commit": "5f94348",
+   "sha256": "7772e393c0a8cafe61931cce0bcb750e595cffa3fffb3b64b67aa20148aa27f5"
   },
   "feature_store": {
    "path": "data/features.jsonl",
-   "sha256": "01195f029a1bb7ae4cde8271977a957717db559a14e5cbacfbe9dcd40173875f"
+   "sha256": "3fea4a0a9e12d3e1aa1fb6434a1653a45f5fbbf9f56529e024d36ecb835e3366"
   }
  }
 }
