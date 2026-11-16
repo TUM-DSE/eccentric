@@ -50,7 +50,7 @@ advice.expected_cost(errors=100)   # shots and core-hours per decoder
 | `--objective cheapest` (default) | the cheapest decoder predicted within 1.25× of the most accurate, with 80% confidence |
 | `--objective accurate` | the decoder with the lowest predicted logical error rate |
 | `--objective budget --budget-ms 1 [--per-round]` | the most accurate decoder within a time budget |
-| `--distance 11` | the code distance, if you know it: better predictions beyond the training data |
+| `--distance 11` | the code distance, if you know it: below threshold, LER predictions that follow the distance scaling |
 | `qec-matchmaker advise trace.h5` | a [decoder-bench](https://github.com/satvikmaurya/decoder-bench) trace instead of a circuit |
 | `qec-matchmaker features circuit.stim` | the features the models see |
 

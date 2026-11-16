@@ -109,9 +109,12 @@ def advise(source, objective: str = "cheapest", budget_ms: float = None, per_rou
     outside = predictions.outside_training.iloc[0]
     if outside:
         warnings.append(f"outside the training data, predictions extrapolate: {outside}")
-        if code_distance is None and predictions.p_above.iloc[0] < 0.5:
-            warnings.append("without the code distance the LER cannot follow the distance scaling below threshold: "
-                            "pass it (--distance, code_distance=) if you know it")
+    # Below threshold the LER falls with the code distance, which the circuit's features do not give: without
+    # it the prediction is that of an average training code at this noise, even for a circuit inside the
+    # training ranges (a distance-21 surface code is, once the training holds large lattice-surgery circuits)
+    if code_distance is None and "code_distance" in bundle.meta.get("ranges", {}) and predictions.p_above.iloc[0] < 0.5:
+        warnings.append("without the code distance the LER cannot follow the distance scaling below threshold: "
+                        "pass it (--distance, code_distance=) if you know it")
     rounds = features.get("rounds") if per_round else None
     choice = recommend(predictions, objective=objective, budget_ms=budget_ms, rounds=rounds, tolerance=tolerance)
     return Advice(features, predictions, choice, warnings)
