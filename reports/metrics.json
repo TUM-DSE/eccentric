@@ -163,33 +163,35 @@
   "circuits": 5116,
   "policies": {
    "recommend, accurate": {
-    "good_enough": 0.9255277560594214,
+    "good_enough": 0.9159499609069586,
     "median_regret": 1.0,
-    "p90_regret": 1.1386470171548244,
-    "median_time_vs_cheapest_good": 5.250975180863313,
-    "fallbacks": 2340,
+    "p90_regret": 1.1590161830722834,
+    "median_time_vs_cheapest_good": 1.8075001542447695,
+    "fallbacks": 1581,
     "chosen": {
-     "tesseract": 3991,
-     "mwpm_corr": 833,
-     "bposd_tuned": 148,
+     "tesseract": 3992,
+     "gari_pp": 591,
+     "bposd_tuned": 367,
      "mwpm": 121,
-     "gari_pp": 11,
-     "relay_bp": 11,
+     "mwpm_corr": 31,
+     "relay_bp": 13,
      "mwpf": 1
     }
    },
    "recommend, cheapest": {
-    "good_enough": 0.9091086786551994,
+    "good_enough": 0.8887802971071149,
     "median_regret": 1.0,
-    "p90_regret": 1.2091260260743601,
-    "median_time_vs_cheapest_good": 3.8891028397817955,
-    "fallbacks": 2490,
+    "p90_regret": 1.2709378521279362,
+    "median_time_vs_cheapest_good": 1.0931612682509613,
+    "fallbacks": 1500,
     "chosen": {
-     "tesseract": 3289,
-     "mwpm_corr": 1341,
+     "tesseract": 3295,
+     "gari_pp": 726,
+     "bposd_tuned": 536,
      "mwpm": 253,
-     "bposd_tuned": 187,
-     "relay_bp": 45,
+     "mwpm_corr": 244,
+     "relay_bp": 59,
+     "gari": 2,
      "mwpf": 1
     }
    },
@@ -225,32 +227,33 @@
    "circuits": 1950,
    "policies": {
     "recommend, accurate": {
-     "good_enough": 0.9564102564102565,
+     "good_enough": 0.9533333333333334,
      "median_regret": 1.0,
-     "p90_regret": 1.065171656455901,
-     "median_time_vs_cheapest_good": 14.354263865487345,
-     "fallbacks": 569,
+     "p90_regret": 1.0608190396079435,
+     "median_time_vs_cheapest_good": 1.8687056551612722,
+     "fallbacks": 49,
      "chosen": {
       "tesseract": 1257,
-      "mwpm_corr": 538,
+      "gari_pp": 335,
+      "bposd_tuned": 243,
       "mwpm": 96,
-      "bposd_tuned": 56,
-      "gari_pp": 2,
+      "mwpm_corr": 18,
       "mwpf": 1
      }
     },
     "recommend, cheapest": {
-     "good_enough": 0.9230769230769231,
+     "good_enough": 0.9179487179487179,
      "median_regret": 1.0,
-     "p90_regret": 1.1404948939512964,
-     "median_time_vs_cheapest_good": 11.389391669654163,
-     "fallbacks": 683,
+     "p90_regret": 1.1429426860564589,
+     "median_time_vs_cheapest_good": 1.3094487536208705,
+     "fallbacks": 94,
      "chosen": {
-      "tesseract": 1003,
-      "mwpm_corr": 714,
+      "tesseract": 1005,
+      "gari_pp": 376,
+      "bposd_tuned": 300,
       "mwpm": 131,
-      "bposd_tuned": 87,
-      "relay_bp": 14,
+      "mwpm_corr": 122,
+      "relay_bp": 15,
       "mwpf": 1
      }
     },
@@ -276,7 +279,9 @@
     }
    }
   },
-  "measured_but_inapplicable": {}
+  "measured_but_inapplicable": {
+   "mwpm_corr": 81
+  }
  },
  "per_group": {}
 }

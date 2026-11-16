@@ -7,7 +7,7 @@ a single shot, whether it is below threshold, roughly what its logical error rat
 decoder will take, and which decoder to use.
 
 > [!NOTE]
-> **Working prototype, v0.1.0.** The packaged model is trained on 5,624 circuits and 33,487 measured
+> **Working prototype, v0.1.0.** The packaged model is trained on 5,624 circuits and 35,163 measured
 > decodes from the [ECCentric](https://github.com/TUM-DSE/eccentric) benchmark. MIT licensed.
 
 ## Quick start
@@ -98,8 +98,8 @@ decodes every circuit with several decoders on the same shots.
 | Codes | 70 codes from 26 families: surface, color, heavy-hex, Floquet, bivariate bicycle, hypergraph and lifted product, quantum Tanner, ... |
 | Devices | 25: IBM Heron, Flamingo, Loon and the bicycle module (one and several QPUs), Google Willow, Quantinuum Apollo, Harvard/MIT and Infleqtion neutral atoms, and ideal grid, all-to-all and cube layouts |
 | Noise | 27 models: each device's own, scaled versions of them, and standard circuit noise |
-| Decoders | 11: MWPM, MWPF, BP-OSD (paper and tuned settings), BP-LSD, BeliefFind, Relay-BP, Tesseract, Chromobius, GARI, GARI++ (ECCentric's beta reimplementation) |
-| Decodes | 34,798, from 2.4 billion shots |
+| Decoders | 12: MWPM, correlated MWPM, MWPF, BP-OSD (paper and tuned settings), BP-LSD, BeliefFind, Relay-BP, Tesseract, Chromobius, GARI, GARI++ (ECCentric's beta reimplementation) |
+| Decodes | 36,480, from 3.8 billion shots |
 
 Every decoder trades accuracy against time differently, and none wins everywhere. Tesseract is the most
 accurate wherever it finishes, but it is among the slowest and timed out on 256 of the largest circuits;
@@ -128,7 +128,7 @@ code it is predicting.
   <img alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 97% at 1.8 times the cheapest good decoder's time, always Tesseract on 100% at 14 times, always BP-OSD on 52% at 18 times" src="docs/figures/choice-light.png">
 </picture>
 
-Threshold regime: 98% correct. Matchmaker's "accurate" choice is as good as always running Tesseract at a
+Threshold regime: 97% correct. Matchmaker's "accurate" choice is as good as always running Tesseract at a
 fraction of its time; "cheapest" trades a few percent of accuracy for the cheapest decoder.
 
 Replaying ECCentric's whole sweep with Matchmaker deciding what to decode and with which decoder

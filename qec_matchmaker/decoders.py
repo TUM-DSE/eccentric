@@ -33,7 +33,7 @@ def _flag(value):
 
 def applicable(features: dict) -> dict:
     """Which decoders can decode a circuit with these features: True, False, or None when the features
-    cannot tell. Matching needs errors that decompose into edges, which only the circuit shows (graph-like
+    cannot tell. Matching (plain and correlated) needs errors that decompose into edges, which only the circuit shows (graph-like
     errors in a DEM settle it in favour); Chromobius needs color-annotated detectors; GARI and GARI++ a CSS
     structure (CSS_ONLY)"""
     decomposable = _flag(features.get("decomposable"))
@@ -43,5 +43,7 @@ def applicable(features: dict) -> dict:
     structure = [features.get(f) for f in ("mixed_detectors", "observables_both_sides", "y_parts_unmatched")]
     known = all(v is not None and not (isinstance(v, float) and math.isnan(v)) for v in structure)
     css = (not any(v > 0 for v in structure)) if known else None
-    rule = {"mwpm": decomposable, "chromobius": color, **{name: css for name in CSS_ONLY}}
+    # Correlated matching splits some errors stim cannot decompose, but ECCentric ran it only where it runs
+    # matching (1,579 decomposable circuits, 103 not, all surface-like): no evidence beyond, so matching's rule
+    rule = {"mwpm": decomposable, "mwpm_corr": decomposable, "chromobius": color, **{name: css for name in CSS_ONLY}}
     return {name: rule.get(name, True) for name in DECODERS}

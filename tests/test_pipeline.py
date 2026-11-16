@@ -90,6 +90,7 @@ def test_applicable():
         "relay_bp": True, "tesseract": True, "chromobius": False, "gari": None, "gari_pp": None}
     assert applicable({"decomposable": math.nan, "graphlike": 0, "color_annotated": 1})["mwpm"] is None
     assert applicable({"decomposable": math.nan, "graphlike": 1})["mwpm"] is True
+    assert applicable({"decomposable": 0})["mwpm_corr"] is False
     assert applicable({})["chromobius"] is None
 
 
