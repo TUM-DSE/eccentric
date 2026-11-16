@@ -309,6 +309,19 @@ which experiments and paper figures it affects, and how it was checked.
 - **Paper:** statements that the Willow model includes crosstalk. See analysis/WILLOW.md for what
   crosstalk would change.
 
+### 17. Refined decodes kept the decoding time of their first run only
+
+- **File:** `sweep/collect.py`. **Commit:** see git log.
+- **Problem:** when `sweep.collect` added the shots and errors of refinement chunks (`sweep.refine`) to a
+  decode, `decode_seconds` stayed the time of the decode's own run, so the seconds per shot of every
+  refined row were too low (median 6.7x, up to ~70x), and refined timeouts had none.
+- **Fix:** the chunks' decoding seconds are added with their shots.
+- **Affects:** `decode_seconds` of the 974 refined rows of the sweep table (sweep_ft_ops 508,
+  sweep_idle 289, sweep_lattice_surgery 174, sweep1/sweep2 3); no other column and no other row.
+  `sweep.effort` (CPU hours on the website) was right: it sums the jobs' own times. Matchmaker trained
+  on the low times until it was retrained on the fixed table.
+- **Checked by:** `tests/test_sweep_refine.py::test_collect_adds_refinement_chunks`.
+
 ## Known issues (found, not fixed)
 
 1. **Fig. 17 c/d legend is swapped.** The Nighthawk results are stored as `real_loon` /

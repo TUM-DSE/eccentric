@@ -55,12 +55,19 @@ def test_collect_adds_refinement_chunks(tmp_path):
     for i, errors in enumerate((40, 70)):
         chunk = {**base, "id": f"decode.x.refine{i}", "refines": "run/decode.x"}
         write("refine", chunk["id"], chunk, "jobs")
-        write("refine", chunk["id"], {"job": chunk, "status": "done", "shots": 1000, "errors": errors}, "results")
+        write("refine", chunk["id"], {"job": chunk, "status": "done", "shots": 1000, "errors": errors, "seconds": 5.0 + i}, "results")
     dirs = [str(tmp_path / "run"), str(tmp_path / "refine")]
     added = refinements(dirs)
     (row,) = list(rows(dirs[0], added))
     assert (row["shots"], row["errors"], row["status"], row["refined_chunks"]) == (2000, 110, "measured", 2)
+    # The chunks' decoding time comes with their shots
+    assert row["decode_seconds"] == 11.0
     assert list(rows(dirs[1], added)) == []
+
+    # A run's own shots and seconds add to the chunks'
+    write("run", "decode.x", {"job": base, "status": "done", "shots": 500, "errors": 5, "seconds": 2.5}, "results")
+    (row,) = list(rows(dirs[0], refinements(dirs)))
+    assert (row["shots"], row["errors"], row["decode_seconds"]) == (2500, 115, 13.5)
 
 
 def test_worker_keeps_partial_counts(tmp_path):

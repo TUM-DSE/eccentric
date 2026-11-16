@@ -66,14 +66,14 @@ def superseded(run_dir):
 
 
 def refinements(run_dirs):
-    """Shots, errors and chunks that sweep.refine added to decodes, keyed by run dir name/job id"""
+    """Shots, errors, chunks and decoding seconds that sweep.refine added to decodes, keyed by run dir name/job id"""
     added = {}
     for run_dir in run_dirs:
         for r in load(run_dir).values():
             base = r["job"].get("refines")
             if base and r.get("status") == "done" and r.get("shots"):
-                shots, errors, chunks = added.get(base, (0, 0, 0))
-                added[base] = (shots + r["shots"], errors + r["errors"], chunks + 1)
+                shots, errors, chunks, seconds = added.get(base, (0, 0, 0, 0.0))
+                added[base] = (shots + r["shots"], errors + r["errors"], chunks + 1, seconds + (r.get("seconds") or 0.0))
     return added
 
 
@@ -116,8 +116,11 @@ def rows(run_dir, added=None, timeouts=None):
         more = added.get(f"{run}/{job['id']}")
         if more and decode is not None and (decode["status"] == "done" or str(decode.get("error", "")).startswith("timeout")):
             # Chunks decoded with other seeds add their shots to the run's own (none if it timed out)
-            own = (decode.get("shots", 0), decode.get("errors", 0)) if decode["status"] == "done" else (0, 0)
-            decode = {**decode, "status": "done", "shots": own[0] + more[0], "errors": own[1] + more[1], "refined_chunks": more[2]}
+            own = ((decode.get("shots", 0), decode.get("errors", 0), decode.get("seconds") or 0.0)
+                   if decode["status"] == "done" else (0, 0, 0.0))
+            # The chunks' decoding time goes with their shots, so that seconds per shot stay right
+            decode = {**decode, "status": "done", "shots": own[0] + more[0], "errors": own[1] + more[1],
+                      "seconds": own[2] + more[3], "refined_chunks": more[2]}
         row = {k: job.get(k) for k in CONFIG}
         # Jobs from before the memory basis was a setting are Z-basis memories
         row["basis"] = row["basis"] or "Z"
