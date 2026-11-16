@@ -1,5 +1,5 @@
 {
- "created": "2026-11-14T08:02:07+00:00",
+ "created": "2026-11-16T10:10:42+00:00",
  "feature_version": 2,
  "features": [
   "detectors",
@@ -48,9 +48,9 @@
   "tesseract"
  ],
  "status": {
-  "measured": 27761,
-  "low statistics": 4416,
-  "upper bound": 1310,
+  "measured": 28285,
+  "low statistics": 3929,
+  "upper bound": 1273,
   "decoder not applicable": 983,
   "timeout": 328
  },
@@ -61,8 +61,8 @@
  "sources": {
   "eccentric_results": {
    "path": "../eccentric/experiment_results/Sweep/results.csv",
-   "commit": "deeb90c",
-   "sha256": "0184f0cdba530812d026383612b72f37ebadb08f0c976fefc2b2afa0553b7b5c"
+   "commit": "c28f9ac",
+   "sha256": "188914257ace89ce5c46fada000e28b9835527625d523a212fd44e4eb0dbf733"
   },
   "feature_store": {
    "path": "data/features.jsonl",
