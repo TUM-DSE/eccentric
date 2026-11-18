@@ -13,7 +13,7 @@ the same return value (the logical error rate). Matching-type decoders (`mwpm`, 
 | `hier_bposd_hard_gpu` | `hier_bposd_hard` | level stages and final BP (our kernel) | OSD for the shots the final BP does not converge on (ldpc) | identical on every shot tested |
 | `hier_bposd_gpu` | `hier_bposd` | level stages and final BP (our kernel) | OSD as above | 99.0–99.4% of shots; LER within statistical error |
 | `bposd_gpu`, `bposd_tuned_gpu` | `bposd`, `bposd_tuned` | BP and OSD-CS (NVIDIA nv-qldpc-decoder) | — | 98.1–100% of shots; LER within statistical error |
-| `relay_bp_gpu` | `relay_bp` | Relay-BP (NVIDIA nv-qldpc-decoder) | — | 84–100% of shots; LER within statistical error on 6 of 7 circuits (see below) |
+| `relay_bp_gpu` | `relay_bp` | Relay-BP (our kernel, port of relay-bp) | — | identical on every shot with the same memory strengths; with per-shot random ones (the default) 84–100% of shots, LER within statistical error |
 | `union_find_gpu` | `union_find` | union-find with inversion (our kernel) | — | 54–99.7% of shots; LER differs by 0.1–2% (relative) on 5 of 7 circuits (see below) |
 
 ## How they work
@@ -37,12 +37,18 @@ use, with fused multiply-adds off so that double arithmetic rounds as on the CPU
   variable sees the same updates in the same order. Circuits tested need 12–25 levels per iteration.
 - **Union-find** (`union_find.cu`): ldpc's `matrix_decode` (cluster growth by all candidate bits, merging, then
   Gaussian elimination over each cluster's bits ordered by weight).
-- **nv-qldpc** (`nvqldpc.py`): BP-OSD and Relay-BP through NVIDIA CUDA-Q QEC's `nv-qldpc-decoder` (closed source),
-  with ECCentric's settings: min-sum BP with `bposd`'s or `bposd_tuned`'s iterations and scaling, OSD-CS of the
-  same order; for Relay-BP, relay-bp 0.2.1's defaults (γ0 0.1, 60 pre-iterations, up to 60 legs of 60 iterations,
-  γ uniform in [−0.24, 0.66], stop after 5 converged legs) on relay-bp's own check matrices (including the biases
-  of pruned errors). Relay-BP runs with `repeatable=True` (deterministic), which nv-qldpc allows only with a clip
-  on the messages (200, NVIDIA's preset value); BP-OSD runs without it.
+- **Relay-BP** (`relay.cu`, `relay_gpu.py`): a port of relay-bp 0.2.1's `RelayDecoder<f64>` (memory min-sum BP
+  and its legs) with its arithmetic in the same order, on relay-bp's own check matrices (including the biases of
+  pruned errors) and with ECCentric's settings (relay-bp's sinter defaults: γ0 0.1, 60 pre-iterations, up to 60
+  legs of 60 iterations, γ uniform in [−0.24, 0.66], stop after 5 converged legs, lowest-weight solution). Given
+  the same memory strengths (relay-bp's `explicit_gammas`), it returns relay-bp's error vectors on every shot.
+  relay-bp draws the legs' memory strengths from one random stream that runs through the shots in order, which a
+  parallel decoder cannot follow; the kernel draws them per (seed, shot, leg, variable) from a counter-based
+  generator instead: different draws, the same distribution.
+- **nv-qldpc** (`nvqldpc.py`): BP-OSD through NVIDIA CUDA-Q QEC's `nv-qldpc-decoder` (closed source), with
+  ECCentric's settings: min-sum BP with `bposd`'s or `bposd_tuned`'s iterations and scaling, OSD-CS of the same
+  order. `relay_bp_gpu` first used nv-qldpc's Relay-BP too; it is kept as `nvqldpc.relay_bp_nvqldpc` for
+  comparison (see below).
 
 ## Installing and running
 
@@ -63,7 +69,8 @@ CPU bit for bit); GPUs with little double-precision throughput (A40, consumer ca
 `analysis/gpu_verification/` (run on steve, 17–18 Nov 2026): seven stored sweep circuits (SD6 noise), 10^6 shots
 each sampled once with a fixed seed and saved, decoded by the GPU decoder (all shots) and by the CPU decoder
 (chunks of ~10 min on 48 cores; all 10^6 shots where affordable, otherwise the first 5×10^4–2×10^5). Per shot we
-compare the predicted observable flips. "z" is the paired test on the shots only one of the two decoders gets
+compare the predicted observable flips. For Relay-BP, `relay_exact.py` also compares error vectors with relay-bp given the same
+explicit memory strengths (3,000 shots each of surface d5, bb72, hgp_hamming and color d5: identical). "z" is the paired test on the shots only one of the two decoders gets
 wrong, (b − c) / √(b + c); |z| > 3 means the logical error rates differ. Speeds: GPU shots/s over all shots
 (decoding only, after building the decoder), CPU shots/s of one core, measured with 48 workers running at once
 (10–20% slower than one process alone, so the speedups are that much too high).
@@ -87,6 +94,13 @@ wrong, (b − c) / √(b + c); |z| > 3 means the logical error rates differ. Spe
 | `gari_gpu` | hgp_hamming d3, p=0.001 | 1,000,000 | 1,000,000 | 100.00% | 1.298e-01 | 1.298e-01 ± 3.4e-04 | 0 / 0 | 0.00 | 134,864 | 2,053.2 | 66× |
 | `gari_gpu` | steane d9, p=0.001 | 1,000,000 | 1,000,000 | 100.00% | 4.598e-02 | 4.598e-02 ± 2.1e-04 | 0 / 0 | 0.00 | 13,727 | 77.6 | 177× |
 | `gari_gpu` | mhc36 d4, p=0.001 | 1,000,000 | 1,000,000 | 100.00% | 3.415e-01 | 3.415e-01 ± 4.7e-04 | 0 / 0 | 0.00 | 68,709 | 942.5 | 73× |
+| `relay_bp_gpu` | surface d5, p=0.002 | 1,000,000 | 1,000,000 | 99.87% | 2.365e-03 | 2.329e-03 ± 4.8e-05 | 657 / 621 | 1.01 | 128,870 | 528.3 | 244× |
+| `relay_bp_gpu` | color d5, p=0.002 | 1,000,000 | 1,000,000 | 99.18% | 9.964e-03 | 1.011e-02 ± 1.0e-04 | 4,049 / 4,192 | -1.58 | 39,385 | 244.3 | 161× |
+| `relay_bp_gpu` | bb72 d6, p=0.002 | 1,000,000 | 1,000,000 | 99.84% | 2.995e-03 | 3.007e-03 ± 5.5e-05 | 685 / 697 | -0.32 | 147,477 | 482.2 | 306× |
+| `relay_bp_gpu` | gross d12, p=0.001 | 1,000,000 | 1,000,000 | 100.00% | 1.000e-06 | 1.000e-06 ± 1.0e-06 | 0 / 0 | 0.00 | 9,347 | 95.2 | 98× |
+| `relay_bp_gpu` | hgp_hamming d3, p=0.001 | 1,000,000 | 1,000,000 | 95.91% | 9.238e-02 | 9.265e-02 ± 2.9e-04 | 16,430 / 16,698 | -1.47 | 997,675 | 2,208.2 | 452× |
+| `relay_bp_gpu` | steane d9, p=0.001 | 1,000,000 | 50,000 | 98.98% | 1.076e-02 | 1.072e-02 ± 4.6e-04 | 255 / 253 | 0.09 | 1,064 | 12.4 | 86× |
+| `relay_bp_gpu` | mhc36 d4, p=0.001 | 1,000,000 | 1,000,000 | 84.18% | 2.918e-01 | 2.918e-01 ± 4.5e-04 | 29,331 / 29,355 | -0.10 | 284,680 | 643.3 | 443× |
 | `hier_bposd_hard_gpu` | steane d9, p=0.001 | 50,000 | 50,000 | 100.00% | 5.218e-02 | 5.218e-02 ± 9.9e-04 | 0 / 0 | 0.00 | 9 | 5.4 | 2× |
 | `hier_bposd_hard_gpu` | mhc36 d4, p=0.001 | 1,000,000 | 1,000,000 | 100.00% | 4.602e-01 | 4.602e-01 ± 5.0e-04 | 0 / 0 | 0.00 | 965 | 261.2 | 4× |
 | `hier_bposd_gpu` | steane d9, p=0.001 | 1,000,000 | 50,000 | 99.39% | 1.504e-02 | 1.508e-02 ± 5.5e-04 | 152 / 154 | -0.11 | 18 | 8.7 | 2× |
@@ -100,13 +114,6 @@ wrong, (b − c) / √(b + c); |z| > 3 means the logical error rates differ. Spe
 | `bposd_tuned_gpu` | bb72 d6, p=0.002 | 1,000,000 | 1,000,000 | 99.98% | 5.088e-03 | 5.102e-03 ± 7.1e-05 | 59 / 73 | -1.22 | 20,715 | 234.5 | 88× |
 | `bposd_tuned_gpu` | hgp_hamming d3, p=0.001 | 1,000,000 | 1,000,000 | 99.98% | 1.417e-01 | 1.417e-01 ± 3.5e-04 | 22 / 15 | 1.15 | 56,171 | 2,117.0 | 27× |
 | `bposd_tuned_gpu` | mhc36 d4, p=0.001 | 1,000,000 | 1,000,000 | 98.10% | 2.855e-01 | 2.855e-01 ± 4.5e-04 | 3,760 / 3,731 | 0.34 | 52,562 | 1,490.1 | 35× |
-| `relay_bp_gpu` | surface d5, p=0.002 | 1,000,000 | 1,000,000 | 99.88% | 2.347e-03 | 2.329e-03 ± 4.8e-05 | 632 / 614 | 0.51 | 31,557 | 528.3 | 60× |
-| `relay_bp_gpu` | color d5, p=0.002 | 1,000,000 | 1,000,000 | 99.18% | 1.006e-02 | 1.011e-02 ± 1.0e-04 | 4,089 / 4,134 | -0.50 | 13,996 | 244.3 | 57× |
-| `relay_bp_gpu` | bb72 d6, p=0.002 | 1,000,000 | 1,000,000 | 99.84% | 3.091e-03 | 3.007e-03 ± 5.5e-05 | 749 / 665 | 2.23 | 16,722 | 482.2 | 35× |
-| `relay_bp_gpu` | gross d12, p=0.001 | 1,000,000 | 1,000,000 | 100.00% | 0.000e+00 | 1.000e-06 ± 1.0e-06 | 0 / 1 | -1.00 | 4,178 | 95.2 | 44× |
-| `relay_bp_gpu` | hgp_hamming d3, p=0.001 | 1,000,000 | 1,000,000 | 95.53% | 9.656e-02 | 9.265e-02 ± 2.9e-04 | 20,146 / 16,231 | 20.53 | 77,123 | 2,208.2 | 35× |
-| `relay_bp_gpu` | steane d9, p=0.001 | 1,000,000 | 50,000 | 98.96% | 1.058e-02 | 1.072e-02 ± 4.6e-04 | 257 / 264 | -0.31 | 1,511 | 12.4 | 122× |
-| `relay_bp_gpu` | mhc36 d4, p=0.001 | 1,000,000 | 1,000,000 | 84.16% | 2.919e-01 | 2.918e-01 ± 4.5e-04 | 29,253 / 29,185 | 0.28 | 47,901 | 643.3 | 74× |
 | `union_find_gpu` | surface d5, p=0.002 | 1,000,000 | 1,000,000 | 99.71% | 1.258e-02 | 1.262e-02 ± 1.1e-04 | 1,450 / 1,488 | -0.70 | 1,019,321 | 3,865.2 | 264× |
 | `union_find_gpu` | color d5, p=0.002 | 1,000,000 | 1,000,000 | 98.97% | 4.301e-02 | 4.220e-02 ± 2.0e-04 | 5,580 / 4,763 | 8.03 | 768,395 | 2,786.3 | 276× |
 | `union_find_gpu` | bb72 d6, p=0.002 | 1,000,000 | 1,000,000 | 53.52% | 4.655e-01 | 4.668e-01 ± 5.0e-04 | 32,649 / 33,959 | -5.08 | 238,240 | 517.7 | 460× |
@@ -114,6 +121,13 @@ wrong, (b − c) / √(b + c); |z| > 3 means the logical error rates differ. Spe
 | `union_find_gpu` | hgp_hamming d3, p=0.001 | 1,000,000 | 1,000,000 | 88.02% | 3.830e-01 | 3.840e-01 ± 4.9e-04 | 31,637 / 32,599 | -3.80 | 2,023,043 | 9,388.4 | 215× |
 | `union_find_gpu` | steane d9, p=0.001 | 1,000,000 | 1,000,000 | 95.14% | 1.200e-01 | 1.221e-01 ± 3.3e-04 | 23,252 / 25,301 | -9.30 | 86,390 | 405.0 | 213× |
 | `union_find_gpu` | mhc36 d4, p=0.001 | 1,000,000 | 1,000,000 | 72.56% | 4.851e-01 | 4.847e-01 ± 5.0e-04 | 14,122 / 13,679 | 2.66 | 1,436,157 | 6,921.2 | 208× |
+| nv-qldpc Relay-BP (replaced) | surface d5, p=0.002 | 1,000,000 | 1,000,000 | 99.88% | 2.347e-03 | 2.329e-03 ± 4.8e-05 | 632 / 614 | 0.51 | 31,557 | 528.3 | 60× |
+| nv-qldpc Relay-BP (replaced) | color d5, p=0.002 | 1,000,000 | 1,000,000 | 99.18% | 1.006e-02 | 1.011e-02 ± 1.0e-04 | 4,089 / 4,134 | -0.50 | 13,996 | 244.3 | 57× |
+| nv-qldpc Relay-BP (replaced) | bb72 d6, p=0.002 | 1,000,000 | 1,000,000 | 99.84% | 3.091e-03 | 3.007e-03 ± 5.5e-05 | 749 / 665 | 2.23 | 16,722 | 482.2 | 35× |
+| nv-qldpc Relay-BP (replaced) | gross d12, p=0.001 | 1,000,000 | 1,000,000 | 100.00% | 0.000e+00 | 1.000e-06 ± 1.0e-06 | 0 / 1 | -1.00 | 4,178 | 95.2 | 44× |
+| nv-qldpc Relay-BP (replaced) | hgp_hamming d3, p=0.001 | 1,000,000 | 1,000,000 | 95.53% | 9.656e-02 | 9.265e-02 ± 2.9e-04 | 20,146 / 16,231 | 20.53 | 77,123 | 2,208.2 | 35× |
+| nv-qldpc Relay-BP (replaced) | steane d9, p=0.001 | 1,000,000 | 50,000 | 98.96% | 1.058e-02 | 1.072e-02 ± 4.6e-04 | 257 / 264 | -0.31 | 1,511 | 12.4 | 122× |
+| nv-qldpc Relay-BP (replaced) | mhc36 d4, p=0.001 | 1,000,000 | 1,000,000 | 84.16% | 2.919e-01 | 2.918e-01 ± 4.5e-04 | 29,253 / 29,185 | 0.28 | 47,901 | 643.3 | 74× |
 
 ### Known differences
 
@@ -128,15 +142,15 @@ wrong, (b − c) / √(b + c); |z| > 3 means the logical error rates differ. Spe
   (color d5 4.30% vs 4.22%, steane d9 12.0% vs 12.2%, in both directions). Treat `union_find_gpu` as union-find
   with a different tie order, not as a copy of `union_find`; reproducing ldpc's order would mean emulating its hash
   sets and sort on the GPU.
-- **`relay_bp_gpu`: one set of memory strengths for all shots.** nv-qldpc's Relay-BP is 4% worse on hgp_hamming d3
-  (0.0966 vs 0.0927, z = 20) and slightly worse on bb72 (z = 2.2); the other five circuits agree. The message clip,
-  `repeatable` and fp32/fp64 change nothing (2×10^5 shots: 0.0971–0.0972), but the seed does: seeds 1–7 and 42 give
-  0.0891–0.1023, far beyond the statistical error (±0.0007). relay-bp seeds its generator once per decoder and
-  draws new memory strengths for every leg of every shot, so its logical error rate averages over the draws;
-  nv-qldpc evidently draws them from the seed alone, so every shot sees the same legs and each seed is a different
-  fixed decoder. The mean over the eight seeds (0.0958) is still 1.9σ above relay-bp's 0.0929.
-- **nv-qldpc is closed source**; its BP-OSD and Relay-BP agree with ldpc and relay-bp statistically, not shot by
-  shot, and without `repeatable` (BP-OSD) two runs on the same shots can differ.
+- **nv-qldpc's Relay-BP uses one set of memory strengths for all shots** (why `relay_bp_gpu` no longer uses it).
+  It was 4% worse than relay-bp on hgp_hamming d3 (0.0966 vs 0.0927, z = 20) and slightly worse on bb72
+  (z = 2.2). The message clip, `repeatable` and fp32/fp64 change nothing (2×10^5 shots: 0.0971–0.0972), but the
+  seed does: seeds 1–7 and 42 give 0.0891–0.1023, far beyond the statistical error (±0.0007). relay-bp draws new
+  memory strengths for every leg of every shot, so its logical error rate averages over the draws; nv-qldpc
+  evidently draws them from the seed alone, so each seed is a different fixed decoder. Our kernel draws them per
+  shot and agrees with relay-bp on all seven circuits (|z| ≤ 1.6; hgp_hamming 0.0924 vs 0.0927).
+- **nv-qldpc is closed source**; its BP-OSD agrees with ldpc statistically, not shot by shot, and without `repeatable`
+  two runs on the same shots can differ.
 
 ### The CPU `hier_bposd` reuses the previous shot's level posteriors
 
@@ -151,7 +165,7 @@ been measured yet; fixing it would change them.
 ### Speed
 
 Speedups over one CPU core: `union_find` 208–489×, `bplsd`/`belief_find` 36–213×, `gari` 21–177×, `bposd`
-12–148×, `relay_bp` 35–122×, `bposd_tuned` 27–107×, `hier_bposd` 2–9×. The fastest reach 0.4–2 million shots/s
+12–148×, `relay_bp` 86–452×, `bposd_tuned` 27–107×, `hier_bposd` 2–9×. The fastest reach 0.4–2 million shots/s
 on small codes. Where BP fails on many shots, the CPU post-processing dominates: `hier_bposd_gpu` on steane d9
 sent 44% of the shots to OSD on the CPU and ran at 18 shots/s (10^6 shots took 15.6 h); `bplsd_gpu` on color d5
 sent 23%. The speed of a GPU decoder therefore depends on the circuit and the noise in a different way than on the
@@ -163,7 +177,8 @@ For time estimates (e.g. in Matchmaker), `analysis/gpu_verification/pilot_timing
 verified (circuit, decoder) pairs except the two steane d9 `hier_bposd` ones: the decoder's build time, Stim's
 sampling time, a reference run (all 10^6 shots, or as many as take ~5 min; run twice) and pilots of 10^3, 10^4
 and 10^5 shots at three offsets into the shots, all in `decode()`'s batch sizes (results in
-`analysis/gpu_verification/pilot/`).
+`analysis/gpu_verification/pilot/`). The Relay-BP pairs were measured with nv-qldpc's Relay-BP, before `relay_bp_gpu` moved to
+our kernel.
 
 | pilot | within 20% of the reference throughput | within 2× | worst |
 |---|---:|---:|---:|

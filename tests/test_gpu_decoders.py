@@ -1,7 +1,8 @@
 """GPU decoders (eccentric/decoders/gpu, analysis/GPU.md) against the CPU ones on the same shots. Skipped without CuPy and
-an NVIDIA GPU; bposd_gpu and relay_bp_gpu also need CUDA-Q QEC (requirements-gpu.txt)"""
+an NVIDIA GPU; bposd_gpu and bposd_tuned_gpu also need CUDA-Q QEC (requirements-gpu.txt)"""
 import numpy as np
 import pytest
+import scipy.sparse as sp
 import stim
 
 cp = pytest.importorskip("cupy")
@@ -76,6 +77,29 @@ def test_gari_matches_the_c_decoder_shot_by_shot():
     assert np.array_equal(GariGpu(enc).predict(dets), decode_observables(enc, dets))
 
 
+def test_relay_matches_relay_bp_with_the_same_memory_strengths():
+    import relay_bp
+    from relay_bp.stim.sinter.decoders import SinterDecoder_RelayBP
+    from eccentric.decoders.gpu.relay_gpu import RELAY, RelayGpu
+    for circuit in (_surface(5, 0.004), _color(5, 0.003)):
+        m = SinterDecoder_RelayBP().compile_decoder_for_dem(dem=circuit.detector_error_model()).check_matrices
+        dets, _ = _shots(circuit, 500)
+        syn = dets.astype(np.uint8)
+        if m.syndrome_bias is not None:
+            syn = syn ^ m.syndrome_bias.astype(np.uint8)
+        table = np.random.default_rng(1).uniform(*RELAY["gamma_dist_interval"], size=(RELAY["num_sets"], m.check_matrix.shape[1]))
+        cpu = relay_bp.RelayDecoderF64(m.check_matrix, error_priors=m.error_priors, alpha=None, gamma0=RELAY["gamma0"],
+                                       pre_iter=RELAY["pre_iter"], num_sets=RELAY["num_sets"],
+                                       set_max_iter=RELAY["set_max_iter"], gamma_dist_interval=RELAY["gamma_dist_interval"],
+                                       explicit_gammas=table, stop_nconv=RELAY["stop_nconv"], stopping_criterion="nconv")
+        expected = (sp.csr_matrix(m.observables_matrix) @ np.asarray(cpu.decode_batch(syn)).T).T % 2
+        if m.observables_bias is not None:
+            expected = expected ^ m.observables_bias
+        gpu = RelayGpu(m.check_matrix, m.error_priors, m.observables_matrix, m.syndrome_bias, m.observables_bias,
+                       explicit_gammas=table)
+        assert np.array_equal(gpu.predict(dets), expected.astype(bool))
+
+
 def test_union_find_is_close_to_ldpc_on_surface_code():
     # Not a copy of ldpc: equal weights are ordered differently, which shifts the logical error rate by 0.1-2% on
     # some codes (analysis/GPU.md); on the surface code the two agree within statistics
@@ -113,7 +137,7 @@ def test_hierarchical_previous_mode_follows_the_cpu_decoder():
 
 @pytest.mark.parametrize("decoder", sorted(GPU_DECODERS))
 def test_decode_dispatches_gpu_decoders(decoder):
-    if decoder in ("bposd_gpu", "bposd_tuned_gpu", "relay_bp_gpu"):
+    if decoder in ("bposd_gpu", "bposd_tuned_gpu"):
         pytest.importorskip("cudaq_qec")
     if decoder.startswith("hier"):
         pytest.skip("needs a concatenated code (tests/test_new_decoders.py builds them; slow)")

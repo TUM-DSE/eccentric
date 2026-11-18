@@ -92,6 +92,9 @@ def gpu_predictor(tag, decoder):
         from eccentric.decoders.gpu.nvqldpc import bposd_decoder
         return bposd_decoder(circ, False, code in ("steane", "bacon"), "tuned" if decoder == "bposd_tuned" else "paper")
     if decoder == "relay_bp":
+        from eccentric.decoders.gpu.relay_gpu import relay_decoder
+        return relay_decoder(circ, False)
+    if decoder == "relay_bp_nvq":   # NVIDIA nv-qldpc's Relay-BP, the first relay_bp_gpu
         from eccentric.decoders.gpu.nvqldpc import relay_decoder
         return relay_decoder(circ, False)
     if decoder == "bplsd":

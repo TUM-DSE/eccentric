@@ -1,7 +1,8 @@
-"""BP-OSD and Relay-BP on the GPU through NVIDIA CUDA-Q QEC's nv-qldpc-decoder (pip install cudaq-qec), with the
-settings of ECCentric's CPU decoders. nv-qldpc is closed source; its BP, OSD and Relay-BP are NVIDIA's own
-implementations, so the corrections differ from ldpc's and relay-bp's shot by shot and the logical error rates
-agree statistically (analysis/GPU.md)."""
+"""BP-OSD on the GPU through NVIDIA CUDA-Q QEC's nv-qldpc-decoder (pip install cudaq-qec), with the settings of
+ECCentric's CPU decoders (bposd_gpu, bposd_tuned_gpu). nv-qldpc is closed source; its BP and OSD are NVIDIA's own
+implementations, so the corrections differ from ldpc's on a few shots and the logical error rates agree statistically
+(analysis/GPU.md). relay_decoder here (nv-qldpc's Relay-BP) is not a decoder name any more: it uses one set of memory
+strengths for all shots, so its logical error rate depends on the seed; relay_bp_gpu is relay_gpu.py's port."""
 import numpy as np
 import stim
 
@@ -18,7 +19,7 @@ def _qec():
     try:
         import cudaq_qec
     except ImportError as e:
-        raise RuntimeError("bposd_gpu and relay_bp_gpu need CUDA-Q QEC (pip install cudaq-qec)") from e
+        raise RuntimeError("bposd_gpu and bposd_tuned_gpu need CUDA-Q QEC (pip install cudaq-qec)") from e
     return cudaq_qec
 
 
@@ -94,7 +95,8 @@ def relay_decoder(circuit: stim.Circuit, approximate_disjoint_errors: bool):
                    matrices.observables_bias, **RELAY)
 
 
-def relay_bp_gpu(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool) -> float:
+def relay_bp_nvqldpc(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool) -> float:
+    """nv-qldpc's Relay-BP (for comparison; ECCentric's relay_bp_gpu is relay_gpu.relay_bp_gpu)"""
     dec = _cached(("relay", approximate_disjoint_errors), circuit,
                   lambda: relay_decoder(circuit, approximate_disjoint_errors))
     return logical_error_rate(dec.predict, circuit, num_shots)

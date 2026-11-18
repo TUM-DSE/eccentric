@@ -6,7 +6,7 @@ cupy-cuda12x==13.6.0
 fastrlock==0.8.4
 nvidia-cuda-nvrtc-cu12==12.9.86
 nvidia-cuda-runtime-cu12==12.9.79
-# CUDA-Q QEC's nv-qldpc-decoder (bposd_gpu, bposd_tuned_gpu, relay_bp_gpu)
+# CUDA-Q QEC's nv-qldpc-decoder (bposd_gpu, bposd_tuned_gpu)
 cudaq-qec==0.9.0
 cudaq-qec-cu12==0.9.0
 cudaq-core==0.17.0

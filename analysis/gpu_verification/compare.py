@@ -9,7 +9,8 @@ for tag in CIRCUITS:
         decoder = os.path.basename(gj)[len(tag) + 1:-len(".gpu.json")]
         g = json.load(open(gj))
         gp = np.unpackbits(np.load(gj[:-5] + ".npy"), axis=1, count=obs.shape[1], bitorder="little").astype(bool)
-        parts = sorted(glob.glob(os.path.join(DATA, "parts", f"{tag}.{decoder}.cpu.*.json")))
+        cpu_decoder = decoder.replace("_nvq", "")   # the CPU decoder a GPU variant is compared with
+        parts = sorted(glob.glob(os.path.join(DATA, "parts", f"{tag}.{cpu_decoder}.cpu.*.json")))
         if not parts:
             continue
         idx, cp_, secs = [], [], 0.0
