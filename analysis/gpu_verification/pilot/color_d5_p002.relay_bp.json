@@ -1,0 +1,57 @@
+{
+ "circuit": "color_d5_p002",
+ "decoder": "relay_bp",
+ "batch": 262144,
+ "reference_shots": 1000000,
+ "build_seconds": 3.831512212753296,
+ "first_call_seconds": 0.14758801460266113,
+ "sampling_seconds_reference": 0.4633941650390625,
+ "reference_seconds": [
+  42.910611152648926,
+  42.3580687046051
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.1184237003326416
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.07575201988220215
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.14179635047912598
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 0.46469640731811523
+   },
+   {
+    "offset": 495000,
+    "seconds": 0.4515414237976074
+   },
+   {
+    "offset": 990000,
+    "seconds": 0.4632124900817871
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 4.197089433670044
+   },
+   {
+    "offset": 450000,
+    "seconds": 4.2369725704193115
+   },
+   {
+    "offset": 900000,
+    "seconds": 4.315383195877075
+   }
+  ]
+ }
+}

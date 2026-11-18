@@ -1,0 +1,57 @@
+{
+ "circuit": "hgp_hamming_d3_p001",
+ "decoder": "bplsd",
+ "batch": 262144,
+ "reference_shots": 1000000,
+ "build_seconds": 3.249105215072632,
+ "first_call_seconds": 0.1764211654663086,
+ "sampling_seconds_reference": 0.5217478275299072,
+ "reference_seconds": [
+  42.0353364944458,
+  42.00366735458374
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.13592958450317383
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.15642070770263672
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.13799262046813965
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 0.4775407314300537
+   },
+   {
+    "offset": 495000,
+    "seconds": 0.46681737899780273
+   },
+   {
+    "offset": 990000,
+    "seconds": 0.4718644618988037
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 4.228089094161987
+   },
+   {
+    "offset": 450000,
+    "seconds": 4.204341411590576
+   },
+   {
+    "offset": 900000,
+    "seconds": 4.31129002571106
+   }
+  ]
+ }
+}

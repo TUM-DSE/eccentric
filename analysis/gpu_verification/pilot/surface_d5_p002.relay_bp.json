@@ -1,0 +1,57 @@
+{
+ "circuit": "surface_d5_p002",
+ "decoder": "relay_bp",
+ "batch": 262144,
+ "reference_shots": 1000000,
+ "build_seconds": 4.475638389587402,
+ "first_call_seconds": 0.18569684028625488,
+ "sampling_seconds_reference": 0.9007203578948975,
+ "reference_seconds": [
+  34.71034288406372,
+  34.48129987716675
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.15068912506103516
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.10626339912414551
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.13411498069763184
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 0.3484494686126709
+   },
+   {
+    "offset": 495000,
+    "seconds": 0.3912971019744873
+   },
+   {
+    "offset": 990000,
+    "seconds": 0.36217522621154785
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 3.579257011413574
+   },
+   {
+    "offset": 450000,
+    "seconds": 3.5723421573638916
+   },
+   {
+    "offset": 900000,
+    "seconds": 3.503645896911621
+   }
+  ]
+ }
+}

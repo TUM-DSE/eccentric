@@ -1,0 +1,57 @@
+{
+ "circuit": "color_d5_p002",
+ "decoder": "belief_find",
+ "batch": 262144,
+ "reference_shots": 334000,
+ "build_seconds": 4.660460472106934,
+ "first_call_seconds": 1.0001704692840576,
+ "sampling_seconds_reference": 0.15662050247192383,
+ "reference_seconds": [
+  297.10114455223083,
+  297.1388223171234
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.9843740463256836
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.9681978225708008
+   },
+   {
+    "offset": 999000,
+    "seconds": 1.023305892944336
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 9.212423324584961
+   },
+   {
+    "offset": 495000,
+    "seconds": 9.214787244796753
+   },
+   {
+    "offset": 990000,
+    "seconds": 9.09951138496399
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 89.63757085800171
+   },
+   {
+    "offset": 450000,
+    "seconds": 87.92599034309387
+   },
+   {
+    "offset": 900000,
+    "seconds": 88.20740461349487
+   }
+  ]
+ }
+}

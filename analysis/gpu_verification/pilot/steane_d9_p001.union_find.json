@@ -1,0 +1,57 @@
+{
+ "circuit": "steane_d9_p001",
+ "decoder": "union_find",
+ "batch": 65536,
+ "reference_shots": 1000000,
+ "build_seconds": 4.127197265625,
+ "first_call_seconds": 0.022193431854248047,
+ "sampling_seconds_reference": 4.930586099624634,
+ "reference_seconds": [
+  14.40381646156311,
+  14.379928827285767
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.021755695343017578
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.021702289581298828
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.02722620964050293
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 0.14800167083740234
+   },
+   {
+    "offset": 495000,
+    "seconds": 0.15223312377929688
+   },
+   {
+    "offset": 990000,
+    "seconds": 0.1551041603088379
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 1.472942590713501
+   },
+   {
+    "offset": 450000,
+    "seconds": 1.4955663681030273
+   },
+   {
+    "offset": 900000,
+    "seconds": 1.4988775253295898
+   }
+  ]
+ }
+}

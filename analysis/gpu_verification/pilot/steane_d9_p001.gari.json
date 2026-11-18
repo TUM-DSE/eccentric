@@ -1,0 +1,57 @@
+{
+ "circuit": "steane_d9_p001",
+ "decoder": "gari",
+ "batch": 65536,
+ "reference_shots": 1000000,
+ "build_seconds": 4.843425035476685,
+ "first_call_seconds": 0.26241374015808105,
+ "sampling_seconds_reference": 4.680831670761108,
+ "reference_seconds": [
+  95.82688784599304,
+  96.09182453155518
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.24338531494140625
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.2806580066680908
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.27033019065856934
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 0.9405808448791504
+   },
+   {
+    "offset": 495000,
+    "seconds": 0.969963788986206
+   },
+   {
+    "offset": 990000,
+    "seconds": 0.958643913269043
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 8.96599006652832
+   },
+   {
+    "offset": 450000,
+    "seconds": 8.98797082901001
+   },
+   {
+    "offset": 900000,
+    "seconds": 9.054829120635986
+   }
+  ]
+ }
+}

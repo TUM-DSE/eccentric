@@ -1,0 +1,57 @@
+{
+ "circuit": "gross_d12_p001",
+ "decoder": "bposd",
+ "batch": 262144,
+ "reference_shots": 970000,
+ "build_seconds": 4.066287994384766,
+ "first_call_seconds": 0.17571234703063965,
+ "sampling_seconds_reference": 10.168145895004272,
+ "reference_seconds": [
+  294.3062193393707,
+  271.760764837265
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.42218589782714844
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.1349649429321289
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.10943794250488281
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 2.970366954803467
+   },
+   {
+    "offset": 495000,
+    "seconds": 2.737309217453003
+   },
+   {
+    "offset": 990000,
+    "seconds": 2.8454344272613525
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 29.644928455352783
+   },
+   {
+    "offset": 450000,
+    "seconds": 30.692925930023193
+   },
+   {
+    "offset": 900000,
+    "seconds": 25.89949107170105
+   }
+  ]
+ }
+}

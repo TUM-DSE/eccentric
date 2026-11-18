@@ -1,0 +1,57 @@
+{
+ "circuit": "bb72_d6_p002",
+ "decoder": "belief_find",
+ "batch": 262144,
+ "reference_shots": 1000000,
+ "build_seconds": 3.1496076583862305,
+ "first_call_seconds": 0.21973681449890137,
+ "sampling_seconds_reference": 3.094107151031494,
+ "reference_seconds": [
+  8.835922956466675,
+  8.795481443405151
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.20365691184997559
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.2102828025817871
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.208359956741333
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 0.24415063858032227
+   },
+   {
+    "offset": 495000,
+    "seconds": 0.2447819709777832
+   },
+   {
+    "offset": 990000,
+    "seconds": 0.2599766254425049
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 0.9388155937194824
+   },
+   {
+    "offset": 450000,
+    "seconds": 0.9869098663330078
+   },
+   {
+    "offset": 900000,
+    "seconds": 1.0044598579406738
+   }
+  ]
+ }
+}

@@ -1,0 +1,57 @@
+{
+ "circuit": "gross_d12_p001",
+ "decoder": "belief_find",
+ "batch": 262144,
+ "reference_shots": 1000000,
+ "build_seconds": 3.589151382446289,
+ "first_call_seconds": 0.1490466594696045,
+ "sampling_seconds_reference": 10.156901597976685,
+ "reference_seconds": [
+  88.08129835128784,
+  87.15804290771484
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.13005375862121582
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.14364290237426758
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.1046292781829834
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 2.946758508682251
+   },
+   {
+    "offset": 495000,
+    "seconds": 3.087101697921753
+   },
+   {
+    "offset": 990000,
+    "seconds": 2.878836154937744
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 8.9128737449646
+   },
+   {
+    "offset": 450000,
+    "seconds": 8.91988205909729
+   },
+   {
+    "offset": 900000,
+    "seconds": 8.886187076568604
+   }
+  ]
+ }
+}

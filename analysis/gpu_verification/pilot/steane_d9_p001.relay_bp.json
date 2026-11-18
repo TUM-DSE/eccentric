@@ -1,0 +1,57 @@
+{
+ "circuit": "steane_d9_p001",
+ "decoder": "relay_bp",
+ "batch": 262144,
+ "reference_shots": 453000,
+ "build_seconds": 3.1411664485931396,
+ "first_call_seconds": 1.3150010108947754,
+ "sampling_seconds_reference": 2.0405771732330322,
+ "reference_seconds": [
+  375.8089106082916,
+  347.709641456604
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 1.1337265968322754
+   },
+   {
+    "offset": 499500,
+    "seconds": 1.2869911193847656
+   },
+   {
+    "offset": 999000,
+    "seconds": 1.1354866027832031
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 7.833311080932617
+   },
+   {
+    "offset": 495000,
+    "seconds": 7.76326322555542
+   },
+   {
+    "offset": 990000,
+    "seconds": 7.978277921676636
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 77.29444527626038
+   },
+   {
+    "offset": 450000,
+    "seconds": 68.91289830207825
+   },
+   {
+    "offset": 900000,
+    "seconds": 76.19671988487244
+   }
+  ]
+ }
+}

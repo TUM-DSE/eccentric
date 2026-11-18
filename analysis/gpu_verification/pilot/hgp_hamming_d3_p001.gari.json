@@ -1,0 +1,57 @@
+{
+ "circuit": "hgp_hamming_d3_p001",
+ "decoder": "gari",
+ "batch": 65536,
+ "reference_shots": 1000000,
+ "build_seconds": 3.9935083389282227,
+ "first_call_seconds": 0.05059361457824707,
+ "sampling_seconds_reference": 0.518775463104248,
+ "reference_seconds": [
+  7.233760118484497,
+  7.194777011871338
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.05053567886352539
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.0507047176361084
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.05060458183288574
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 0.10991501808166504
+   },
+   {
+    "offset": 495000,
+    "seconds": 0.10405850410461426
+   },
+   {
+    "offset": 990000,
+    "seconds": 0.10463428497314453
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 0.7745051383972168
+   },
+   {
+    "offset": 450000,
+    "seconds": 0.7426066398620605
+   },
+   {
+    "offset": 900000,
+    "seconds": 0.7536799907684326
+   }
+  ]
+ }
+}
