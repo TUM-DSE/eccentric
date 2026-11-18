@@ -70,6 +70,8 @@ cd ../..
 
 The `gari` and `gari_pp` decoders compile the authors' C decoder on first use with `cc` and OpenMP (into `~/.cache/eccentric`, or `$ECCENTRIC_CACHE`), so they need a C compiler.
 
+The `_gpu` decoders need an NVIDIA GPU and `pip install --no-deps -r requirements-gpu.txt` (CuPy, and CUDA-Q QEC for `bposd_gpu`, `bposd_tuned_gpu` and `relay_bp_gpu`); without them ECCentric runs as before. See [analysis/GPU.md](analysis/GPU.md).
+
 `pip install -e .` installs the dependencies from `requirements.txt` and adds an `eccentric` command, equivalent to `python -m eccentric`. If you cloned without `--recurse-submodules`, fetch the submodules first with `git submodule update --init --recursive`.
 
 Run all commands from the repository root: results are written to `experiment_results/` and figures to `figures/` relative to the current directory.
@@ -122,7 +124,7 @@ experiments:
 | `num_samples` | Number of shots (or, for `routing` and `translation`, number of repetitions) |
 | `backends` | List of backends (see below) |
 | `codes` | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane), and the codes listed under [Codes](#codes) |
-| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only), `bplsd`, `union_find`, `belief_find`, `belief_matching`, `relay_bp`, `tesseract`, `mwpf`, `bposd_tuned`, `gari`, `gari_pp` (see [Decoders](#decoders)) |
+| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only), `bplsd`, `union_find`, `belief_find`, `belief_matching`, `relay_bp`, `tesseract`, `mwpf`, `bposd_tuned`, `gari`, `gari_pp`, and GPU versions with a `_gpu` suffix (see [Decoders](#decoders)) |
 | `error_types` | List of noise models (see below) |
 | `error_probabilities` | Physical error rates `p` for the artificial noise models |
 | `backends_sizes` | Number of qubits of a `custom_*` backend. The largest code distance that fits is used |
@@ -243,6 +245,7 @@ Notes:
 | `tesseract` | Tesseract most-likely-error search decoder (Google) with its default configuration | All codes, but slow beyond a few hundred qubits; use as an accuracy reference on small instances |
 | `gari` | GARI (Maan et al., arXiv:2510.14060): normalized min-sum on the GARI-transformed correlated error model, with the authors' C decoder (github.com/astra-decoders/gari-nms, Apache-2.0, vendored in `eccentric/decoders/gari`); their standalone setting (400 iterations, normalization 0.96875, no ensemble). Checked against their published results on their circuits | CSS memory circuits; refused (decoder not applicable) where detectors or errors lack the X/Z structure GARI needs (non-CSS codes, some Bacon-Shor and routed circuits). A shot it does not converge on gets no correction |
 | `gari_pp` | **GARI++, beta reimplementation** (Maan et al., arXiv:2611.12833; the authors have not released it): GARI for at most 7 iterations (normalization 0.9063 surface-like, 0.725 qLDPC, 0.825 color), and on the shots it does not converge on, union-find on the residual syndrome of the observables' side, guided by GARI's posterior LLRs of the iteration with the lightest residual. The paper uses Chromobius (color) and its own hypergraph union-find (BB) as second stages; this uses ldpc's union-find everywhere | As `gari` |
+| `bposd_gpu`, `bposd_tuned_gpu`, `bplsd_gpu`, `belief_find_gpu`, `relay_bp_gpu`, `union_find_gpu`, `gari_gpu`, `hier_bposd_gpu`, `hier_bposd_hard_gpu` | GPU versions of the decoders of the same name without `_gpu`, with the same settings ([analysis/GPU.md](analysis/GPU.md)): `bplsd_gpu`, `belief_find_gpu`, `gari_gpu` and `hier_bposd_hard_gpu` give the CPU decoders' corrections exactly; the others agree statistically, except `union_find_gpu` (a different tie order, 0.1–2% different logical error rates) and `relay_bp_gpu` (NVIDIA's Relay-BP, one set of memory strengths for all shots). 12–490× one CPU core on an H200 | As the CPU decoder; needs an NVIDIA GPU and `requirements-gpu.txt` |
 
 ### Backends
 

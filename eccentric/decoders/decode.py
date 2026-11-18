@@ -11,6 +11,7 @@ from .sinter_decoders import mwpf, relay_bp, tesseract
 from .gari import gari, gari_pp
 from .correlated_matching import mwpm_corr
 from .hierarchical import hierarchical
+from .gpu import GPU_DECODERS, gpu_decoder
 
 DECODERS = {
     "bplsd": bplsd,
@@ -78,6 +79,20 @@ def decode(
         try:
             return hierarchical(circuit, num_shots, approximate_disjoint_errors, code_name, distance,
                                 soft=decoder == "hier_bposd")
+        except Exception as e:
+            logging.error(f"{decoder} failed: {e}")
+            return None
+    elif decoder in GPU_DECODERS:
+        # GPU versions (decoders/gpu, analysis/GPU.md): same settings as the CPU decoder of the same name without "_gpu"
+        try:
+            run = gpu_decoder(decoder)
+            if decoder in ("bposd_gpu", "bposd_tuned_gpu"):
+                return run(circuit, num_shots, approximate_disjoint_errors, chk_variant=code_name in ("steane", "bacon"),
+                           bp="tuned" if decoder == "bposd_tuned_gpu" else "paper")
+            if decoder in ("hier_bposd_gpu", "hier_bposd_hard_gpu"):
+                return run(circuit, num_shots, approximate_disjoint_errors, code_name, distance,
+                           soft=decoder == "hier_bposd_gpu")
+            return run(circuit, num_shots, approximate_disjoint_errors)
         except Exception as e:
             logging.error(f"{decoder} failed: {e}")
             return None
