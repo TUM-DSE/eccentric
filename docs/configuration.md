@@ -1,4 +1,30 @@
-# Configuration fields
+# Configuration and command line
+
+## Running
+
+```bash
+python -m eccentric configs/example.yaml
+```
+
+This runs the small example in [`configs/example.yaml`](../configs/example.yaml) and writes to `experiment_results/Example/`:
+
+- `results.csv`: one row per configuration, for example the `logical_error_rate` over all `rounds` of syndrome extraction and the `logical_error_rate_per_round` derived from it as (1 − (1 − 2P)^(1/rounds))/2
+- `experiment.log`: completed, skipped and failed configurations, with error messages
+- `metadata_<timestamp>.json`: a copy of the experiment configuration
+
+Results are appended to `results.csv`, so delete the directory or rename the experiment before re-running it.
+
+Command-line options:
+
+| Option | Description |
+| --- | --- |
+| `python -m eccentric a.yaml b.yaml` | Run several configuration files in sequence |
+| `-j N`, `--workers N` | Number of parallel worker processes (default: all CPUs). Lower it if you run out of memory |
+| `-e NAME`, `--experiment NAME` | Only run the experiment called `NAME` (repeatable) |
+| `eccentric plugins` | List the installed plugins ([docs/plugins.md](plugins.md)) |
+| `eccentric <command> ...` | Run a command added by a plugin or tool |
+
+## Configuration fields
 
 
 | Field | Description |
