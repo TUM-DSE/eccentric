@@ -1,0 +1,25 @@
+code,device,distance,ler_per_round,is_bound,platform
+bacon,real_apollo,27,0.00889235,False,Quantinuum Apollo
+bacon,real_nsapollo,27,2.33667e-05,False,Quantinuum Apollo
+color,real_apollo,17,0.00951575,False,Quantinuum Apollo
+color,real_nsapollo,17,0.0194965,False,Quantinuum Apollo
+gross,real_apollo,12,2.12001e-08,True,Quantinuum Apollo
+gross,real_nsapollo,12,8.39355e-08,False,Quantinuum Apollo
+hh,real_apollo,17,2.25968e-06,True,Quantinuum Apollo
+hh,real_nsapollo,17,0.000459357,False,Quantinuum Apollo
+steane,real_apollo,27,5.1169e-06,True,Quantinuum Apollo
+steane,real_nsapollo,27,2.9389e-05,True,Quantinuum Apollo
+surface,real_apollo,17,4.70624e-06,False,Quantinuum Apollo
+surface,real_nsapollo,17,0.0100305,False,Quantinuum Apollo
+bacon,real_infleqtion,19,,False,Infleqtion
+bacon,real_nsinfleqtion,19,0.0586721,False,Infleqtion
+color,real_infleqtion,13,0.000252144,False,Infleqtion
+color,real_nsinfleqtion,13,0.0771092,False,Infleqtion
+gross,real_infleqtion,12,1.82866e-07,False,Infleqtion
+gross,real_nsinfleqtion,12,,False,Infleqtion
+hh,real_infleqtion,11,0.00108113,False,Infleqtion
+hh,real_nsinfleqtion,11,0.0379171,False,Infleqtion
+steane,real_infleqtion,9,0.0011896,False,Infleqtion
+steane,real_nsinfleqtion,9,0.0391577,False,Infleqtion
+surface,real_infleqtion,13,1.27948e-05,False,Infleqtion
+surface,real_nsinfleqtion,13,0.00588541,False,Infleqtion

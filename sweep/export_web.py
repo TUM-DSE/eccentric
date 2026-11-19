@@ -12,23 +12,8 @@ import sys
 
 import pandas as pd
 
-FAMILIES = [
-    ("ls_", "Lattice surgery (surface-code patches)", "Topological"),
-    ("bb", "Bivariate bicycle", "QLDPC"), ("gross", "Bivariate bicycle", "QLDPC"),
-    ("cbb", "Coprime bivariate bicycle", "QLDPC"), ("tb", "Trivariate bicycle", "QLDPC"),
-    ("bpc", "Balanced product cyclic", "QLDPC"), ("gb", "Generalized bicycle", "QLDPC"),
-    ("hgp", "Hypergraph product", "QLDPC"), ("lcs", "Lift-connected surface", "QLDPC"),
-    ("lp", "Lifted product", "QLDPC"), ("qlp", "Quasi-cyclic lifted product", "QLDPC"),
-    ("qt", "Quantum Tanner", "QLDPC"), ("mitten", "Mitten", "QLDPC"),
-    ("surface", "Surface", "Topological"), ("xzzx", "XZZX surface", "Topological"),
-    ("toric", "Toric", "Topological"), ("repetition", "Repetition", "Topological"),
-    ("color", "Color", "Topological"), ("rm15", "Quantum Reed-Muller", "Topological"),
-    ("planar_honeycomb", "Planar honeycomb", "Floquet"), ("honeycomb", "Honeycomb", "Floquet"),
-    ("semi_hyperbolic", "Semi-hyperbolic Floquet", "Floquet"), ("hyperbolic", "Hyperbolic Floquet", "Floquet"),
-    ("bacon", "Bacon-Shor", "Subsystem"), ("steane", "Concatenated Steane", "Concatenated"),
-    ("mhc", "Many-hypercube", "Concatenated"), ("golay", "Quantum Golay", "Algebraic"),
-    ("hh", "Heavy-hex", "Hybrid"),
-]
+from eccentric.dataset import FAMILIES, family  # noqa: F401 (re-exported for sweep.export_codes)
+
 
 DEVICES = {
     "real_torino": "IBM Heron (133 qubits)",
@@ -172,13 +157,6 @@ def device_label(backend):
         name, size = {"loon": ("IBM Loon/Nighthawk", 121), "flamingo": ("IBM Flamingo", 133)}[parts[1]]
         return f"{name}, {parts[2]} QPUs ({int(parts[2]) * size} qubits, projected)"
     return DEVICES.get(backend, backend)
-
-
-def family(code):
-    for prefix, name, taxonomy in FAMILIES:
-        if code.startswith(prefix):
-            return name, taxonomy
-    return code, "Other"
 
 
 def latest_commit(commits):
