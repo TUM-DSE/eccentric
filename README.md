@@ -31,24 +31,29 @@ can be compared end to end. It comes with a large dataset of results across all 
 
 The dataset ([`experiment_results/Sweep/results.csv`](experiment_results/Sweep/results.csv)) covers every
 code on IBM, Google, Quantinuum, Infleqtion and neutral-atom device models, under their own noise and scaled
-versions of it, with every applicable decoder, in the Z and X basis. All results can be browsed on the
-**[website](https://eccentric-benchmark.github.io)**; its columns are documented in [docs/dataset.md](docs/dataset.md). Some findings, with the full analyses in [`analysis/`](analysis/README.md):
+versions of it, with every applicable decoder, in the Z and X basis. Browse it on the
+**[website](https://eccentric-benchmark.github.io)**; its columns are documented in [docs/dataset.md](docs/dataset.md).
+Every figure below is built from it by `python -m eccentric.figures` ([site/figures](site/figures), with the
+plotted values as CSV); the full analyses are in [`analysis/`](analysis/README.md).
 
-- **Layout decides whether qLDPC codes work on IBM devices.** Under the same noise (a tenth of today's
-  Flamingo errors, coherence times tripled), bivariate bicycle codes on a native layout reach logical error
-  rates of 10⁻³ to 10⁻⁶. Routed onto Flamingo or Loon, they stay at 10–100%: 40× to 200,000× worse.
-  ([INSIGHTS](analysis/INSIGHTS.md))
-- **The surface code is below threshold on most of today's devices.** It is below threshold at today's
-  noise on Willow, Infleqtion, Harvard/MIT neutral atoms, IBM's bicycle module and Loon. On Heron it needs
-  40% of today's noise. ([NOISE_SCALING](analysis/NOISE_SCALING.md))
-- **Z-basis memory experiments are optimistic.** For 791 of 1,492 configurations below threshold, the X basis is
-  significantly worse; on Infleqtion, qLDPC codes are 7.6× worse in X (median). ([BASIS](analysis/BASIS.md))
-- **There is no single best decoder.** The most accurate decoder and the fastest one that is good enough differ by orders
-  of magnitude in cost, and which decoder wins depends on the code, the device and the noise.
-  ([DECODING](analysis/DECODING.md), [DECODER_SETTINGS](analysis/DECODER_SETTINGS.md), [NEW_DECODERS](analysis/NEW_DECODERS.md))
-- **The device models match experiments.** With matching decoders, the Willow model reproduces Google's
-  surface-code memory within 1.15 to 1.25× at every distance, and its error suppression factor Λ.
-  ([WILLOW](analysis/WILLOW.md))
+<p align="center"><img src="site/figures/where-codes-work.png" width="720" alt="Best logical error per round of each code family on each device at today's noise"></p>
+
+- **Trapped ions protect the most code families.** At today's noise, 19 code families reach a logical error
+  below 10⁻³ per round on Quantinuum Apollo, and none on IBM Heron.
+- **Routing, not the code, decides whether qLDPC codes work on IBM devices.** Under the same noise,
+  bivariate bicycle codes are 42× to 228,000× worse routed onto IBM Flamingo or Loon than on a layout that
+  gives every check its couplers ([figure](site/figures/routing-vs-native.png)).
+- **The surface code is below threshold on 6 of 8 device models at today's noise, the color code on 3**
+  ([figure](site/figures/below-threshold.png)).
+- **Z-basis memory experiments flatter the code.** In the X basis, 72% of configurations do worse; on
+  Infleqtion by a median 6.1× ([figure](site/figures/x-vs-z.png)).
+- **BP-OSD, the go-to qLDPC decoder, is as good as the best decoder on only 39% of configurations.**
+  Tesseract is on 99.8%, at a third of BP-OSD's median time per shot:
+
+<p align="center"><img src="site/figures/decoders.png" width="620" alt="Share of configurations where each decoder is as good as the best, against its median decoding time"></p>
+
+- **The device models match experiments.** With matching decoders, the Willow model is 1.2–1.3× optimistic
+  against Google's surface-code memory and reproduces its error suppression ([figure](site/figures/willow.png)).
 
 Built on the dataset: [QEC Matchmaker](https://github.com/manosgior/qec-matchmaker) predicts the logical
 error rate and decoding time of a circuit and recommends a decoder, without decoding it.
@@ -248,6 +253,7 @@ tools/                tools built on ECCentric, each its own package
 sweep/                the sweep: job generation, cluster runner, collection, website export
 validation/           cluster checks of circuits, distances and decoders
 docs/                 reference documentation
+site/                 what the website shows: figures (python -m eccentric.figures) with their data
 tests/                unit and end-to-end tests (pytest)
 external/             submodules: qiskit-qec fork, more-bacon-less-threshold, honeycomb_threshold, honeycomb-boundaries
 ```

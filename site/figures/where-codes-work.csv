@@ -1,0 +1,203 @@
+family,device,ler_per_round,is_bound,above_threshold
+Bacon-Shor,real_apollo,0.00889235,False,False
+Bacon-Shor,real_bicycle,0.0358411,False,False
+Bacon-Shor,real_flamingo,0.0719944,False,False
+Bacon-Shor,real_flamingo_1_qpu,0.056048,False,False
+Bacon-Shor,real_harvard,0.0394797,False,False
+Bacon-Shor,real_infleqtion,0.0168287,False,False
+Bacon-Shor,real_loon,0.0458545,False,False
+Bacon-Shor,real_loon_1_qpu,0.0902596,False,False
+Bacon-Shor,real_torino,0.0928374,False,False
+Bacon-Shor,real_willow,0.0154603,False,False
+Balanced product cyclic,real_apollo,1.25e-07,False,False
+Balanced product cyclic,real_bicycle,,False,True
+Balanced product cyclic,real_flamingo,,False,True
+Balanced product cyclic,real_flamingo_1_qpu,,False,True
+Balanced product cyclic,real_harvard,0.153387,False,False
+Balanced product cyclic,real_infleqtion,5.62502e-06,False,False
+Balanced product cyclic,real_loon,,False,True
+Balanced product cyclic,real_loon_1_qpu,,False,True
+Balanced product cyclic,real_torino,,False,True
+Balanced product cyclic,real_willow,,False,True
+Bivariate bicycle,real_apollo,1.44047e-08,False,False
+Bivariate bicycle,real_bicycle,0.00808529,False,False
+Bivariate bicycle,real_flamingo,,False,True
+Bivariate bicycle,real_flamingo_1_qpu,,False,True
+Bivariate bicycle,real_harvard,0.119792,False,False
+Bivariate bicycle,real_infleqtion,1.82866e-07,False,False
+Bivariate bicycle,real_loon,,False,True
+Bivariate bicycle,real_loon_1_qpu,,False,True
+Bivariate bicycle,real_torino,,False,True
+Bivariate bicycle,real_willow,,False,True
+Color,real_apollo,0.00951575,False,False
+Color,real_bicycle,0.0185275,False,False
+Color,real_flamingo,0.0631686,False,False
+Color,real_flamingo_1_qpu,0.0311274,False,False
+Color,real_harvard,0.0110785,False,False
+Color,real_infleqtion,0.000252144,False,False
+Color,real_loon,0.037134,False,False
+Color,real_loon_1_qpu,0.0659661,False,False
+Color,real_torino,0.0344699,False,False
+Color,real_willow,0.00470161,False,False
+Concatenated Steane,real_apollo,5.1169e-06,True,False
+Concatenated Steane,real_bicycle,0.0426449,False,False
+Concatenated Steane,real_flamingo,0.134229,False,False
+Concatenated Steane,real_flamingo_1_qpu,0.104946,False,False
+Concatenated Steane,real_infleqtion,0.0011896,False,False
+Concatenated Steane,real_loon,0.157354,False,False
+Concatenated Steane,real_loon_1_qpu,0.098121,False,False
+Concatenated Steane,real_willow,0.0435916,False,False
+Coprime bivariate bicycle,real_apollo,5.00013e-06,False,False
+Coprime bivariate bicycle,real_bicycle,,False,True
+Coprime bivariate bicycle,real_flamingo,,False,True
+Coprime bivariate bicycle,real_flamingo_1_qpu,,False,True
+Coprime bivariate bicycle,real_harvard,0.0909056,False,False
+Coprime bivariate bicycle,real_infleqtion,2.01674e-05,False,False
+Coprime bivariate bicycle,real_loon,,False,True
+Coprime bivariate bicycle,real_loon_1_qpu,,False,True
+Coprime bivariate bicycle,real_torino,,False,True
+Generalized bicycle,real_apollo,6.42046e-07,False,False
+Generalized bicycle,real_bicycle,,False,True
+Generalized bicycle,real_flamingo,,False,True
+Generalized bicycle,real_flamingo_1_qpu,,False,True
+Generalized bicycle,real_harvard,,False,True
+Generalized bicycle,real_infleqtion,0.00395817,False,False
+Generalized bicycle,real_loon,,False,True
+Generalized bicycle,real_loon_1_qpu,,False,True
+Generalized bicycle,real_torino,,False,True
+Heavy-hex,real_apollo,2.25968e-06,True,False
+Heavy-hex,real_bicycle,0.0185224,False,False
+Heavy-hex,real_flamingo,0.046057,False,False
+Heavy-hex,real_flamingo_1_qpu,0.0419069,False,False
+Heavy-hex,real_harvard,0.0114567,False,False
+Heavy-hex,real_infleqtion,0.000665577,False,False
+Heavy-hex,real_loon,0.0309925,False,False
+Heavy-hex,real_loon_1_qpu,0.0845703,False,False
+Heavy-hex,real_torino,0.057571,False,False
+Heavy-hex,real_willow,0.00833103,False,False
+Honeycomb,real_apollo,2.50002e-06,False,False
+Honeycomb,real_bicycle,0.132032,False,False
+Honeycomb,real_flamingo,0.159124,False,False
+Honeycomb,real_flamingo_1_qpu,0.160191,False,False
+Honeycomb,real_harvard,0.0882255,False,False
+Honeycomb,real_infleqtion,0.00388418,False,False
+Honeycomb,real_loon,0.159124,False,False
+Honeycomb,real_loon_1_qpu,0.147631,False,False
+Honeycomb,real_torino,0.259719,False,False
+Honeycomb,real_willow,0.0446666,False,False
+Hyperbolic Floquet,real_apollo,1.25e-06,False,False
+Hyperbolic Floquet,real_bicycle,,False,True
+Hyperbolic Floquet,real_flamingo,,False,True
+Hyperbolic Floquet,real_flamingo_1_qpu,,False,True
+Hyperbolic Floquet,real_harvard,,False,True
+Hyperbolic Floquet,real_infleqtion,0.0469136,False,False
+Hyperbolic Floquet,real_loon,,False,True
+Hyperbolic Floquet,real_loon_1_qpu,,False,True
+Hyperbolic Floquet,real_torino,,False,True
+Hyperbolic Floquet,real_willow,0.0882255,False,False
+Hypergraph product,real_apollo,5.00001e-07,False,False
+Hypergraph product,real_bicycle,,False,True
+Hypergraph product,real_flamingo,,False,True
+Hypergraph product,real_flamingo_1_qpu,,False,True
+Hypergraph product,real_harvard,0.224839,False,False
+Hypergraph product,real_infleqtion,0.0262421,False,False
+Hypergraph product,real_loon,,False,True
+Hypergraph product,real_loon_1_qpu,,False,True
+Hypergraph product,real_torino,,False,True
+Lift-connected surface,real_apollo,5.71431e-07,False,False
+Lift-connected surface,real_bicycle,0.0878715,False,False
+Lift-connected surface,real_flamingo,0.405896,False,False
+Lift-connected surface,real_flamingo_1_qpu,0.273197,False,False
+Lift-connected surface,real_harvard,0.0736491,False,False
+Lift-connected surface,real_infleqtion,0.00111168,False,False
+Lift-connected surface,real_loon,0.236318,False,False
+Lift-connected surface,real_loon_1_qpu,0.17551,False,False
+Lift-connected surface,real_torino,,False,True
+Lifted product,real_apollo,0.000210876,False,False
+Lifted product,real_bicycle,0.0830225,False,False
+Lifted product,real_flamingo,0.381437,False,False
+Lifted product,real_flamingo_1_qpu,0.319986,False,False
+Lifted product,real_harvard,0.0542433,False,False
+Lifted product,real_infleqtion,0.0112175,False,False
+Lifted product,real_loon,0.248894,False,False
+Lifted product,real_loon_1_qpu,0.118883,False,False
+Lifted product,real_torino,,False,True
+Many-hypercube,real_apollo,7.87222e-06,False,False
+Many-hypercube,real_bicycle,,False,True
+Many-hypercube,real_flamingo,,False,True
+Many-hypercube,real_flamingo_1_qpu,,False,True
+Many-hypercube,real_harvard,,False,True
+Many-hypercube,real_infleqtion,0.0888664,False,False
+Many-hypercube,real_loon,,False,True
+Many-hypercube,real_loon_1_qpu,,False,True
+Many-hypercube,real_torino,,False,True
+Mitten,real_apollo,6.53564e-07,False,False
+Mitten,real_bicycle,,False,True
+Mitten,real_flamingo,,False,True
+Mitten,real_harvard,,False,True
+Mitten,real_infleqtion,0.00845228,False,False
+Planar honeycomb,real_apollo,8.33337e-07,False,False
+Planar honeycomb,real_bicycle,0.104037,False,False
+Planar honeycomb,real_flamingo,0.102836,False,False
+Planar honeycomb,real_flamingo_1_qpu,0.120082,False,False
+Planar honeycomb,real_harvard,0.064733,False,False
+Planar honeycomb,real_infleqtion,0.00333105,False,False
+Planar honeycomb,real_loon,0.07433,False,False
+Planar honeycomb,real_loon_1_qpu,0.187119,False,False
+Planar honeycomb,real_torino,0.181613,False,False
+Planar honeycomb,real_willow,0.0158746,False,False
+Quantum Golay,real_apollo,1.14294e-05,False,False
+Quantum Golay,real_bicycle,0.0941875,False,False
+Quantum Golay,real_flamingo,0.155753,False,False
+Quantum Golay,real_flamingo_1_qpu,0.136824,False,False
+Quantum Golay,real_harvard,0.0577502,False,False
+Quantum Golay,real_infleqtion,0.00552547,False,False
+Quantum Golay,real_loon,0.123939,False,False
+Quantum Golay,real_loon_1_qpu,0.122438,False,False
+Quantum Golay,real_torino,0.140157,False,False
+Quantum Tanner,real_apollo,4.55622e-05,False,False
+Quantum Tanner,real_bicycle,0.381437,False,False
+Quantum Tanner,real_flamingo,,False,True
+Quantum Tanner,real_flamingo_1_qpu,,False,True
+Quantum Tanner,real_harvard,0.114028,False,False
+Quantum Tanner,real_infleqtion,0.0164492,False,False
+Quantum Tanner,real_loon,,False,True
+Quantum Tanner,real_loon_1_qpu,,False,True
+Quantum Tanner,real_torino,,False,True
+Semi-hyperbolic Floquet,real_apollo,1.00003e-05,False,False
+Semi-hyperbolic Floquet,real_bicycle,,False,True
+Semi-hyperbolic Floquet,real_flamingo,,False,True
+Semi-hyperbolic Floquet,real_flamingo_1_qpu,,False,True
+Semi-hyperbolic Floquet,real_harvard,,False,True
+Semi-hyperbolic Floquet,real_infleqtion,0.00462162,False,False
+Semi-hyperbolic Floquet,real_loon,,False,True
+Semi-hyperbolic Floquet,real_loon_1_qpu,,False,True
+Semi-hyperbolic Floquet,real_torino,,False,True
+Semi-hyperbolic Floquet,real_willow,0.0368015,False,False
+Surface,real_apollo,4.70624e-06,False,False
+Surface,real_bicycle,0.000223229,False,False
+Surface,real_flamingo,0.025383,False,False
+Surface,real_flamingo_1_qpu,0.0161361,False,False
+Surface,real_harvard,0.00148297,False,False
+Surface,real_infleqtion,1.27948e-05,False,False
+Surface,real_loon,0.00581629,False,False
+Surface,real_loon_1_qpu,0.0223834,False,False
+Surface,real_torino,0.0227745,False,False
+Surface,real_willow,0.000194629,False,False
+Trivariate bicycle,real_apollo,1.66668e-06,False,False
+Trivariate bicycle,real_bicycle,0.116148,False,False
+Trivariate bicycle,real_flamingo,,False,True
+Trivariate bicycle,real_flamingo_1_qpu,,False,True
+Trivariate bicycle,real_harvard,0.00639478,False,False
+Trivariate bicycle,real_infleqtion,1.8547e-05,False,False
+Trivariate bicycle,real_loon,,False,True
+Trivariate bicycle,real_loon_1_qpu,,False,True
+Trivariate bicycle,real_torino,,False,True
+XZZX surface,real_bicycle,0.00204774,False,False
+XZZX surface,real_flamingo,0.0237797,False,False
+XZZX surface,real_flamingo_1_qpu,0.0274829,False,False
+XZZX surface,real_harvard,0.00236269,False,False
+XZZX surface,real_infleqtion,0.000281735,False,False
+XZZX surface,real_loon,0.00799346,False,False
+XZZX surface,real_torino,0.0292312,False,False
+XZZX surface,real_willow,0.000485208,False,False

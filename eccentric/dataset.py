@@ -87,6 +87,33 @@ WITH_RATE = ("measured", "low statistics", "upper bound")
 
 KEY = list(CONFIG) + list(DECODER)
 
+# Code families by name prefix (first match wins): (prefix, family, kind)
+FAMILIES = [
+    ("ls_", "Lattice surgery (surface-code patches)", "Topological"),
+    ("bb", "Bivariate bicycle", "QLDPC"), ("gross", "Bivariate bicycle", "QLDPC"),
+    ("cbb", "Coprime bivariate bicycle", "QLDPC"), ("tb", "Trivariate bicycle", "QLDPC"),
+    ("bpc", "Balanced product cyclic", "QLDPC"), ("gb", "Generalized bicycle", "QLDPC"),
+    ("hgp", "Hypergraph product", "QLDPC"), ("lcs", "Lift-connected surface", "QLDPC"),
+    ("lp", "Lifted product", "QLDPC"), ("qlp", "Quasi-cyclic lifted product", "QLDPC"),
+    ("qt", "Quantum Tanner", "QLDPC"), ("mitten", "Mitten", "QLDPC"),
+    ("surface", "Surface", "Topological"), ("xzzx", "XZZX surface", "Topological"),
+    ("toric", "Toric", "Topological"), ("repetition", "Repetition", "Topological"),
+    ("color", "Color", "Topological"), ("rm15", "Quantum Reed-Muller", "Topological"),
+    ("planar_honeycomb", "Planar honeycomb", "Floquet"), ("honeycomb", "Honeycomb", "Floquet"),
+    ("semi_hyperbolic", "Semi-hyperbolic Floquet", "Floquet"), ("hyperbolic", "Hyperbolic Floquet", "Floquet"),
+    ("bacon", "Bacon-Shor", "Subsystem"), ("steane", "Concatenated Steane", "Concatenated"),
+    ("mhc", "Many-hypercube", "Concatenated"), ("golay", "Quantum Golay", "Algebraic"),
+    ("hh", "Heavy-hex", "Hybrid"),
+]
+
+
+def family(code: str):
+    """(family, kind) of a code name, e.g. ("Bivariate bicycle", "QLDPC") for bb72"""
+    for prefix, name, kind in FAMILIES:
+        if code.startswith(prefix):
+            return name, kind
+    return code, "Other"
+
 
 def load(path=DEFAULT_PATH, check: bool = True) -> pd.DataFrame:
     """The sweep table. With `check`, raise if a documented column is missing or a status is unknown"""

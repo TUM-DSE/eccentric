@@ -1,0 +1,34 @@
+code,distance,layout_method,swap_overhead_mean,device
+bacon,17,dense,2146.69,2D grid
+bacon,17,sabre,0,2D grid
+bacon,17,trivial,0,2D grid
+color,11,dense,13295.2,2D grid
+color,11,sabre,5307.8,2D grid
+color,11,trivial,12837.6,2D grid
+gross,144,dense,58595.4,2D grid
+gross,144,sabre,44415.5,2D grid
+gross,144,trivial,57265.8,2D grid
+hh,10,dense,14064,2D grid
+hh,10,sabre,4516.72,2D grid
+hh,10,trivial,12089.3,2D grid
+steane,9,dense,7940.26,2D grid
+steane,9,sabre,3640.91,2D grid
+steane,9,trivial,8631.11,2D grid
+surface,11,dense,13175.5,2D grid
+surface,11,sabre,3288.28,2D grid
+surface,11,trivial,11465.9,2D grid
+bacon,13,dense,1565.53,Heavy-hex
+bacon,13,sabre,892.139,Heavy-hex
+bacon,13,trivial,2328.55,Heavy-hex
+color,9,dense,10036.8,Heavy-hex
+color,9,sabre,5257.67,Heavy-hex
+color,9,trivial,11207.6,Heavy-hex
+hh,9,dense,13697.2,Heavy-hex
+hh,9,sabre,6201.6,Heavy-hex
+hh,9,trivial,15649.8,Heavy-hex
+steane,9,dense,12249.1,Heavy-hex
+steane,9,sabre,6945.61,Heavy-hex
+steane,9,trivial,12435.5,Heavy-hex
+surface,9,dense,9161.28,Heavy-hex
+surface,9,sabre,4447.77,Heavy-hex
+surface,9,trivial,11987.9,Heavy-hex

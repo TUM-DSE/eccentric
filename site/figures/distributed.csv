@@ -1,0 +1,41 @@
+panel,code,series,device,noise,ler_per_round,is_bound
+"IBM Flamingo, today's noise",bacon,"3 QPUs, larger codes",real_flamingo,real_flamingo,0.0719944,False
+"IBM Flamingo, today's noise",color,"3 QPUs, larger codes",real_flamingo,real_flamingo,0.0910356,False
+"IBM Flamingo, today's noise",hh,"3 QPUs, larger codes",real_flamingo,real_flamingo,0.0876564,False
+"IBM Flamingo, today's noise",steane,"3 QPUs, larger codes",real_flamingo,real_flamingo,0.134229,False
+"IBM Flamingo, today's noise",surface,"3 QPUs, larger codes",real_flamingo,real_flamingo,0.0771924,False
+"IBM Flamingo, today's noise",bacon,1 QPU,real_flamingo_1_qpu,real_flamingo,0.0876564,False
+"IBM Flamingo, today's noise",color,1 QPU,real_flamingo_1_qpu,real_flamingo,0.0678996,False
+"IBM Flamingo, today's noise",hh,1 QPU,real_flamingo_1_qpu,real_flamingo,0.0853933,False
+"IBM Flamingo, today's noise",steane,1 QPU,real_flamingo_1_qpu,real_flamingo,0.104946,False
+"IBM Flamingo, today's noise",surface,1 QPU,real_flamingo_1_qpu,real_flamingo,0.0232387,False
+"IBM Loon, today's noise",bacon,"2 QPUs, larger codes",real_loon,real_flamingo,0.0651744,False
+"IBM Loon, today's noise",color,"2 QPUs, larger codes",real_loon,real_flamingo,0.0960383,False
+"IBM Loon, today's noise",hh,"2 QPUs, larger codes",real_loon,real_flamingo,0.112868,False
+"IBM Loon, today's noise",steane,"2 QPUs, larger codes",real_loon,real_flamingo,0.157354,False
+"IBM Loon, today's noise",surface,"2 QPUs, larger codes",real_loon,real_flamingo,0.0391577,False
+"IBM Loon, today's noise",bacon,1 QPU,real_loon_1_qpu,real_flamingo,0.0902596,False
+"IBM Loon, today's noise",color,1 QPU,real_loon_1_qpu,real_flamingo,0.0659661,False
+"IBM Loon, today's noise",hh,1 QPU,real_loon_1_qpu,real_flamingo,0.0845703,False
+"IBM Loon, today's noise",steane,1 QPU,real_loon_1_qpu,real_flamingo,0.098121,False
+"IBM Loon, today's noise",surface,1 QPU,real_loon_1_qpu,real_flamingo,0.0223834,False
+"IBM Flamingo, noise ÷10",bacon,"3 QPUs, larger codes",real_flamingo,real_flamingo_downscaled,0.0789608,False
+"IBM Flamingo, noise ÷10",color,"3 QPUs, larger codes",real_flamingo,real_flamingo_downscaled,0.00533805,False
+"IBM Flamingo, noise ÷10",hh,"3 QPUs, larger codes",real_flamingo,real_flamingo_downscaled,0.00272066,False
+"IBM Flamingo, noise ÷10",steane,"3 QPUs, larger codes",real_flamingo,real_flamingo_downscaled,0.077423,False
+"IBM Flamingo, noise ÷10",surface,"3 QPUs, larger codes",real_flamingo,real_flamingo_downscaled,2.76832e-05,False
+"IBM Flamingo, noise ÷10",bacon,1 QPU,real_flamingo_1_qpu,real_flamingo_downscaled,0.0944346,False
+"IBM Flamingo, noise ÷10",color,1 QPU,real_flamingo_1_qpu,real_flamingo_downscaled,0.000538344,False
+"IBM Flamingo, noise ÷10",hh,1 QPU,real_flamingo_1_qpu,real_flamingo_downscaled,0.0011855,False
+"IBM Flamingo, noise ÷10",steane,1 QPU,real_flamingo_1_qpu,real_flamingo_downscaled,0.0413318,False
+"IBM Flamingo, noise ÷10",surface,1 QPU,real_flamingo_1_qpu,real_flamingo_downscaled,0.000159915,False
+"IBM Loon, noise ÷10",bacon,"2 QPUs, larger codes",real_loon,real_flamingo_downscaled,0.0659077,False
+"IBM Loon, noise ÷10",color,"2 QPUs, larger codes",real_loon,real_flamingo_downscaled,0.000781874,False
+"IBM Loon, noise ÷10",hh,"2 QPUs, larger codes",real_loon,real_flamingo_downscaled,0.00117238,False
+"IBM Loon, noise ÷10",steane,"2 QPUs, larger codes",real_loon,real_flamingo_downscaled,0.0483995,False
+"IBM Loon, noise ÷10",surface,"2 QPUs, larger codes",real_loon,real_flamingo_downscaled,5.0449e-05,False
+"IBM Loon, noise ÷10",bacon,1 QPU,real_loon_1_qpu,real_flamingo_downscaled,0.00374332,False
+"IBM Loon, noise ÷10",color,1 QPU,real_loon_1_qpu,real_flamingo_downscaled,0.000190305,False
+"IBM Loon, noise ÷10",hh,1 QPU,real_loon_1_qpu,real_flamingo_downscaled,0.00104604,False
+"IBM Loon, noise ÷10",steane,1 QPU,real_loon_1_qpu,real_flamingo_downscaled,0.0194278,False
+"IBM Loon, noise ÷10",surface,1 QPU,real_loon_1_qpu,real_flamingo_downscaled,6.25414e-05,False

@@ -1,0 +1,12 @@
+decoder,label,configurations,good_enough,median_ms_per_shot
+chromobius,Chromobius,166,13.8554,0.0456022
+belief_find,BeliefFind,2177,19.706,108.793
+gari,GARI,3219,20.0994,3.30029
+gari_pp,GARI++,3219,22.3361,2.4508
+bplsd,BP-LSD,2183,23.912,110.217
+bposd,BP-OSD,2843,39.1488,125.866
+mwpm,MWPM,1400,45.7857,0.038001
+bposd_tuned,BP-OSD (tuned),2515,61.5905,13.9608
+relay_bp,Relay-BP,2979,63.9812,14.6575
+mwpm_corr,Correlated MWPM,1479,69.9797,0.0250843
+tesseract,Tesseract,3996,99.8248,39.2986

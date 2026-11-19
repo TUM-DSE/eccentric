@@ -12,6 +12,10 @@ releases are tagged on GitHub.
 - `eccentric.dataset`: the sweep table's schema (columns, statuses, schema version 1) and a loader that checks it
   (docs/dataset.md). `stats.json` records the schema version.
 - `tools/` for tools built on ECCentric; an index of the analyses (analysis/README.md).
+- Figures (`python -m eccentric.figures`): featured findings of the dataset and the paper's topology,
+  technology, distributed, routing, translation and accumulated-error experiments redrawn from the current
+  results, each with its data, in `site/figures/` for the website.
+- `eccentric.dataset.family()`: the code families, used by the website export and the figures.
 
 ## [1.1.0] – 2026-11
 
