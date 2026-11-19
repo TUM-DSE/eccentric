@@ -1,3 +1,4 @@
+from .. import plugins
 from qiskit_ibm_runtime import QiskitRuntimeService
 from qiskit_ibm_runtime.fake_provider import FakeTorino
 from .custom_topologies import get_custom_topology
@@ -14,6 +15,17 @@ from .fake_harvard import FakeHarvardBackend
 from .variance_backend import VarianceBackend
 
 def get_backend(backend: str, backend_size: int):
+    """A built-in device, or a plugin device (eccentric.plugins, group eccentric.backends)"""
+    try:
+        return _builtin_backend(backend, backend_size)
+    except NotImplementedError:
+        make = plugins.get("backends", backend)
+        if make is None:
+            raise
+        return make(backend_size)
+
+
+def _builtin_backend(backend: str, backend_size: int):
     backend_type = backend.split("_")[0]
     if backend_type == "ibm":
         service = QiskitRuntimeService(instance="open-instance")

@@ -3,6 +3,16 @@
 All notable changes to ECCentric are listed here. Versions follow [semantic versioning](https://semver.org);
 releases are tagged on GitHub.
 
+## [Unreleased]
+
+### Added
+
+- Plugins: codes, decoders, devices, noise models and command-line commands from other packages, registered
+  through entry points (`eccentric.plugins`, docs/plugins.md). `eccentric plugins` lists them.
+- `eccentric.dataset`: the sweep table's schema (columns, statuses, schema version 1) and a loader that checks it
+  (docs/dataset.md). `stats.json` records the schema version.
+- `tools/` for tools built on ECCentric; an index of the analyses (analysis/README.md).
+
 ## [1.1.0] – 2026-11
 
 ### Added

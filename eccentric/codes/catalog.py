@@ -161,7 +161,7 @@ def _planar_honeycomb_qubits(d):
     return planar_honeycomb_num_qubits(d)
 
 
-CODES = {
+_BUILTIN_CODES = {
     "repetition": CodeFamily(_repetition, lambda d: 2 * d - 1),
     "xzzx": CodeFamily(_xzzx, lambda d: 2 * d * d - 1),
     "toric": CodeFamily(_toric, lambda d: 4 * d * d, schedules=QLDPC_SCHEDULES),
@@ -232,6 +232,39 @@ CODES = {
                        rounds_fixed=True)
        for name in _ls.LAYERS},
 }
+
+
+# The codes of the SIGMETRICS'26 paper, built by eccentric.codes.utils.get_code rather than the catalog
+PAPER_CODES = ("surface", "hh", "gross", "color", "bacon", "steane")
+
+
+class _Catalog(dict):
+    """The built-in codes, and plugin codes (eccentric.plugins, group eccentric.codes) looked up on first use.
+    Built-in names, the paper's codes included, always win over a plugin of the same name."""
+
+    def _plugin(self, name):
+        if not isinstance(name, str) or name in PAPER_CODES:
+            return None
+        from .. import plugins
+        code = plugins.get("codes", name)
+        if code is not None:
+            self[name] = code
+        return code
+
+    def __missing__(self, name):
+        code = self._plugin(name)
+        if code is None:
+            raise KeyError(name)
+        return code
+
+    def __contains__(self, name):
+        return dict.__contains__(self, name) or self._plugin(name) is not None
+
+    def get(self, name, default=None):
+        return self[name] if name in self else default
+
+
+CODES = _Catalog(_BUILTIN_CODES)
 
 
 class MemoryCodeCircuit(StimCodeCircuit):

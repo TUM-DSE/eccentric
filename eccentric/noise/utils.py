@@ -1,3 +1,4 @@
+from .. import plugins
 from .willow_noise import WillowNoise
 from .flamingo_noise import FlamingoNoise
 from .flamingo_noise_downscaled import FlamingoNoiseDownscaled
@@ -71,4 +72,7 @@ def get_noise_model(error_type: str,
             return ArtificialVarianceNoise.get_noise(qt, backend)
         else:
             return ArtificialVarianceNoise.get_noise(qt, backend, error_type.split("_")[1])
-    raise NotImplementedError
+    make = plugins.get("noise_models", error_type)
+    if make is not None:
+        return make(qt, p, backend)
+    raise NotImplementedError(f"unknown noise model {error_type}")
