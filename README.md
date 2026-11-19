@@ -46,6 +46,7 @@ of results.
 | **Compilation** | Qiskit layout and routing · gate-set translation with Qiskit, BQSKit or TKET |
 | **Noise** ([list](docs/noise-models.md)) | Circuit-level models (SD6, SI1000, ...) · hardware models with gate, readout, idle, leakage and atom-loss errors · erasure · scaling of any hardware model |
 | **Decoders** ([list](docs/decoders.md)) | MWPM and correlated MWPM · BP-OSD, BP-LSD, BeliefFind, Relay-BP · Tesseract · MWPF · Chromobius · union-find · GARI and GARI++ · level-by-level BP-OSD · GPU versions of the BP-based decoders |
+| **Tools** | [QEC Matchmaker](tools/matchmaker): predicts a circuit's logical error rate and decoding times and picks a decoder, without decoding |
 | **Extensible** ([plugins](docs/plugins.md)) | Codes, decoders, devices, noise models and tools from other packages, without changing ECCentric |
 
 ## Results at a glance
@@ -64,6 +65,23 @@ of results.
 
 All findings, with their data: **[on the website](https://eccentric-benchmark.github.io/results/findings.html)**
 and in [`analysis/`](analysis/README.md).
+
+## QEC Matchmaker: pick a decoder before you decode
+
+<p align="center"><img src="tools/matchmaker/docs/figures/choice-light.png" width="640" alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 97% at 1.8 times the cheapest good decoder's time, always Tesseract on 100% at 14 times, always BP-OSD on 52% at 18 times"></p>
+
+**[Matchmaker](tools/matchmaker)** is trained on ECCentric's dataset. Given a noisy circuit, it predicts in
+seconds, without decoding a single shot, whether the circuit is above threshold, its logical error rate, each
+decoder's time per shot, and which decoder to use:
+
+```bash
+pip install -e tools/matchmaker
+eccentric matchmaker advise circuit.stim --distance 5      # or: qec-matchmaker advise ...
+```
+
+On codes it never saw in training, it gets the threshold regime right for 97% of circuits, and its decoder
+choice is good enough for 97% at a fraction of always running the most accurate decoder. Replaying ECCentric's
+whole sweep, it reaches the quality of always running Tesseract at 54% of its CPU time.
 
 ## Installation
 

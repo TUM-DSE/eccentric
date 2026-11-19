@@ -33,3 +33,19 @@ jobs:
       # Known issue 6), which would abort the whole run.
       - name: Test
         run: pytest -q --deselect tests/test_transpilers.py::test_tket_translation_returns_circuit
+
+  matchmaker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: tools/matchmaker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install -e ".[test,decoder-bench]"
+      - name: Test
+        run: pytest -q

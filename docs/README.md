@@ -5,7 +5,8 @@
 | **Running experiments** | [Configuration and command line](configuration.md) |
 | **Reference** | [Codes](codes.md) · [Devices](devices.md) · [Noise models](noise-models.md) · [Decoders](decoders.md) |
 | **The dataset** | [Columns and statuses](dataset.md) · [How it is produced](sweep.md) · [Analyses](../analysis/README.md) · [Figures](../site/README.md) |
-| **Extending** | [Plugins](plugins.md) · [Extending ECCentric](extending.md) · [Tools](../tools/README.md) |
+| **Tools** | [QEC Matchmaker](../tools/matchmaker/README.md) · [How tools fit in](../tools/README.md) |
+| **Extending** | [Plugins](plugins.md) · [Extending ECCentric](extending.md) |
 | **More** | [Reproducing the paper](reproducing-the-paper.md) (incl. Docker) · [Comparison with real IBM hardware](ibm-hardware.md) · [Changes since v1.0.0](DETAILED_CHANGES.md) |
 
 ## Repository layout

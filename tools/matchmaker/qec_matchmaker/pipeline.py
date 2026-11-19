@@ -1,10 +1,11 @@
 """Keeping Matchmaker's data up to date with ECCentric.
 
-The feature store is a JSON-lines file, one record per circuit file: its key (`<run>/<circuit job id>`),
+The feature store is a JSON-lines file (gzip-compressed if its name ends in .gz), one record per circuit file: its key (`<run>/<circuit job id>`),
 size, modification time, feature version and features. Extraction only computes circuits that are new,
 changed or of an older feature version, so it can run after every ECCentric sweep update; a later record
 of the same key replaces an earlier one.
 """
+import gzip
 import json
 import os
 import time
@@ -16,11 +17,16 @@ from .detector_types import detector_type_features
 from .features import FEATURE_VERSION, features_from_circuit
 
 
+def _open_store(path: str, mode: str):
+    """A feature store for reading ("r") or appending ("a"), compressed if its name ends in .gz"""
+    return gzip.open(path, mode + "t") if path.endswith(".gz") else open(path, mode)
+
+
 def load_store(path: str) -> dict:
     """{key: record} of a feature store, the last record of each key winning"""
     records = {}
     if os.path.exists(path):
-        with open(path) as f:
+        with _open_store(path, "r") as f:
             for line in f:
                 if line.strip():
                     r = json.loads(line)
@@ -87,7 +93,7 @@ def extract(run_dirs, store_path: str, processes: int = 1, keys=None, log=print)
     # Big circuits first, so no straggler is left at the end
     todo.sort(key=lambda t: -t[2]["size"])
     done = failed = 0
-    with open(store_path, "a") as out, Pool(processes) as pool:
+    with _open_store(store_path, "a") as out, Pool(processes) as pool:
         for record in pool.imap_unordered(_extract, todo, chunksize=1):
             out.write(json.dumps(record) + "\n")
             out.flush()

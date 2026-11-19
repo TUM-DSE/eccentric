@@ -4,3 +4,7 @@ __pycache__/
 .pytest_cache/
 build/
 dist/
+# Built by `qec-matchmaker ingest` from ECCentric's sweep table and data/features.jsonl.gz
+data/dataset.csv
+data/MANIFEST.json
+data/features.jsonl

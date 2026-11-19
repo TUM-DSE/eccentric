@@ -6,6 +6,32 @@ import os
 import sys
 
 
+# Inside the ECCentric repository: its sweep table and this tool's committed feature store
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_ECCENTRIC_RESULTS = os.path.join(_ROOT, "..", "..", "experiment_results", "Sweep", "results.csv")
+_STORE = os.path.join(_ROOT, "data", "features.jsonl.gz")
+
+
+def _read_results(path):
+    """ECCentric's sweep table, read through eccentric.dataset when ECCentric is installed. Matchmaker needs only
+    the columns from_eccentric uses, so a smaller table (e.g. one sweep's) is fine: no full-schema check"""
+    try:
+        from eccentric import dataset
+    except ImportError:
+        import pandas as pd
+        return pd.read_csv(path, low_memory=False)
+    return dataset.load(path, check=False)
+
+
+def _eccentric_commit():
+    import subprocess
+    try:
+        return subprocess.run(["git", "-C", _ROOT, "rev-parse", "--short", "HEAD"], capture_output=True, text=True,
+                              check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+
 def _features(args):
     from .api import features_of
     print(json.dumps({k: (None if isinstance(v, float) and math.isnan(v) else v) for k, v in features_of(args.input).items()}, indent=1))
@@ -35,12 +61,12 @@ def _extract(args):
 
 
 def _ingest(args):
-    import pandas as pd
     from .dataset import from_eccentric, write_dataset
     from .pipeline import features_of_store, load_store
-    results = pd.read_csv(args.results, low_memory=False)
+    results = _read_results(args.results)
     table, left_out = from_eccentric(results, features_of_store(load_store(args.store)))
-    sources = {"eccentric_results": {"path": args.results, "commit": args.eccentric_commit}, "feature_store": {"path": args.store}}
+    sources = {"eccentric_results": {"path": os.path.relpath(args.results, _ROOT), "commit": args.eccentric_commit or _eccentric_commit()},
+               "feature_store": {"path": os.path.relpath(args.store, _ROOT)}}
     manifest = write_dataset(table, args.out, sources, left_out)
     print(json.dumps({k: manifest[k] for k in ("rows", "circuits", "codes", "left_out")}))
 
@@ -98,20 +124,20 @@ def main(argv=None):
 
     p = sub.add_parser("extract", help="add features of new circuit files of ECCentric run directories to a store")
     p.add_argument("run_dirs", nargs="+")
-    p.add_argument("--store", required=True)
+    p.add_argument("--store", default=_STORE)
     p.add_argument("--processes", type=int, default=1)
     p.add_argument("--keys-from", help="ECCentric results.csv: only the circuits its rows used")
     p.set_defaults(run=_extract)
 
     p = sub.add_parser("ingest", help="build the training table from ECCentric's results and the feature store")
-    p.add_argument("--results", required=True)
-    p.add_argument("--store", required=True)
-    p.add_argument("--out", default="data")
+    p.add_argument("--results", default=_ECCENTRIC_RESULTS, help="ECCentric's sweep table (default: this checkout's)")
+    p.add_argument("--store", default=_STORE)
+    p.add_argument("--out", default=os.path.join(_ROOT, "data"))
     p.add_argument("--eccentric-commit")
     p.set_defaults(run=_ingest)
 
     p = sub.add_parser("train", help="train the models on a training table")
-    p.add_argument("--data", default="data")
+    p.add_argument("--data", default=os.path.join(_ROOT, "data"))
     p.add_argument("--out", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "model"))
     p.add_argument("--metrics", default="reports/metrics.json", help="evaluation metrics to store with the model")
     p.add_argument("--no-calibration", action="store_true", help="skip the conformal widening of the intervals")
@@ -119,8 +145,8 @@ def main(argv=None):
 
     p = sub.add_parser("evaluate", help="cross-validate over held-out codes (or families, devices, noise models, or "
                                          "beyond the training range) and write a report")
-    p.add_argument("--data", default="data")
-    p.add_argument("--out", default="reports")
+    p.add_argument("--data", default=os.path.join(_ROOT, "data"))
+    p.add_argument("--out", default=os.path.join(_ROOT, "reports"))
     p.add_argument("--folds", type=int, default=10, help="GroupKFold folds (more than groups: leave one group out)")
     p.add_argument("--group-by", default="code", choices=["code", "family", "backend", "error_type", "largest", "quietest",
                                                           "next_distance", "operations"],

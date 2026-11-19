@@ -248,13 +248,36 @@ def test_load_refuses_models_of_another_version(bundle, tmp_path):
         ModelBundle.load(tmp_path)
 
 
-def test_trains_on_the_committed_dataset():
-    if not os.path.exists(os.path.join(ROOT, "data", "MANIFEST.json")):
-        pytest.skip("no data")
+def test_trains_on_the_committed_dataset(tmp_path):
+    """The training table built from ECCentric's sweep table and the committed feature store"""
+    from qec_matchmaker.cli import _ECCENTRIC_RESULTS, main
+    if not os.path.exists(_ECCENTRIC_RESULTS):
+        pytest.skip("not inside the ECCentric repository")
+    main(["ingest", "--out", str(tmp_path)])
     from qec_matchmaker.dataset import load_dataset
-    df, manifest = load_dataset(os.path.join(ROOT, "data"))
+    df, manifest = load_dataset(str(tmp_path))
+    assert manifest["rows"] > 30000
     bundle = train(df, manifest=manifest)
     assert bundle.meta["manifest"]["rows"] == len(df)
+    # Saved models must load under NumPy 1 too (ECCentric's environment): no NumPy generators in the pickle
+    bundle.save(str(tmp_path / "model"))
+    import joblib
+    loaded = joblib.load(tmp_path / "model" / "models.joblib")
+    found = []
+
+    seen = set()
+
+    def walk(o):
+        if id(o) in seen or isinstance(o, (np.ndarray, str, bytes, int, float)):
+            return
+        seen.add(id(o))
+        if isinstance(o, np.random.Generator):
+            found.append(o)
+        for c in (o.values() if isinstance(o, dict) else o if isinstance(o, (list, tuple))
+                  else vars(o).values() if hasattr(o, "__dict__") else ()):
+            walk(c)
+    walk(loaded)
+    assert not found
     for column in ("code", "family", "backend", "slice", "error_type"):
         assert column not in bundle.features
     pred = bundle.predict(circuit_features(df).reset_index())

@@ -437,6 +437,21 @@ def _conformal(df, features, quantiles, folds, random_state, parametric=True):
             "time_all": _cqr(times.lo.to_numpy(), times.hi.to_numpy(), times.y.to_numpy(), coverage) if len(times) else 0.0}
 
 
+def _drop_training_rngs(obj, _seen=None) -> None:
+    """Clear the random generators scikit-learn keeps from fitting (_feature_subsample_rng). Prediction never uses
+    them, and a NumPy 2 generator in the pickle cannot be loaded under NumPy 1, which ECCentric's environment pins."""
+    _seen = set() if _seen is None else _seen
+    if id(obj) in _seen or isinstance(obj, (np.ndarray, str, bytes, int, float)):
+        return
+    _seen.add(id(obj))
+    if getattr(obj, "_feature_subsample_rng", None) is not None:
+        obj._feature_subsample_rng = None
+    children = (obj.values() if isinstance(obj, dict) else obj if isinstance(obj, (list, tuple))
+                else vars(obj).values() if hasattr(obj, "__dict__") else ())
+    for child in children:
+        _drop_training_rngs(child, _seen)
+
+
 class ModelBundle:
     """The trained models, and in meta what they were trained on"""
 
@@ -520,7 +535,8 @@ class ModelBundle:
     def save(self, out_dir: str) -> None:
         """Write models.joblib (the estimators) and meta.json"""
         os.makedirs(out_dir, exist_ok=True)
-        joblib.dump(self.models, os.path.join(out_dir, "models.joblib"))
+        _drop_training_rngs(self.models)
+        joblib.dump(self.models, os.path.join(out_dir, "models.joblib"), compress=3)
         with open(os.path.join(out_dir, "meta.json"), "w") as f:
             json.dump(self.meta, f, indent=1, default=lambda o: o.item() if hasattr(o, "item") else str(o))
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qec-matchmaker"
-version = "0.1.0"
+version = "0.2.0"
 description = "Predict how decoding a QEC circuit will go, and pick a decoder, before decoding it"
 readme = "README.md"
 license = "MIT"
@@ -20,8 +20,15 @@ test = ["pytest>=7", "pymatching>=2.2"]
 [project.scripts]
 qec-matchmaker = "qec_matchmaker.cli:main"
 
+# `eccentric matchmaker ...` when ECCentric is installed (eccentric.plugins)
+[project.entry-points."eccentric.commands"]
+matchmaker = "qec_matchmaker.cli:main"
+
 [tool.setuptools.packages.find]
 include = ["qec_matchmaker*"]
 
 [tool.setuptools.package-data]
 qec_matchmaker = ["py.typed", "model/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

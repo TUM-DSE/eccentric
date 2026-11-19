@@ -7,15 +7,19 @@ a single shot, whether it is below threshold, roughly what its logical error rat
 decoder will take, and which decoder to use.
 
 > [!NOTE]
-> **Working prototype, v0.1.0.** The packaged model is trained on 5,624 circuits and 35,163 measured
-> decodes from the [ECCentric](https://github.com/TUM-DSE/eccentric) benchmark. MIT licensed.
+> **Working prototype, v0.2.0, part of [ECCentric](../../README.md)** (`tools/matchmaker`). The packaged model is
+> trained on 5,624 circuits and 36,480 decodes from ECCentric's dataset. MIT licensed.
 
 ## Quick start
 
+From a checkout of ECCentric:
+
 ```bash
-pip install -e .
-qec-matchmaker advise circuit.stim
+pip install -e tools/matchmaker
+qec-matchmaker advise circuit.stim      # or, with ECCentric installed: eccentric matchmaker advise circuit.stim
 ```
+
+Matchmaker itself needs only Stim, NumPy, pandas and scikit-learn, not the rest of ECCentric.
 
 ```
 $ qec-matchmaker advise surface_d5_p0.001.stim --distance 5
@@ -88,7 +92,7 @@ next candidate if the pilot is too slow or fails, and commits to the full decode
 
 ## The dataset
 
-Matchmaker learns from [ECCentric](https://github.com/TUM-DSE/eccentric), an end-to-end benchmark that
+Matchmaker learns from [ECCentric](../../README.md)'s dataset: an end-to-end benchmark that
 compiles QEC codes onto real and projected quantum devices, simulates them under each device's noise, and
 decodes every circuit with several decoders on the same shots.
 
@@ -110,8 +114,11 @@ matching and Chromobius are fast but apply to few codes and lose accuracy on com
   <img alt="Per decoder: how often it is as accurate as the best decoder on a circuit, and its time per shot, which spans eight orders of magnitude across decoders and circuits" src="docs/figures/decoders-light.png">
 </picture>
 
-The training table is [data/dataset.csv](data/dataset.csv) (one row per circuit and decoder, with the features)
-and its provenance [data/MANIFEST.json](data/MANIFEST.json) (ECCentric commit and file hashes).
+The features of every circuit are in [data/features.jsonl.gz](data/features.jsonl.gz). `qec-matchmaker ingest`
+joins them with ECCentric's sweep table (`experiment_results/Sweep/results.csv`, read through
+`eccentric.dataset` when ECCentric is installed; documented in [docs/dataset.md](../../docs/dataset.md)) into the training table `data/dataset.csv`, one row per circuit
+and decoder, and its provenance `data/MANIFEST.json` (ECCentric commit and file hashes). The packaged model's
+`meta.json` records the same provenance.
 
 ## How good it is
 
@@ -157,11 +164,12 @@ time within 3× for 87%).
 ## Keeping up with ECCentric
 
 ```bash
-scripts/update_from_eccentric.sh          # MM_PUSH=1 to push; see the script for settings
+tools/matchmaker/scripts/update_from_eccentric.sh          # see the script for settings
 ```
 
 extracts the features of new circuits on the cluster that holds ECCentric's runs, rebuilds the training table
-from ECCentric's sweep table, retrains, re-evaluates, and commits the data, the packaged model and the report.
+from the sweep table in this repository, retrains, re-evaluates, and commits the feature store, the packaged
+model and the report (it does not push).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/figures/training-dark.png">
@@ -180,7 +188,7 @@ measurements train it ([CITATION.cff](CITATION.cff), which GitHub's "Cite this r
   title  = {qec-matchmaker: pick a decoder before you decode},
   author = {Giortamis, Emmanouil},
   year   = {2026},
-  url    = {https://github.com/manosgior/qec-matchmaker}
+  url    = {https://github.com/TUM-DSE/eccentric/tree/main/tools/matchmaker}
 }
 
 @inproceedings{swierkowska2026eccentric,
@@ -188,6 +196,6 @@ measurements train it ([CITATION.cff](CITATION.cff), which GitHub's "Cite this r
   author    = {{\'S}wierkowska, Aleksandra and Pflieger, Jannik and Giortamis, Emmanouil and Bhatotia, Pramod},
   booktitle = {Proceedings of the ACM SIGMETRICS Conference (SIGMETRICS'26)},
   year      = {2026},
-  note      = {arXiv:2511.01062}
+  doi       = {10.1145/3805635}
 }
 ```

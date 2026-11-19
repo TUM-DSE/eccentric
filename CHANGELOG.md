@@ -15,6 +15,9 @@ releases are tagged on GitHub.
 - Figures (`python -m eccentric.figures`): featured findings of the dataset and the paper's topology,
   technology, distributed, routing, translation and accumulated-error experiments redrawn from the current
   results, each with its data, in `site/figures/` for the website.
+- QEC Matchmaker (`tools/matchmaker`, from github.com/manosgior/qec-matchmaker with its history): predicts a
+  circuit's logical error rate and decoding times and picks a decoder; `eccentric matchmaker ...`. Its training
+  table is built from the sweep table in this repository.
 - `eccentric.dataset.family()`: the code families, used by the website export and the figures.
 
 ## [1.1.0] – 2026-11
