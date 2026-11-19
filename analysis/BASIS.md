@@ -90,7 +90,7 @@ tens of percent.
 
 ## Caveats
 
-- Willow's leakage is decided when the circuit is built (CHANGELOG, Known issue 10), and the X circuit
+- Willow's leakage is decided when the circuit is built (docs/DETAILED_CHANGES.md, Known issue 10), and the X circuit
   draws a different pattern than its Z partner: the d = 3 X circuit has one probability-1 error, the Z
   circuit none, and MWPM cannot decode it (2 failures). The comparison above takes the best decoder, so
   it is not affected.

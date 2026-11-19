@@ -1,7 +1,7 @@
 """The numbers behind analysis/INSIGHTS.md: python analysis/insights.py [<old results.csv>]
 
 Reads experiment_results/Sweep/results.csv (and the routing and variance experiments). The optional
-argument is a sweep table collected before the waiting-qubit fix (CHANGELOG fix 9), for the
+argument is a sweep table collected before the waiting-qubit fix (DETAILED_CHANGES fix 9), for the
 before/after comparison. The logical error rate (LER) is per shot over all rounds; where no error was
 seen, the 95% upper bound stands in. "Best" means the lowest LER over decoders and schedules.
 """
@@ -135,7 +135,7 @@ def main():
         print(r.pivot_table(index=["code", "distance"], columns="routing_method", values="swap_overhead_mean").round(1).to_string())
 
     if len(sys.argv) > 1:
-        section("Waiting-qubit fix (CHANGELOG 9): new against old LER, same configuration and decoder")
+        section("Waiting-qubit fix (DETAILED_CHANGES 9): new against old LER, same configuration and decoder")
         old = pd.read_csv(sys.argv[1], low_memory=False)
         old["ler"] = old.logical_error_rate.fillna(old.ler_high)
         keys = CONFIG + ["decoder"]

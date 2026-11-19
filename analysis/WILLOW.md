@@ -37,7 +37,7 @@ leakage 1%); ours weighs idle and single-qubit errors somewhat more.
 
 ## 3. What the model leaves out
 
-- **Crosstalk** (11% of Google's budget) was never applied (CHANGELOG fix 16; removed). Added as a
+- **Crosstalk** (11% of Google's budget) was never applied (DETAILED_CHANGES fix 16; removed). Added as a
   two-qubit depolarizing error of 5.5e-4 on every pair of neighbouring qubits in different CZs of the
   same layer, it gives 0.76%, 0.52% and 0.337% (Λ = 1.55): twice the measured rate at d = 7. Google's
   stray coupling is mostly ZZ and swap-like, much of which a Z-basis memory does not see, so the true

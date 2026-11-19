@@ -1,4 +1,4 @@
-"""CHANGELOG fix 2: the concatenated Steane circuits read the logical qubit out of the data qubits"""
+"""DETAILED_CHANGES fix 2: the concatenated Steane circuits read the logical qubit out of the data qubits"""
 import pytest
 import stim
 

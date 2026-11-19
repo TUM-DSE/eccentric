@@ -2,7 +2,7 @@
 
 State of 2 November 2026: the sweep table `experiment_results/Sweep/results.csv` (8,170 rows,
 5,937 with a logical error rate or bound, 58 codes, 25 devices, 12 noise models, 7 decoders),
-after the waiting-qubit fix (CHANGELOG 9) and the refinement of weak results, plus the routing
+after the waiting-qubit fix (DETAILED_CHANGES 9) and the refinement of weak results, plus the routing
 and variance experiments in `experiment_results/`. Every number below comes from
 `python analysis/insights.py [<table from before fix 9>]`.
 

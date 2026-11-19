@@ -246,7 +246,7 @@ PAPER_TOPOLOGY = ["Real_Topology", "Willow", "Connectivity", "Program_stats_topo
 
 def paper_topology():
     """The paper's experiments on sparse devices at the paper's configurations, compiled again with
-    the placement without SWAPs (CHANGELOG fix 8) and decoded with BP-OSD as in the paper"""
+    the placement without SWAPs (DETAILED_CHANGES fix 8) and decoded with BP-OSD as in the paper"""
     import csv
     import os
 

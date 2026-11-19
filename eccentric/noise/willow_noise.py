@@ -6,7 +6,7 @@ class WillowNoise(NoiseModel):
     def get_noise(qt) -> 'NoiseModel':
         # From https://arxiv.org/pdf/2408.13687 (Table S4); its idle error is the error of the data qubits
         # while the measure qubits are measured and reset, once per cycle. Its CZ crosstalk (5.5e-4, stray
-        # coupling between neighbouring qubits of parallel CZs) is not modelled (CHANGELOG fix 16)
+        # coupling between neighbouring qubits of parallel CZs) is not modelled (DETAILED_CHANGES fix 16)
         return NoiseModel(
             sq=6.2e-4,
             tq=2.8e-3,

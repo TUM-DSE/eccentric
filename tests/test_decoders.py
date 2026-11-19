@@ -99,7 +99,7 @@ def test_relay_bp_decodes_the_exact_syndrome(monkeypatch):
 
 
 def test_mwpm_matches_on_the_decomposed_error_model(monkeypatch):
-    # CHANGELOG fix 5: PyMatching drops errors with more than two detectors, so MWPM must get them decomposed
+    # DETAILED_CHANGES fix 5: PyMatching drops errors with more than two detectors, so MWPM must get them decomposed
     import pymatching
     seen = []
     original = pymatching.Matching.from_detector_error_model

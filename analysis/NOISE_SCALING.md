@@ -84,7 +84,7 @@ noise level does not carry over to another.
 
 ## Caveats
 
-- Willow's and Apollo's leakage is sampled when the circuit is built (CHANGELOG, Known issue 10); the
+- Willow's and Apollo's leakage is sampled when the circuit is built (docs/DETAILED_CHANGES.md, Known issue 10); the
   scaled models scale the leakage rate, but a leaked qubit's error is frozen into the circuit. Willow's
   surface code at d = 9 is routed, which already explains its loss of suppression (section 2).
 - "Crosses 1 at" interpolates Λ(3 -> 5) in log noise between the measured scales; where larger codes need

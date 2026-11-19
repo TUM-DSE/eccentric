@@ -4,10 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "eccentric"
-version = "1.0.0"
+version = "1.1.0"
 description = "ECCentric: benchmarking quantum error correction codes under realistic hardware conditions"
 readme = "README.md"
 requires-python = ">=3.11"
+license = { file = "LICENSE" }
 dynamic = ["dependencies"]
 
 [project.scripts]
