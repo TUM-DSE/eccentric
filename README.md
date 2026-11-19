@@ -1,6 +1,6 @@
 # ECCentric
 
-[![Paper](https://img.shields.io/badge/SIGMETRICS'26-arXiv%3A2511.01062-b31b1b)](https://arxiv.org/abs/2511.01062)
+[![Paper](https://img.shields.io/badge/SIGMETRICS'26-10.1145%2F3805635-blue)](https://doi.org/10.1145/3805635)
 [![Tests](https://github.com/TUM-DSE/eccentric/actions/workflows/tests.yml/badge.svg)](https://github.com/TUM-DSE/eccentric/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
@@ -20,7 +20,7 @@ can be compared end to end. It comes with a large dataset of results across all 
 
 > 📄 **ECCentric: An Empirical Analysis of Quantum Error Correction Codes**, ACM SIGMETRICS 2026.
 > Aleksandra Świerkowska, Jannik Pflieger, Emmanouil Giortamis, Pramod Bhatotia.
-> [arXiv:2511.01062](https://arxiv.org/abs/2511.01062)
+> [doi:10.1145/3805635](https://dl.acm.org/doi/abs/10.1145/3805635)
 >
 > The version evaluated in the paper is tagged [`v1.0.0-sigmetrics26`](https://github.com/TUM-DSE/eccentric/tree/v1.0.0-sigmetrics26).
 > `main` is the actively developed benchmark: it adds codes, decoders, devices and noise models, and refines
@@ -247,7 +247,7 @@ external/             submodules: qiskit-qec fork, more-bacon-less-threshold, ho
   author    = {{\'S}wierkowska, Aleksandra and Pflieger, Jannik and Giortamis, Emmanouil and Bhatotia, Pramod},
   booktitle = {Proceedings of the ACM SIGMETRICS Conference (SIGMETRICS'26)},
   year      = {2026},
-  note      = {arXiv:2511.01062}
+  doi       = {10.1145/3805635}
 }
 ```
 
