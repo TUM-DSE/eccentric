@@ -43,4 +43,6 @@ Details of each change: [docs/DETAILED_CHANGES.md](docs/DETAILED_CHANGES.md).
 
 ## [1.0.0] – 2026
 
-The version evaluated in the SIGMETRICS'26 paper (tag `v1.0.0-sigmetrics26`).
+The version evaluated in the SIGMETRICS'26 paper, packaged as `eccentric` with a single experiment runner
+(tag `v1.0.0-sigmetrics26`, October 2026). The code as of the camera-ready version (March 2026), before the
+packaging, is tagged `sigmetrics26-camera-ready`.
