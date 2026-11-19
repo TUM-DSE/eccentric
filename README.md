@@ -11,10 +11,12 @@ compiles a code's syndrome-extraction circuit onto a device (topology, connectiv
 translation), applies a hardware noise model, and decodes it, so codes, devices, noise models and decoders
 can be compared end to end. It comes with a large dataset of results across all of them.
 
-<p align="center">
-![codes](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.codes&label=codes&style=for-the-badge&color=2b6cb0) ![devices](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.devices&label=devices&style=for-the-badge&color=2b6cb0) ![noise models](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.noise_models&label=noise%20models&style=for-the-badge&color=2b6cb0) ![decoders](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.decoders&label=decoders&style=for-the-badge&color=2b6cb0)<br>
-![results](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.display.results&label=results&style=for-the-badge&color=2f855a) ![shots decoded](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.display.shots&label=shots%20decoded&style=for-the-badge&color=2f855a) ![CPU hours](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.display.cpu_hours&label=CPU%20hours&style=for-the-badge&color=2f855a)
-</p>
+<div align="center">
+
+![codes][stat-codes] ![devices][stat-devices] ![noise models][stat-noise-models] ![decoders][stat-decoders]<br>
+![results][stat-results] ![shots decoded][stat-shots-decoded] ![CPU hours][stat-cpu-hours]
+
+</div>
 
 > 📄 **ECCentric: An Empirical Analysis of Quantum Error Correction Codes**, ACM SIGMETRICS 2026.
 > Aleksandra Świerkowska, Jannik Pflieger, Emmanouil Giortamis, Pramod Bhatotia.
@@ -253,3 +255,12 @@ external/             submodules: qiskit-qec fork, more-bacon-less-threshold, ho
 
 ECCentric is released under the [Apache License 2.0](LICENSE). Vendored and submodule code keeps its own
 license (e.g. the GARI decoder in `eccentric/decoders/gari/`).
+
+<!-- Badges: numbers read from experiment_results/Sweep/stats.json on main (python -m sweep.stats) -->
+[stat-codes]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.codes&label=codes&style=for-the-badge&color=2b6cb0
+[stat-devices]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.devices&label=devices&style=for-the-badge&color=2b6cb0
+[stat-noise-models]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.noise_models&label=noise%20models&style=for-the-badge&color=2b6cb0
+[stat-decoders]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.decoders&label=decoders&style=for-the-badge&color=2b6cb0
+[stat-results]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.display.results&label=results&style=for-the-badge&color=2f855a
+[stat-shots-decoded]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.display.shots&label=shots%20decoded&style=for-the-badge&color=2f855a
+[stat-cpu-hours]: https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.display.cpu_hours&label=CPU%20hours&style=for-the-badge&color=2f855a
