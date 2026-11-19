@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use Matchmaker in your research, please cite it as below, and cite ECCentric, whose measurements train it."
+type: software
+title: "qec-matchmaker: pick a decoder before you decode"
+abstract: "Predicts from a noisy QEC circuit, without decoding it, whether it is above threshold, its logical error rate, each decoder's time per shot, and which decoder to use."
+authors:
+  - family-names: Giortamis
+    given-names: Emmanouil
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/manosgior/qec-matchmaker"
+references:
+  - type: conference-paper
+    title: "ECCentric: An Empirical Analysis of Quantum Error Correction Codes"
+    authors:
+      - family-names: Świerkowska
+        given-names: Aleksandra
+      - family-names: Pflieger
+        given-names: Jannik
+      - family-names: Giortamis
+        given-names: Emmanouil
+      - family-names: Bhatotia
+        given-names: Pramod
+    collection-title: "Proceedings of the ACM SIGMETRICS Conference (SIGMETRICS'26)"
+    year: 2026
+    identifiers:
+      - type: other
+        value: "arXiv:2511.01062"

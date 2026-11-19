@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qec-matchmaker"
+version = "0.1.0"
+description = "Predict how decoding a QEC circuit will go, and pick a decoder, before decoding it"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Emmanouil Giortamis" }]
+requires-python = ">=3.10"
+dependencies = ["stim>=1.13", "numpy>=1.24", "pandas>=2.0", "scikit-learn>=1.4", "joblib>=1.3"]
+
+[project.optional-dependencies]
+decoder-bench = ["h5py>=3.8", "scipy>=1.10"]
+test = ["pytest>=7", "pymatching>=2.2"]
+
+[project.scripts]
+qec-matchmaker = "qec_matchmaker.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["qec_matchmaker*"]
+
+[tool.setuptools.package-data]
+qec_matchmaker = ["py.typed", "model/*"]
