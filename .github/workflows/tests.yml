@@ -21,6 +21,9 @@ jobs:
           cache-dependency-path: requirements.txt
 
       - name: Install
+        env:
+          # The qiskit-qec fork's CMake files predate CMake 4, which the runners ship
+          CMAKE_POLICY_VERSION_MINIMUM: "3.5"
         run: |
           pip install -e . pytest
           cd external/qiskit_qec && python setup.py build_ext --inplace

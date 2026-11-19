@@ -87,6 +87,9 @@ python setup.py build_ext --inplace
 cd ../..
 ```
 
+With CMake 4, build qiskit-qec with `CMAKE_POLICY_VERSION_MINIMUM=3.5 python setup.py build_ext --inplace`
+(its CMake files predate CMake 4).
+
 `pip install -e .` installs the dependencies from `requirements.txt` and adds an `eccentric` command,
 equivalent to `python -m eccentric`. If you cloned without `--recurse-submodules`, fetch the submodules with
 `git submodule update --init --recursive`.
