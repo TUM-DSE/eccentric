@@ -1,39 +1,74 @@
-# ECCentric Bench
+# ECCentric
 
-ECCentric is a benchmarking framework for evaluating Quantum Error Correction (QEC) codes under realistic hardware conditions: device topologies, connectivity, noise models, routing, gate translation, and decoders.
+[![Paper](https://img.shields.io/badge/SIGMETRICS'26-arXiv%3A2511.01062-b31b1b)](https://arxiv.org/abs/2511.01062)
+[![Tests](https://github.com/TUM-DSE/eccentric/actions/workflows/tests.yml/badge.svg)](https://github.com/TUM-DSE/eccentric/actions/workflows/tests.yml)
+![Python](https://img.shields.io/badge/python-3.11-blue)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
+[![Website](https://img.shields.io/badge/results-eccentric--benchmark.github.io-orange)](https://eccentric-benchmark.github.io)
 
-> 📄 **Paper:** <ins>**ECCentric: An Empirical Analysis of Quantum Error Correction Codes**</ins>, accepted at <ins>**ACM SIGMETRICS 2026 (SIGMETRICS'26)**</ins>.
+**ECCentric is a benchmark for quantum error correction codes under realistic hardware conditions.** It
+compiles a code's syndrome-extraction circuit onto a device (topology, connectivity, routing, gate
+translation), applies a hardware noise model, and decodes it, so codes, devices, noise models and decoders
+can be compared end to end. It comes with a large dataset of results across all of them.
+
+<p align="center">
+![codes](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.codes&label=codes&style=for-the-badge&color=2b6cb0) ![devices](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.devices&label=devices&style=for-the-badge&color=2b6cb0) ![noise models](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.noise_models&label=noise%20models&style=for-the-badge&color=2b6cb0) ![decoders](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.decoders&label=decoders&style=for-the-badge&color=2b6cb0)<br>
+![results](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.display.results&label=results&style=for-the-badge&color=2f855a) ![shots decoded](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.display.shots&label=shots%20decoded&style=for-the-badge&color=2f855a) ![CPU hours](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FTUM-DSE%2Feccentric%2Fmain%2Fexperiment_results%2FSweep%2Fstats.json&query=%24.display.cpu_hours&label=CPU%20hours&style=for-the-badge&color=2f855a)
+</p>
+
+> 📄 **ECCentric: An Empirical Analysis of Quantum Error Correction Codes**, ACM SIGMETRICS 2026.
 > Aleksandra Świerkowska, Jannik Pflieger, Emmanouil Giortamis, Pramod Bhatotia.
-> [arXiv:2511.01062 (PDF)](https://arxiv.org/pdf/2511.01062)
+> [arXiv:2511.01062](https://arxiv.org/abs/2511.01062)
+>
+> The version evaluated in the paper is tagged [`v1.0.0-sigmetrics26`](https://github.com/TUM-DSE/eccentric/tree/v1.0.0-sigmetrics26).
+> `main` is the actively developed benchmark: it adds codes, decoders, devices and noise models, and refines
+> the noise modelling and circuit construction, so its numbers can differ from the paper's.
+> See [CHANGELOG.md](CHANGELOG.md).
 
-## Overview
+## Results at a glance
 
-![ECCentric pipeline](docs/pipeline.png)
+The dataset ([`experiment_results/Sweep/results.csv`](experiment_results/Sweep/results.csv)) covers every
+code on IBM, Google, Quantinuum, Infleqtion and neutral-atom device models, under their own noise and scaled
+versions of it, with every applicable decoder, in the Z and X basis. All results can be browsed on the
+**[website](https://eccentric-benchmark.github.io)**. Some findings, with the full analyses in [`analysis/`](analysis):
 
-An experiment is described in a YAML file listing the codes, backends, noise models and other parameters to sweep. For every combination, ECCentric generates the encoded memory circuit of the code and transpiles it with Qiskit onto the backend, applying gate translation, qubit mapping and routing. Stim then adds the noise model, simulates the stabilizer circuit and decodes the measurements. The resulting logical error rates are written to a CSV file. ([PDF version of the figure](docs/pipeline.pdf))
+- **Layout decides whether qLDPC codes work on IBM devices.** Under the same noise (a tenth of today's
+  Flamingo errors, coherence times tripled), bivariate bicycle codes on a native layout reach logical error
+  rates of 10⁻³ to 10⁻⁶. Routed onto Flamingo or Loon, they stay at 10–100%: 40× to 200,000× worse.
+  ([INSIGHTS](analysis/INSIGHTS.md))
+- **The surface code is below threshold on most of today's devices.** It is below threshold at today's
+  noise on Willow, Infleqtion, Harvard/MIT neutral atoms, IBM's bicycle module and Loon. On Heron it needs
+  40% of today's noise. ([NOISE_SCALING](analysis/NOISE_SCALING.md))
+- **Z-basis memory experiments are optimistic.** For 791 of 1,492 configurations below threshold, the X basis is
+  significantly worse; on Infleqtion, qLDPC codes are 7.6× worse in X (median). ([BASIS](analysis/BASIS.md))
+- **There is no single best decoder.** The most accurate decoder and the fastest one that is good enough differ by orders
+  of magnitude in cost, and which decoder wins depends on the code, the device and the noise.
+  ([DECODING](analysis/DECODING.md), [DECODER_SETTINGS](analysis/DECODER_SETTINGS.md), [NEW_DECODERS](analysis/NEW_DECODERS.md))
+- **The device models match experiments.** With matching decoders, the Willow model reproduces Google's
+  surface-code memory within 1.15 to 1.25× at every distance, and its error suppression factor Λ.
+  ([WILLOW](analysis/WILLOW.md))
 
-## Repository layout
+Built on the dataset: [QEC Matchmaker](https://github.com/manosgior/qec-matchmaker) predicts the logical
+error rate and decoding time of a circuit and recommends a decoder, without decoding it.
 
-```
-eccentric/                 the framework (Python package)
-├── __main__.py            command-line entry point: python -m eccentric
-├── runner.py              config loading, parameter sweeps, parallel execution, result saving
-├── experiments/           experiment types, one module each
-├── backends/              fake hardware backends and custom topologies
-├── codes/                 QEC code circuits: surface, heavy-hex, gross, color, Bacon-Shor, concatenated Steane
-├── noise/                 artificial and hardware-inspired noise models
-├── decoders/              MWPM, BP-OSD and Chromobius
-├── transpilers/           layout/routing and gate-set translation (Qiskit, BQSKit, TKET)
-├── metrics/               gate and resource counting
-├── plots/                 paper figures: python -m eccentric.plots
-└── hardware/              comparison against real IBM hardware
-configs/                   YAML configurations of all paper experiments, plus example.yaml
-experiment_results/        raw results used in the paper
-figures/                   generated figures
-docs/                      pipeline overview figure
-tests/                     unit and end-to-end tests
-external/                  submodules: qiskit-qec fork, more-bacon-less-threshold
-```
+## Features
+
+- **Codes** ([full list](docs/codes.md)): surface, heavy-hex, color, Bacon-Shor, concatenated Steane;
+  bivariate/trivariate/coprime/generalized bicycle, balanced product, hypergraph and lifted product,
+  lift-connected surface, quantum Tanner, many-hypercube, Mitten, Golay, Reed-Muller; Floquet codes
+  (honeycomb, hyperbolic, semi-hyperbolic); XZZX, toric, repetition. Several syndrome-extraction schedules each.
+- **Operations:** memory in the Z and X basis, lattice surgery on surface-code patches (tqec), and
+  fault-tolerant measurements, joint measurements and transversal CNOT on CSS codes.
+- **Devices** ([full list](docs/devices.md)): IBM Heron, Flamingo, Loon/Nighthawk and the bicycle-architecture
+  module, Google Willow, Quantinuum Apollo, Infleqtion, Harvard/MIT neutral atoms, multi-QPU devices with remote
+  gates, synthetic topologies, and code-native layouts.
+- **Noise models** ([full list](docs/noise-models.md)): artificial circuit-level models (SD6, SI1000, ...),
+  hardware-inspired models with gate, readout, idle, leakage and atom-loss errors, erasure, and a knob that scales any
+  hardware model.
+- **Decoders** ([full list](docs/decoders.md)): MWPM and correlated matching, BP-OSD, BP-LSD, BeliefFind,
+  union-find, belief matching, Relay-BP, Tesseract, MWPF, Chromobius, GARI, level-by-level BP-OSD for
+  concatenated codes, and GPU versions of the BP-based decoders.
+- **Compilation:** Qiskit layout and routing, gate-set translation with Qiskit, BQSKit or TKET.
 
 ## Installation (Linux)
 
@@ -52,9 +87,17 @@ python setup.py build_ext --inplace
 cd ../..
 ```
 
-`pip install -e .` installs the dependencies from `requirements.txt` and adds an `eccentric` command, equivalent to `python -m eccentric`. If you cloned without `--recurse-submodules`, fetch the submodules first with `git submodule update --init --recursive`.
+`pip install -e .` installs the dependencies from `requirements.txt` and adds an `eccentric` command,
+equivalent to `python -m eccentric`. If you cloned without `--recurse-submodules`, fetch the submodules with
+`git submodule update --init --recursive`.
 
-Run all commands from the repository root: results are written to `experiment_results/` and figures to `figures/` relative to the current directory.
+Optional:
+
+- **GARI decoders** (`gari`, `gari_pp`) compile their C decoder on first use and need a C compiler with OpenMP.
+- **GPU decoders** (`*_gpu`) need an NVIDIA GPU and `pip install --no-deps -r requirements-gpu.txt`.
+
+Run all commands from the repository root: results are written to `experiment_results/` and figures to
+`figures/` relative to the current directory.
 
 ## Quick start
 
@@ -64,7 +107,7 @@ python -m eccentric configs/example.yaml
 
 This runs the small example in [`configs/example.yaml`](configs/example.yaml) and writes to `experiment_results/Example/`:
 
-- `results.csv`: one row per configuration, for example the `logical_error_rate`
+- `results.csv`: one row per configuration, for example the `logical_error_rate` over all `rounds` of syndrome extraction and the `logical_error_rate_per_round` derived from it as (1 − (1 − 2P)^(1/rounds))/2
 - `experiment.log`: completed, skipped and failed configurations, with error messages
 - `metadata_<timestamp>.json`: a copy of the experiment configuration
 
@@ -80,7 +123,8 @@ Command-line options:
 
 ## Configuration
 
-Experiments are described in a YAML file containing a list under `experiments`. Every list-valued field is a sweep: the runner executes the Cartesian product of all lists, in parallel.
+Experiments are described in a YAML file containing a list under `experiments`. Every list-valued field is a
+sweep: the runner executes the Cartesian product of all lists, in parallel.
 
 ```yaml
 experiments:
@@ -95,58 +139,13 @@ experiments:
     decoders: ["bposd"]
 ```
 
-### Fields
-
-| Field | Description |
-| --- | --- |
-| `name` | Experiment name; results go to `experiment_results/<name>/` |
-| `type` | Experiment type: `logical_error` (default), `decoder`, `program_stats`, `accumulated_error`, `chromobius`, `routing`, `translation` |
-| `num_samples` | Number of shots (or, for `routing` and `translation`, number of repetitions) |
-| `backends` | List of backends (see below) |
-| `codes` | List of codes: `surface`, `hh` (heavy-hex), `gross`, `color`, `bacon` (Bacon-Shor), `steane` (concatenated Steane) |
-| `decoders` | List of decoders: `bposd`, `bposd_chk`, `bposd_batch`, `mwpm`, `chromobius` (color code only) |
-| `error_types` | List of noise models (see below) |
-| `error_probabilities` | Physical error rates `p` for the artificial noise models |
-| `backends_sizes` | Number of qubits of a `custom_*` backend. The largest code distance that fits is used |
-| `distances` | Fixed code distances. The backend size is set to the minimum needed by the code. **Cannot be combined with `backends_sizes`** |
-| `cycles` | Number of syndrome-extraction rounds (a single integer ≥ 2). Defaults to the code distance |
-| `layout_methods` | Qiskit layout methods, e.g. `trivial`, `dense`, `sabre` |
-| `routing_methods` | Qiskit routing methods, e.g. `basic`, `sabre`, `stochastic`, `lookahead` |
-| `translating_methods` | Gate translation: `qiskit`, `bqskit`, `tket` |
-| `gate_sets` | Target gate sets for `translation`: `h2`, `ibm_heron` |
-| `optimization_levels` | Translation optimization levels for `translation` (default `[0, 2, 3]`) |
-
-If neither `backends_sizes` nor `distances` is given, the backend's own size is used and the largest code distance that fits is chosen. Configurations whose code does not fit (distance < 3) are skipped and logged.
-
-### Backends
-
-| Value | Description |
-| --- | --- |
-| `custom_line`, `custom_grid`, `custom_cube`, `custom_full`, `custom_heavyhex` | Synthetic topologies; require `backends_sizes` (or `distances`) |
-| `real_flamingo`, `real_loon` | IBM Flamingo and IBM Loon/Nighthawk (multi-chip, with remote gates) |
-| `real_flamingo_1_qpu`, `real_loon_1_qpu` | The same devices restricted to a single QPU |
-| `real_torino` | IBM Torino (Qiskit fake backend) |
-| `real_willow` | Google Willow |
-| `real_apollo`, `real_nsapollo` | Quantinuum Apollo with and without shuttling |
-| `real_infleqtion`, `real_nsinfleqtion` | Infleqtion with and without shuttling |
-| `variance_<level>_<scale>` | Flamingo-like device with T1/T2 variance `<level>` ∈ {`none`, `low`, `mid`, `high`} and coherence times scaled by `<scale>`, e.g. `variance_mid_10` |
-| `ibm_<device>` | A real IBM device through `QiskitRuntimeService` (requires an IBM token) |
-
-### Noise models (`error_types`)
-
-| Value | Description |
-| --- | --- |
-| `sd6`, `pm3`, `em3_1`, `em3_2`, `si1000`, `modsi1000`, `constant` | Artificial noise models parameterised by `error_probabilities` |
-| `real_willow`, `real_apollo`, `real_infleqtion`, `real_heron` | Hardware-inspired noise models |
-| `real_flamingo`, `real_flamingo_downscaled` | IBM Flamingo noise, and the same noise scaled down 10× |
-| `variance` | Decoherence driven by the T1/T2 values of a `variance_*` backend |
-| `variance_low`, `variance_mid`, `variance_high` | Readout error drawn from a log-normal distribution with increasing variance |
-
-Hardware noise models must be paired with a matching backend, for example `real_infleqtion` with `real_infleqtion`.
+Reference: [all configuration fields](docs/configuration.md), [codes](docs/codes.md),
+[devices](docs/devices.md), [noise models](docs/noise-models.md), [decoders](docs/decoders.md).
 
 ## Reproducing the paper
 
-Every experiment of the paper has a configuration in [`configs/`](configs):
+To reproduce the paper exactly, check out the tag `v1.0.0-sigmetrics26`. Every experiment of the paper has
+a configuration in [`configs/`](configs):
 
 | Configuration | Paper experiment |
 | --- | --- |
@@ -165,10 +164,16 @@ Every experiment of the paper has a configuration in [`configs/`](configs):
 ```bash
 python -m eccentric configs/size.yaml   # one experiment
 bash run_experiments.sh                 # all experiments, then all plots
-python -m eccentric.plots               # only regenerate the figures
+python -m eccentric.plots               # only regenerate the figures from experiment_results/
 ```
 
-The full suite takes a long time. The results used in the paper are already in `experiment_results/`, so `python -m eccentric.plots` regenerates the figures in `figures/` without re-running anything.
+## The sweep
+
+The dataset is produced by `sweep/`, which generates one job per circuit or decode, runs them on a cluster
+(`python -m sweep.run_job <run_dir> <job_id>`, each until 100 logical errors or its time budget) and collects
+them (`python -m sweep.collect <run dirs> <out>`; `python -m sweep.stats` then updates the numbers above).
+Each row records the commit that produced it. `validation/` holds the cluster checks of circuits, code and
+circuit distances, and decoders.
 
 ## Running with Docker
 
@@ -214,6 +219,21 @@ Job metadata and results are stored in `experiment_results/ibm_runs/`. These scr
 
 Run the tests with `pytest`.
 
+## Repository layout
+
+```
+eccentric/            the framework (Python package): runner, experiments, codes, backends, noise,
+                      decoders, transpilers, metrics, plots, hardware comparison
+configs/              configurations of the paper's experiments, plus example.yaml
+experiment_results/   results of the paper's experiments and the sweep dataset (Sweep/)
+analysis/             analyses of the dataset
+sweep/                the sweep: job generation, cluster runner, collection, website export
+validation/           cluster checks of circuits, distances and decoders
+docs/                 reference documentation
+tests/                unit and end-to-end tests (pytest)
+external/             submodules: qiskit-qec fork, more-bacon-less-threshold, honeycomb_threshold, honeycomb-boundaries
+```
+
 ## Citation
 
 ```bibtex
@@ -225,3 +245,8 @@ Run the tests with `pytest`.
   note      = {arXiv:2511.01062}
 }
 ```
+
+## License
+
+ECCentric is released under the [Apache License 2.0](LICENSE). Vendored and submodule code keeps its own
+license (e.g. the GARI decoder in `eccentric/decoders/gari/`).

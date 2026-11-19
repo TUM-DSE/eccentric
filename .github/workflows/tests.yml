@@ -1,0 +1,32 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install
+        run: |
+          pip install -e . pytest
+          cd external/qiskit_qec && python setup.py build_ext --inplace
+
+      # Tests marked `slow` are skipped (pytest.ini); GPU tests skip themselves without a GPU.
+      # The TKET translation test segfaults depending on test order (docs/DETAILED_CHANGES.md,
+      # Known issue 6), which would abort the whole run.
+      - name: Test
+        run: pytest -q --deselect tests/test_transpilers.py::test_tket_translation_returns_circuit

@@ -1,0 +1,242 @@
+[
+ {
+  "tool": "eccentric_tqec",
+  "op": "memory",
+  "d": 3,
+  "p": 0.002,
+  "rounds": 3,
+  "ler": 0.0011275,
+  "per_round": 0.0003761161891666087,
+  "qubits": 19
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "merge",
+  "d": 3,
+  "p": 0.002,
+  "rounds": 9,
+  "ler": 0.0088925,
+  "per_round": 0.0009959541813531758,
+  "qubits": 43
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "memory",
+  "d": 3,
+  "p": 0.002,
+  "rounds": 4,
+  "ler": 0.001715,
+  "per_round": 0.00042930258571516333,
+  "qubits": 22
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "merge",
+  "d": 3,
+  "p": 0.002,
+  "rounds": 8,
+  "ler": 0.0025025,
+  "per_round": 0.0003134996120044975,
+  "qubits": 41
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "memory",
+  "d": 5,
+  "p": 0.002,
+  "rounds": 5,
+  "ler": 0.00032,
+  "per_round": 6.401639029429695e-05,
+  "qubits": 51
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "merge",
+  "d": 5,
+  "p": 0.002,
+  "rounds": 15,
+  "ler": 0.00249,
+  "per_round": 0.00016638702664883986,
+  "qubits": 111
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "memory",
+  "d": 5,
+  "p": 0.002,
+  "rounds": 6,
+  "ler": 0.00046,
+  "per_round": 7.669607208943274e-05,
+  "qubits": 57
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "merge",
+  "d": 5,
+  "p": 0.002,
+  "rounds": 12,
+  "ler": 0.00061,
+  "per_round": 5.086177981378226e-05,
+  "qubits": 109
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "memory",
+  "d": 7,
+  "p": 0.002,
+  "rounds": 7,
+  "ler": 6e-05,
+  "per_round": 8.571869420492817e-06,
+  "qubits": 99
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "merge",
+  "d": 7,
+  "p": 0.002,
+  "rounds": 21,
+  "ler": 0.000525,
+  "per_round": 2.50125085483055e-05,
+  "qubits": 211
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "memory",
+  "d": 7,
+  "p": 0.002,
+  "rounds": 8,
+  "ler": 9.5e-05,
+  "per_round": 1.1875987226628304e-05,
+  "qubits": 108
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "merge",
+  "d": 7,
+  "p": 0.002,
+  "rounds": 16,
+  "ler": 0.00015,
+  "per_round": 9.3763186148621e-06,
+  "qubits": 209
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "memory",
+  "d": 3,
+  "p": 0.004,
+  "rounds": 3,
+  "ler": 0.0045275,
+  "per_round": 0.001513744889003632,
+  "qubits": 19
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "merge",
+  "d": 3,
+  "p": 0.004,
+  "rounds": 9,
+  "ler": 0.0330425,
+  "per_round": 0.0037839342636001305,
+  "qubits": 43
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "memory",
+  "d": 3,
+  "p": 0.004,
+  "rounds": 4,
+  "ler": 0.0067625,
+  "per_round": 0.0016992679244904885,
+  "qubits": 22
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "merge",
+  "d": 3,
+  "p": 0.004,
+  "rounds": 8,
+  "ler": 0.0091325,
+  "per_round": 0.0011507901764113426,
+  "qubits": 41
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "memory",
+  "d": 5,
+  "p": 0.004,
+  "rounds": 5,
+  "ler": 0.0023875,
+  "per_round": 0.0004784146467172179,
+  "qubits": 51
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "merge",
+  "d": 5,
+  "p": 0.004,
+  "rounds": 15,
+  "ler": 0.019005,
+  "per_round": 0.0012900403737911015,
+  "qubits": 111
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "memory",
+  "d": 5,
+  "p": 0.004,
+  "rounds": 6,
+  "ler": 0.0034,
+  "per_round": 0.0005682789265026855,
+  "qubits": 57
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "merge",
+  "d": 5,
+  "p": 0.004,
+  "rounds": 12,
+  "ler": 0.0047725,
+  "per_round": 0.0003994589090323686,
+  "qubits": 109
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "memory",
+  "d": 7,
+  "p": 0.004,
+  "rounds": 7,
+  "ler": 0.001005,
+  "per_round": 0.000143695259212262,
+  "qubits": 99
+ },
+ {
+  "tool": "eccentric_tqec",
+  "op": "merge",
+  "d": 7,
+  "p": 0.004,
+  "rounds": 21,
+  "ler": 0.0084425,
+  "per_round": 0.0004052922414715665,
+  "qubits": 211
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "memory",
+  "d": 7,
+  "p": 0.004,
+  "rounds": 8,
+  "ler": 0.00156,
+  "per_round": 0.00019526669520802953,
+  "qubits": 108
+ },
+ {
+  "tool": "lattice_sim",
+  "op": "merge",
+  "d": 7,
+  "p": 0.004,
+  "rounds": 16,
+  "ler": 0.002025,
+  "per_round": 0.00012680340133008894,
+  "qubits": 209
+ }
+]

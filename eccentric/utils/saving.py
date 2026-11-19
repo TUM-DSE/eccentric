@@ -14,9 +14,24 @@ def save_results_to_csv(data, experiment_name):
         directory = create_experiment_directory(experiment_name)
         filename = os.path.join(directory, "results.csv")
 
+        rows, fieldnames = [], list(data.keys())
+        if os.path.isfile(filename):
+            with open(filename, newline="") as f:
+                reader = csv.DictReader(f)
+                header = reader.fieldnames or []
+                rows = list(reader)
+            fieldnames = header + [k for k in data if k not in header]
+            if fieldnames == header:
+                rows = []
+        if rows:
+            # New columns: rewrite the file with the extended header
+            with open(filename, mode="w", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames, restval="")
+                writer.writeheader()
+                writer.writerows(rows)
         file_exists = os.path.isfile(filename)
         with open(filename, mode="a", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=data.keys())
+            writer = csv.DictWriter(f, fieldnames=fieldnames, restval="")
             if not file_exists:
                 writer.writeheader()
             writer.writerow(data)

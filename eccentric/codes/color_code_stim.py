@@ -42,6 +42,7 @@ class ColorCode:
         logical_gap: bool = False,
         use_last_detectors: bool = True,
         benchmarking: bool = False,
+        basis: str = "Z",
     ):
         if isinstance(cnot_schedule, str):
             if cnot_schedule in ["tri_optimal", "LLB"]:
@@ -97,6 +98,11 @@ class ColorCode:
         if logical_gap and self.shape not in {"tri", "growing"}:
             raise NotImplementedError
         self.use_last_detectors = use_last_detectors
+        # Memory basis of the triangular and rectangular patches: "X" mirrors the Z-basis experiment
+        # (data prepared in |+>, measured in X, first- and last-round detectors on the X checks)
+        if basis not in ("Z", "X") or (basis == "X" and self.shape not in {"tri", "rec"}):
+            raise NotImplementedError(f"basis {basis} for the {self.shape} color code")
+        self.basis = basis
 
         self.tanner_graph = ig.Graph()
         self.circuit = stim.Circuit()
@@ -464,7 +470,7 @@ class ColorCode:
             data_q1s = red_links[:, 0]
             data_q2s = red_links[:, 1]
         elif shape in {"tri", "rec"}:
-            temp_bdrys = "z"
+            temp_bdrys = "x" if self.basis == "X" else "z"
             red_links = data_q1s = data_q2s = None
         elif shape == "growing":
             temp_bdrys = "mixed"
@@ -543,12 +549,20 @@ class ColorCode:
 
             return tuple(coords)
 
+        def get_detector_coords(anc_qubit: ig.Vertex):
+            # (x, y, t, basis and color): the 4th coordinate is what Chromobius decodes with,
+            # 0-2 for red, green, blue X checks and 3-5 for Z checks
+            basis_color = 3 * (anc_qubit["pauli"] == "Z") + "rgb".index(anc_qubit["color"])
+            return get_qubit_coords(anc_qubit) + (0, basis_color)
+
         def get_synd_extr_circuit(first=False):
             synd_extr_circuit = synd_extr_circuit_without_spam.copy()
 
             synd_extr_circuit.append("MRZ", anc_Z_qids, p_meas)
 
-            if first:
+            if first and temp_bdrys == "x":
+                pass
+            elif first:
                 for j, anc_qubit in enumerate(anc_Z_qubits):
                     if anc_qubit["color"] == "r":
                         if temp_bdrys == "r":
@@ -559,16 +573,14 @@ class ColorCode:
                         ):
                             continue
                     lookback = -num_anc_Z_qubits + j
-                    coords = get_qubit_coords(anc_qubit)
-                    coords += (0,)
+                    coords = get_detector_coords(anc_qubit)
                     target = stim.target_rec(lookback)
                     synd_extr_circuit.append("DETECTOR", target, coords)
 
             else:
                 for j, anc_qubit in enumerate(anc_Z_qubits):
                     lookback = -num_anc_Z_qubits + j
-                    coords = get_qubit_coords(anc_qubit)
-                    coords += (0,)
+                    coords = get_detector_coords(anc_qubit)
                     target = [
                         stim.target_rec(lookback),
                         stim.target_rec(lookback - num_anc_qubits),
@@ -576,7 +588,11 @@ class ColorCode:
                     synd_extr_circuit.append("DETECTOR", target, coords)
 
             synd_extr_circuit.append("MRX", anc_X_qids, p_meas)
-            if first and temp_bdrys in {"r", "mixed"}:
+            if first and temp_bdrys == "x":
+                for j, anc_qubit in enumerate(anc_X_qubits):
+                    lookback = -num_anc_X_qubits + j
+                    synd_extr_circuit.append("DETECTOR", [stim.target_rec(lookback)], get_detector_coords(anc_qubit))
+            elif first and temp_bdrys in {"r", "mixed"}:
                 for j, anc_qubit in enumerate(anc_X_qubits):
                     if temp_bdrys == "r" and anc_qubit["color"] == "r":
                         continue
@@ -586,16 +602,14 @@ class ColorCode:
                         continue
 
                     lookback = -num_anc_X_qubits + j
-                    coords = get_qubit_coords(anc_qubit)
-                    coords += (0,)
+                    coords = get_detector_coords(anc_qubit)
                     target = [stim.target_rec(lookback)]
                     synd_extr_circuit.append("DETECTOR", target, coords)
 
             elif not first:
                 for j, anc_qubit in enumerate(anc_X_qubits):
                     lookback = -num_anc_X_qubits + j
-                    coords = get_qubit_coords(anc_qubit)
-                    coords += (0,)
+                    coords = get_detector_coords(anc_qubit)
                     target = [
                         stim.target_rec(lookback),
                         stim.target_rec(lookback - num_anc_qubits),
@@ -624,6 +638,11 @@ class ColorCode:
             circuit.append("RZ", data_qids)
             if p_reset > 0 and not perfect_init_final:
                 circuit.append("X_ERROR", data_qids, p_reset)
+
+        elif temp_bdrys == "x":
+            circuit.append("RX", data_qids)
+            if p_reset > 0 and not perfect_init_final:
+                circuit.append("Z_ERROR", data_qids, p_reset)
 
         elif temp_bdrys == "r":
             circuit.append("RX", data_q1s)
@@ -673,7 +692,17 @@ class ColorCode:
         circuit += get_synd_extr_circuit() * (rounds - 1)
 
         p_meas_final = 0 if perfect_init_final else p_meas
-        if temp_bdrys in {"z", "mixed"}:
+        if temp_bdrys == "x":
+            circuit.append("MX", data_qids, p_meas_final)
+            if use_last_detectors:
+                for j_anc, anc_qubit in enumerate(anc_X_qubits):
+                    lookback_inds = [-num_data_qubits + data_qids.index(q.index) for q in anc_qubit.neighbors()]
+                    # The X checks are measured after the Z checks in each round
+                    lookback_inds.append(-num_data_qubits - num_anc_X_qubits + j_anc)
+                    circuit.append("DETECTOR", [stim.target_rec(i) for i in lookback_inds],
+                                   get_detector_coords(anc_qubit))
+
+        elif temp_bdrys in {"z", "mixed"}:
             circuit.append("MZ", data_qids, p_meas_final)
             if use_last_detectors:
                 for j_anc, anc_qubit in enumerate(anc_Z_qubits):
@@ -686,7 +715,7 @@ class ColorCode:
                     lookback_inds.append(-num_data_qubits - num_anc_qubits + j_anc)
                     target = [stim.target_rec(ind) for ind in lookback_inds]
                     circuit.append(
-                        "DETECTOR", target, get_qubit_coords(anc_qubit) + (0,)
+                        "DETECTOR", target, get_detector_coords(anc_qubit)
                     )
 
         else:
@@ -769,7 +798,7 @@ class ColorCode:
             else:
                 circuit.append("OBSERVABLE_INCLUDE", target, 1)
 
-        if temp_bdrys in {"z", "mixed"}:
+        if temp_bdrys in {"z", "mixed", "x"}:
             if self.shape in {"tri", "growing"}:
                 qubits_logs = [tanner_graph.vs.select(obs=True)]
 
@@ -791,12 +820,13 @@ class ColorCode:
         return self.detectors[detector_id]
 
 
-def get_color_code(d=5,rounds=5):
+def get_color_code(d=5, rounds=5, basis="Z"):
     colorcode = ColorCode(
     d=d,
     rounds=rounds,
     cnot_schedule="tri_optimal",
     p_circuit=0,
+    basis=basis,
     )
     return StimCodeCircuit(stim_circuit = colorcode.circuit)
 

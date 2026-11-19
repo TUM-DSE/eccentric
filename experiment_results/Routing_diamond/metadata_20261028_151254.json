@@ -1,0 +1,27 @@
+{
+    "name": "Routing_diamond",
+    "type": "routing",
+    "num_samples": 100,
+    "backends": [
+        "custom_diamond"
+    ],
+    "backends_sizes": [
+        313
+    ],
+    "codes": [
+        "surface",
+        "hh",
+        "color",
+        "bacon",
+        "steane"
+    ],
+    "routing_methods": [
+        "basic",
+        "sabre",
+        "stochastic"
+    ],
+    "layout_methods": [
+        null,
+        "sabre"
+    ]
+}

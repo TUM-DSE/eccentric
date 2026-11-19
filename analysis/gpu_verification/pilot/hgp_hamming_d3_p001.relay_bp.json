@@ -1,0 +1,57 @@
+{
+ "circuit": "hgp_hamming_d3_p001",
+ "decoder": "relay_bp",
+ "batch": 262144,
+ "reference_shots": 1000000,
+ "build_seconds": 3.7342121601104736,
+ "first_call_seconds": 0.044628143310546875,
+ "sampling_seconds_reference": 0.5270168781280518,
+ "reference_seconds": [
+  12.82036304473877,
+  12.558094024658203
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.01715397834777832
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.02020096778869629
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.022584199905395508
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 0.1069784164428711
+   },
+   {
+    "offset": 495000,
+    "seconds": 0.10132336616516113
+   },
+   {
+    "offset": 990000,
+    "seconds": 0.10572052001953125
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 1.2465357780456543
+   },
+   {
+    "offset": 450000,
+    "seconds": 1.2356345653533936
+   },
+   {
+    "offset": 900000,
+    "seconds": 1.2977638244628906
+   }
+  ]
+ }
+}

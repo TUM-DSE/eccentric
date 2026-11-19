@@ -1,0 +1,57 @@
+{
+ "circuit": "mhc36_d4_p001",
+ "decoder": "hier_bposd_hard",
+ "batch": 262144,
+ "reference_shots": 289000,
+ "build_seconds": 7.826759576797485,
+ "first_call_seconds": 1.129141092300415,
+ "sampling_seconds_reference": 0.0990443229675293,
+ "reference_seconds": [
+  289.3147990703583,
+  291.228786945343
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 1.0814752578735352
+   },
+   {
+    "offset": 499500,
+    "seconds": 1.0239622592926025
+   },
+   {
+    "offset": 999000,
+    "seconds": 1.0346317291259766
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 10.243778944015503
+   },
+   {
+    "offset": 495000,
+    "seconds": 10.077253341674805
+   },
+   {
+    "offset": 990000,
+    "seconds": 10.01470398902893
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 100.22685885429382
+   },
+   {
+    "offset": 450000,
+    "seconds": 100.01649832725525
+   },
+   {
+    "offset": 900000,
+    "seconds": 100.18842363357544
+   }
+  ]
+ }
+}

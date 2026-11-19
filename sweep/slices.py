@@ -1,0 +1,384 @@
+"""Slices of the configuration space that the sweep covers, one family of codes at a time.
+
+A configuration is a code (with a schedule and distance), a device with a noise model (and error
+rate), a compiler setting and a number of syndrome rounds; each configuration is decoded with
+several decoders on the same shots.
+"""
+from itertools import product
+
+from eccentric.codes.catalog import CODES, CodeFamily, FixedCode
+
+QLDPC_PREFIXES = ("bb", "bpc", "gb", "hgp", "lp", "lcs", "qt", "mitten", "qlp", "cbb", "tb", "mhc", "golay")
+QLDPC_CODES = sorted(c for c in CODES if c.startswith(QLDPC_PREFIXES)) + ["gross"]
+
+# Paper codes and their distances in the reference slice
+PAPER_DISTANCES = {"surface": [3, 5, 7], "color": [3, 5, 7], "hh": [3, 5, 7], "bacon": [3, 5, 7], "steane": [3, 9], "gross": [12]}
+MATCHABLE = {"surface", "hh", "bacon", "repetition", "xzzx", "toric", "honeycomb", "planar_honeycomb"}
+LATTICE_SURGERY = ("ls_memory", "ls_merge", "ls_cnot")
+
+DECODE = dict(target_errors=100, max_shots=100_000, time_budget=3600, first_batch=100, max_batch=5000, timeout=3 * 3600)
+
+
+def schedules(code):
+    return (CODES[code].schedules or (None,)) if code in CODES else (None,)
+
+
+def code_distances(code):
+    if code in PAPER_DISTANCES:
+        return PAPER_DISTANCES[code]
+    spec = CODES[code]
+    if isinstance(spec, FixedCode):
+        return [spec.distance]
+    return [spec.min_d + i * spec.step for i in range(3)]
+
+
+def qldpc_ibm():
+    """qLDPC codes on IBM devices: Heron, Loon/Nighthawk (one or two QPUs) and Flamingo (one or three
+    QPUs), at the devices' noise and, for Loon and Flamingo, tenfold lower noise"""
+    ibm = ["real_flamingo", "real_flamingo_downscaled"]
+    devices = [("real_torino", ["real_heron"]), ("real_loon_1_qpu", ibm), ("real_loon", ibm),
+               ("real_flamingo_1_qpu", ibm), ("real_flamingo", ibm)]
+    for code in QLDPC_CODES:
+        for schedule in schedules(code):
+            for d in code_distances(code):
+                for backend, noises in devices:
+                    for error_type in noises:
+                        yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend=backend,
+                                   error_type=error_type, error_probability=None,
+                                   decoders=["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"])
+
+
+def qldpc_ibm_projected(max_qubits=600):
+    """qLDPC codes that fit none of the IBM devices above, on projected Loon and Flamingo devices with
+    as many QPUs in the chain as the code needs, at tenfold lower noise (at the devices' own noise
+    no qLDPC code works even on the existing devices). Tesseract is left out, it ran out of time on
+    most codes above 200 qubits."""
+    from eccentric.codes import get_min_n
+
+    devices = [("loon", 121, 242), ("flamingo", 133, 399)]
+    for code in QLDPC_CODES:
+        for d in code_distances(code):
+            n = get_min_n(code, d)
+            for device, qpu_size, largest in devices:
+                if n <= largest or n > max_qubits:
+                    continue
+                for schedule in schedules(code):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d,
+                               backend=f"real_{device}_{-(-n // qpu_size)}_qpus", error_type="real_flamingo_downscaled",
+                               error_probability=None, decoders=["bposd", "relay_bp", "belief_find"])
+
+
+def bb_native(max_qubits=600):
+    """Bivariate bicycle codes placed one to one on a device built for them, IBM's planned layout,
+    to compare with the same codes compiled onto Loon and Flamingo: with long-range couplers as good
+    as local ones (native) and as noisy as IBM's remote couplers, 3% at the devices' noise (native_lr)"""
+    from eccentric.codes import get_min_n
+
+    for code in QLDPC_CODES:
+        if not code.startswith(("bb", "gross")):
+            continue
+        for schedule in schedules(code):
+            for d in code_distances(code):
+                if get_min_n(code, d) > max_qubits:
+                    continue
+                for backend, error_type in product(("native", "native_lr"), ("real_flamingo", "real_flamingo_downscaled")):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend=backend,
+                               error_type=error_type, error_probability=None,
+                               decoders=["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"])
+
+
+# Distances of the paper's distributed-QPU comparison (experiment_results/DQC_*), per device
+PAPER_DQC = {
+    "real_loon_1_qpu": {"surface": 7, "color": 7, "hh": 7, "bacon": 9, "steane": 9},
+    "real_loon": {"surface": 9, "color": 9, "hh": 9, "bacon": 15, "steane": 9},
+    "real_flamingo_1_qpu": {"surface": 7, "color": 7, "hh": 7, "bacon": 11, "steane": 9},
+    "real_flamingo": {"surface": 13, "color": 13, "hh": 11, "bacon": 19, "steane": 9},
+}
+
+
+def paper_dqc():
+    """The paper's comparison of one QPU with distributed QPUs, again with the fixes (decoherence,
+    Steane readout, single-QPU devices) and BP-OSD as in the paper"""
+    for backend, distances in PAPER_DQC.items():
+        for code, d in distances.items():
+            for error_type in ("real_flamingo", "real_flamingo_downscaled"):
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=error_type,
+                           error_probability=None, decoders=["bposd"])
+
+
+def willow_surface():
+    """The surface code memory on Willow, to compare with Google's experiment below threshold
+    (Nature 638, 920 (2025): 0.143% logical error per cycle at distance 7, suppression factor 2.14),
+    under the paper's Willow noise and the spec-sheet noise, compiled onto Willow by Qiskit (as in the
+    paper) and placed on the grid without SWAPs as in Google's experiment (native)"""
+    for d, cycles, backend, error_type in product((3, 5, 7), (10, 30), ("real_willow", "native"), ("real_willow", "real_willow_spec")):
+        yield dict(code="surface", schedule=None, distance=d, cycles=cycles, backend=backend, error_type=error_type,
+                   error_probability=None, decoders=["mwpm", "bposd", "tesseract"],
+                   decode=dict(time_budget=1800, timeout=2 * 3600))
+
+
+def qldpc_bicycle():
+    """qLDPC and the paper's codes on IBM's bicycle architecture module (288 qubits), with its
+    long-range c-couplers as good as local ones or as noisy as remote ones, at IBM noise and tenfold
+    lower"""
+    from eccentric.codes import get_min_n
+
+    noises = ["real_flamingo", "real_flamingo_downscaled"]
+    for code in QLDPC_CODES + ["surface", "color", "hh", "bacon", "steane"]:
+        qldpc = code in QLDPC_CODES
+        decoders = ["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"] if qldpc else \
+            ["bposd", "tesseract"] + (["mwpm"] if code in MATCHABLE else []) + (["chromobius"] if code == "color" else [])
+        for d in code_distances(code):
+            if get_min_n(code, d) > 288:
+                continue
+            for schedule in schedules(code):
+                for backend, error_type in product(["real_bicycle", "real_bicycle_lr"], noises):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend=backend,
+                               error_type=error_type, error_probability=None, decoders=decoders)
+
+
+def qldpc_bicycle_chain(max_qubits=600):
+    """qLDPC codes too large for one bicycle architecture module, on as many modules as they need,
+    chained by remote links, at tenfold lower noise as on the projected Loon and Flamingo chains"""
+    from eccentric.codes import get_min_n
+
+    for code in QLDPC_CODES:
+        for d in code_distances(code):
+            n = get_min_n(code, d)
+            if n <= 288 or n > max_qubits:
+                continue
+            for schedule in schedules(code):
+                for variant in ("bicycle", "bicycle_lr"):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d,
+                               backend=f"real_{variant}_{-(-n // 288)}_qpus", error_type="real_flamingo_downscaled",
+                               error_probability=None, decoders=["bposd", "relay_bp", "belief_find"])
+
+
+def qldpc_atoms():
+    """qLDPC codes on neutral atoms (the Harvard/MIT array and Infleqtion's) and on Quantinuum's ions,
+    at the devices' own noise: any two qubits interact after a move, which costs a gate error (and,
+    for the Harvard array, atom loss), so the codes need no SWAPs"""
+    from eccentric.backends.utils import get_backend
+    from eccentric.codes import get_min_n
+
+    for backend, error_type in (("real_harvard", "real_harvard"), ("real_infleqtion", "real_infleqtion"), ("real_apollo", "real_apollo")):
+        size = get_backend(backend, None).num_qubits
+        for code in QLDPC_CODES:
+            for d in code_distances(code):
+                if get_min_n(code, d) > size:
+                    continue
+                for schedule in schedules(code):
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend=backend,
+                               error_type=error_type, error_probability=None,
+                               decoders=["bposd", "bplsd", "relay_bp", "belief_find", "tesseract"])
+
+
+def readout_700():
+    """The IBM devices' codes again with 700 ns readout instead of today's 1.56 us, to see how much
+    faster readout would help: qLDPC and the paper's codes on one Loon or Flamingo QPU and on the
+    bicycle module, at the default schedule"""
+    from eccentric.codes import get_min_n
+
+    devices = [("real_loon_1_qpu", 121), ("real_flamingo_1_qpu", 133), ("real_bicycle", 288)]
+    for code in QLDPC_CODES + ["surface", "color", "hh", "bacon", "steane"]:
+        decoders = ["bposd", "relay_bp"] if code in QLDPC_CODES else ["bposd"] + (["mwpm"] if code in MATCHABLE else [])
+        for d in code_distances(code):
+            for backend, size in devices:
+                if get_min_n(code, d) > size:
+                    continue
+                for error_type in ("real_flamingo_m700", "real_flamingo_downscaled_m700"):
+                    yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=error_type,
+                               error_probability=None, decoders=decoders)
+
+
+FLOQUET_CODES = ["honeycomb", "planar_honeycomb"] + sorted(c for c in CODES if "hyperbolic_floquet" in c)
+
+
+def floquet_devices():
+    """Floquet codes (honeycomb, planar honeycomb, hyperbolic and semi-hyperbolic) on real devices: IBM's
+    (one and several QPUs, the bicycle module; today's and tenfold lower noise), Willow, Quantinuum's
+    ions and the neutral-atom arrays. Their pair checks need only two-qubit gates (or ancillas), and
+    all of them are matchable"""
+    ibm = ["real_flamingo", "real_flamingo_downscaled"]
+    devices = [("real_torino", ["real_heron"]), ("real_loon_1_qpu", ibm), ("real_loon", ibm), ("real_flamingo_1_qpu", ibm),
+               ("real_flamingo", ibm), ("real_bicycle", ibm), ("real_willow", ["real_willow", "real_willow_spec"]),
+               ("real_apollo", ["real_apollo"]), ("real_infleqtion", ["real_infleqtion"]), ("real_harvard", ["real_harvard"])]
+    for code in FLOQUET_CODES:
+        for d in code_distances(code):
+            for backend, noises in devices:
+                for error_type in noises:
+                    yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=error_type,
+                               error_probability=None, decoders=["mwpm", "bposd", "relay_bp", "tesseract"],
+                               decode=dict(time_budget=2 * 3600, max_shots=200_000, timeout=3 * 3600))
+
+
+NOISE_SCALES = (0.1, 0.25, 0.5, 1.0)
+SCALING_DEVICES = [("real_willow", "real_willow"), ("real_torino", "real_heron"), ("real_flamingo_1_qpu", "real_flamingo"),
+                   ("real_flamingo", "real_flamingo"), ("real_loon", "real_flamingo"), ("real_bicycle", "real_flamingo"),
+                   ("real_harvard", "real_harvard"), ("real_infleqtion", "real_infleqtion")]
+# Codes with several distances, or a family of sizes (fixed codes at their own distance)
+SCALING_CODES = {"surface": [3, 5, 7, 9], "color": [3, 5, 7], "hh": [3, 5, 7], "planar_honeycomb": [3, 5, 7],
+                 "bb72": None, "bb90": None, "gross": None, "bpc36": None, "bpc72": None, "bpc90": None}
+
+
+def noise_scaling():
+    """Device noise scaled down, every error probability times 0.1, 0.25, 0.5 or 1 (error type
+    <noise>_x<factor>), for codes with several distances or sizes on IBM, Google and neutral-atom devices:
+    each device's threshold, the suppression per distance step, and how much better a device must get.
+    The topological codes also run twice as many rounds. Apollo is left out: at its own noise the codes
+    are already far below threshold. Up to a million shots, so that low rates are measured"""
+    for code, distances in SCALING_CODES.items():
+        qldpc = code.startswith(QLDPC_PREFIXES) or code == "gross"
+        decoders = ["bposd", "bplsd", "relay_bp"] if qldpc else \
+            ["bposd", "tesseract"] + (["mwpm"] if code in MATCHABLE else ["relay_bp"])
+        for d in distances or code_distances(code):
+            for backend, noise in SCALING_DEVICES:
+                for factor in NOISE_SCALES:
+                    for cycles in ([d] if qldpc else [d, 2 * d]):
+                        yield dict(code=code, schedule=None, distance=d, cycles=cycles, backend=backend,
+                                   error_type=noise if factor == 1 else f"{noise}_x{factor}", error_probability=None,
+                                   decoders=decoders, decode=dict(max_shots=1_000_000))
+
+
+# The paper's experiments compiled onto sparse devices with circuit qubit i on device qubit i
+PAPER_TOPOLOGY = ["Real_Topology", "Willow", "Connectivity", "Program_stats_topology", "Apollo", "Infleqtion"]
+
+
+def paper_topology():
+    """The paper's experiments on sparse devices at the paper's configurations, compiled again with
+    the placement without SWAPs (DETAILED_CHANGES fix 8) and decoded with BP-OSD as in the paper"""
+    import csv
+    import os
+
+    results = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "experiment_results")
+    configs = set()
+    for experiment in PAPER_TOPOLOGY:
+        with open(os.path.join(results, experiment, "results.csv")) as f:
+            for row in csv.DictReader(f):
+                configs.add((row["code"], int(row["distance"]), int(row["cycles"]), row["backend"],
+                             int(row["backend_size"]) if row["backend_size"] else None, row["error_type"],
+                             float(row["error_probability"]) if row["error_probability"] else None))
+    for code, d, cycles, backend, size, error_type, p in sorted(configs, key=str):
+        yield dict(code=code, schedule=None, distance=d, cycles=cycles, backend=backend, backend_size=size,
+                   error_type=error_type, error_probability=p, decoders=["bposd"])
+
+
+def reference(max_qubits=600):
+    """Every code at its default schedule on an all-to-all device with SD6 noise, the common ground
+    that makes the device slices comparable"""
+    from eccentric.codes import get_min_n
+
+    for code in [c for c in CODES if c not in LATTICE_SURGERY] + list(PAPER_DISTANCES):
+        for d in code_distances(code):
+            n = get_min_n(code, d)
+            if n > max_qubits:
+                continue
+            decoders = ["bposd"]
+            if code in MATCHABLE or code.startswith(("hyperbolic", "semi_hyperbolic")):
+                decoders.append("mwpm")
+            if code.startswith(QLDPC_PREFIXES) or code == "gross":
+                decoders.append("relay_bp")
+            if code == "color":
+                decoders.append("chromobius")
+            for p in (5e-4, 1e-3, 2e-3, 4e-3):
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend="custom_full", backend_size=n,
+                           error_type="sd6", error_probability=p, decoders=decoders)
+
+
+# Codes whose circuits exist in both bases, and the asymmetric ones that are not in the device slices yet
+BASIS_CODES = {"surface", "color", "hh", "bacon", "xzzx", "bb72", "bb90", "gross", "bpc36", "bpc72", "bpc90"}
+BASIS_NEW = {"bacon": [3, 5, 7], "xzzx": [3, 5, 7]}
+
+
+def basis_x():
+    """The memory experiment in the X basis (logical |+> prepared and measured), paired with the Z-basis
+    results of the same configurations: the Z basis does not see dephasing of the data qubits, which
+    dominates idling on devices with T2 < T1, and heavy-hex, Bacon-Shor and XZZX protect X and Z
+    differently. The X circuit is compiled with the Z circuit's seed. Covers the Willow surface code
+    (all of willow_surface), the device-noise configurations of noise_scaling (at the device's own noise,
+    d rounds), Bacon-Shor and XZZX on the same devices in both bases, and surface, heavy-hex, Bacon-Shor
+    and XZZX on the all-to-all device with SD6 noise (paired with reference: only the code, not the
+    noise, is asymmetric there)"""
+    for config in willow_surface():
+        yield dict(config, basis="X")
+    for config in noise_scaling():
+        if config["error_type"] == dict(SCALING_DEVICES)[config["backend"]] and config["cycles"] == config["distance"] \
+                and config["code"] in BASIS_CODES:
+            yield dict(config, basis="X", decode=dict(max_shots=200_000))
+    for code, distances in BASIS_NEW.items():
+        for d in distances:
+            for backend, noise in SCALING_DEVICES:
+                for basis in ("Z", "X"):
+                    yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=noise,
+                               error_probability=None, decoders=["bposd", "tesseract", "mwpm"],
+                               decode=dict(max_shots=200_000), **({"basis": "X"} if basis == "X" else {}))
+    from eccentric.codes import get_min_n
+    for code in ("surface", "hh", "bacon", "xzzx"):
+        for d in code_distances(code):
+            n = get_min_n(code, d)
+            for p in (1e-3, 2e-3):
+                # As in reference (all four are matchable)
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend="custom_full", backend_size=n,
+                           error_type="sd6", error_probability=p, decoders=["bposd", "mwpm"], basis="X")
+
+
+LS_DEVICES = [("real_willow", "real_willow"), ("real_torino", "real_heron"), ("real_flamingo_1_qpu", "real_flamingo"),
+              ("real_loon", "real_flamingo"), ("real_flamingo", "real_flamingo"), ("real_harvard", "real_harvard"),
+              ("real_apollo", "real_apollo"), ("real_infleqtion", "real_infleqtion")]
+
+
+def lattice_surgery():
+    """Lattice-surgery operations on surface-code patches (memory, ZZ/XX merge, CNOT; built with tqec) at
+    d = 3, 5, 7: on the all-to-all device with SD6 noise at the reference error rates in both bases (the merge
+    measures ZZ in the Z basis and XX in the X basis, the CNOT's observables are its Z or X correlations), and
+    in the Z basis on the real devices with their own noise (configurations too large for a device are
+    recorded as such). Matching, BP-OSD, Tesseract and Relay-BP on every configuration"""
+    from eccentric.codes import get_min_n
+
+    decoders = ["mwpm", "bposd", "tesseract", "relay_bp"]
+    for code in LATTICE_SURGERY:
+        for d in code_distances(code):
+            n = get_min_n(code, d)
+            for p in (5e-4, 1e-3, 2e-3, 4e-3):
+                for basis in ("Z", "X"):
+                    yield dict(code=code, schedule=None, distance=d, cycles=d, backend="custom_full", backend_size=n,
+                               error_type="sd6", error_probability=p, decoders=decoders,
+                               **({"basis": "X"} if basis == "X" else {}))
+            for backend, noise in LS_DEVICES:
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=noise,
+                           error_probability=None, decoders=decoders)
+
+
+OPS_CODES = [("surface", 3), ("surface", 5), ("toric", 3), ("hgp_hamming", 3), ("golay23", 7), ("mhc36", 4), ("cbb42", 6),
+             ("tb48", 6), ("bb72", 6), ("bb90", 10), ("gross", 12), ("bpc72", 8), ("lcs52", 4)]
+OPS_DEVICES = [("real_harvard", "real_harvard"), ("real_infleqtion", "real_infleqtion"), ("real_apollo", "real_apollo"),
+               ("real_flamingo", "real_flamingo")]
+
+
+def fault_tolerant_ops():
+    """Fault-tolerant operations on CSS codes (codes/operations.py, built with the qLDPC library): the memory
+    with qLDPC's syndrome extraction as the baseline, a logical Z and X measurement by surgery, a joint ZZ and XX
+    measurement of two blocks, and a transversal CNOT between two blocks, on surface, toric, hypergraph product,
+    Golay, many-hypercube, coprime and trivariate bicycle, bivariate bicycle, balanced product and
+    lift-connected surface codes; under SD6 noise on an all-to-all device and on the neutral-atom, trapped-ion
+    and IBM Flamingo devices with their own noise (configurations too large for a device are recorded as
+    such). BP-OSD, Tesseract and Relay-BP, and matching where it applies"""
+    from eccentric.codes import get_min_n
+    from eccentric.codes.operations import BASIS_OF, OPERATIONS
+
+    for code, d in OPS_CODES:
+        for operation in OPERATIONS:
+            decoders = ["bposd", "tesseract", "relay_bp"] + (["mwpm"] if code in ("surface", "toric") else [])
+            basis = BASIS_OF.get(operation)
+            extra = dict(operation=operation, **({"basis": basis} if basis == "X" else {}))
+            n = get_min_n(code, d, operation)
+            for p in (1e-3, 2e-3):
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend="custom_full", backend_size=n,
+                           error_type="sd6", error_probability=p, decoders=decoders,
+                           decode=dict(time_budget=1800, max_shots=100_000), **extra)
+            for backend, noise in OPS_DEVICES:
+                yield dict(code=code, schedule=None, distance=d, cycles=d, backend=backend, error_type=noise,
+                           error_probability=None, decoders=decoders, decode=dict(time_budget=1800, max_shots=100_000), **extra)
+
+
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices, "noise_scaling": noise_scaling, "basis_x": basis_x, "lattice_surgery": lattice_surgery, "fault_tolerant_ops": fault_tolerant_ops}

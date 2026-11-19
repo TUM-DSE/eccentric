@@ -5,11 +5,11 @@ from gen import _gen_util
 from qiskit_qec.circuits import StimCodeCircuit
 
 # Based on https://github.com/Strilanc/more-bacon-less-threshold
-def get_bacon_shor_code(d=5, cycles=1):
+def get_bacon_shor_code(d=5, cycles=1, basis="Z"):
     construction = {**make_bacon_shor_constructions()}
     circuit = _gen_util._generate_single_circuit(
                 constructions=construction,
-                params=_gen_util.CircuitBuildParams(style='bacon_shor', rounds=cycles, diameter=d, custom={'b': 'Z'}),
+                params=_gen_util.CircuitBuildParams(style='bacon_shor', rounds=cycles, diameter=d, custom={'b': basis}),
                 noise=None,
                 debug_out_dir=None,
                 convert_to_cz='0'

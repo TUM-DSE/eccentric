@@ -1,0 +1,57 @@
+{
+ "circuit": "gross_d12_p001",
+ "decoder": "relay_bp",
+ "batch": 262144,
+ "reference_shots": 1000000,
+ "build_seconds": 4.532679796218872,
+ "first_call_seconds": 0.20384621620178223,
+ "sampling_seconds_reference": 10.155268669128418,
+ "reference_seconds": [
+  166.6451871395111,
+  167.927889585495
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.12750673294067383
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.135345458984375
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.14168953895568848
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 1.4580652713775635
+   },
+   {
+    "offset": 495000,
+    "seconds": 1.4418680667877197
+   },
+   {
+    "offset": 990000,
+    "seconds": 1.410032033920288
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 15.387928485870361
+   },
+   {
+    "offset": 450000,
+    "seconds": 15.334234714508057
+   },
+   {
+    "offset": 900000,
+    "seconds": 14.966951370239258
+   }
+  ]
+ }
+}

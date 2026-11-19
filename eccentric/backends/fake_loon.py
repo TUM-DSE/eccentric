@@ -2,12 +2,14 @@ from qiskit.transpiler import Target, CouplingMap
 from qiskit.providers import BackendV2, Options, QubitProperties
 from qiskit.visualization import plot_coupling_map
 import numpy as np
+from ..seeding import stable_seed
 
 
 class FakeIBMLoon(BackendV2):
 
-    def __init__(self):
+    def __init__(self, num_qpus: int = 2):
         super().__init__(name="FakeIBMLoon", backend_version="2")
+        self.num_qpus = num_qpus
 
         self._remote_gates, self._coupling_map = self.get_distributed_coupling_map()
         self._num_qubits = self._coupling_map.size()
@@ -94,23 +96,26 @@ class FakeIBMLoon(BackendV2):
         return self.squareLatticeCouplingMap(add_c_couplers=True)
 
     def get_distributed_coupling_map(self) -> tuple[list, CouplingMap]:
-
-        endpoints, coupling_map_two = self.DQCCouplingMap(self.squareLatticeCouplingMap(add_c_couplers=True),
-                                                    self.squareLatticeCouplingMap(add_c_couplers=True),
-                                                    [[32, 18], [51, 37], [70, 56], [89, 75]]
-                                                    )
-
-        return endpoints, coupling_map_two
+        # A chain of QPUs, each linked to the next by four l-couplers
+        qpu = self.squareLatticeCouplingMap(add_c_couplers=True)
+        all_endpoints, coupling_map = [], qpu
+        for i in range(1, self.num_qpus):
+            offset = (i - 1) * qpu.size()
+            endpoints, coupling_map = self.DQCCouplingMap(coupling_map, qpu, [[offset + 32, 18], [offset + 51, 37], [offset + 70, 56], [offset + 89, 75]])
+            all_endpoints += endpoints
+        return all_endpoints, coupling_map
 
     def addStateOfTheArtQubits(self):
         qubit_props = []
 
+        # One draw of T1 and T2 per device, the same in every process
+        rng = np.random.default_rng(stable_seed(type(self).__name__, self._num_qubits))
         for i in range(self._num_qubits):
-            t1 = np.random.normal(190, 120, 1)
+            t1 = rng.normal(190, 120, 1)
             t1 = np.clip(t1, 50, 500)
             t1 = t1 * 1e-6
 
-            t2 = np.random.normal(130, 120, 1)
+            t2 = rng.normal(130, 120, 1)
             t2 = np.clip(t2, 50, 650)
             t2 = t2 * 1e-6
 

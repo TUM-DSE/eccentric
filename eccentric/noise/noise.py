@@ -16,6 +16,10 @@ RESET_OPS = {"R", "RX", "RY"}
 MEASURE_OPS = {"M", "MX", "MY"}
 ANNOTATION_OPS = {"OBSERVABLE_INCLUDE", "DETECTOR", "SHIFT_COORDS", "QUBIT_COORDS", "TICK"}
 SWAP_OPS = {"SWAP"}
+LOSS_DETECTION = ("none", "immediate", "measurement")
+# Tag of the instructions added to herald losses, whose measurement records are not part of the
+# original circuit
+HERALD_TAG = "herald"
 
 class NoiseModel:
     def __init__(
@@ -23,7 +27,6 @@ class NoiseModel:
         sq: Optional[float] = 0,
         tq: Optional[float] = 0,
         idle: Optional[float] = 0,
-        crosstalk: Optional[float] = 0,
         leakage: Optional[float] = 0,
         leakage_propagation: Optional[float] = 0,
         reset: Optional[float] = 0,
@@ -34,12 +37,22 @@ class NoiseModel:
         gate_times: Optional[Dict[str, float]] = {},
         qt: Optional[QubitTracking] = None,
         backend: Optional[BackendV2] = None,
-        use_correlated_parity_measurement_errors: bool = False
+        use_correlated_parity_measurement_errors: bool = False,
+        loss: float = 0,
+        loss_remote: float = 0,
+        loss_measure: float = 0,
+        loss_detection: str = "none",
+        idle_window: str = "layer",
+        coherence_scale: float = 1,
     ):
         self.sq = sq
         self.tq = tq
         self.idle = idle
-        self.crosstalk = crosstalk
+        # The idle error hits the qubits that wait in every layer ("layer"), or only while others
+        # are measured ("measurement"), as Google reports it for Willow
+        if idle_window not in ("layer", "measurement"):
+            raise ValueError(f"idle_window must be 'layer' or 'measurement', got {idle_window}")
+        self.idle_window = idle_window
         self.leakage = leakage
         self.leakage_propagation = leakage_propagation if leakage_propagation != 0 else leakage
         self.reset = reset
@@ -48,9 +61,22 @@ class NoiseModel:
         self.remote = remote
         self.noisy_gates = noisy_gates
         self.gate_times = gate_times
+        # T1 and T2 of the device's qubits are multiplied by this, e.g. for projections of better devices
+        self.coherence_scale = coherence_scale
         self.qt = qt
         self.backend = backend
         self.use_correlated_parity_measurement_errors = use_correlated_parity_measurement_errors
+        # Loss (erasure) probability per qubit of a local gate, of a remote gate (a move) and of a
+        # measurement. A lost qubit is replaced by a maximally mixed one. loss_detection is
+        # "none" (plain Pauli noise), "immediate" (heralded right away, as for erasure qubits) or
+        # "measurement" (detected the next time the qubit is measured, as for atom loss)
+        if loss_detection not in LOSS_DETECTION:
+            raise ValueError(f"loss_detection must be one of {LOSS_DETECTION}, got {loss_detection}")
+        self.loss = loss
+        self.loss_remote = loss_remote
+        self.loss_measure = loss_measure
+        self.loss_detection = loss_detection
+        self.flag_offset = None
         if callable(measure):
             self.measure_func = measure
         else:
@@ -64,8 +90,10 @@ class NoiseModel:
             return
         for qubit in qubits:
             qubit_properties = self.backend.qubit_properties(qubit.value)
-            t1 = qubit_properties.t1
-            t2 = qubit_properties.t2
+            if qubit_properties is None or qubit_properties.t1 is None or qubit_properties.t2 is None:
+                continue
+            t1 = qubit_properties.t1 * self.coherence_scale
+            t2 = qubit_properties.t2 * self.coherence_scale
 
             if t1 <= 0 or t2 <= 0:
                 continue
@@ -79,18 +107,6 @@ class NoiseModel:
             p_z = np.clip(p_z, 0.0, 1.0)
 
             circuit.append_operation("PAULI_CHANNEL_1", [qubit], [p_x, p_y, p_z])
-
-    def add_crosstalk_errors(self, touched_qubits: set[int], post: stim.Circuit):
-        if self.backend == None:
-            return
-        already_noised = set()
-        for q in touched_qubits:
-            for neighbor in self.qt.get_neighbours(q):
-                if neighbor in touched_qubits and (neighbor, q) not in already_noised and (q, neighbor) not in already_noised:
-                    noise_op = "X_ERROR" if random.random() < 0.5 else "Z_ERROR"
-                    post.append_operation(noise_op, [stim.target_qubit(neighbor)], self.crosstalk)
-                    already_noised.add((q, neighbor))
-                    already_noised.add((neighbor, q))
 
     def propagate_leakage(self, circuit: stim.Circuit, pair: List[int]):
         if any(self.qt.check_leaked(q) for q in pair) and random.random() < self.leakage_propagation:
@@ -107,6 +123,32 @@ class NoiseModel:
                 pauli = random.choice(["X_ERROR", "Y_ERROR", "Z_ERROR"])
                 circuit.append_operation(pauli, [target], 1.0)
                 self.qt.leak_qubit(target.value)
+
+    def has_heralded_loss(self) -> bool:
+        return self.loss_detection != "none" and (self.loss or self.loss_remote or self.loss_measure) > 0
+
+    def read_loss_flags(self, circuit: stim.Circuit, qubits: List[int]):
+        for q in qubits:
+            circuit.append("M", [self.flag_offset + q], tag=HERALD_TAG)
+            circuit.append(stim.CircuitInstruction("DETECTOR", [stim.target_rec(-1)], [], tag=HERALD_TAG))
+            circuit.append("R", [self.flag_offset + q], tag=HERALD_TAG)
+
+    def add_loss(self, circuit: stim.Circuit, qubits: List[int], p: float):
+        if p == 0 or not qubits:
+            return
+        if self.loss_detection == "none":
+            circuit.append("PAULI_CHANNEL_1", qubits, [p / 4, p / 4, p / 4])
+            return
+        # Each qubit has a noiseless flag qubit that a loss flips together with a random Pauli.
+        # Independent mechanisms instead of a disjoint mixture keep the DEM exact; they differ
+        # at order p^2.
+        for q in qubits:
+            flag = stim.target_x(self.flag_offset + q)
+            circuit.append("CORRELATED_ERROR", [flag], p / 4)
+            for pauli in (stim.target_x, stim.target_y, stim.target_z):
+                circuit.append("CORRELATED_ERROR", [flag, pauli(q)], p / 4)
+        if self.loss_detection == "immediate":
+            self.read_loss_flags(circuit, qubits)
 
     def is_remote(self, pair: List[int]) -> bool:
 
@@ -160,6 +202,7 @@ class NoiseModel:
             elif self.sq != 0:
                 post.append_operation("DEPOLARIZE1", targets, self.sq)
             self.add_qubit_error(post, targets, self.get_gate_time(op))
+            self.add_loss(post, [t.value for t in targets], self.loss)
         elif op.name in TQ_OPS or op.name in SWAP_OPS:
             if op.name in self.noisy_gates:
                 p = self.noisy_gates[op.name]
@@ -182,7 +225,8 @@ class NoiseModel:
                         post.append_operation("DEPOLARIZE2", pair, p)
                 else:
                     post.append_operation("DEPOLARIZE2", pair, p)
-                self.add_qubit_error(post, targets, self.get_gate_time(op, pair))
+                self.add_qubit_error(post, targets[i:i + 2], self.get_gate_time(op, pair))
+                self.add_loss(post, pair, self.loss_remote if self.is_remote(pair) else self.loss)
         elif op.name in RESET_OPS:
             for q in targets:
                 if self.qt != None:
@@ -197,6 +241,10 @@ class NoiseModel:
                 p = self.noisy_gates[op.name]
             else:
                 p = self.measure_func()
+            measured = [t.value for t in targets]
+            self.add_loss(pre, measured, self.loss_measure)
+            if self.loss_detection == "measurement" and self.has_heralded_loss():
+                self.read_loss_flags(pre, measured)
             pre.append_operation("Z_ERROR" if op.name.endswith("X") else "X_ERROR", targets, p)
             self.add_qubit_error(post, targets, self.get_gate_time(op))
         elif op.name == "MPP":
@@ -224,7 +272,30 @@ class NoiseModel:
         mid.append_operation(op.name, targets, args)
         return pre, mid, post
 
+    def decoheres(self) -> bool:
+        """Whether qubits decay by their T1 and T2 while they wait (devices with coherence times and
+        gate durations, unless the model has its own idle error)"""
+        return self.backend is not None and self.idle == 0 and bool(self.gate_times)
+
+    def durations(self, op: stim.CircuitInstruction) -> List[Tuple[List[int], float]]:
+        """The gates of the operation in order, each with its qubits and duration"""
+        targets = [t.value for t in op.targets_copy() if t.is_qubit_target]
+        if op.name in TQ_OPS or op.name in SWAP_OPS:
+            pairs = [targets[i:i + 2] for i in range(0, len(targets), 2)]
+            return [(pair, self.get_gate_time(op, pair)) for pair in pairs]
+        if op.name in SQ_OPS or op.name in RESET_OPS or op.name in MEASURE_OPS:
+            duration = self.get_gate_time(op)
+            return [([q], duration) for q in targets]
+        return []
+
     def noisy_circuit(self, circuit: stim.Circuit, *, qs: Optional[Set[int]] = None) -> stim.Circuit:
+        if self.has_heralded_loss() and self.flag_offset is None:
+            # Flag qubits after the ancilla qubit used for correlated MPP errors
+            self.flag_offset = circuit.num_qubits + 1
+            try:
+                return remap_measurement_records(self.noisy_circuit(circuit.flattened(), qs=qs))
+            finally:
+                self.flag_offset = None
         result = stim.Circuit()
         ancilla = circuit.num_qubits
 
@@ -236,7 +307,13 @@ class NoiseModel:
         reset_qubits: Set[int] = set()
 
         if qs is None:
-            qs = set(range(circuit.num_qubits))
+            # The qubits the circuit uses, not all qubits of the device
+            qs = {t.value for inst in circuit.flattened() for t in inst.targets_copy() if t.is_qubit_target}
+        # Within a layer, every gate starts as soon as its qubits are free (a layer can hold a
+        # measurement and then a reset of the same qubit): when each qubit is free again, and how
+        # long it was busy
+        clock: Dict[int, float] = {}
+        busy: Dict[int, float] = {}
 
         def flush():
             nonlocal result
@@ -244,8 +321,17 @@ class NoiseModel:
                 return
 
             idle_qubits = sorted(qs - used_qubits)
-            if idle_qubits and self.idle > 0:
+            if idle_qubits and self.idle > 0 and (self.idle_window == "layer" or measured_qubits):
                 current_moment_post.append_operation("DEPOLARIZE1", idle_qubits, self.idle)
+            if clock and self.decoheres():
+                # Every qubit waits whenever it is not busy until the layer is done
+                layer = max(clock.values())
+                for q in sorted(qs):
+                    wait = layer - busy.get(q, 0)
+                    if wait > 1e-15:
+                        self.add_qubit_error(current_moment_post, [stim.GateTarget(q)], wait)
+            clock.clear()
+            busy.clear()
 
             result += current_moment_pre
             result += current_moment_mid
@@ -283,10 +369,13 @@ class NoiseModel:
                 if op.name in ANNOTATION_OPS:
                     touched_qubits.clear()
 
-                if self.crosstalk > 0:
-                    self.add_crosstalk_errors(touched_qubits, post)
-
                 used_qubits |= touched_qubits
+                if self.decoheres():
+                    for qubits, duration in self.durations(op):
+                        start = max(clock.get(q, 0) for q in qubits)
+                        for q in qubits:
+                            clock[q] = start + duration
+                            busy[q] = busy.get(q, 0) + duration
                 if op.name in MEASURE_OPS:
                     measured_qubits |= touched_qubits
                 if op.name in RESET_OPS:
@@ -295,6 +384,29 @@ class NoiseModel:
                 raise NotImplementedError(repr(op))
         flush()
         return result
+
+
+def remap_measurement_records(circuit: stim.Circuit) -> stim.Circuit:
+    """Shift the measurement-record lookbacks of the original instructions past the records that
+    herald instructions inserted in between"""
+    result = stim.Circuit()
+    new_index = []
+    total = 0
+    for inst in circuit:
+        if inst.tag != HERALD_TAG and any(t.is_measurement_record_target for t in inst.targets_copy()):
+            targets = [
+                stim.target_rec(new_index[len(new_index) + t.value] - total) if t.is_measurement_record_target else t
+                for t in inst.targets_copy()
+            ]
+            inst = stim.CircuitInstruction(inst.name, targets, inst.gate_args_copy(), tag=inst.tag)
+        single = stim.Circuit()
+        single.append(inst)
+        n = single.num_measurements
+        if inst.tag != HERALD_TAG:
+            new_index.extend(range(total, total + n))
+        total += n
+        result.append(inst)
+    return result
 
 
 def mix_probability_to_independent_component_probability(mix_probability: float, n: float) -> float:
@@ -350,3 +462,50 @@ def parity_measurement_with_correlated_measurement_noise(
     circuit.append_operation('M', [ancilla])
 
     return circuit
+
+
+# Instructions whose arguments are error probabilities: noise channels, and measurements with a flip probability
+PROBABILITY_ARGS = {"DEPOLARIZE1", "DEPOLARIZE2", "X_ERROR", "Y_ERROR", "Z_ERROR", "PAULI_CHANNEL_1", "PAULI_CHANNEL_2",
+                    "E", "CORRELATED_ERROR", "ELSE_CORRELATED_ERROR", "HERALDED_ERASE", "HERALDED_PAULI_CHANNEL_1",
+                    "M", "MX", "MY", "MZ", "MR", "MRX", "MRY", "MRZ", "MPP", "MXX", "MYY", "MZZ"}
+
+
+def scale_noise(circuit: stim.Circuit, factor: float) -> stim.Circuit:
+    """The circuit with every error probability multiplied by factor (inside REPEAT blocks too); everything
+    else, tags included, is unchanged. Probability-1 errors are left alone: they are leakage events, which
+    NoiseModel samples when it builds the circuit (ScaledNoise scales how often they happen instead).
+    ELSE_CORRELATED_ERROR probabilities are conditional, so chains of them scale only approximately (no
+    noise model here emits them)"""
+    result = stim.Circuit()
+    for op in circuit:
+        if isinstance(op, stim.CircuitRepeatBlock):
+            result.append(stim.CircuitRepeatBlock(op.repeat_count, scale_noise(op.body_copy(), factor), tag=op.tag))
+        elif op.name in PROBABILITY_ARGS and op.gate_args_copy() and op.gate_args_copy() != [1.0]:
+            result.append(stim.CircuitInstruction(op.name, op.targets_copy(), [p * factor for p in op.gate_args_copy()],
+                                                  tag=op.tag))
+        else:
+            result.append(op)
+    return result
+
+
+class ScaledNoise:
+    """A noise model with every error probability multiplied by a factor, i.e. a device that many times as
+    noisy (0.1: tenfold better). Gate, measurement, reset and loss errors scale exactly, and so does
+    the rate of leakage events;
+    idle errors from T1/T2 scale like 1/T1 and 1/T2 to first order. Unlike FlamingoNoiseDownscaled (gate
+    errors / 10 with T1 and T2 x 3), one factor applies to every error. Everything but noisy_circuit is the
+    underlying model's"""
+
+    def __init__(self, model: NoiseModel, factor: float):
+        self.model = model
+        self.factor = factor
+        # Leakage is sampled while the circuit is built (a leaked qubit gets a probability-1 error), so scale
+        # how often a qubit leaks and passes leakage on, keeping the base model's leakage at every factor
+        model.leakage *= factor
+        model.leakage_propagation *= factor
+
+    def noisy_circuit(self, circuit: stim.Circuit, **kwargs) -> stim.Circuit:
+        return scale_noise(self.model.noisy_circuit(circuit, **kwargs), self.factor)
+
+    def __getattr__(self, name):
+        return getattr(self.model, name)

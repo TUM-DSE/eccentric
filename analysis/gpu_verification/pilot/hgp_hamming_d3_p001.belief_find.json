@@ -1,0 +1,57 @@
+{
+ "circuit": "hgp_hamming_d3_p001",
+ "decoder": "belief_find",
+ "batch": 262144,
+ "reference_shots": 1000000,
+ "build_seconds": 2.602546453475952,
+ "first_call_seconds": 0.17700409889221191,
+ "sampling_seconds_reference": 0.5229616165161133,
+ "reference_seconds": [
+  44.52707386016846,
+  44.51716446876526
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.1564633846282959
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.13922929763793945
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.14093708992004395
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 0.5045735836029053
+   },
+   {
+    "offset": 495000,
+    "seconds": 0.4926185607910156
+   },
+   {
+    "offset": 990000,
+    "seconds": 0.49695777893066406
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 4.489647626876831
+   },
+   {
+    "offset": 450000,
+    "seconds": 4.458805561065674
+   },
+   {
+    "offset": 900000,
+    "seconds": 4.583130121231079
+   }
+  ]
+ }
+}

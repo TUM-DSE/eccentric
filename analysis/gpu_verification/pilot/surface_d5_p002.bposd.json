@@ -1,0 +1,57 @@
+{
+ "circuit": "surface_d5_p002",
+ "decoder": "bposd",
+ "batch": 262144,
+ "reference_shots": 1000000,
+ "build_seconds": 4.033247947692871,
+ "first_call_seconds": 0.5825352668762207,
+ "sampling_seconds_reference": 0.9004390239715576,
+ "reference_seconds": [
+  276.496390581131,
+  275.4057855606079
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.5491955280303955
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.547687292098999
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.5502629280090332
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 3.024061679840088
+   },
+   {
+    "offset": 495000,
+    "seconds": 3.004608631134033
+   },
+   {
+    "offset": 990000,
+    "seconds": 2.725836992263794
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 27.64984631538391
+   },
+   {
+    "offset": 450000,
+    "seconds": 28.02675485610962
+   },
+   {
+    "offset": 900000,
+    "seconds": 27.285397052764893
+   }
+  ]
+ }
+}

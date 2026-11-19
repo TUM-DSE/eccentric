@@ -1,0 +1,152 @@
+import json
+import os
+
+import stim
+
+from validation.run_job import decode_adaptively
+
+
+def decode_ones(circuit):
+    """A batch decoder that counts how often the first detector fires"""
+    def run(n):
+        samples = circuit.compile_detector_sampler().sample(n)
+        return samples[:, 0].mean()
+    return run
+
+
+def test_seed_offset_gives_other_shots():
+    circuit = stim.Circuit.generated("repetition_code:memory", distance=3, rounds=2, before_round_data_depolarization=0.3)
+    job = dict(first_batch=200, max_batch=200, max_shots=200, target_errors=10**9, time_budget=60)
+    seen = []
+    a = decode_adaptively(job, decode_ones(circuit), seen.append)
+    b = decode_adaptively(job, decode_ones(circuit))
+    c = decode_adaptively({**job, "seed_offset": 10_000_000}, decode_ones(circuit))
+    assert a["errors"] == b["errors"] and a["errors"] != c["errors"]
+    assert seen[-1]["shots"] == 200
+
+
+def test_batches_fit_the_time_budget():
+    import time
+
+    def slow(n):
+        # 10 ms a shot
+        time.sleep(n / 100)
+        return 0.0
+
+    # Batches of 10, 20 and 40 shots take 0.7 s; a doubled batch of 80 would end at 1.5 s
+    job = dict(first_batch=10, max_batch=10**6, max_shots=10**6, target_errors=1, time_budget=1.0)
+    start = time.time()
+    result = decode_adaptively(job, slow)
+    assert time.time() - start < 1.3 and result["shots"] < 150
+
+
+def test_collect_adds_refinement_chunks(tmp_path):
+    from sweep.collect import refinements, rows
+
+    def write(run, name, obj, sub):
+        os.makedirs(tmp_path / run / sub, exist_ok=True)
+        with open(tmp_path / run / sub / f"{name}.json", "w") as f:
+            json.dump(obj, f)
+
+    base = dict(id="decode.x", type="decode", needs="circuit.x", decoder="bposd", target_errors=100, slice="s", code="c")
+    write("run", "decode.x", base, "jobs")
+    write("run", "circuit.x", {"job": {"id": "circuit.x"}, "status": "done", "rounds": 2}, "results")
+    write("run", "decode.x", {"job": base, "status": "failed", "error": "timeout after 3 s"}, "results")
+    for i, errors in enumerate((40, 70)):
+        chunk = {**base, "id": f"decode.x.refine{i}", "refines": "run/decode.x"}
+        write("refine", chunk["id"], chunk, "jobs")
+        write("refine", chunk["id"], {"job": chunk, "status": "done", "shots": 1000, "errors": errors, "seconds": 5.0 + i}, "results")
+    dirs = [str(tmp_path / "run"), str(tmp_path / "refine")]
+    added = refinements(dirs)
+    (row,) = list(rows(dirs[0], added))
+    assert (row["shots"], row["errors"], row["status"], row["refined_chunks"]) == (2000, 110, "measured", 2)
+    # The chunks' decoding time comes with their shots
+    assert row["decode_seconds"] == 11.0
+    assert list(rows(dirs[1], added)) == []
+
+    # A run's own shots and seconds add to the chunks'
+    write("run", "decode.x", {"job": base, "status": "done", "shots": 500, "errors": 5, "seconds": 2.5}, "results")
+    (row,) = list(rows(dirs[0], refinements(dirs)))
+    assert (row["shots"], row["errors"], row["decode_seconds"]) == (2500, 115, 13.5)
+
+
+def test_worker_keeps_partial_counts(tmp_path):
+    from validation.worker import keep_partial
+
+    os.makedirs(tmp_path / "results")
+    job = {"id": "decode.y"}
+    with open(tmp_path / "results" / "decode.y.partial", "w") as f:
+        json.dump({"shots": 300, "errors": 3}, f)
+    assert keep_partial(str(tmp_path), job, "timeout after 1 s")
+    with open(tmp_path / "results" / "decode.y.json") as f:
+        result = json.load(f)
+    assert result["status"] == "done" and result["shots"] == 300 and result["stopped"] == "timeout after 1 s"
+    assert not keep_partial(str(tmp_path), {"id": "decode.z"}, "timeout")
+
+
+def test_effort_counts_only_the_work_behind_the_results(tmp_path, monkeypatch):
+    import sys
+    from sweep import collect, effort
+
+    def write(run, sub, name, obj):
+        os.makedirs(tmp_path / run / sub, exist_ok=True)
+        with open(tmp_path / run / sub / f"{name}.json", "w") as f:
+            json.dump(obj, f)
+
+    def decode(run, code, result):
+        job = dict(id=f"decode.{code}", type="decode", needs=f"circuit.{code}", decoder="bposd", target_errors=10,
+                   slice="s", code=code)
+        write(run, "jobs", job["id"], job)
+        write(run, "results", job["needs"], {"job": {"id": job["needs"]}, "status": "done", "seconds_total": 3600})
+        write(run, "results", job["id"], {"job": job, **result})
+        return job
+
+    # The new run replaces the old run's x and fails on y; one of two chunks refining x finishes
+    decode("old", "x", dict(status="done", shots=100, errors=50, seconds_total=7200))
+    x = decode("new", "x", dict(status="done", shots=1000, errors=20, seconds_total=3600))
+    decode("new", "y", dict(status="failed", error="crashed", seconds_total=3600))
+    for i, result in enumerate((dict(status="done", shots=500, errors=5, seconds_total=3600),
+                                dict(status="failed", error="crashed without a result"))):
+        chunk = {**x, "id": f"decode.x.refine{i}", "refines": "new/decode.x"}
+        write("refine", "jobs", chunk["id"], chunk)
+        write("refine", "results", chunk["id"], {"job": chunk, **result})
+    runs = [str(tmp_path / run) for run in ("old", "new", "refine")]
+    monkeypatch.setattr(sys, "argv", ["collect", *runs, str(tmp_path / "merged")])
+    collect.main()
+    monkeypatch.setattr(sys, "argv", ["effort", str(tmp_path / "effort.json"), str(tmp_path / "merged" / "results.csv"), *runs])
+    effort.main()
+    with open(tmp_path / "effort.json") as f:
+        e = json.load(f)
+    # x's new decode, its finished chunk and its circuit
+    assert (e["results"], e["jobs"], e["cpu_hours"], e["shots"], e["logical_errors"]) == (1, 3, 3, 1500, 25)
+
+
+def test_collect_reports_timeouts(tmp_path):
+    from sweep.collect import chunk_timeouts, rows
+
+    def write(run, sub, name, obj):
+        os.makedirs(tmp_path / run / sub, exist_ok=True)
+        with open(tmp_path / run / sub / f"{name}.json", "w") as f:
+            json.dump(obj, f)
+
+    base = dict(id="decode.x", type="decode", needs="circuit.x", decoder="tesseract", target_errors=100, slice="s",
+                code="c", timeout=21600)
+    write("run", "jobs", "decode.x", base)
+    write("run", "results", "circuit.x", {"job": {"id": "circuit.x"}, "status": "done"})
+    write("run", "results", "decode.x", {"job": base, "status": "failed", "error": "timeout after 21600 s"})
+    chunk = {**base, "id": "decode.x.refine0", "refines": "run/decode.x", "timeout": 32400}
+    write("refine", "jobs", chunk["id"], chunk)
+    write("refine", "results", chunk["id"], {"job": chunk, "status": "failed", "error": "timeout after 32400 s"})
+    (row,) = rows(str(tmp_path / "run"), timeouts=chunk_timeouts([str(tmp_path / "run"), str(tmp_path / "refine")]))
+    assert (row["status"], row["note"]) == ("timeout", "timeout after 9 h")
+    (row,) = rows(str(tmp_path / "run"))
+    assert row["note"] == "timeout after 6 h"
+
+
+def test_undetectable_faults():
+    import pytest
+    from sweep.run_job import undetectable_faults
+
+    # Qubit 0's flip changes the logical and trips no detector; qubit 1's trips the detector
+    circuit = stim.Circuit("R 0 1\nX_ERROR(0.1) 0 1\nM 0 1\nDETECTOR rec[-1]\nOBSERVABLE_INCLUDE(0) rec[-2]")
+    assert undetectable_faults(circuit) == {"undetectable_faults": 1, "undetectable_probability": pytest.approx(0.1)}

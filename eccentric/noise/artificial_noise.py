@@ -109,3 +109,14 @@ class ArtificialNoise(NoiseModel):
             remote=remote
         )
 
+    @staticmethod
+    def erasure(p: float, qt, detected: bool = True) -> 'NoiseModel':
+        # Pure erasure noise: every gate and measurement loses each of its qubits with probability
+        # p, heralded right away when detected
+        return NoiseModel(
+            loss=p,
+            loss_remote=p,
+            loss_measure=p,
+            loss_detection="immediate" if detected else "none",
+            qt=qt,
+        )

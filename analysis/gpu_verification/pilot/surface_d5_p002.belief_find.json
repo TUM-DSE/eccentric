@@ -1,0 +1,57 @@
+{
+ "circuit": "surface_d5_p002",
+ "decoder": "belief_find",
+ "batch": 262144,
+ "reference_shots": 1000000,
+ "build_seconds": 4.321058511734009,
+ "first_call_seconds": 0.4859902858734131,
+ "sampling_seconds_reference": 0.8863112926483154,
+ "reference_seconds": [
+  229.2328007221222,
+  235.8769028186798
+ ],
+ "pilots": {
+  "1000": [
+   {
+    "offset": 0,
+    "seconds": 0.4624323844909668
+   },
+   {
+    "offset": 499500,
+    "seconds": 0.46416616439819336
+   },
+   {
+    "offset": 999000,
+    "seconds": 0.4714651107788086
+   }
+  ],
+  "10000": [
+   {
+    "offset": 0,
+    "seconds": 2.5152580738067627
+   },
+   {
+    "offset": 495000,
+    "seconds": 2.528855800628662
+   },
+   {
+    "offset": 990000,
+    "seconds": 2.436890125274658
+   }
+  ],
+  "100000": [
+   {
+    "offset": 0,
+    "seconds": 23.672592639923096
+   },
+   {
+    "offset": 450000,
+    "seconds": 24.013586044311523
+   },
+   {
+    "offset": 900000,
+    "seconds": 23.380209922790527
+   }
+  ]
+ }
+}

@@ -1,0 +1,16 @@
+{
+  "codes": 74,
+  "codes_with_results": 70,
+  "devices": 25,
+  "noise_models": 27,
+  "decoders": 14,
+  "results": 35374,
+  "configurations": 5580,
+  "shots": 3805447395,
+  "cpu_hours": 24624,
+  "display": {
+    "results": "35,374",
+    "shots": "3.8B",
+    "cpu_hours": "24.6k"
+  }
+}

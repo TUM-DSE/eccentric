@@ -8,7 +8,7 @@ from ..metrics import (
     get_resource_overhead_total_gates,
 )
 from ..transpilers import translate
-from .base import load_backend, resolve_distance
+from .base import load_backend, resolve_code_schedule, resolve_distance
 
 REQUIRED = ("backends", "codes", "translating_methods")
 DEFAULTS = {"optimization_levels": [0, 2, 3]}
@@ -17,7 +17,8 @@ DEFAULTS = {"optimization_levels": [0, 2, 3]}
 def run(task):
     backend = load_backend(task)
     d = resolve_distance(task, backend)
-    code = get_code(task.code, d, task.cycles)
+    schedule = resolve_code_schedule(task)
+    code = get_code(task.code, d, task.cycles, schedule)
     level = task.optimization_level
     rows = []
     for state, circuit in code.circuit.items():
@@ -35,6 +36,7 @@ def run(task):
             "state": state,
             "translating_method": f"{task.translating_method}_{level}",
             "gate_set": task.gate_set or "N/A",
+            "schedule": schedule or "N/A",
             "original_total_gates": count_total_gates_qiskit(circuit),
             "original_2q_gates": count_2q_gates_qiskit(circuit),
             "gate_overhead_mean": np.mean(gates),

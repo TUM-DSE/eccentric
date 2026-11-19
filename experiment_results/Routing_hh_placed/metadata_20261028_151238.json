@@ -1,0 +1,26 @@
+{
+    "name": "Routing_hh_placed",
+    "type": "routing",
+    "num_samples": 100,
+    "backends": [
+        "custom_heavyhex"
+    ],
+    "backends_sizes": [
+        290
+    ],
+    "codes": [
+        "surface",
+        "hh",
+        "color",
+        "bacon",
+        "steane"
+    ],
+    "routing_methods": [
+        "basic",
+        "sabre",
+        "stochastic"
+    ],
+    "layout_methods": [
+        null
+    ]
+}

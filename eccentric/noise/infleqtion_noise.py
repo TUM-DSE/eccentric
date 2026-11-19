@@ -9,7 +9,6 @@ class InfleqtionNoise(NoiseModel):
             # https://arxiv.org/pdf/2408.08288
             sq=0.00098,
             tq=0.0065,
-            crosstalk=0,
             leakage=0,
             measure=0.004,
             shuttle=0.001999,
