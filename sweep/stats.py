@@ -12,11 +12,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from eccentric.codes.catalog import CODES
-
-PAPER_CODES = ["surface", "hh", "gross", "color", "bacon", "steane"]
-# Rows with a logical error rate (the others did not fit their device or the decoder refused them)
-RESULT_STATUSES = {"measured", "low statistics", "upper bound"}
+from eccentric import dataset
+from eccentric.codes.catalog import _BUILTIN_CODES, PAPER_CODES
 
 
 def _short(x: float) -> str:
@@ -27,9 +24,10 @@ def _short(x: float) -> str:
 
 
 def stats(table: pd.DataFrame) -> dict:
-    res = table[table["status"].isin(RESULT_STATUSES)]
-    framework_codes = len(set(PAPER_CODES) | set(CODES))
+    res = dataset.with_rates(table)
+    framework_codes = len(set(PAPER_CODES) | set(_BUILTIN_CODES))
     s = {
+        "schema_version": dataset.SCHEMA_VERSION,
         "codes": framework_codes,
         "codes_with_results": int(res["code"].nunique()),
         "devices": int(res["backend"].nunique()),
@@ -54,7 +52,7 @@ def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     src = Path(argv[0] if argv else "experiment_results/Sweep/results.csv")
     out = Path(argv[1] if len(argv) > 1 else src.with_name("stats.json"))
-    s = stats(pd.read_csv(src, low_memory=False))
+    s = stats(dataset.load(src))
     out.write_text(json.dumps(s, indent=2) + "\n")
     print(json.dumps(s, indent=2))
 

@@ -32,7 +32,7 @@ can be compared end to end. It comes with a large dataset of results across all 
 The dataset ([`experiment_results/Sweep/results.csv`](experiment_results/Sweep/results.csv)) covers every
 code on IBM, Google, Quantinuum, Infleqtion and neutral-atom device models, under their own noise and scaled
 versions of it, with every applicable decoder, in the Z and X basis. All results can be browsed on the
-**[website](https://eccentric-benchmark.github.io)**. Some findings, with the full analyses in [`analysis/`](analysis):
+**[website](https://eccentric-benchmark.github.io)**; its columns are documented in [docs/dataset.md](docs/dataset.md). Some findings, with the full analyses in [`analysis/`](analysis/README.md):
 
 - **Layout decides whether qLDPC codes work on IBM devices.** Under the same noise (a tenth of today's
   Flamingo errors, coherence times tripled), bivariate bicycle codes on a native layout reach logical error
@@ -125,6 +125,8 @@ Command-line options:
 | `python -m eccentric a.yaml b.yaml` | Run several configuration files in sequence |
 | `-j N`, `--workers N` | Number of parallel worker processes (default: all CPUs). Lower it if you run out of memory |
 | `-e NAME`, `--experiment NAME` | Only run the experiment called `NAME` (repeatable) |
+| `eccentric plugins` | List the installed plugins ([docs/plugins.md](docs/plugins.md)) |
+| `eccentric <command> ...` | Run a command added by a plugin or tool |
 
 ## Configuration
 
@@ -145,7 +147,8 @@ experiments:
 ```
 
 Reference: [all configuration fields](docs/configuration.md), [codes](docs/codes.md),
-[devices](docs/devices.md), [noise models](docs/noise-models.md), [decoders](docs/decoders.md).
+[devices](docs/devices.md), [noise models](docs/noise-models.md), [decoders](docs/decoders.md),
+[the dataset](docs/dataset.md), [plugins](docs/plugins.md).
 
 ## Reproducing the paper
 
@@ -217,10 +220,19 @@ python -m eccentric.hardware.ibm_demo [<job_id>]          # analyse and plot (de
 
 Job metadata and results are stored in `experiment_results/ibm_runs/`. These scripts need an IBM Quantum API token. Follow the [IBM Quantum setup guide](https://quantum.cloud.ibm.com/docs/en/guides/cloud-setup) to save it in your environment.
 
-## Extending the framework
+## Extending ECCentric
 
-- **New experiment type:** add a module to `eccentric/experiments/` that defines `REQUIRED` (the required config fields) and `run(task)`, which returns a list of result rows (dicts), and register it in `EXPERIMENTS` in `eccentric/experiments/__init__.py`. `task` is an `eccentric.experiments.Task` holding a single point of the sweep. `eccentric/experiments/base.py` provides the shared steps: `load_backend`, `resolve_distance`, `resolve_cycles`, `noisy_circuit`, `result_row`. Raise `Skip` to skip a configuration.
-- **New code, backend, noise model or decoder:** add it to the matching package and to its dispatcher (`get_code` in `eccentric/codes/utils.py`, `get_backend` in `eccentric/backends/utils.py`, `get_noise_model` in `eccentric/noise/utils.py`, `decode` in `eccentric/decoders/decode.py`). It then becomes available in every configuration under its new name.
+- **As a plugin** (no changes to ECCentric): a package registers codes, decoders, devices, noise models or
+  command-line tools through entry points, and they work in every configuration under their names. Built-in
+  names always take precedence. See [docs/plugins.md](docs/plugins.md); `eccentric plugins` lists what is installed.
+- **Tools on the dataset** read the sweep table through `eccentric.dataset`, a versioned schema
+  ([docs/dataset.md](docs/dataset.md)). Tools maintained with ECCentric live in [`tools/`](tools).
+- **In ECCentric itself:** add a code, device, noise model or decoder to its package and its dispatcher
+  (`get_code` in `eccentric/codes/utils.py` or the catalog in `eccentric/codes/catalog.py`, `get_backend` in
+  `eccentric/backends/utils.py`, `get_noise_model` in `eccentric/noise/utils.py`, `decode` in
+  `eccentric/decoders/decode.py`). A new experiment type is a module in `eccentric/experiments/` that defines
+  `REQUIRED` (the required config fields) and `run(task)`, which returns a list of result rows, registered in
+  `EXPERIMENTS` in `eccentric/experiments/__init__.py`; `eccentric/experiments/base.py` provides the shared steps.
 
 Run the tests with `pytest`.
 
@@ -231,7 +243,8 @@ eccentric/            the framework (Python package): runner, experiments, codes
                       decoders, transpilers, metrics, plots, hardware comparison
 configs/              configurations of the paper's experiments, plus example.yaml
 experiment_results/   results of the paper's experiments and the sweep dataset (Sweep/)
-analysis/             analyses of the dataset
+analysis/             analyses of the dataset (index: analysis/README.md)
+tools/                tools built on ECCentric, each its own package
 sweep/                the sweep: job generation, cluster runner, collection, website export
 validation/           cluster checks of circuits, distances and decoders
 docs/                 reference documentation

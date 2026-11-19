@@ -1,5 +1,7 @@
 import logging
 import stim
+
+from .. import plugins
 import numpy as np
 
 from .bp_osd import bposd_chk, bposd_batch
@@ -96,14 +98,15 @@ def decode(
         except Exception as e:
             logging.error(f"{decoder} failed: {e}")
             return None
-    elif decoder in DECODERS:
+    elif decoder in DECODERS or plugins.get("decoders", decoder) is not None:
+        run = DECODERS.get(decoder) or plugins.get("decoders", decoder)
         try:
-            return DECODERS[decoder](circuit, num_shots, approximate_disjoint_errors)
+            return run(circuit, num_shots, approximate_disjoint_errors)
         except Exception as e:
             logging.error(f"{decoder} failed: {e}")
             return None
     else:
-        raise NotImplementedError
+        raise NotImplementedError(f"unknown decoder {decoder}")
 
 def raw_error_rate(circuit: stim.Circuit, num_shots: int):
     sampler = circuit.compile_detector_sampler()
