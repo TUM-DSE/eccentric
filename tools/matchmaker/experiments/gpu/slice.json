@@ -1,0 +1,4253 @@
+[
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=7.cycles=14.backend=real_willow.error_type=real_willow_x0.5.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_willow",
+"error_type": "real_willow_x0.5",
+"decoders": {
+"gari": 37.03373591105143
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=7.cycles=14.backend=real_willow.error_type=real_willow_x0.5.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bb72.distance=6.cycles=6.backend=real_flamingo.error_type=real_flamingo_x0.1.basis=X",
+"code": "bb72",
+"family": "Bivariate bicycle",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"gari": 62.86661672592163
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bb72.distance=6.cycles=6.backend=real_flamingo.error_type=real_flamingo_x0.1.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.paper_topology.code=color.distance=11.cycles=11.backend=custom_full.backend_size=300.error_type=modsi1000.error_probability=0.002",
+"code": "color",
+"family": "Color",
+"backend": "custom_full",
+"error_type": "modsi1000",
+"decoders": {
+"bposd": 8171.595752000809,
+"bposd_tuned": 2953.3247561886487,
+"belief_find": 8797.34748667413,
+"bplsd": 8150.199584918099,
+"relay_bp": 560.0118669999056,
+"gari": 18.661777481200204
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.paper_topology.code=color.distance=11.cycles=11.backend=custom_full.backend_size=300.error_type=modsi1000.error_probability=0.002.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=xzzx.distance=3.cycles=3.backend=real_loon.error_type=real_flamingo",
+"code": "xzzx",
+"family": "XZZX surface",
+"backend": "real_loon",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 1.3974744478861492,
+"gari": 0.05356042615828976
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=xzzx.distance=3.cycles=3.backend=real_loon.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=cbb108.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_apollo.error_type=real_apollo.basis=X",
+"code": "cbb108",
+"family": "Coprime bivariate bicycle",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"gari": 0.28454692363739015
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=cbb108.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_apollo.error_type=real_apollo.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=bb90.schedule=ibm.distance=10.cycles=10.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+"code": "bb90",
+"family": "Bivariate bicycle",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 1586.7361903190613,
+"bplsd": 3133.3825387273514,
+"bposd": 5095.972840445383,
+"bposd_tuned": 619.7868544714792,
+"gari": 200.89092084339686,
+"relay_bp": 369.4219109217326
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=bb90.schedule=ibm.distance=10.cycles=10.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.operation=measure_z",
+"code": "hgp_hamming",
+"family": "Hypergraph product",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd": 399.4515668755233,
+"relay_bp": 21.532162106226362
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.operation=measure_z.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=lcs65.schedule=cardinal.distance=5.cycles=5.backend=real_apollo.error_type=real_apollo",
+"code": "lcs65",
+"family": "Lift-connected surface",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"belief_find": 0.42849573566595267,
+"bplsd": 0.5303355586282186,
+"bposd": 0.3391958326082352,
+"bposd_tuned": 0.16738410568237305,
+"gari": 0.13956442931178176,
+"relay_bp": 0.2877743616104126
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=lcs65.schedule=cardinal.distance=5.cycles=5.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=surface.distance=5.cycles=5.backend=custom_full.backend_size=64.error_type=sd6.error_probability=0.002.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 32.04931489692247,
+"gari": 0.24177742675996164
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=surface.distance=5.cycles=5.backend=custom_full.backend_size=64.error_type=sd6.error_probability=0.002.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=7.cycles=14.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.25.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_x0.25",
+"decoders": {
+"gari": 295.06716319492887
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=7.cycles=14.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.25.basis=X.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=xzzx.distance=5.cycles=5.backend=real_loon.error_type=real_flamingo",
+"code": "xzzx",
+"family": "XZZX surface",
+"backend": "real_loon",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 134.38269353681994,
+"gari": 1.7071037292480469
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=xzzx.distance=5.cycles=5.backend=real_loon.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_cnot.distance=3.cycles=3.backend=real_apollo.error_type=real_apollo",
+"code": "ls_cnot",
+"family": "Lattice surgery",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 2.3342202123531623,
+"relay_bp": 0.9173731873977514
+},
+"file": "/home/manosgior/eccentric-validation/sweep_lattice_surgery/circuits/circuit.lattice_surgery.code=ls_cnot.distance=3.cycles=3.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.willow_surface.code=surface.distance=3.cycles=30.backend=native.error_type=real_willow",
+"code": "surface",
+"family": "Surface",
+"backend": "native",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 148.05927022298178,
+"bposd_tuned": 27.34246238072713,
+"belief_find": 146.57282209396362,
+"bplsd": 296.43556935446605,
+"relay_bp": 8.382733980814615,
+"gari": 1.0980186462402344
+},
+"file": "/home/manosgior/eccentric-validation/sweep_willow/circuits/circuit.willow_surface.code=surface.distance=3.cycles=30.backend=native.error_type=real_willow.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=toric.distance=3.cycles=3.backend=real_apollo.error_type=real_apollo.operation=transversal_cnot",
+"code": "toric",
+"family": "Toric",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 4.81752363091275,
+"relay_bp": 1.308544228942889
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=toric.distance=3.cycles=3.backend=real_apollo.error_type=real_apollo.operation=transversal_cnot.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.reference.code=tb72.distance=8.cycles=8.backend=custom_full.backend_size=144.error_type=sd6.error_probability=0.001",
+"code": "tb72",
+"family": "Trivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 8.544818687438966,
+"bposd_tuned": 1.8205606317520142,
+"belief_find": 10.451956239797301,
+"bplsd": 9.694650015830995,
+"gari": 0.3591318364523671,
+"relay_bp": 1.934815332889557
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.reference.code=tb72.distance=8.cycles=8.backend=custom_full.backend_size=144.error_type=sd6.error_probability=0.001.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=qt36.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_loon.error_type=real_flamingo_downscaled.basis=X",
+"code": "qt36",
+"family": "Quantum Tanner",
+"backend": "real_loon",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"bposd_tuned": 4.249347278050014,
+"gari": 5.494958673204694
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=qt36.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_loon.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.reference.code=tb72.distance=8.cycles=8.backend=custom_full.backend_size=144.error_type=sd6.error_probability=0.004",
+"code": "tb72",
+"family": "Trivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 115.80329758780343,
+"bposd_tuned": 11.21774400983538,
+"belief_find": 329.29444392522174,
+"bplsd": 241.78800412586756,
+"gari": 10.291180610656738,
+"relay_bp": 27.084038598196848
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.reference.code=tb72.distance=8.cycles=8.backend=custom_full.backend_size=144.error_type=sd6.error_probability=0.004.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=3.cycles=3.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.25",
+"code": "color",
+"family": "Color",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_x0.25",
+"decoders": {
+"bposd": 3.8135344792256314,
+"bposd_tuned": 0.156362985087707,
+"belief_find": 2.988401670304556,
+"bplsd": 4.178235795762804,
+"gari": 0.01337002194116986,
+"relay_bp": 0.21946483188205296
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=3.cycles=3.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.25.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=repetition.distance=5.cycles=5.backend=custom_full.backend_size=9.error_type=sd6.error_probability=0.002",
+"code": "repetition",
+"family": "Repetition",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 0.014878407239913941,
+"bposd_tuned": 0.01363062024116516,
+"belief_find": 0.03198903679847717,
+"bplsd": 0.01873998236656189,
+"relay_bp": 0.016145298957824707,
+"gari": 0.003743604788454851
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=repetition.distance=5.cycles=5.backend=custom_full.backend_size=9.error_type=sd6.error_probability=0.002.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc54.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled.basis=X",
+"code": "bpc54",
+"family": "Balanced product cyclic",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"relay_bp": 34.407412665230886,
+"gari": 33.93392596926008
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc54.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=planar_honeycomb.distance=3.cycles=6.backend=real_flamingo.error_type=real_flamingo_x0.1",
+"code": "planar_honeycomb",
+"family": "Planar honeycomb",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"bposd": 3.5982206889561246,
+"bposd_tuned": 0.322435734763978,
+"belief_find": 4.612495482914031,
+"bplsd": 4.6015848810710605,
+"relay_bp": 0.44478352107698954
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=planar_honeycomb.distance=3.cycles=6.backend=real_flamingo.error_type=real_flamingo_x0.1.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=bpc126.schedule=cardinalNSmerge.distance=10.cycles=10.backend=real_apollo.error_type=real_apollo",
+"code": "bpc126",
+"family": "Balanced product cyclic",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"belief_find": 1.0227943134307862,
+"bplsd": 0.8347799587249756,
+"bposd": 0.8521536016464233,
+"bposd_tuned": 11.424463160037995,
+"gari": 0.6673070096969604,
+"relay_bp": 3.095919625759125
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=bpc126.schedule=cardinalNSmerge.distance=10.cycles=10.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=7.cycles=14.backend=real_torino.error_type=real_heron_x0.1.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_torino",
+"error_type": "real_heron_x0.1",
+"decoders": {
+"gari": 36.76277929736722
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=7.cycles=14.backend=real_torino.error_type=real_heron_x0.1.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"gari": 3.6669170471929733
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion_x0.1.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.1",
+"decoders": {
+"gari": 0.005473292294391873
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion_x0.1.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bb72.schedule=ibm.distance=6.cycles=6.backend=native.error_type=real_flamingo_downscaled.basis=X",
+"code": "bb72",
+"family": "Bivariate bicycle",
+"backend": "native",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"bplsd": 1.6709910579985636,
+"gari": 0.30644059912558713
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bb72.schedule=ibm.distance=6.cycles=6.backend=native.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=lcs52.schedule=cardinal.distance=4.cycles=4.backend=real_flamingo.error_type=real_flamingo_downscaled",
+"code": "lcs52",
+"family": "Lift-connected surface",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 336.8708457265581,
+"bplsd": 311.55405282974243,
+"bposd": 346.19092328207836,
+"relay_bp": 44.741080147879465,
+"bposd_tuned": 14.362004143851143,
+"gari": 28.354121616908483
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.qldpc_ibm.code=lcs52.schedule=cardinal.distance=4.cycles=4.backend=real_flamingo.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=7.cycles=14.backend=real_bicycle.error_type=real_flamingo_x0.1",
+"code": "surface",
+"family": "Surface",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"bposd": 145.52944287090315,
+"bposd_tuned": 76.17750033301908,
+"belief_find": 146.1682512577118,
+"bplsd": 110.62981132948666,
+"relay_bp": 7.858602590252712,
+"gari": 0.3674555693178638
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=7.cycles=14.backend=real_bicycle.error_type=real_flamingo_x0.1.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_x0.1.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"gari": 0.007640468187568601
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_x0.1.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc126.schedule=cardinalNSmerge.distance=10.cycles=10.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.basis=X",
+"code": "bpc126",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"gari": 3291.0903215408325
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc126.schedule=cardinalNSmerge.distance=10.cycles=10.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=9.cycles=18.backend=real_willow.error_type=real_willow_x0.25",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow_x0.25",
+"decoders": {
+"bposd": 8988.314733704392,
+"bposd_tuned": 2733.645065963178,
+"belief_find": 8903.872019823859,
+"bplsd": 7841.242550007592,
+"relay_bp": 470.2906981830575,
+"gari": 33.28591585159302
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=9.cycles=18.backend=real_willow.error_type=real_willow_x0.25.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc90.distance=10.cycles=10.backend=real_infleqtion.error_type=real_infleqtion_x0.5.basis=X",
+"code": "bpc90",
+"family": "Balanced product cyclic",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.5",
+"decoders": {
+"gari": 4.033401743765989
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc90.distance=10.cycles=10.backend=real_infleqtion.error_type=real_infleqtion_x0.5.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=repetition.distance=7.cycles=7.backend=custom_full.backend_size=13.error_type=sd6.error_probability=0.004",
+"code": "repetition",
+"family": "Repetition",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 0.09984478378295898,
+"bposd_tuned": 0.036571205377578735,
+"belief_find": 0.20510623264312744,
+"bplsd": 0.20299194812774657,
+"relay_bp": 0.060546256065368655,
+"gari": 0.021335177493661834
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=repetition.distance=7.cycles=7.backend=custom_full.backend_size=13.error_type=sd6.error_probability=0.004.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc54.distance=4.cycles=4.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700.basis=X",
+"code": "bpc54",
+"family": "Balanced product cyclic",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"relay_bp": 49.59514175142561,
+"gari": 94.96548891067505
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc54.distance=4.cycles=4.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=lcs52.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_bicycle.error_type=real_flamingo_downscaled",
+"code": "lcs52",
+"family": "Lift-connected surface",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 24.594421617446407,
+"bplsd": 46.71075136430802,
+"bposd": 59.14370244549167,
+"relay_bp": 5.937904927038377,
+"bposd_tuned": 4.251790122380332,
+"gari": 6.505512714385986
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=lcs52.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_bicycle.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.reference.code=cbb70.distance=8.cycles=8.backend=custom_full.backend_size=140.error_type=sd6.error_probability=0.0005",
+"code": "cbb70",
+"family": "Coprime bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 0.7864457249641419,
+"bposd_tuned": 0.7886415243148803,
+"belief_find": 1.1419657945632935,
+"bplsd": 0.5705647230148315,
+"gari": 0.23231600999832153,
+"relay_bp": 1.2677042436599733
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.reference.code=cbb70.distance=8.cycles=8.backend=custom_full.backend_size=140.error_type=sd6.error_probability=0.0005.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=surface.distance=5.cycles=5.backend=real_flamingo_1_qpu.error_type=real_flamingo_m700",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_m700",
+"decoders": {
+"bposd": 715.2991752624512,
+"bposd_tuned": 19.079221725463867,
+"belief_find": 567.7351198877607,
+"bplsd": 609.9795215924581,
+"relay_bp": 22.213773250579834,
+"gari": 2.958799680074056
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=surface.distance=5.cycles=5.backend=real_flamingo_1_qpu.error_type=real_flamingo_m700.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=11.cycles=11.backend=custom_cube.backend_size=300.error_type=modsi1000.error_probability=0.002.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "custom_cube",
+"error_type": "modsi1000",
+"decoders": {
+"relay_bp": 4926.711411951021,
+"gari": 539.6657912319059
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=11.cycles=11.backend=custom_cube.backend_size=300.error_type=modsi1000.error_probability=0.002.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=rm15.distance=3.cycles=3.backend=custom_full.backend_size=29.error_type=sd6.error_probability=0.001",
+"code": "rm15",
+"family": "Quantum Reed-Muller",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 0.16640228602388912,
+"bposd_tuned": 0.08055592201183476,
+"belief_find": 0.22819326229880565,
+"bplsd": 0.2281010122045189,
+"relay_bp": 0.16058443546295165,
+"gari": 0.034539612014144336
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=rm15.distance=3.cycles=3.backend=custom_full.backend_size=29.error_type=sd6.error_probability=0.001.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=xzzx.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo",
+"code": "xzzx",
+"family": "XZZX surface",
+"backend": "real_flamingo",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 6.738768418629964
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=xzzx.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=lp.schedule=edge_coloring.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled",
+"code": "lp",
+"family": "Lifted product",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 10.413740634918213,
+"bplsd": 19.174397468566895,
+"bposd": 10.51604970808952,
+"relay_bp": 2.5252046123627694,
+"bposd_tuned": 1.7763752322043143,
+"gari": 0.7296314547138829
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.qldpc_ibm.code=lp.schedule=edge_coloring.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=lcs15.schedule=zxcoloration.distance=3.cycles=3.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+"code": "lcs15",
+"family": "Lift-connected surface",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 1.40960447249874,
+"bplsd": 1.2220186571921072,
+"bposd": 2.9675594452888734,
+"bposd_tuned": 0.23212878934798703,
+"gari": 0.20576987947736466,
+"relay_bp": 0.3026928220476423
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=lcs15.schedule=zxcoloration.distance=3.cycles=3.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=surface.distance=3.cycles=3.backend=custom_full.backend_size=26.error_type=sd6.error_probability=0.001",
+"code": "surface",
+"family": "Surface",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 0.3423855086283842,
+"bposd_tuned": 0.044760555822938204,
+"belief_find": 0.5189867227475811,
+"bplsd": 0.6881163600733071,
+"relay_bp": 0.04346488424135144,
+"gari": 0.00562143094891786
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=surface.distance=3.cycles=3.backend=custom_full.backend_size=26.error_type=sd6.error_probability=0.001.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=3.cycles=3.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.1.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"gari": 0.011414447716907063
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=3.cycles=3.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.1.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.floquet_devices.code=semi_hyperbolic_floquet_576.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo",
+"code": "semi_hyperbolic_floquet_576",
+"family": "Semi-hyperbolic Floquet",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 40.08528575568462,
+"bposd_tuned": 183.73744611483085,
+"belief_find": 28.219523006677626,
+"bplsd": 58.282442472062954,
+"relay_bp": 20.853366265296938
+},
+"file": "/home/manosgior/eccentric-validation/sweep_floquet/circuits/circuit.floquet_devices.code=semi_hyperbolic_floquet_576.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=hh.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 570.6262006078448,
+"gari": 3.49539007459368
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=hh.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=steane.distance=3.cycles=3.backend=real_flamingo_1_qpu.error_type=real_flamingo_m700",
+"code": "steane",
+"family": "Concatenated Steane",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_m700",
+"decoders": {
+"bposd": 10.788048676082067,
+"bposd_tuned": 0.4300112724304199,
+"belief_find": 13.560281821659633,
+"bplsd": 7.678625924246652,
+"relay_bp": 0.35543251037597656
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=steane.distance=3.cycles=3.backend=real_flamingo_1_qpu.error_type=real_flamingo_m700.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=mitten150.distance=8.cycles=8.backend=custom_full.backend_size=270.error_type=sd6.error_probability=0.001",
+"code": "mitten150",
+"family": "Mitten",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 565.2513835543677,
+"relay_bp": 148.80849331881092,
+"bposd_tuned": 127.72124973932902,
+"belief_find": 448.50489060084027,
+"bplsd": 350.00755071640015,
+"gari": 99.2890043258667
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=mitten150.distance=8.cycles=8.backend=custom_full.backend_size=270.error_type=sd6.error_probability=0.001.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.paper_topology.code=bacon.distance=17.cycles=17.backend=custom_full.backend_size=300.error_type=modsi1000.error_probability=0.002",
+"code": "bacon",
+"family": "Bacon-Shor",
+"backend": "custom_full",
+"error_type": "modsi1000",
+"decoders": {
+"bposd": 19149.538810253143,
+"bposd_tuned": 2366.2751603126526,
+"belief_find": 12626.935035662544,
+"bplsd": 8529.557198569888,
+"relay_bp": 3028.6991119384766
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.paper_topology.code=bacon.distance=17.cycles=17.backend=custom_full.backend_size=300.error_type=modsi1000.error_probability=0.002.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=xzzx.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.basis=X",
+"code": "xzzx",
+"family": "XZZX surface",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 3.389201466999357,
+"gari": 0.03556501297723679
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=xzzx.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=color.distance=7.cycles=7.backend=custom_full.backend_size=100.error_type=sd6.error_probability=0.002",
+"code": "color",
+"family": "Color",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 1027.5287395810324,
+"bposd_tuned": 64.02881781260173,
+"belief_find": 987.9304447559396,
+"bplsd": 716.3602088343713,
+"relay_bp": 39.052996145908374,
+"gari": 1.3448623429357478
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=color.distance=7.cycles=7.backend=custom_full.backend_size=100.error_type=sd6.error_probability=0.002.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=hgp_hamming.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled",
+"code": "hgp_hamming",
+"family": "Hypergraph product",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 20.100564616067068,
+"bplsd": 43.83566992623465,
+"bposd": 34.92638042994908,
+"bposd_tuned": 3.0913416544596353,
+"gari": 3.3796896253313338,
+"relay_bp": 2.180924415588379
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=hgp_hamming.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=hyperbolic_floquet_120.distance=3.cycles=3.backend=custom_full.backend_size=120.error_type=sd6.error_probability=0.002",
+"code": "hyperbolic_floquet_120",
+"family": "Hyperbolic Floquet",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 174.5167614618937,
+"bposd_tuned": 21.236573378245037,
+"belief_find": 236.34923855463663,
+"bplsd": 129.37700970967612,
+"relay_bp": 12.074782848358154
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=hyperbolic_floquet_120.distance=3.cycles=3.backend=custom_full.backend_size=120.error_type=sd6.error_probability=0.002.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle_chain.code=bpc162.schedule=cardinal.distance=12.cycles=12.backend=real_bicycle_2_qpus.error_type=real_flamingo_downscaled",
+"code": "bpc162",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle_2_qpus",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 24626.223630110424,
+"bposd": 12548.865051950726,
+"bposd_tuned": 8189.074222019741,
+"bplsd": 20261.601337411787,
+"gari": 1470.650765101115,
+"relay_bp": 2759.4937923976354
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle_chain/circuits/circuit.qldpc_bicycle_chain.code=bpc162.schedule=cardinal.distance=12.cycles=12.backend=real_bicycle_2_qpus.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=5.cycles=5.backend=real_torino.error_type=real_heron_x0.5",
+"code": "color",
+"family": "Color",
+"backend": "real_torino",
+"error_type": "real_heron_x0.5",
+"decoders": {
+"bposd": 789.9306419917515,
+"bposd_tuned": 33.229982217152916,
+"belief_find": 593.2815653937204,
+"bplsd": 841.9276642799377,
+"gari": 3.4485119183858237,
+"relay_bp": 38.396110693613686
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=5.cycles=5.backend=real_torino.error_type=real_heron_x0.5.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=bpc72.distance=8.cycles=8.backend=real_harvard.error_type=real_harvard_x0.5",
+"code": "bpc72",
+"family": "Balanced product cyclic",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.5",
+"decoders": {
+"bplsd": 606.1294507980347,
+"bposd": 473.3229624840521,
+"relay_bp": 91.99650764465332,
+"bposd_tuned": 199.61617501576742,
+"belief_find": 463.65070411137174,
+"gari": 24.8654621442159
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=bpc72.distance=8.cycles=8.backend=real_harvard.error_type=real_harvard_x0.5.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=surface.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.operation=transversal_cnot",
+"code": "surface",
+"family": "Surface",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 4771.130901177724,
+"relay_bp": 664.4322708674839
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=surface.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.operation=transversal_cnot.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.floquet_devices.code=honeycomb.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo",
+"code": "honeycomb",
+"family": "Honeycomb",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 0.6749242866039276,
+"relay_bp": 1.3817442750930786,
+"bposd_tuned": 0.8623746848106384,
+"belief_find": 1.6179347121715546,
+"bplsd": 1.5936614966392517
+},
+"file": "/home/manosgior/eccentric-validation/sweep_floquet/circuits/circuit.floquet_devices.code=honeycomb.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bacon.distance=5.cycles=5.backend=real_bicycle_lr.error_type=real_flamingo.basis=X",
+"code": "bacon",
+"family": "Bacon-Shor",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd_tuned": 2.8693175315856934
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bacon.distance=5.cycles=5.backend=real_bicycle_lr.error_type=real_flamingo.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=9.cycles=18.backend=real_harvard.error_type=real_harvard_x0.25",
+"code": "surface",
+"family": "Surface",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.25",
+"decoders": {
+"bposd": 10121.360239055422,
+"bposd_tuned": 3617.226627217718,
+"belief_find": 10235.181045157748,
+"bplsd": 6422.605946885437,
+"relay_bp": 414.7297002924134,
+"gari": 28.535464945293608
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=9.cycles=18.backend=real_harvard.error_type=real_harvard_x0.25.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=3.cycles=3.backend=real_willow.error_type=real_willow_x0.1.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_willow",
+"error_type": "real_willow_x0.1",
+"decoders": {
+"gari": 0.008338105089310911
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=3.cycles=3.backend=real_willow.error_type=real_willow_x0.1.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=3.cycles=6.backend=real_flamingo.error_type=real_flamingo.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd_tuned": 2.7301902770996094,
+"relay_bp": 2.2341135569981168,
+"gari": 0.2630734443664551
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=3.cycles=6.backend=real_flamingo.error_type=real_flamingo.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=bb54.schedule=ibm.distance=6.cycles=6.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "bb54",
+"family": "Bivariate bicycle",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"belief_find": 2.4221529759151834,
+"bplsd": 2.134264881062396,
+"bposd": 2.452254966184667,
+"bposd_tuned": 2.617884163565479,
+"gari": 0.3539453985545557,
+"relay_bp": 2.6342661650056023
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=bb54.schedule=ibm.distance=6.cycles=6.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.reference.code=cbb108.distance=6.cycles=6.backend=custom_full.backend_size=216.error_type=sd6.error_probability=0.0005",
+"code": "cbb108",
+"family": "Coprime bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 2.198513304123856,
+"bposd_tuned": 1.436310113609517,
+"belief_find": 2.2733893864591357,
+"bplsd": 2.7378842752304435,
+"gari": 0.48407847892510497,
+"relay_bp": 3.8440246818479427
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.reference.code=cbb108.distance=6.cycles=6.backend=custom_full.backend_size=216.error_type=sd6.error_probability=0.0005.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=tb30.schedule=edge_coloring_xz.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X",
+"code": "tb30",
+"family": "Trivariate bicycle",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"relay_bp": 1.4886170720297194,
+"gari": 0.4272909318247149
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=tb30.schedule=edge_coloring_xz.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.floquet_devices.code=hyperbolic_floquet_256.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo",
+"code": "hyperbolic_floquet_256",
+"family": "Hyperbolic Floquet",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 2.296393356323242,
+"relay_bp": 1.721980152130127,
+"bposd_tuned": 2.0524108815193176,
+"belief_find": 2.0437405383586884,
+"bplsd": 1.8271893095970153
+},
+"file": "/home/manosgior/eccentric-validation/sweep_floquet/circuits/circuit.floquet_devices.code=hyperbolic_floquet_256.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=gb48.schedule=edge_coloring.distance=8.cycles=8.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "gb48",
+"family": "Generalized bicycle",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"belief_find": 374.35752471288043,
+"bplsd": 549.0189014162336,
+"bposd": 279.55200944628035,
+"relay_bp": 102.95817273003715,
+"bposd_tuned": 23.650142351786297,
+"gari": 44.273277691432405
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=gb48.schedule=edge_coloring.distance=8.cycles=8.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_merge.distance=3.cycles=3.backend=real_willow.error_type=real_willow",
+"code": "ls_merge",
+"family": "Lattice surgery",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 87.0807523727417,
+"relay_bp": 4.555803457895915
+},
+"file": "/home/manosgior/eccentric-validation/sweep_lattice_surgery/circuits/circuit.lattice_surgery.code=ls_merge.distance=3.cycles=3.backend=real_willow.error_type=real_willow.stim"
+},
+{
+"key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_memory.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo",
+"code": "ls_memory",
+"family": "Lattice surgery",
+"backend": "real_flamingo",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 5.540095488230388,
+"relay_bp": 0.21659294764200845
+},
+"file": "/home/manosgior/eccentric-validation/sweep_lattice_surgery/circuits/circuit.lattice_surgery.code=ls_memory.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=lp.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.basis=X",
+"code": "lp",
+"family": "Lifted product",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd_tuned": 3.584113121032715,
+"gari": 3.4173829214913503
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=lp.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.basis=X.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=lcs52.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo.operation=measure_z",
+"code": "lcs52",
+"family": "Lift-connected surface",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 8.175067155801258,
+"relay_bp": 2.4703283500129594
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=lcs52.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo.operation=measure_z.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=bb180.distance=16.cycles=16.backend=custom_full.backend_size=360.error_type=sd6.error_probability=0.002",
+"code": "bb180",
+"family": "Bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 78.02321619457669,
+"bposd_tuned": 863.4939583683214,
+"belief_find": 64.74036099847972,
+"bplsd": 61.51796257818826,
+"gari": 6.016076906275788,
+"relay_bp": 50.000407374420206
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=bb180.distance=16.cycles=16.backend=custom_full.backend_size=360.error_type=sd6.error_probability=0.002.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=golay23.schedule=edge_coloring_xz.distance=7.cycles=7.backend=real_apollo.error_type=real_apollo",
+"code": "golay23",
+"family": "Quantum Golay",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"belief_find": 0.845060848215757,
+"bplsd": 1.0904369704409242,
+"bposd": 0.7915173502575126,
+"relay_bp": 0.40265076637268066,
+"bposd_tuned": 0.4830183219909668,
+"gari": 0.09826172828674316
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_atoms.code=golay23.schedule=edge_coloring_xz.distance=7.cycles=7.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=color.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_flamingo",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 21.473137310573033,
+"relay_bp": 0.7582501002720424,
+"gari": 0.07515873227800642
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=color.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=cbb70.schedule=edge_coloring.distance=8.cycles=8.backend=real_infleqtion.error_type=real_infleqtion.basis=X",
+"code": "cbb70",
+"family": "Coprime bivariate bicycle",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"gari": 13.555592128208705
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=cbb70.schedule=edge_coloring.distance=8.cycles=8.backend=real_infleqtion.error_type=real_infleqtion.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=tb48.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+"code": "tb48",
+"family": "Trivariate bicycle",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 341.47891793932234,
+"bplsd": 334.55383368900846,
+"bposd": 559.9077320098877,
+"relay_bp": 33.709792137145996,
+"bposd_tuned": 50.13464117050171,
+"gari": 47.56718508402506
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_bicycle.code=tb48.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc108.distance=8.cycles=8.backend=custom_full.backend_size=216.error_type=sd6.error_probability=0.002.basis=X",
+"code": "bpc108",
+"family": "Balanced product cyclic",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"gari": 14.260445333296254
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc108.distance=8.cycles=8.backend=custom_full.backend_size=216.error_type=sd6.error_probability=0.002.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.paper_topology.code=steane.distance=9.cycles=9.backend=real_nsinfleqtion.error_type=modsi1000.error_probability=0.004",
+"code": "steane",
+"family": "Concatenated Steane",
+"backend": "real_nsinfleqtion",
+"error_type": "modsi1000",
+"decoders": {
+"bposd": 8411.523733933767,
+"bposd_tuned": 454.7320826848348,
+"belief_find": 4566.0280084609985,
+"bplsd": 5871.058555444081,
+"relay_bp": 1677.0313368524824,
+"gari": 128.1327302115304
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.paper_topology.code=steane.distance=9.cycles=9.backend=real_nsinfleqtion.error_type=modsi1000.error_probability=0.004.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=5.cycles=10.backend=real_willow.error_type=real_willow.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd_tuned": 49.13517917905535,
+"gari": 4.224576950073242
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=5.cycles=10.backend=real_willow.error_type=real_willow.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=gb46.schedule=edge_coloring_xz.distance=9.cycles=9.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "gb46",
+"family": "Generalized bicycle",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"belief_find": 476.03076423917497,
+"bplsd": 538.4962657519749,
+"bposd": 508.9929618154253,
+"bposd_tuned": 27.603794166019984,
+"gari": 33.28242301940918,
+"relay_bp": 198.10628382364908
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=gb46.schedule=edge_coloring_xz.distance=9.cycles=9.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=bb72.distance=6.cycles=6.backend=real_apollo.error_type=real_apollo.operation=transversal_cnot",
+"code": "bb72",
+"family": "Bivariate bicycle",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 328.18284375448053,
+"relay_bp": 210.02706302263914
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=bb72.distance=6.cycles=6.backend=real_apollo.error_type=real_apollo.operation=transversal_cnot.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=7.cycles=14.backend=real_flamingo.error_type=real_flamingo_x0.1",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"bposd": 7630.421137858311,
+"bposd_tuned": 1318.6870805960032,
+"belief_find": 3618.571814478966,
+"bplsd": 3421.1679292937456,
+"relay_bp": 112.60130239590372,
+"gari": 6.326597162255659
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=7.cycles=14.backend=real_flamingo.error_type=real_flamingo_x0.1.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=qt72.schedule=edge_coloring_xz.distance=4.cycles=4.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "qt72",
+"family": "Quantum Tanner",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"belief_find": 19.634940942128498,
+"bplsd": 19.71068541208903,
+"bposd": 35.771167278289795,
+"relay_bp": 7.331419467926025,
+"bposd_tuned": 3.3872888882954917,
+"gari": 1.5289745330810547
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=qt72.schedule=edge_coloring_xz.distance=4.cycles=4.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=cbb30.schedule=edge_coloring.distance=6.cycles=6.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled",
+"code": "cbb30",
+"family": "Coprime bivariate bicycle",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 35.69672648111979,
+"bplsd": 36.15150213241577,
+"bposd": 64.37338002522786,
+"bposd_tuned": 5.243176491029801,
+"gari": 5.443156878153483,
+"relay_bp": 8.532426587996945
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_ibm.code=cbb30.schedule=edge_coloring.distance=6.cycles=6.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=bacon.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_m700",
+"code": "bacon",
+"family": "Bacon-Shor",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_m700",
+"decoders": {
+"bposd": 0.7959532737731934,
+"bposd_tuned": 0.08780749638875325,
+"belief_find": 0.402066707611084,
+"bplsd": 0.48358885447184247,
+"relay_bp": 0.052327632904052734
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=bacon.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_m700.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=gb46.distance=9.cycles=9.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700",
+"code": "gb46",
+"family": "Generalized bicycle",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"bposd": 3428.7982908884683,
+"bposd_tuned": 217.2744576136271,
+"belief_find": 3314.661010901133,
+"bplsd": 2935.454076131185,
+"gari": 630.3706615311759,
+"relay_bp": 717.859684739794
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=gb46.distance=9.cycles=9.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=gross.distance=12.cycles=12.backend=real_apollo.error_type=real_apollo.operation=measure_z",
+"code": "gross",
+"family": "Bivariate bicycle",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 3311.507591860635,
+"relay_bp": 620.7926272560125
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=gross.distance=12.cycles=12.backend=real_apollo.error_type=real_apollo.operation=measure_z.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=cbb30.schedule=edge_coloring.distance=6.cycles=6.backend=real_loon.error_type=real_flamingo_downscaled",
+"code": "cbb30",
+"family": "Coprime bivariate bicycle",
+"backend": "real_loon",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 87.67444814954486,
+"bplsd": 88.79189831869942,
+"bposd": 84.80657720565796,
+"bposd_tuned": 16.72270854314168,
+"gari": 14.243110020955404,
+"relay_bp": 14.093517303466797
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_ibm.code=cbb30.schedule=edge_coloring.distance=6.cycles=6.backend=real_loon.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=cbb70.schedule=edge_coloring_xz.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo",
+"code": "cbb70",
+"family": "Coprime bivariate bicycle",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"belief_find": 0.26600566148757937,
+"bplsd": 0.2648796105384827,
+"bposd": 0.2936235976219177,
+"bposd_tuned": 0.36588999271392825,
+"gari": 0.2247123670578003,
+"relay_bp": 0.7014995718002319
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_atoms.code=cbb70.schedule=edge_coloring_xz.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=7.cycles=14.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.1",
+"code": "color",
+"family": "Color",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"bposd": 7713.463136469983,
+"relay_bp": 339.8441703322925,
+"bposd_tuned": 2616.119718932551,
+"belief_find": 8922.579951933873,
+"bplsd": 12751.400052455434,
+"gari": 28.476649322340975
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=7.cycles=14.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.1.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_infleqtion.error_type=real_infleqtion_x0.25",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.25",
+"decoders": {
+"bposd": 36.56798991245265,
+"bposd_tuned": 3.646664000521508,
+"belief_find": 40.72838504786839,
+"bplsd": 22.514964210669802,
+"relay_bp": 0.99956072027605
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_infleqtion.error_type=real_infleqtion_x0.25.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=lcs52.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_flamingo_1_qpu.error_type=real_flamingo_downscaled.basis=X",
+"code": "lcs52",
+"family": "Lift-connected surface",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"bposd_tuned": 12.832214151109968,
+"gari": 29.901916640145437
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=lcs52.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_flamingo_1_qpu.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=bpc162.distance=12.cycles=12.backend=custom_full.backend_size=324.error_type=sd6.error_probability=0.004",
+"code": "bpc162",
+"family": "Balanced product cyclic",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 3550.4792952537537,
+"bposd_tuned": 1197.5238291422527,
+"belief_find": 1678.9893746376038,
+"bplsd": 1778.3345929781597,
+"gari": 325.18222093582153,
+"relay_bp": 742.5454099973043
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=bpc162.distance=12.cycles=12.backend=custom_full.backend_size=324.error_type=sd6.error_probability=0.004.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=lcs175.schedule=zxcoloration.distance=7.cycles=7.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "lcs175",
+"family": "Lift-connected surface",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"belief_find": 984.2449951171875,
+"bplsd": 989.7386854694736,
+"bposd": 1007.7819941889855,
+"bposd_tuned": 82.51165466923868,
+"gari": 51.87425919941494,
+"relay_bp": 191.33099655951224
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=lcs175.schedule=zxcoloration.distance=7.cycles=7.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=5.cycles=5.backend=real_torino.error_type=real_heron_x0.1",
+"code": "surface",
+"family": "Surface",
+"backend": "real_torino",
+"error_type": "real_heron_x0.1",
+"decoders": {
+"bposd": 49.43943207115698,
+"bposd_tuned": 8.641136159439213,
+"belief_find": 49.18863006711872,
+"bplsd": 72.25098476623194,
+"relay_bp": 4.141072139042324,
+"gari": 0.1617073548002782
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=5.cycles=5.backend=real_torino.error_type=real_heron_x0.1.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_flamingo_1_qpu.error_type=real_flamingo",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 650.2803802490234,
+"bposd_tuned": 52.79272181647165,
+"belief_find": 476.00545088450116,
+"bplsd": 698.8167556126913,
+"relay_bp": 56.205242020743235
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_flamingo_1_qpu.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=planar_honeycomb.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_x0.25",
+"code": "planar_honeycomb",
+"family": "Planar honeycomb",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_x0.25",
+"decoders": {
+"bposd": 558.5184092521667,
+"bposd_tuned": 37.11284729742235,
+"belief_find": 439.6399625142415,
+"bplsd": 441.12673902511597,
+"relay_bp": 72.02156520658924
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=planar_honeycomb.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_x0.25.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=toric.distance=3.cycles=3.backend=custom_full.backend_size=91.error_type=sd6.error_probability=0.002.basis=X.operation=joint_xx",
+"code": "toric",
+"family": "Toric",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 34.69104891731625,
+"relay_bp": 1.9353756450471424
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=toric.distance=3.cycles=3.backend=custom_full.backend_size=91.error_type=sd6.error_probability=0.002.basis=X.operation=joint_xx.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=5.cycles=5.backend=real_willow.error_type=real_willow",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 97.19625010954596,
+"bposd_tuned": 7.5774185057798045,
+"belief_find": 53.99462020502681,
+"bplsd": 86.92224737197634,
+"relay_bp": 3.1701878682236,
+"gari": 0.406705689808679
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=5.cycles=5.backend=real_willow.error_type=real_willow.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc36.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X",
+"code": "bpc36",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"relay_bp": 2.7739505767822266,
+"gari": 1.8020485242207844
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc36.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=bpc162.schedule=zxcoloration.distance=12.cycles=12.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "bpc162",
+"family": "Balanced product cyclic",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"belief_find": 279.9152106943384,
+"bplsd": 172.1400446687008,
+"bposd": 307.5456234620098,
+"bposd_tuned": 634.6959103397065,
+"gari": 32.60205367254832,
+"relay_bp": 70.19648481512185
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=bpc162.schedule=zxcoloration.distance=12.cycles=12.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=5.cycles=10.backend=real_bicycle.error_type=real_flamingo",
+"code": "color",
+"family": "Color",
+"backend": "real_bicycle",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 2893.6615546544394,
+"bposd_tuned": 284.24385445458546,
+"belief_find": 3065.681846936544,
+"bplsd": 2569.2224526405334,
+"gari": 21.89370564052037,
+"relay_bp": 520.6224880899701
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=5.cycles=10.backend=real_bicycle.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=planar_honeycomb.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion_x0.25",
+"code": "planar_honeycomb",
+"family": "Planar honeycomb",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.25",
+"decoders": {
+"bposd": 0.41945468007990744,
+"bposd_tuned": 0.07189938719843475,
+"belief_find": 0.4054613029007363,
+"bplsd": 0.3697819414391982,
+"relay_bp": 0.08903965703758275
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=planar_honeycomb.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion_x0.25.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=tb48.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_loon.error_type=real_flamingo_downscaled.basis=X",
+"code": "tb48",
+"family": "Trivariate bicycle",
+"backend": "real_loon",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"relay_bp": 69.35485283533733,
+"gari": 138.60790967941284
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=tb48.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_loon.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.bb_native.code=bb108.schedule=ibm.distance=10.cycles=10.backend=native.error_type=real_flamingo_downscaled",
+"code": "bb108",
+"family": "Bivariate bicycle",
+"backend": "native",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 3.949933887193163,
+"bplsd": 3.9655805443884145,
+"bposd": 4.157698843717575,
+"bposd_tuned": 13.976988331317902,
+"gari": 1.0773400276881417,
+"relay_bp": 5.3407580542564395
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.bb_native.code=bb108.schedule=ibm.distance=10.cycles=10.backend=native.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_cnot.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "ls_cnot",
+"family": "Lattice surgery",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd": 221.8825478553772,
+"relay_bp": 11.013580676048033
+},
+"file": "/home/manosgior/eccentric-validation/sweep_lattice_surgery/circuits/circuit.lattice_surgery.code=ls_cnot.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=surface.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.operation=joint_zz",
+"code": "surface",
+"family": "Surface",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 3053.3258984871595,
+"relay_bp": 389.7733165371803
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=surface.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.operation=joint_zz.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=3.cycles=3.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.25",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_x0.25",
+"decoders": {
+"bposd": 1.903588603028154,
+"bposd_tuned": 0.1557574651937569,
+"belief_find": 3.3958153876047286,
+"bplsd": 2.779786094786629,
+"relay_bp": 0.11637025409274632
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=3.cycles=3.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.25.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=11.cycles=11.backend=custom_grid.backend_size=300.error_type=modsi1000.error_probability=0.002.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "custom_grid",
+"error_type": "modsi1000",
+"decoders": {
+"gari": 165.2876619369753
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=11.cycles=11.backend=custom_grid.backend_size=300.error_type=modsi1000.error_probability=0.002.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=bb90.distance=10.cycles=10.backend=real_flamingo.error_type=real_flamingo_x0.1",
+"code": "bb90",
+"family": "Bivariate bicycle",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"bplsd": 2092.123988469442,
+"bposd": 1931.6093098263525,
+"bposd_tuned": 641.0355550448099,
+"belief_find": 1944.5317594210308,
+"gari": 152.81235965092978,
+"relay_bp": 305.14065121847483
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=bb90.distance=10.cycles=10.backend=real_flamingo.error_type=real_flamingo_x0.1.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=3.cycles=6.backend=real_loon.error_type=real_flamingo_x0.5",
+"code": "color",
+"family": "Color",
+"backend": "real_loon",
+"error_type": "real_flamingo_x0.5",
+"decoders": {
+"bposd": 50.30465110143026,
+"bposd_tuned": 2.167147477467855,
+"belief_find": 42.19237263997396,
+"bplsd": 40.67361720403036,
+"relay_bp": 1.891928059714181
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=3.cycles=6.backend=real_loon.error_type=real_flamingo_x0.5.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=tb144.schedule=edge_coloring.distance=12.cycles=12.backend=real_harvard.error_type=real_harvard.basis=X",
+"code": "tb144",
+"family": "Trivariate bicycle",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"gari": 326.1496416727702
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=tb144.schedule=edge_coloring.distance=12.cycles=12.backend=real_harvard.error_type=real_harvard.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=lcs52.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled",
+"code": "lcs52",
+"family": "Lift-connected surface",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 78.48727051417033,
+"bplsd": 97.48566341400146,
+"bposd": 92.86354573567708,
+"relay_bp": 14.341331640879313,
+"bposd_tuned": 10.632023175557455,
+"gari": 22.712981700897217
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.qldpc_ibm.code=lcs52.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=tb48.distance=6.cycles=6.backend=custom_full.backend_size=237.error_type=sd6.error_probability=0.001.basis=X.operation=joint_xx",
+"code": "tb48",
+"family": "Trivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 974.4467053643638,
+"relay_bp": 83.31803317024186
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=tb48.distance=6.cycles=6.backend=custom_full.backend_size=237.error_type=sd6.error_probability=0.001.basis=X.operation=joint_xx.stim"
+},
+{
+"key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_cnot.distance=3.cycles=3.backend=custom_full.backend_size=65.error_type=sd6.error_probability=0.004.basis=X",
+"code": "ls_cnot",
+"family": "Lattice surgery",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 270.4361758913313,
+"relay_bp": 13.06272097996303
+},
+"file": "/home/manosgior/eccentric-validation/sweep_lattice_surgery/circuits/circuit.lattice_surgery.code=ls_cnot.distance=3.cycles=3.backend=custom_full.backend_size=65.error_type=sd6.error_probability=0.004.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=7.cycles=7.backend=real_flamingo.error_type=real_flamingo_x0.1",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"bposd": 2152.0309847025646,
+"bposd_tuned": 262.7004481655386,
+"belief_find": 1675.0644195118311,
+"bplsd": 1634.1169999899766,
+"relay_bp": 72.80224562052882
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=7.cycles=7.backend=real_flamingo.error_type=real_flamingo_x0.1.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=3.cycles=6.backend=real_infleqtion.error_type=real_infleqtion_x0.5.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.5",
+"decoders": {
+"gari": 0.03994603310861895
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=3.cycles=6.backend=real_infleqtion.error_type=real_infleqtion_x0.5.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_x0.5",
+"code": "surface",
+"family": "Surface",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_x0.5",
+"decoders": {
+"bposd": 196.07741307817685,
+"bposd_tuned": 59.54156708357731,
+"belief_find": 225.10654908747762,
+"bplsd": 216.91040260246,
+"relay_bp": 21.299941620841697,
+"gari": 1.4049785538057311
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_x0.5.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=bpc144.schedule=zxcoloration.distance=12.cycles=12.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+"code": "bpc144",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 25718.338576952618,
+"bplsd": 22342.479730447132,
+"bposd": 16090.93490907124,
+"relay_bp": 4600.911420413426,
+"bposd_tuned": 5810.318197863443,
+"gari": 3709.4149915377297
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=bpc144.schedule=zxcoloration.distance=12.cycles=12.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=5.cycles=10.backend=real_flamingo.error_type=real_flamingo_x0.5",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_x0.5",
+"decoders": {
+"bposd": 2083.438346862793,
+"bposd_tuned": 170.13858111699423,
+"belief_find": 2116.01101398468,
+"bplsd": 1585.4435065814428,
+"relay_bp": 140.55084037780762,
+"gari": 8.000757217407227
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=5.cycles=10.backend=real_flamingo.error_type=real_flamingo_x0.5.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=lcs150.schedule=cardinalNSmerge.distance=6.cycles=6.backend=real_infleqtion.error_type=real_infleqtion.basis=X",
+"code": "lcs150",
+"family": "Lift-connected surface",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"gari": 76.68423811594646
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=lcs150.schedule=cardinalNSmerge.distance=6.cycles=6.backend=real_infleqtion.error_type=real_infleqtion.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo_x0.1",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"bposd": 0.6781856670684543,
+"bposd_tuned": 0.10680195796920593,
+"belief_find": 0.6649870645922668,
+"bplsd": 0.6651090344352901,
+"relay_bp": 0.08231351711998688,
+"gari": 0.016898053937253698
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo_x0.1.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc90.distance=10.cycles=10.backend=real_infleqtion.error_type=real_infleqtion_x0.25.basis=X",
+"code": "bpc90",
+"family": "Balanced product cyclic",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.25",
+"decoders": {
+"bposd": 3.0722828273773195,
+"gari": 1.071085329139558
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc90.distance=10.cycles=10.backend=real_infleqtion.error_type=real_infleqtion_x0.25.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=lcs52.schedule=cardinal.distance=4.cycles=4.backend=real_harvard.error_type=real_harvard.basis=X",
+"code": "lcs52",
+"family": "Lift-connected surface",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd_tuned": 21.19208608354841,
+"gari": 21.542197068532307
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=lcs52.schedule=cardinal.distance=4.cycles=4.backend=real_harvard.error_type=real_harvard.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=bb90.schedule=ibm.distance=10.cycles=10.backend=real_apollo.error_type=real_apollo",
+"code": "bb90",
+"family": "Bivariate bicycle",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"belief_find": 0.6257693552970887,
+"bplsd": 0.6025278830528259,
+"bposd": 0.40963762044906615,
+"bposd_tuned": 2.542411093711853,
+"gari": 0.3835128378868103,
+"relay_bp": 1.7908952665328979
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=bb90.schedule=ibm.distance=10.cycles=10.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=bpc36.schedule=cardinal.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo",
+"code": "bpc36",
+"family": "Balanced product cyclic",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"belief_find": 0.16842238755133868,
+"bplsd": 0.22084866934090872,
+"bposd": 0.08843592153488698,
+"bposd_tuned": 0.04178291298857529,
+"gari": 0.05195383300973602,
+"relay_bp": 0.41834146281625595
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=bpc36.schedule=cardinal.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.paper_topology.code=hh.distance=11.cycles=11.backend=custom_full.backend_size=300.error_type=modsi1000.error_probability=0.002",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "custom_full",
+"error_type": "modsi1000",
+"decoders": {
+"bposd": 6191.487114559938,
+"bposd_tuned": 979.1180967538941,
+"belief_find": 9464.85960769915,
+"bplsd": 8556.912794045162,
+"relay_bp": 1047.1042071826873
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.paper_topology.code=hh.distance=11.cycles=11.backend=custom_full.backend_size=300.error_type=modsi1000.error_probability=0.002.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=surface.distance=7.cycles=7.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+"code": "surface",
+"family": "Surface",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"bposd": 65.15325831429588,
+"bposd_tuned": 20.04197478458283,
+"belief_find": 68.05622100640866,
+"bplsd": 65.80537824277332,
+"relay_bp": 5.886413712024689,
+"gari": 0.3303861675770462
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=surface.distance=7.cycles=7.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=lcs65.distance=5.cycles=5.backend=custom_full.backend_size=125.error_type=sd6.error_probability=0.001.basis=X",
+"code": "lcs65",
+"family": "Lift-connected surface",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"gari": 1.7345359248499717
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=lcs65.distance=5.cycles=5.backend=custom_full.backend_size=125.error_type=sd6.error_probability=0.001.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=bb72.schedule=zxcoloration.distance=6.cycles=6.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "bb72",
+"family": "Bivariate bicycle",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"belief_find": 28.57639678319295,
+"bplsd": 27.857462882995605,
+"bposd": 28.841436227162678,
+"relay_bp": 8.140927899268366,
+"bposd_tuned": 11.36454725265503,
+"gari": 3.309479554494222
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=bb72.schedule=zxcoloration.distance=6.cycles=6.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=surface.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700",
+"code": "surface",
+"family": "Surface",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"bposd": 0.4500875465830347,
+"bposd_tuned": 0.029095814238089497,
+"belief_find": 0.5313458773525233,
+"bplsd": 0.4021953731828219,
+"relay_bp": 0.06771307004952665,
+"gari": 0.00595359973378516
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=surface.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=lcs15.schedule=zxcoloration.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled",
+"code": "lcs15",
+"family": "Lift-connected surface",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 1.7091957728068035,
+"bplsd": 1.212996482849121,
+"bposd": 1.099470615386963,
+"bposd_tuned": 0.14925372216009325,
+"gari": 0.1494295256478446,
+"relay_bp": 0.12921231133597239
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.qldpc_ibm.code=lcs15.schedule=zxcoloration.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc162.schedule=cardinal.distance=12.cycles=12.backend=real_infleqtion.error_type=real_infleqtion.basis=X",
+"code": "bpc162",
+"family": "Balanced product cyclic",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"relay_bp": 571.6768561999003,
+"gari": 140.48195736748832
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc162.schedule=cardinal.distance=12.cycles=12.backend=real_infleqtion.error_type=real_infleqtion.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=bpc90.schedule=cardinal.distance=10.cycles=10.backend=real_apollo.error_type=real_apollo",
+"code": "bpc90",
+"family": "Balanced product cyclic",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"belief_find": 0.5407648277282715,
+"bplsd": 0.7066295695304871,
+"bposd": 0.5309070563316345,
+"bposd_tuned": 3.008041059970856,
+"gari": 0.4010245490074158,
+"relay_bp": 1.3664515542984008
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=bpc90.schedule=cardinal.distance=10.cycles=10.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=toric.distance=3.cycles=3.backend=custom_full.backend_size=43.error_type=sd6.error_probability=0.001.operation=measure_z",
+"code": "toric",
+"family": "Toric",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 6.584979762881018,
+"relay_bp": 0.2888576694542842
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=toric.distance=3.cycles=3.backend=custom_full.backend_size=43.error_type=sd6.error_probability=0.001.operation=measure_z.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bb180.distance=16.cycles=16.backend=custom_full.backend_size=360.error_type=sd6.error_probability=0.004.basis=X",
+"code": "bb180",
+"family": "Bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"gari": 119.3732887698758
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bb180.distance=16.cycles=16.backend=custom_full.backend_size=360.error_type=sd6.error_probability=0.004.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=repetition.distance=5.cycles=5.backend=custom_full.backend_size=9.error_type=sd6.error_probability=0.0005",
+"code": "repetition",
+"family": "Repetition",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 0.010864999294281006,
+"bposd_tuned": 0.01934962272644043,
+"belief_find": 0.014046945571899415,
+"bplsd": 0.014134232997894286,
+"relay_bp": 0.018574423789978027,
+"gari": 0.003007068634033203
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=repetition.distance=5.cycles=5.backend=custom_full.backend_size=9.error_type=sd6.error_probability=0.0005.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=13.cycles=13.backend=real_flamingo.error_type=real_flamingo_downscaled.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"gari": 1519.7919079235621
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=13.cycles=13.backend=real_flamingo.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=bb90.distance=10.cycles=10.backend=real_apollo.error_type=real_apollo.operation=transversal_cnot",
+"code": "bb90",
+"family": "Bivariate bicycle",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 1365.8496073087056,
+"relay_bp": 934.9616465519886
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=bb90.distance=10.cycles=10.backend=real_apollo.error_type=real_apollo.operation=transversal_cnot.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=tb72.schedule=edge_coloring.distance=8.cycles=8.backend=real_flamingo.error_type=real_flamingo_downscaled",
+"code": "tb72",
+"family": "Trivariate bicycle",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 1577.418037255605,
+"bplsd": 1463.463164170583,
+"bposd": 1909.1303571065266,
+"bposd_tuned": 252.11780275617326,
+"gari": 584.2345499992371,
+"relay_bp": 480.8357985814412
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_ibm.code=tb72.schedule=edge_coloring.distance=8.cycles=8.backend=real_flamingo.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.floquet_devices.code=hyperbolic_floquet_160.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo",
+"code": "hyperbolic_floquet_160",
+"family": "Hyperbolic Floquet",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 1.0741659390926361,
+"relay_bp": 1.474300411939621,
+"bposd_tuned": 0.5115073883533477,
+"belief_find": 1.1923184263706208,
+"bplsd": 1.1955296635627746
+},
+"file": "/home/manosgior/eccentric-validation/sweep_floquet/circuits/circuit.floquet_devices.code=hyperbolic_floquet_160.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=3.cycles=6.backend=real_torino.error_type=real_heron_x0.1",
+"code": "surface",
+"family": "Surface",
+"backend": "real_torino",
+"error_type": "real_heron_x0.1",
+"decoders": {
+"bposd": 3.845657531752786,
+"bposd_tuned": 0.5292907385780408,
+"belief_find": 5.537238969393303,
+"bplsd": 3.696756489508975,
+"relay_bp": 0.3446006774902344,
+"gari": 0.04416829063778832
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=3.cycles=6.backend=real_torino.error_type=real_heron_x0.1.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=planar_honeycomb.distance=7.cycles=7.backend=custom_full.backend_size=318.error_type=sd6.error_probability=0.0005",
+"code": "planar_honeycomb",
+"family": "Planar honeycomb",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 45.37617106768634,
+"bposd_tuned": 27.06658464262099,
+"belief_find": 80.91910507411689,
+"bplsd": 42.55995427659518,
+"relay_bp": 11.600740384817124
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=planar_honeycomb.distance=7.cycles=7.backend=custom_full.backend_size=318.error_type=sd6.error_probability=0.0005.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=gross.distance=12.cycles=12.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X",
+"code": "gross",
+"family": "Bivariate bicycle",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"bposd_tuned": 91.75838397543946,
+"gari": 2.09299135286751
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=gross.distance=12.cycles=12.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=semi_hyperbolic_floquet_64.distance=3.cycles=3.backend=custom_full.backend_size=64.error_type=sd6.error_probability=0.0005",
+"code": "semi_hyperbolic_floquet_64",
+"family": "Semi-hyperbolic Floquet",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 3.7015914916992188,
+"bposd_tuned": 0.5452252507209778,
+"belief_find": 6.330544929239178,
+"bplsd": 6.88341756001903,
+"relay_bp": 1.070099805374383
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=semi_hyperbolic_floquet_64.distance=3.cycles=3.backend=custom_full.backend_size=64.error_type=sd6.error_probability=0.0005.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=golay23.schedule=edge_coloring_xz.distance=7.cycles=7.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled.basis=X",
+"code": "golay23",
+"family": "Quantum Golay",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"gari": 62.77025445302328
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=golay23.schedule=edge_coloring_xz.distance=7.cycles=7.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bb72.distance=6.cycles=6.backend=custom_full.backend_size=144.error_type=sd6.error_probability=0.001.basis=X",
+"code": "bb72",
+"family": "Bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 0.39255114137647834,
+"gari": 0.18691969032989972
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bb72.distance=6.cycles=6.backend=custom_full.backend_size=144.error_type=sd6.error_probability=0.001.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=bpc162.distance=12.cycles=12.backend=custom_full.backend_size=324.error_type=sd6.error_probability=0.0005",
+"code": "bpc162",
+"family": "Balanced product cyclic",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 3.6766276788711547,
+"bposd_tuned": 209.17747349765665,
+"belief_find": 3.0692932915687563,
+"bplsd": 3.0815510082244875,
+"gari": 3.463545250892639,
+"relay_bp": 14.487571353488848
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=bpc162.distance=12.cycles=12.backend=custom_full.backend_size=324.error_type=sd6.error_probability=0.0005.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=steane.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo",
+"code": "steane",
+"family": "Concatenated Steane",
+"backend": "real_bicycle",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 14.869815962655204,
+"bposd_tuned": 0.4286319414774577,
+"belief_find": 13.608476434435163,
+"bplsd": 13.996107578277588,
+"relay_bp": 0.544884999593099,
+"gari": 0.09318288167317708
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=steane.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=5.cycles=10.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.5",
+"code": "color",
+"family": "Color",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_x0.5",
+"decoders": {
+"bposd": 2311.195556776864,
+"bposd_tuned": 312.3294186592102,
+"belief_find": 2133.365864753723,
+"bplsd": 2172.33980178833,
+"gari": 17.33125822884696,
+"relay_bp": 238.3704171861921
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=5.cycles=10.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.5.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=bb90.distance=10.cycles=10.backend=custom_full.backend_size=279.error_type=sd6.error_probability=0.001.operation=measure_z",
+"code": "bb90",
+"family": "Bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 17115.27742304892,
+"relay_bp": 2620.0656701518137
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=bb90.distance=10.cycles=10.backend=custom_full.backend_size=279.error_type=sd6.error_probability=0.001.operation=measure_z.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=3.cycles=6.backend=real_harvard.error_type=real_harvard",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 56.80677127838135,
+"bposd_tuned": 3.425013701121012,
+"belief_find": 37.074075063069664,
+"bplsd": 37.68452628453573,
+"relay_bp": 1.7973403930664062
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=3.cycles=6.backend=real_harvard.error_type=real_harvard.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc72.distance=8.cycles=8.backend=custom_full.backend_size=144.error_type=sd6.error_probability=0.004.basis=X",
+"code": "bpc72",
+"family": "Balanced product cyclic",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"relay_bp": 126.45475660051618,
+"gari": 30.281965732574463
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc72.distance=8.cycles=8.backend=custom_full.backend_size=144.error_type=sd6.error_probability=0.004.basis=X.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=surface.distance=3.cycles=3.backend=custom_full.backend_size=49.error_type=sd6.error_probability=0.002.basis=X.operation=joint_xx",
+"code": "surface",
+"family": "Surface",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 6.229310224926661,
+"relay_bp": 0.37104743771848425
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=surface.distance=3.cycles=3.backend=custom_full.backend_size=49.error_type=sd6.error_probability=0.002.basis=X.operation=joint_xx.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard_x0.1",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.1",
+"decoders": {
+"bposd": 38.33056146620995,
+"bposd_tuned": 3.516024508192972,
+"belief_find": 22.232248343612397,
+"bplsd": 22.636791621249145,
+"relay_bp": 2.1717826957388144
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard_x0.1.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=qt36.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X",
+"code": "qt36",
+"family": "Quantum Tanner",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"bposd_tuned": 1.560072422027588,
+"gari": 0.8702104432242257
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=qt36.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=cbb42.distance=6.cycles=6.backend=custom_full.backend_size=168.error_type=sd6.error_probability=0.001.operation=transversal_cnot",
+"code": "cbb42",
+"family": "Coprime bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 1123.1389159534506,
+"relay_bp": 171.51343947365172
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=cbb42.distance=6.cycles=6.backend=custom_full.backend_size=168.error_type=sd6.error_probability=0.001.operation=transversal_cnot.stim"
+},
+{
+"key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_merge.distance=5.cycles=5.backend=custom_full.backend_size=109.error_type=sd6.error_probability=0.0005.basis=X",
+"code": "ls_merge",
+"family": "Lattice surgery",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 153.59423750752225,
+"relay_bp": 8.950208451235058
+},
+"file": "/home/manosgior/eccentric-validation/sweep_lattice_surgery/circuits/circuit.lattice_surgery.code=ls_merge.distance=5.cycles=5.backend=custom_full.backend_size=109.error_type=sd6.error_probability=0.0005.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=7.cycles=14.backend=real_infleqtion.error_type=real_infleqtion_x0.5.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.5",
+"decoders": {
+"relay_bp": 130.24551406983406,
+"gari": 29.371960503714426
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=7.cycles=14.backend=real_infleqtion.error_type=real_infleqtion_x0.5.basis=X.stim"
+},
+{
+"key": "sweep2/circuit.willow_surface.code=surface.distance=3.cycles=30.backend=real_willow.error_type=real_willow",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 190.13397250856673,
+"bposd_tuned": 27.585490226745605,
+"belief_find": 209.1912283216204,
+"bplsd": 181.2415051460266,
+"relay_bp": 18.363026210239955,
+"gari": 1.0737933431352888
+},
+"file": "/home/manosgior/eccentric-validation/sweep2/circuits/circuit.willow_surface.code=surface.distance=3.cycles=30.backend=real_willow.error_type=real_willow.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=custom_full.backend_size=217.error_type=sd6.error_probability=0.001.operation=joint_zz",
+"code": "hgp_hamming",
+"family": "Hypergraph product",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 421.31777350647496,
+"relay_bp": 24.552834561440797
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=custom_full.backend_size=217.error_type=sd6.error_probability=0.001.operation=joint_zz.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=rm15.distance=3.cycles=3.backend=custom_full.backend_size=29.error_type=sd6.error_probability=0.002",
+"code": "rm15",
+"family": "Quantum Reed-Muller",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 0.7137596079733519,
+"bposd_tuned": 0.1418344320449154,
+"belief_find": 0.6491490380953898,
+"bplsd": 0.7040779147527915,
+"relay_bp": 0.33568663216532674,
+"gari": 0.057450037086959435
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=rm15.distance=3.cycles=3.backend=custom_full.backend_size=29.error_type=sd6.error_probability=0.002.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bb108.distance=10.cycles=10.backend=custom_full.backend_size=216.error_type=sd6.error_probability=0.001.basis=X",
+"code": "bb108",
+"family": "Bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 2.3638915622234347,
+"relay_bp": 8.083379275123756,
+"gari": 1.2161241065933053
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bb108.distance=10.cycles=10.backend=custom_full.backend_size=216.error_type=sd6.error_probability=0.001.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.bb_native.code=bb54.schedule=zxcoloration.distance=6.cycles=6.backend=native.error_type=real_flamingo_downscaled",
+"code": "bb54",
+"family": "Bivariate bicycle",
+"backend": "native",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 1.1972069951285302,
+"bplsd": 1.5710861282011048,
+"bposd": 1.1902117307207225,
+"relay_bp": 1.7965862648618733,
+"bposd_tuned": 0.9037228595991076,
+"gari": 0.2604760532885526
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.bb_native.code=bb54.schedule=zxcoloration.distance=6.cycles=6.backend=native.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=lcs65.schedule=cardinalNSmerge.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_downscaled",
+"code": "lcs65",
+"family": "Lift-connected surface",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 107.79270267486572,
+"bplsd": 123.91374049648162,
+"bposd": 129.04426013269733,
+"bposd_tuned": 13.286781926308908,
+"gari": 9.309046427408854,
+"relay_bp": 15.160746805129513
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=lcs65.schedule=cardinalNSmerge.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=9.cycles=18.backend=real_harvard.error_type=real_harvard_x0.25.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.25",
+"decoders": {
+"gari": 24.453389568934366
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=9.cycles=18.backend=real_harvard.error_type=real_harvard_x0.25.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=color.distance=3.cycles=3.backend=custom_full.backend_size=16.error_type=sd6.error_probability=0.001",
+"code": "color",
+"family": "Color",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 1.334422942811409,
+"bposd_tuned": 0.06019292679508176,
+"belief_find": 1.0938423398941282,
+"bplsd": 2.0232104498242576,
+"relay_bp": 0.06737716614253937,
+"gari": 0.022927049606565445
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=color.distance=3.cycles=3.backend=custom_full.backend_size=16.error_type=sd6.error_probability=0.001.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=lcs65.schedule=cardinalNSmerge.distance=5.cycles=5.backend=real_infleqtion.error_type=real_infleqtion.basis=X",
+"code": "lcs65",
+"family": "Lift-connected surface",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd_tuned": 5.519318262736003,
+"gari": 8.89486312866211
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=lcs65.schedule=cardinalNSmerge.distance=5.cycles=5.backend=real_infleqtion.error_type=real_infleqtion.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle_chain.code=cbb154.schedule=edge_coloring.distance=16.cycles=16.backend=real_bicycle_2_qpus.error_type=real_flamingo_downscaled",
+"code": "cbb154",
+"family": "Coprime bivariate bicycle",
+"backend": "real_bicycle_2_qpus",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 7460.186557968457,
+"bposd": 15809.930850448922,
+"bposd_tuned": 8876.762258008195,
+"bplsd": 15156.997736044756,
+"gari": 998.5312591280256,
+"relay_bp": 2141.9093039830527
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_bicycle_chain.code=cbb154.schedule=edge_coloring.distance=16.cycles=16.backend=real_bicycle_2_qpus.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=7.cycles=14.backend=real_flamingo.error_type=real_flamingo_x0.25",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_x0.25",
+"decoders": {
+"bposd": 18048.567711138257,
+"bposd_tuned": 1046.5667808471724,
+"belief_find": 9054.321382641792,
+"bplsd": 8241.194083810396,
+"relay_bp": 689.4592607441969,
+"gari": 28.174709966105798
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=7.cycles=14.backend=real_flamingo.error_type=real_flamingo_x0.25.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=surface.distance=5.cycles=5.backend=real_willow.error_type=real_willow.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 51.49851134393067,
+"gari": 0.25205983524828884
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=surface.distance=5.cycles=5.backend=real_willow.error_type=real_willow.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=gb48.distance=8.cycles=8.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.basis=X",
+"code": "gb48",
+"family": "Generalized bicycle",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"gari": 110.93552214758736
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=gb48.distance=8.cycles=8.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=planar_honeycomb.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard_x0.5",
+"code": "planar_honeycomb",
+"family": "Planar honeycomb",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.5",
+"decoders": {
+"bposd": 23.961374282836914,
+"bposd_tuned": 2.430142402648926,
+"belief_find": 44.755092779795326,
+"bplsd": 37.861420472462974,
+"relay_bp": 1.3433087666829426
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=planar_honeycomb.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard_x0.5.stim"
+},
+{
+"key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_cnot.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard",
+"code": "ls_cnot",
+"family": "Lattice surgery",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 19888.86822972979,
+"relay_bp": 3656.454955736796
+},
+"file": "/home/manosgior/eccentric-validation/sweep_lattice_surgery/circuits/circuit.lattice_surgery.code=ls_cnot.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=hh.distance=3.cycles=3.backend=custom_full.backend_size=19.error_type=sd6.error_probability=0.001",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 1.2161659437512595,
+"bposd_tuned": 0.12390801336912982,
+"belief_find": 0.963315623147147,
+"bplsd": 1.0574710558331202,
+"relay_bp": 0.08236977906353705,
+"gari": 0.012560506020822832
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=hh.distance=3.cycles=3.backend=custom_full.backend_size=19.error_type=sd6.error_probability=0.001.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=tb48.distance=6.cycles=6.backend=custom_full.backend_size=192.error_type=sd6.error_probability=0.001.operation=transversal_cnot",
+"code": "tb48",
+"family": "Trivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 2121.018972699668,
+"relay_bp": 175.44596156618093
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=tb48.distance=6.cycles=6.backend=custom_full.backend_size=192.error_type=sd6.error_probability=0.001.operation=transversal_cnot.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_x0.25.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_x0.25",
+"decoders": {
+"gari": 0.729071065640678
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_x0.25.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=bb72.schedule=ibm.distance=6.cycles=6.backend=real_loon.error_type=real_flamingo_downscaled",
+"code": "bb72",
+"family": "Bivariate bicycle",
+"backend": "real_loon",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 1582.4312607447307,
+"bplsd": 819.5002150535583,
+"bposd": 1661.90100976399,
+"bposd_tuned": 239.54883405140467,
+"gari": 142.890111718859,
+"relay_bp": 128.25766597475325
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.qldpc_ibm.code=bb72.schedule=ibm.distance=6.cycles=6.backend=real_loon.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=lcs15.schedule=cardinal.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled",
+"code": "lcs15",
+"family": "Lift-connected surface",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 1.0153179168701172,
+"bplsd": 2.1152731577555337,
+"bposd": 1.0846352577209473,
+"bposd_tuned": 0.20712644823135867,
+"gari": 0.13517316182454428,
+"relay_bp": 0.1489866574605306
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.qldpc_ibm.code=lcs15.schedule=cardinal.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=5.cycles=5.backend=real_willow.error_type=real_willow_x0.5",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow_x0.5",
+"decoders": {
+"bposd": 38.9778492345701,
+"bposd_tuned": 3.230345084951666,
+"belief_find": 22.66841790866621,
+"bplsd": 35.7841268321371,
+"relay_bp": 1.3110087014652265,
+"gari": 0.13339019093676666
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=5.cycles=5.backend=real_willow.error_type=real_willow_x0.5.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=lcs15.distance=3.cycles=3.backend=custom_full.backend_size=27.error_type=sd6.error_probability=0.0005.basis=X",
+"code": "lcs15",
+"family": "Lift-connected surface",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"gari": 0.0423666738694714
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=lcs15.distance=3.cycles=3.backend=custom_full.backend_size=27.error_type=sd6.error_probability=0.0005.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=planar_honeycomb.distance=5.cycles=10.backend=real_willow.error_type=real_willow",
+"code": "planar_honeycomb",
+"family": "Planar honeycomb",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 2901.107793194907,
+"bposd_tuned": 231.24572583607264,
+"belief_find": 2628.782901763916,
+"bplsd": 2900.6564085824148,
+"relay_bp": 668.0553218296596
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=planar_honeycomb.distance=5.cycles=10.backend=real_willow.error_type=real_willow.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=lcs150.schedule=cardinal.distance=6.cycles=6.backend=real_infleqtion.error_type=real_infleqtion.basis=X",
+"code": "lcs150",
+"family": "Lift-connected surface",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd_tuned": 42.0067990620931,
+"gari": 76.28501176834106
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=lcs150.schedule=cardinal.distance=6.cycles=6.backend=real_infleqtion.error_type=real_infleqtion.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=mitten150.schedule=custom.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo.basis=X",
+"code": "mitten150",
+"family": "Mitten",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 5.337735664888465,
+"gari": 4.771974984436276
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=mitten150.schedule=custom.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=5.cycles=5.backend=custom_full.backend_size=49.error_type=sd6.error_probability=0.002.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"gari": 0.18252864348149933
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=5.cycles=5.backend=custom_full.backend_size=49.error_type=sd6.error_probability=0.002.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=surface.distance=7.cycles=7.backend=custom_full.backend_size=118.error_type=sd6.error_probability=0.0005",
+"code": "surface",
+"family": "Surface",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 40.910933699299704,
+"bposd_tuned": 12.777665808200837,
+"belief_find": 29.165410413742066,
+"bplsd": 55.56229867552724,
+"relay_bp": 4.847006781101227,
+"gari": 0.21909228563308716
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=surface.distance=7.cycles=7.backend=custom_full.backend_size=118.error_type=sd6.error_probability=0.0005.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"relay_bp": 2.6220436855755023,
+"gari": 0.15759493397400443
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=color.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_downscaled_m700",
+"code": "color",
+"family": "Color",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"bposd": 1653.3381550079953,
+"bposd_tuned": 148.26631388194124,
+"belief_find": 1945.5096157391865,
+"bplsd": 1585.2712395509582,
+"relay_bp": 99.98747808683406,
+"gari": 2.36172702950491
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=color.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=tb72.schedule=edge_coloring_xz.distance=8.cycles=8.backend=real_infleqtion.error_type=real_infleqtion.basis=X",
+"code": "tb72",
+"family": "Trivariate bicycle",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"relay_bp": 23.901419178132087,
+"gari": 8.796857833862305
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=tb72.schedule=edge_coloring_xz.distance=8.cycles=8.backend=real_infleqtion.error_type=real_infleqtion.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=3.cycles=3.backend=custom_full.backend_size=16.error_type=sd6.error_probability=0.001.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"gari": 0.010020846412295387
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=3.cycles=3.backend=custom_full.backend_size=16.error_type=sd6.error_probability=0.001.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.floquet_devices.code=planar_honeycomb.distance=5.cycles=5.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "planar_honeycomb",
+"family": "Planar honeycomb",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd": 125.86314347482497,
+"bposd_tuned": 21.333985328674316,
+"belief_find": 195.13147838654058,
+"bplsd": 198.4820976564961,
+"relay_bp": 20.83194371192686
+},
+"file": "/home/manosgior/eccentric-validation/sweep_floquet/circuits/circuit.floquet_devices.code=planar_honeycomb.distance=5.cycles=5.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=bb72.schedule=zxcoloration.distance=6.cycles=6.backend=real_loon.error_type=real_flamingo_downscaled",
+"code": "bb72",
+"family": "Bivariate bicycle",
+"backend": "real_loon",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 1252.4879105885823,
+"bplsd": 1385.0343028704326,
+"bposd": 1345.7347289721172,
+"relay_bp": 100.63571453094482,
+"bposd_tuned": 236.23360554377237,
+"gari": 164.38490470250449
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.qldpc_ibm.code=bb72.schedule=zxcoloration.distance=6.cycles=6.backend=real_loon.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=color.distance=3.cycles=3.backend=real_willow.error_type=real_willow.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 7.174345524080338,
+"relay_bp": 0.2177303837191674,
+"gari": 0.020226278612690586
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=color.distance=3.cycles=3.backend=real_willow.error_type=real_willow.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=3.cycles=3.backend=real_torino.error_type=real_heron_x0.25",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_torino",
+"error_type": "real_heron_x0.25",
+"decoders": {
+"bposd": 1.5017344459654793,
+"bposd_tuned": 0.47514101815602133,
+"belief_find": 1.659280534774538,
+"bplsd": 2.7727089230976407,
+"relay_bp": 0.18209157451506583
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=3.cycles=3.backend=real_torino.error_type=real_heron_x0.25.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=tb48.distance=6.cycles=6.backend=custom_full.backend_size=253.error_type=sd6.error_probability=0.001.operation=joint_zz",
+"code": "tb48",
+"family": "Trivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 2069.9884164087416,
+"relay_bp": 118.64560813517215
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=tb48.distance=6.cycles=6.backend=custom_full.backend_size=253.error_type=sd6.error_probability=0.001.operation=joint_zz.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=3.cycles=6.backend=real_torino.error_type=real_heron_x0.5",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_torino",
+"error_type": "real_heron_x0.5",
+"decoders": {
+"bposd": 16.451996167500813,
+"bposd_tuned": 2.8404738108317056,
+"belief_find": 22.75213400522868,
+"bplsd": 16.239210605621338,
+"relay_bp": 0.8299425670078823
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=3.cycles=6.backend=real_torino.error_type=real_heron_x0.5.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=hh.distance=5.cycles=5.backend=real_flamingo_1_qpu.error_type=real_flamingo_m700",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_m700",
+"decoders": {
+"bposd": 505.9516385623387,
+"bposd_tuned": 33.3117151260376,
+"belief_find": 739.3965203421457,
+"bplsd": 714.8365361349923,
+"relay_bp": 38.90062229973929
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=hh.distance=5.cycles=5.backend=real_flamingo_1_qpu.error_type=real_flamingo_m700.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=7.cycles=14.backend=real_willow.error_type=real_willow_x0.1.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow_x0.1",
+"decoders": {
+"gari": 0.4781648359004088
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=7.cycles=14.backend=real_willow.error_type=real_willow_x0.1.basis=X.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=hh.distance=3.cycles=3.backend=real_willow.error_type=real_willow.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 4.798413245908676,
+"gari": 0.03841461673859627
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=hh.distance=3.cycles=3.backend=real_willow.error_type=real_willow.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=color.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_downscaled",
+"code": "color",
+"family": "Color",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"bposd": 147.52997350107674,
+"bposd_tuned": 9.606502545650468,
+"belief_find": 176.9852389487545,
+"bplsd": 126.63455406824748,
+"relay_bp": 7.152267576406558,
+"gari": 0.3124663527582733
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=color.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=3.cycles=6.backend=real_bicycle.error_type=real_flamingo_x0.5.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_x0.5",
+"decoders": {
+"bposd_tuned": 0.8846484820048014,
+"gari": 0.09870370229085286
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=3.cycles=6.backend=real_bicycle.error_type=real_flamingo_x0.5.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=9.cycles=9.backend=real_willow.error_type=real_willow_x0.25",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow_x0.25",
+"decoders": {
+"bposd": 2964.7421164892694,
+"bposd_tuned": 643.1341575796976,
+"belief_find": 2879.530664852687,
+"bplsd": 2109.6990162051766,
+"relay_bp": 78.94674823656594,
+"gari": 4.212542442088956
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=9.cycles=9.backend=real_willow.error_type=real_willow_x0.25.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=5.cycles=10.backend=real_loon.error_type=real_flamingo.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_loon",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd_tuned": 26.477045474513883,
+"gari": 5.624208291371663
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=5.cycles=10.backend=real_loon.error_type=real_flamingo.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc72.schedule=cardinal.distance=8.cycles=8.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X",
+"code": "bpc72",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"gari": 75.26002248128255
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc72.schedule=cardinal.distance=8.cycles=8.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard_x0.5",
+"code": "color",
+"family": "Color",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.5",
+"decoders": {
+"bposd": 7.379775354939122,
+"bposd_tuned": 0.549036737472292,
+"belief_find": 6.336442270586567,
+"bplsd": 6.076867272776942,
+"gari": 0.0294463865218624,
+"relay_bp": 0.2470185643150693
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard_x0.5.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=tb48.distance=6.cycles=6.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700",
+"code": "tb48",
+"family": "Trivariate bicycle",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"bposd": 340.452926840101,
+"relay_bp": 27.002729415893555,
+"bposd_tuned": 39.89418881280081,
+"belief_find": 377.041825566973,
+"bplsd": 469.8870955194746,
+"gari": 74.23632860183716
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.readout_700.code=tb48.distance=6.cycles=6.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=5.cycles=10.backend=real_bicycle.error_type=real_flamingo.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_bicycle",
+"error_type": "real_flamingo",
+"decoders": {
+"relay_bp": 24.906339009602863,
+"gari": 3.316781838734945
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=5.cycles=10.backend=real_bicycle.error_type=real_flamingo.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=gross.distance=12.cycles=12.backend=real_bicycle.error_type=real_flamingo_downscaled",
+"code": "gross",
+"family": "Bivariate bicycle",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 14.665775781115288,
+"bplsd": 13.412915877103806,
+"bposd": 10.383301543696211,
+"relay_bp": 10.162989030253941,
+"bposd_tuned": 57.15806840446783,
+"gari": 1.6958465667970013
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=gross.distance=12.cycles=12.backend=real_bicycle.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=golay23.schedule=edge_coloring.distance=7.cycles=7.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+"code": "golay23",
+"family": "Quantum Golay",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 505.0900517191206,
+"bplsd": 417.15081862040927,
+"bposd": 370.35766226904735,
+"relay_bp": 41.34785827000936,
+"bposd_tuned": 18.178810392107284,
+"gari": 33.03515021006266
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_bicycle.code=golay23.schedule=edge_coloring.distance=7.cycles=7.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=cbb30.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+"code": "cbb30",
+"family": "Coprime bivariate bicycle",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 87.10034735997517,
+"bplsd": 68.56852674484253,
+"bposd": 100.58702278137207,
+"bposd_tuned": 10.681469917297363,
+"gari": 9.682728926340738,
+"relay_bp": 12.012010159031037
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_bicycle.code=cbb30.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bb98.schedule=zxcoloration.distance=12.cycles=12.backend=native_lr.error_type=real_flamingo_downscaled.basis=X",
+"code": "bb98",
+"family": "Bivariate bicycle",
+"backend": "native_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"gari": 7.4973616768828535
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bb98.schedule=zxcoloration.distance=12.cycles=12.backend=native_lr.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=3.cycles=3.backend=real_willow.error_type=real_willow_x0.1.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow_x0.1",
+"decoders": {
+"gari": 0.004687646320009286
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=3.cycles=3.backend=real_willow.error_type=real_willow_x0.1.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=bpc36.schedule=cardinal.distance=4.cycles=4.backend=real_loon.error_type=real_flamingo_downscaled",
+"code": "bpc36",
+"family": "Balanced product cyclic",
+"backend": "real_loon",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 186.57711710248674,
+"bplsd": 104.92456504276821,
+"bposd": 149.65615136282784,
+"bposd_tuned": 20.392752715519496,
+"gari": 9.787743091583252,
+"relay_bp": 11.504016263144356
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.qldpc_ibm.code=bpc36.schedule=cardinal.distance=4.cycles=4.backend=real_loon.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.paper_dqc.code=surface.distance=13.cycles=13.backend=real_flamingo.error_type=real_flamingo_downscaled",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"bposd": 56218.25536439816,
+"bposd_tuned": 17197.702678974034,
+"belief_find": 68593.08953512282,
+"bplsd": 72201.78513407707,
+"relay_bp": 12599.12401276102,
+"gari": 309.8485968907674
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.paper_dqc.code=surface.distance=13.cycles=13.backend=real_flamingo.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=qt36.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.basis=X",
+"code": "qt36",
+"family": "Quantum Tanner",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd_tuned": 0.523555596669515,
+"gari": 0.4411810239156087
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=qt36.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=7.cycles=14.backend=real_harvard.error_type=real_harvard_x0.25",
+"code": "color",
+"family": "Color",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.25",
+"decoders": {
+"bposd": 8000.695196257697,
+"bposd_tuned": 871.254302972487,
+"belief_find": 8469.40284475274,
+"bplsd": 5247.767627239227,
+"gari": 17.890051054576087,
+"relay_bp": 316.4807084130333
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=7.cycles=14.backend=real_harvard.error_type=real_harvard_x0.25.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=mhc36.distance=4.cycles=4.backend=custom_full.backend_size=65.error_type=sd6.error_probability=0.001.operation=measure_z",
+"code": "mhc36",
+"family": "Many-hypercube",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 381.78433564401445,
+"relay_bp": 18.840826163216242
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=mhc36.distance=4.cycles=4.backend=custom_full.backend_size=65.error_type=sd6.error_probability=0.001.operation=measure_z.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.floquet_devices.code=semi_hyperbolic_floquet_144.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo",
+"code": "semi_hyperbolic_floquet_144",
+"family": "Semi-hyperbolic Floquet",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 0.8473557949066162,
+"bposd_tuned": 0.9496233999729157,
+"belief_find": 0.5620199692249298,
+"bplsd": 0.5734458458423615,
+"relay_bp": 1.896039867401123
+},
+"file": "/home/manosgior/eccentric-validation/sweep_floquet/circuits/circuit.floquet_devices.code=semi_hyperbolic_floquet_144.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=surface.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.operation=memory_ec",
+"code": "surface",
+"family": "Surface",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd": 0.029383320018557684,
+"relay_bp": 0.01980714271404992
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=surface.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.operation=memory_ec.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=xzzx.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard",
+"code": "xzzx",
+"family": "XZZX surface",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 5.721794234381782,
+"gari": 0.058668832930307536
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=xzzx.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"relay_bp": 43.661254529030096,
+"gari": 4.736946552030502
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=rm15.distance=3.cycles=3.backend=custom_full.backend_size=29.error_type=sd6.error_probability=0.002.basis=X",
+"code": "rm15",
+"family": "Quantum Reed-Muller",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"relay_bp": 0.3220973696027483,
+"gari": 0.11275018964494977
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=rm15.distance=3.cycles=3.backend=custom_full.backend_size=29.error_type=sd6.error_probability=0.002.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=9.cycles=9.backend=real_infleqtion.error_type=real_infleqtion_x0.25.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.25",
+"decoders": {
+"gari": 2.000427760988334
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=9.cycles=9.backend=real_infleqtion.error_type=real_infleqtion_x0.25.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=bacon.distance=3.cycles=3.backend=custom_full.backend_size=9.error_type=sd6.error_probability=0.002",
+"code": "bacon",
+"family": "Bacon-Shor",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 0.4099842809861706,
+"bposd_tuned": 0.0551665396917434,
+"belief_find": 0.8067039520509781,
+"bplsd": 0.5391243196302845,
+"relay_bp": 0.04023336595104587
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=bacon.distance=3.cycles=3.backend=custom_full.backend_size=9.error_type=sd6.error_probability=0.002.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=mhc36.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo.basis=X.operation=joint_xx",
+"code": "mhc36",
+"family": "Many-hypercube",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 194.98516454350442,
+"relay_bp": 11.264019507742562
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=mhc36.distance=4.cycles=4.backend=real_apollo.error_type=real_apollo.basis=X.operation=joint_xx.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=planar_honeycomb.distance=5.cycles=5.backend=real_willow.error_type=real_willow",
+"code": "planar_honeycomb",
+"family": "Planar honeycomb",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 662.7107890446981,
+"bposd_tuned": 55.2484761873881,
+"belief_find": 836.6440337044852,
+"bplsd": 594.0040819985526,
+"relay_bp": 102.0594669977824
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=planar_honeycomb.distance=5.cycles=5.backend=real_willow.error_type=real_willow.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=gross.distance=12.cycles=12.backend=native_lr.error_type=real_flamingo_downscaled.basis=X",
+"code": "gross",
+"family": "Bivariate bicycle",
+"backend": "native_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"gari": 6.620065800251405
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=gross.distance=12.cycles=12.backend=native_lr.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bacon.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.basis=X",
+"code": "bacon",
+"family": "Bacon-Shor",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"bposd_tuned": 0.04694905017782574
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bacon.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=planar_honeycomb.distance=3.cycles=6.backend=real_harvard.error_type=real_harvard_x0.25",
+"code": "planar_honeycomb",
+"family": "Planar honeycomb",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.25",
+"decoders": {
+"bposd": 39.120265324910484,
+"bposd_tuned": 4.015200138092041,
+"belief_find": 33.02118889490763,
+"bplsd": 49.053661505381264,
+"relay_bp": 2.437708224019697
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=planar_honeycomb.distance=3.cycles=6.backend=real_harvard.error_type=real_harvard_x0.25.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=7.cycles=14.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd": 4245.62326449247,
+"bposd_tuned": 239.5706081390381,
+"belief_find": 2999.719924275623,
+"bplsd": 3731.055796270311,
+"relay_bp": 371.50111357371014
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=7.cycles=14.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=3.cycles=6.backend=real_harvard.error_type=real_harvard_x0.25.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.25",
+"decoders": {
+"gari": 0.04246677453525531
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=3.cycles=6.backend=real_harvard.error_type=real_harvard_x0.25.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo",
+"code": "color",
+"family": "Color",
+"backend": "real_bicycle",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 6056.009440422058,
+"bposd_tuned": 492.90814706257413,
+"belief_find": 5858.994915485382,
+"bplsd": 6642.366205851237,
+"gari": 97.18814849853516,
+"relay_bp": 1480.5491437230792
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=cbb108.schedule=edge_coloring.distance=6.cycles=6.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X",
+"code": "cbb108",
+"family": "Coprime bivariate bicycle",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"relay_bp": 330.5231067112514,
+"gari": 188.16984244755335
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=cbb108.schedule=edge_coloring.distance=6.cycles=6.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bb288.schedule=ibm.distance=18.cycles=18.backend=native_lr.error_type=real_flamingo_downscaled.basis=X",
+"code": "bb288",
+"family": "Bivariate bicycle",
+"backend": "native_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"relay_bp": 215.70892119771815,
+"gari": 76.81427501999171
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bb288.schedule=ibm.distance=18.cycles=18.backend=native_lr.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=lcs52.distance=4.cycles=4.backend=custom_full.backend_size=100.error_type=sd6.error_probability=0.002.operation=memory_ec",
+"code": "lcs52",
+"family": "Lift-connected surface",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 9.414397901104342,
+"relay_bp": 1.6542383163206038
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=lcs52.distance=4.cycles=4.backend=custom_full.backend_size=100.error_type=sd6.error_probability=0.002.operation=memory_ec.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=11.cycles=11.backend=custom_cube.backend_size=300.error_type=modsi1000.error_probability=0.002.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "custom_cube",
+"error_type": "modsi1000",
+"decoders": {
+"gari": 629.0853794415792
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=11.cycles=11.backend=custom_cube.backend_size=300.error_type=modsi1000.error_probability=0.002.basis=X.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=surface.distance=9.cycles=9.backend=real_willow.error_type=real_willow.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 7631.515575162435,
+"gari": 88.24685414632161
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=surface.distance=9.cycles=9.backend=real_willow.error_type=real_willow.basis=X.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.basis=X.operation=joint_xx",
+"code": "hgp_hamming",
+"family": "Hypergraph product",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd": 2104.390901606648,
+"relay_bp": 124.31386772791545
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.basis=X.operation=joint_xx.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=bb180.schedule=zxcoloration.distance=16.cycles=16.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "bb180",
+"family": "Bivariate bicycle",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"belief_find": 559.7156677927289,
+"bplsd": 314.11014641280724,
+"bposd": 569.4638790099274,
+"bposd_tuned": 1033.660989159522,
+"gari": 25.068513325282506,
+"relay_bp": 198.17472053822024
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=bb180.schedule=zxcoloration.distance=16.cycles=16.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=lcs175.distance=7.cycles=7.backend=custom_full.backend_size=343.error_type=sd6.error_probability=0.002",
+"code": "lcs175",
+"family": "Lift-connected surface",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 924.8219017982483,
+"bposd_tuned": 68.43952512741089,
+"belief_find": 540.5716713269552,
+"bplsd": 554.2404538790385,
+"gari": 126.34210189183553,
+"relay_bp": 264.53744713465375
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=lcs175.distance=7.cycles=7.backend=custom_full.backend_size=343.error_type=sd6.error_probability=0.002.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=5.cycles=5.backend=real_loon.error_type=real_flamingo_x0.25",
+"code": "color",
+"family": "Color",
+"backend": "real_loon",
+"error_type": "real_flamingo_x0.25",
+"decoders": {
+"bposd": 349.4324152810233,
+"bposd_tuned": 49.23050710133144,
+"belief_find": 385.80436214323964,
+"bplsd": 391.05680058079383,
+"gari": 1.3474556377955846,
+"relay_bp": 20.93571420699831
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=5.cycles=5.backend=real_loon.error_type=real_flamingo_x0.25.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=5.cycles=10.backend=real_infleqtion.error_type=real_infleqtion.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"gari": 5.308980623881022
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=5.cycles=10.backend=real_infleqtion.error_type=real_infleqtion.basis=X.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=mhc36.distance=4.cycles=4.backend=real_harvard.error_type=real_harvard.basis=X.operation=measure_x",
+"code": "mhc36",
+"family": "Many-hypercube",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 2142.3960873058863,
+"relay_bp": 225.2478725115458
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=mhc36.distance=4.cycles=4.backend=real_harvard.error_type=real_harvard.basis=X.operation=measure_x.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=5.cycles=10.backend=real_infleqtion.error_type=real_infleqtion_x0.25",
+"code": "surface",
+"family": "Surface",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.25",
+"decoders": {
+"bposd": 52.26833457894732,
+"bposd_tuned": 6.737727473203111,
+"belief_find": 30.049968602019298,
+"bplsd": 33.98707371439893,
+"relay_bp": 2.5195342330932617,
+"gari": 0.15231454428489832
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=5.cycles=10.backend=real_infleqtion.error_type=real_infleqtion_x0.25.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_x0.5",
+"code": "color",
+"family": "Color",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_x0.5",
+"decoders": {
+"bposd": 4.20365248956988,
+"bposd_tuned": 0.12999008572290813,
+"belief_find": 3.730956200630434,
+"bplsd": 2.6229899160323606,
+"gari": 0.015206677573067802,
+"relay_bp": 0.1999143948630681
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_x0.5.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=9.cycles=18.backend=real_infleqtion.error_type=real_infleqtion_x0.25.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.25",
+"decoders": {
+"gari": 6.926403066753286
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=9.cycles=18.backend=real_infleqtion.error_type=real_infleqtion_x0.25.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=hh.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_downscaled_m700",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"bposd": 1113.6094794244123,
+"bposd_tuned": 74.17103001945897,
+"belief_find": 844.914131542993,
+"bplsd": 841.8412593824673,
+"relay_bp": 67.37523077059443
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=hh.distance=7.cycles=7.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=bpc108.schedule=cardinal.distance=8.cycles=8.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+"code": "bpc108",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 2137.3406658853805,
+"bplsd": 3867.6628664334617,
+"bposd": 2886.264439423879,
+"bposd_tuned": 559.4481638272604,
+"gari": 305.0756447655814,
+"relay_bp": 442.5257432845331
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=bpc108.schedule=cardinal.distance=8.cycles=8.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=bpc36.distance=4.cycles=4.backend=real_harvard.error_type=real_harvard_x0.25",
+"code": "bpc36",
+"family": "Balanced product cyclic",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.25",
+"decoders": {
+"bplsd": 10.388741416315879,
+"bposd": 16.842877941746867,
+"bposd_tuned": 5.548809959042456,
+"belief_find": 16.374938949461907,
+"gari": 0.5635968331367739,
+"relay_bp": 2.479714174119253
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=bpc36.distance=4.cycles=4.backend=real_harvard.error_type=real_harvard_x0.25.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=real_apollo.error_type=real_apollo.operation=transversal_cnot",
+"code": "hgp_hamming",
+"family": "Hypergraph product",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 376.33164402154256,
+"relay_bp": 21.825025685890974
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=real_apollo.error_type=real_apollo.operation=transversal_cnot.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=bpc36.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+"code": "bpc36",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 151.10127210617065,
+"bplsd": 139.60515192576818,
+"bposd": 113.22304930005755,
+"bposd_tuned": 11.739643891652426,
+"gari": 11.292012759617396,
+"relay_bp": 9.86693541208903
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=bpc36.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_flamingo.error_type=real_flamingo",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_flamingo",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 626.3465506689889,
+"bposd_tuned": 54.15998765400478,
+"belief_find": 467.43309179941815,
+"bplsd": 739.516430582319,
+"relay_bp": 40.62795843396868
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_flamingo.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_merge.distance=3.cycles=3.backend=real_loon.error_type=real_flamingo",
+"code": "ls_merge",
+"family": "Lattice surgery",
+"backend": "real_loon",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 195.28564453125,
+"relay_bp": 8.232505662100655
+},
+"file": "/home/manosgior/eccentric-validation/sweep_lattice_surgery/circuits/circuit.lattice_surgery.code=ls_merge.distance=3.cycles=3.backend=real_loon.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_m700.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_m700",
+"decoders": {
+"gari": 5.156591619764056
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_m700.basis=X.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=bb288.distance=18.cycles=18.backend=custom_full.backend_size=576.error_type=sd6.error_probability=0.0005",
+"code": "bb288",
+"family": "Bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 11.659638264179229,
+"relay_bp": 34.20890914916992,
+"bposd_tuned": 2422.093718210856,
+"belief_find": 16.079498641490936,
+"bplsd": 18.80654799222946,
+"gari": 4.938152678012848
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=bb288.distance=18.cycles=18.backend=custom_full.backend_size=576.error_type=sd6.error_probability=0.0005.stim"
+},
+{
+"key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_memory.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "ls_memory",
+"family": "Lattice surgery",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd": 1.1839084244944567,
+"relay_bp": 0.08696788913207434
+},
+"file": "/home/manosgior/eccentric-validation/sweep_lattice_surgery/circuits/circuit.lattice_surgery.code=ls_memory.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.floquet_devices.code=honeycomb.distance=4.cycles=4.backend=real_willow.error_type=real_willow",
+"code": "honeycomb",
+"family": "Honeycomb",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 78.34752832140241,
+"relay_bp": 6.122800963265555,
+"bposd_tuned": 3.8624552318028043,
+"belief_find": 99.93140016283307,
+"bplsd": 100.03104278019497
+},
+"file": "/home/manosgior/eccentric-validation/sweep_floquet/circuits/circuit.floquet_devices.code=honeycomb.distance=4.cycles=4.backend=real_willow.error_type=real_willow.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=hh.distance=7.cycles=7.backend=custom_full.backend_size=115.error_type=sd6.error_probability=0.002",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 875.0551055323693,
+"bposd_tuned": 105.4269338032556,
+"belief_find": 1143.4036645889282,
+"bplsd": 921.4331952730814,
+"relay_bp": 94.10906882513137
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=hh.distance=7.cycles=7.backend=custom_full.backend_size=115.error_type=sd6.error_probability=0.002.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=lp.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_apollo.error_type=real_apollo",
+"code": "lp",
+"family": "Lifted product",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"belief_find": 0.16023300063442175,
+"bplsd": 0.16858487062051264,
+"bposd": 0.09156431950313944,
+"relay_bp": 0.19235558437734648,
+"bposd_tuned": 0.02745288814650469,
+"gari": 0.024342140420209255
+},
+"file": "/home/manosgior/eccentric-validation/sweep_atoms/circuits/circuit.qldpc_atoms.code=lp.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo",
+"code": "surface",
+"family": "Surface",
+"backend": "real_bicycle",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 0.7243147728935121,
+"bposd_tuned": 0.1986446000833427,
+"belief_find": 0.656963378664047,
+"bplsd": 0.6762184037102593,
+"relay_bp": 0.08341685860557893,
+"gari": 0.020914115603007967
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=cbb108.schedule=edge_coloring.distance=6.cycles=6.backend=real_apollo.error_type=real_apollo",
+"code": "cbb108",
+"family": "Coprime bivariate bicycle",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"belief_find": 0.5447615242004394,
+"bplsd": 0.6688382148742675,
+"bposd": 0.4407982540130615,
+"bposd_tuned": 0.5618909740447998,
+"gari": 0.2833779525756836,
+"relay_bp": 0.9532298159599304
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_atoms.code=cbb108.schedule=edge_coloring.distance=6.cycles=6.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.paper_dqc.code=hh.distance=11.cycles=11.backend=real_flamingo.error_type=real_flamingo_downscaled",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"bposd": 29671.558680534363,
+"bposd_tuned": 5380.915980497996,
+"belief_find": 25406.023247177538,
+"bplsd": 41262.54030791196,
+"relay_bp": 7598.989814690181
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.paper_dqc.code=hh.distance=11.cycles=11.backend=real_flamingo.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=qt72.distance=4.cycles=4.backend=custom_full.backend_size=136.error_type=sd6.error_probability=0.001.basis=X",
+"code": "qt72",
+"family": "Quantum Tanner",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"relay_bp": 0.8193909554254442,
+"gari": 0.1973263044205923
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=qt72.distance=4.cycles=4.backend=custom_full.backend_size=136.error_type=sd6.error_probability=0.001.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=bpc36.distance=4.cycles=4.backend=real_willow.error_type=real_willow_x0.25",
+"code": "bpc36",
+"family": "Balanced product cyclic",
+"backend": "real_willow",
+"error_type": "real_willow_x0.25",
+"decoders": {
+"bplsd": 30.911751588185627,
+"bposd": 30.491783301035564,
+"bposd_tuned": 7.956566174825032,
+"belief_find": 40.50490188598633,
+"gari": 8.818764050801596,
+"relay_bp": 7.419567108154297
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=bpc36.distance=4.cycles=4.backend=real_willow.error_type=real_willow_x0.25.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=lp.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled",
+"code": "lp",
+"family": "Lifted product",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 11.318397291244999,
+"bplsd": 6.001556381102531,
+"bposd": 10.753157754098215,
+"relay_bp": 1.19401462616459,
+"bposd_tuned": 0.9621626233297681,
+"gari": 0.584014231158841
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=lp.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=gross.distance=12.cycles=12.backend=real_bicycle.error_type=real_flamingo",
+"code": "gross",
+"family": "Bivariate bicycle",
+"backend": "real_bicycle",
+"error_type": "real_flamingo",
+"decoders": {
+"belief_find": 2407.9989234606423,
+"bplsd": 1415.4086724917095,
+"bposd": 3504.1365371431625,
+"relay_bp": 895.6078832490103,
+"bposd_tuned": 492.20246008464267,
+"gari": 132.69451379776
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle/circuits/circuit.qldpc_bicycle.code=gross.distance=12.cycles=12.backend=real_bicycle.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc72.distance=8.cycles=8.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.basis=X",
+"code": "bpc72",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"gari": 20.792142868041992
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc72.distance=8.cycles=8.backend=real_bicycle.error_type=real_flamingo_downscaled_m700.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=cbb126.schedule=edge_coloring_xz.distance=10.cycles=10.backend=real_infleqtion.error_type=real_infleqtion.basis=X",
+"code": "cbb126",
+"family": "Coprime bivariate bicycle",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"gari": 45.98409448351179
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=cbb126.schedule=edge_coloring_xz.distance=10.cycles=10.backend=real_infleqtion.error_type=real_infleqtion.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=bpc36.distance=4.cycles=4.backend=real_infleqtion.error_type=real_infleqtion_x0.1",
+"code": "bpc36",
+"family": "Balanced product cyclic",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.1",
+"decoders": {
+"bplsd": 0.09279346759402418,
+"bposd": 0.07181604676106493,
+"bposd_tuned": 0.0728107021788039,
+"belief_find": 0.08627465548616359,
+"gari": 0.07479298992564729,
+"relay_bp": 0.20635423226030822
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=bpc36.distance=4.cycles=4.backend=real_infleqtion.error_type=real_infleqtion_x0.1.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=5.cycles=10.backend=real_bicycle.error_type=real_flamingo_x0.25.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_x0.25",
+"decoders": {
+"gari": 3.2088583234756713
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=5.cycles=10.backend=real_bicycle.error_type=real_flamingo_x0.25.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bb72.distance=6.cycles=6.backend=real_bicycle.error_type=real_flamingo_x0.1.basis=X",
+"code": "bb72",
+"family": "Bivariate bicycle",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_x0.1",
+"decoders": {
+"relay_bp": 6.282935365472624,
+"gari": 1.9308692577057183
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bb72.distance=6.cycles=6.backend=real_bicycle.error_type=real_flamingo_x0.1.basis=X.stim"
+},
+{
+"key": "sweep_basis_x/circuit.basis_x.code=bacon.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.basis=X",
+"code": "bacon",
+"family": "Bacon-Shor",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 167.60483401162284
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_x/circuits/circuit.basis_x.code=bacon.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=bb72.distance=6.cycles=6.backend=real_infleqtion.error_type=real_infleqtion_x0.25",
+"code": "bb72",
+"family": "Bivariate bicycle",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.25",
+"decoders": {
+"bplsd": 0.22420759344100952,
+"bposd": 0.18951896595954895,
+"bposd_tuned": 1.3110697305202483,
+"belief_find": 0.3933195469379425,
+"gari": 0.15621311473846436,
+"relay_bp": 1.5803887932300567
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=bb72.distance=6.cycles=6.backend=real_infleqtion.error_type=real_infleqtion_x0.25.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=tb72.schedule=edge_coloring.distance=8.cycles=8.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+"code": "tb72",
+"family": "Trivariate bicycle",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 774.5829010009766,
+"bplsd": 773.6416710217794,
+"bposd": 814.9528041962654,
+"bposd_tuned": 156.77248170298915,
+"gari": 107.38593626022339,
+"relay_bp": 135.02938578205723
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_bicycle.code=tb72.schedule=edge_coloring.distance=8.cycles=8.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_bicycle_chain.code=bpc180.schedule=zxcoloration.distance=16.cycles=16.backend=real_bicycle_lr_2_qpus.error_type=real_flamingo_downscaled",
+"code": "bpc180",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle_lr_2_qpus",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"belief_find": 26556.30396783352,
+"bposd": 34816.172240674496,
+"bposd_tuned": 17230.744602680206,
+"bplsd": 39502.08754380544,
+"gari": 3452.7688789367676,
+"relay_bp": 6012.201843261719
+},
+"file": "/home/manosgior/eccentric-validation/sweep_bicycle_chain/circuits/circuit.qldpc_bicycle_chain.code=bpc180.schedule=zxcoloration.distance=16.cycles=16.backend=real_bicycle_lr_2_qpus.error_type=real_flamingo_downscaled.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=gb48.schedule=edge_coloring_xz.distance=8.cycles=8.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X",
+"code": "gb48",
+"family": "Generalized bicycle",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"gari": 248.23116268430437
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=gb48.schedule=edge_coloring_xz.distance=8.cycles=8.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.reference.code=cbb30.distance=6.cycles=6.backend=custom_full.backend_size=60.error_type=sd6.error_probability=0.004",
+"code": "cbb30",
+"family": "Coprime bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 27.3311904498509,
+"bposd_tuned": 4.237806797027588,
+"belief_find": 66.59249146779378,
+"bplsd": 48.25366497039795,
+"gari": 2.428225108555385,
+"relay_bp": 5.88010481425694
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.reference.code=cbb30.distance=6.cycles=6.backend=custom_full.backend_size=60.error_type=sd6.error_probability=0.004.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=toric.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.operation=joint_zz",
+"code": "toric",
+"family": "Toric",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 577.2695178985596,
+"relay_bp": 30.681400458017986
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=toric.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.operation=joint_zz.stim"
+},
+{
+"key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=golay23.distance=7.cycles=7.backend=custom_full.backend_size=145.error_type=sd6.error_probability=0.001.operation=joint_zz",
+"code": "golay23",
+"family": "Quantum Golay",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 3565.793675336511,
+"relay_bp": 314.66023205883187
+},
+"file": "/home/manosgior/eccentric-validation/sweep_ft_ops/circuits/circuit.fault_tolerant_ops.code=golay23.distance=7.cycles=7.backend=custom_full.backend_size=145.error_type=sd6.error_probability=0.001.operation=joint_zz.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=9.cycles=18.backend=real_bicycle.error_type=real_flamingo",
+"code": "surface",
+"family": "Surface",
+"backend": "real_bicycle",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd": 10034.290838374402,
+"bposd_tuned": 2455.9598630967603,
+"belief_find": 7030.652269093013,
+"bplsd": 6122.973218809402,
+"relay_bp": 2049.5854427939967,
+"gari": 62.96509674617222
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=9.cycles=18.backend=real_bicycle.error_type=real_flamingo.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=planar_honeycomb.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard_x0.1",
+"code": "planar_honeycomb",
+"family": "Planar honeycomb",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.1",
+"decoders": {
+"bposd": 4.214722266239402,
+"bposd_tuned": 1.1394510246778318,
+"belief_find": 3.0488335769788355,
+"bplsd": 4.795392741144231,
+"relay_bp": 0.5799685621485464
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=planar_honeycomb.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard_x0.1.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=bacon.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700",
+"code": "bacon",
+"family": "Bacon-Shor",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_downscaled_m700",
+"decoders": {
+"bposd": 0.38531419450202875,
+"bposd_tuned": 0.04021574965620463,
+"belief_find": 0.1653246120014022,
+"bplsd": 0.17112862747327418,
+"relay_bp": 0.03249622160388577
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=bacon.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc126.schedule=cardinalNSmerge.distance=10.cycles=10.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X",
+"code": "bpc126",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"gari": 603.096992628915
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc126.schedule=cardinalNSmerge.distance=10.cycles=10.backend=real_bicycle.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bpc54.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.basis=X",
+"code": "bpc54",
+"family": "Balanced product cyclic",
+"backend": "real_bicycle_lr",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"relay_bp": 45.47780070986067,
+"gari": 69.29059743881226
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bpc54.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion",
+"decoders": {
+"bposd": 1.721696588728163,
+"bposd_tuned": 0.14543195741366496,
+"belief_find": 1.9187948817298526,
+"bplsd": 1.9355472307356576,
+"relay_bp": 0.16000351019665204,
+"gari": 0.05143450152489447
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=3.cycles=3.backend=real_loon.error_type=real_flamingo_x0.5",
+"code": "color",
+"family": "Color",
+"backend": "real_loon",
+"error_type": "real_flamingo_x0.5",
+"decoders": {
+"bposd": 9.264623272803522,
+"bposd_tuned": 0.4896227005989321,
+"belief_find": 6.7131260902650896,
+"bplsd": 8.454127388615762,
+"gari": 0.040244102478027344,
+"relay_bp": 0.2593040466308594
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=3.cycles=3.backend=real_loon.error_type=real_flamingo_x0.5.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=5.cycles=10.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.5.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo_x0.5",
+"decoders": {
+"gari": 8.17608254296439
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=5.cycles=10.backend=real_flamingo_1_qpu.error_type=real_flamingo_x0.5.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=golay23.schedule=edge_coloring_xz.distance=7.cycles=7.backend=real_harvard.error_type=real_harvard",
+"code": "golay23",
+"family": "Quantum Golay",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"belief_find": 548.6260406176249,
+"bplsd": 580.3616666793823,
+"bposd": 819.2464168866476,
+"bposd_tuned": 25.358198483784992,
+"gari": 66.21593793233235,
+"relay_bp": 300.56628306706745
+},
+"file": "/home/manosgior/eccentric-validation/sweep_newcodes/circuits/circuit.qldpc_atoms.code=golay23.schedule=edge_coloring_xz.distance=7.cycles=7.backend=real_harvard.error_type=real_harvard.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.paper_topology.code=color.distance=17.cycles=17.backend=real_apollo.error_type=real_apollo",
+"code": "color",
+"family": "Color",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"bposd": 6190.004991901164,
+"bposd_tuned": 34412.24976530615,
+"belief_find": 5907.8237274714875,
+"bplsd": 5793.782333646502,
+"relay_bp": 453.5810555713526,
+"gari": 15.297063827514648
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.paper_topology.code=color.distance=17.cycles=17.backend=real_apollo.error_type=real_apollo.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=bb98.schedule=zxcoloration.distance=12.cycles=12.backend=native.error_type=real_flamingo_downscaled.basis=X",
+"code": "bb98",
+"family": "Bivariate bicycle",
+"backend": "native",
+"error_type": "real_flamingo_downscaled",
+"decoders": {
+"bposd_tuned": 14.08809621476471,
+"gari": 3.212460526439922
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=bb98.schedule=zxcoloration.distance=12.cycles=12.backend=native.error_type=real_flamingo_downscaled.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.floquet_devices.code=honeycomb.distance=4.cycles=4.backend=real_harvard.error_type=real_harvard",
+"code": "honeycomb",
+"family": "Honeycomb",
+"backend": "real_harvard",
+"error_type": "real_harvard",
+"decoders": {
+"bposd": 189.7521196092878,
+"relay_bp": 12.954773562295097,
+"bposd_tuned": 13.851117065974645,
+"belief_find": 143.25602872031075,
+"bplsd": 148.07809795652116
+},
+"file": "/home/manosgior/eccentric-validation/sweep_floquet/circuits/circuit.floquet_devices.code=honeycomb.distance=4.cycles=4.backend=real_harvard.error_type=real_harvard.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=9.cycles=18.backend=real_infleqtion.error_type=real_infleqtion_x0.5",
+"code": "surface",
+"family": "Surface",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.5",
+"decoders": {
+"bposd": 6265.192915581994,
+"bposd_tuned": 2096.4367847642466,
+"belief_find": 4412.845839510907,
+"bplsd": 4621.63145053081,
+"relay_bp": 310.5140033931655,
+"gari": 5.8001643999487955
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=9.cycles=18.backend=real_infleqtion.error_type=real_infleqtion_x0.5.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=5.cycles=10.backend=real_willow.error_type=real_willow",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"bposd": 225.38263434455507,
+"bposd_tuned": 33.869678406488326,
+"belief_find": 356.25341107768395,
+"bplsd": 235.00593600734587,
+"relay_bp": 26.6177303072006,
+"gari": 1.5250927402127175
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=5.cycles=10.backend=real_willow.error_type=real_willow.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=9.cycles=18.backend=real_willow.error_type=real_willow.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_willow",
+"error_type": "real_willow",
+"decoders": {
+"gari": 469.2943048477173
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=9.cycles=18.backend=real_willow.error_type=real_willow.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=lcs15.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_m700",
+"code": "lcs15",
+"family": "Lift-connected surface",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_m700",
+"decoders": {
+"bposd": 12.39542325337728,
+"bposd_tuned": 0.327913761138916,
+"belief_find": 15.115612347920736,
+"bplsd": 6.207198301951091,
+"gari": 0.8135406176249186,
+"relay_bp": 0.49397071202596027
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=lcs15.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_m700.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=surface.distance=3.cycles=6.backend=real_flamingo_1_qpu.error_type=real_flamingo.basis=X",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo_1_qpu",
+"error_type": "real_flamingo",
+"decoders": {
+"bposd_tuned": 2.542605400085449,
+"gari": 0.2651616505214146
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=surface.distance=3.cycles=6.backend=real_flamingo_1_qpu.error_type=real_flamingo.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=3.cycles=3.backend=real_torino.error_type=real_heron_x0.5",
+"code": "surface",
+"family": "Surface",
+"backend": "real_torino",
+"error_type": "real_heron_x0.5",
+"decoders": {
+"bposd": 3.3855178242637995,
+"bposd_tuned": 0.3174798072330535,
+"belief_find": 2.1960024606613886,
+"bplsd": 2.095910178290473,
+"relay_bp": 0.12313496681951708,
+"gari": 0.02939908735213741
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=3.cycles=3.backend=real_torino.error_type=real_heron_x0.5.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=color.distance=5.cycles=5.backend=real_infleqtion.error_type=real_infleqtion_x0.5.basis=X",
+"code": "color",
+"family": "Color",
+"backend": "real_infleqtion",
+"error_type": "real_infleqtion_x0.5",
+"decoders": {
+"gari": 0.3258082718975776
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=color.distance=5.cycles=5.backend=real_infleqtion.error_type=real_infleqtion_x0.5.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=5.cycles=10.backend=real_willow.error_type=real_willow_x0.25.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_willow",
+"error_type": "real_willow_x0.25",
+"decoders": {
+"gari": 0.3698964060449893
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=5.cycles=10.backend=real_willow.error_type=real_willow_x0.25.basis=X.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=hh.distance=5.cycles=10.backend=real_harvard.error_type=real_harvard_x0.5.basis=X",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.5",
+"decoders": {
+"relay_bp": 54.548273778730824,
+"gari": 9.115575313568115
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=hh.distance=5.cycles=10.backend=real_harvard.error_type=real_harvard_x0.5.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard_x0.5",
+"code": "hh",
+"family": "Heavy-hex",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.5",
+"decoders": {
+"bposd": 233.71563408109876,
+"bposd_tuned": 32.85941604583982,
+"belief_find": 162.45404777072724,
+"bplsd": 163.23926125803303,
+"relay_bp": 8.502441718515042
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard_x0.5.stim"
+},
+{
+"key": "sweep_basis_all/circuit.basis_x.code=mitten150.schedule=zxcoloration.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo.basis=X",
+"code": "mitten150",
+"family": "Mitten",
+"backend": "real_apollo",
+"error_type": "real_apollo",
+"decoders": {
+"relay_bp": 9.246815046082876,
+"gari": 2.80477988920633
+},
+"file": "/home/manosgior/eccentric-validation/sweep_basis_all/circuits/circuit.basis_x.code=mitten150.schedule=zxcoloration.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo.basis=X.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=surface.distance=9.cycles=18.backend=real_flamingo.error_type=real_flamingo_x0.25",
+"code": "surface",
+"family": "Surface",
+"backend": "real_flamingo",
+"error_type": "real_flamingo_x0.25",
+"decoders": {
+"bposd": 31629.401391012627,
+"bposd_tuned": 8025.132388473885,
+"belief_find": 22258.339731679487,
+"bplsd": 27708.337399092587,
+"relay_bp": 4747.001575237793,
+"gari": 152.4702386856079
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=surface.distance=9.cycles=18.backend=real_flamingo.error_type=real_flamingo_x0.25.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.noise_scaling.code=color.distance=7.cycles=14.backend=real_harvard.error_type=real_harvard_x0.5",
+"code": "color",
+"family": "Color",
+"backend": "real_harvard",
+"error_type": "real_harvard_x0.5",
+"decoders": {
+"bposd": 9678.185752505591,
+"bposd_tuned": 1668.2788395881653,
+"belief_find": 7429.730443565213,
+"bplsd": 13312.980907816553,
+"gari": 56.4462308883667,
+"relay_bp": 1363.268048753551
+},
+"file": "/home/manosgior/eccentric-validation/sweep_noise_scaling/circuits/circuit.noise_scaling.code=color.distance=7.cycles=14.backend=real_harvard.error_type=real_harvard_x0.5.stim"
+},
+{
+"key": "sweep_bposd_tuned/circuit.readout_700.code=surface.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_m700",
+"code": "surface",
+"family": "Surface",
+"backend": "real_loon_1_qpu",
+"error_type": "real_flamingo_m700",
+"decoders": {
+"bposd": 1.6684655383624862,
+"bposd_tuned": 0.14259640094453255,
+"belief_find": 1.4642396015403545,
+"bplsd": 1.4162508787307064,
+"relay_bp": 0.0721514541490943,
+"gari": 0.012080943689937085
+},
+"file": "/home/manosgior/eccentric-validation/sweep_idle/circuits/circuit.readout_700.code=surface.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_m700.stim"
+},
+{
+"key": "sweep1/circuit.reference.code=bb72.distance=6.cycles=6.backend=custom_full.backend_size=144.error_type=sd6.error_probability=0.001",
+"code": "bb72",
+"family": "Bivariate bicycle",
+"backend": "custom_full",
+"error_type": "sd6",
+"decoders": {
+"bposd": 0.3459184553139593,
+"bposd_tuned": 3.5097385851203153,
+"belief_find": 0.3956159579938994,
+"bplsd": 0.34917910147215475,
+"gari": 0.25692118121771196,
+"relay_bp": 1.1793584945996207
+},
+"file": "/home/manosgior/eccentric-validation/sweep1/circuits/circuit.reference.code=bb72.distance=6.cycles=6.backend=custom_full.backend_size=144.error_type=sd6.error_probability=0.001.stim"
+}
+]

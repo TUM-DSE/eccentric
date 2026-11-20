@@ -17,7 +17,8 @@ releases are tagged on GitHub.
   results, each with its data, in `site/figures/` for the website.
 - QEC Matchmaker (`tools/matchmaker`, from github.com/manosgior/qec-matchmaker with its history): predicts a
   circuit's logical error rate and decoding times and picks a decoder; `eccentric matchmaker ...`. Its training
-  table is built from the sweep table in this repository.
+  table is built from the sweep table in this repository. With `--gpu`, it predicts and recommends the GPU
+  decoders, from a GPU time model trained on 1,145 pilots on an NVIDIA H200.
 - `eccentric.dataset.family()`: the code families, used by the website export and the figures.
 
 ## [1.1.0] – 2026-11

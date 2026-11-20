@@ -471,11 +471,12 @@ class ModelBundle:
         seen = set(self.meta["decoders"]["regret"]) | set(self.meta["decoders"]["time"])
         return [d for d in DECODERS if d in seen] + sorted(seen - set(DECODERS))
 
-    def predict(self, features, decoders=None) -> pd.DataFrame:
+    def predict(self, features, decoders=None, gpu: bool = False) -> pd.DataFrame:
         """Predictions per circuit and decoder. features: a frame with one row per circuit (FEATURE_NAMES
         columns, optionally `circuit_key`, else the index is the key), or one circuit's features dict.
         decoders: the decoders to predict for (default: those seen in training); a model that did not see
-        a decoder in training predicts NaN for it"""
+        a decoder in training predicts NaN for it. gpu: decoders with a GPU version (gpu.GPU_VERSIONS) are
+        replaced by it, named <decoder>_gpu, with the GPU time model's ms per shot; `device` says which"""
         frame = pd.DataFrame([features]) if isinstance(features, dict) else pd.DataFrame(features)
         keys = frame["circuit_key"].to_numpy() if "circuit_key" in frame.columns else frame.index.to_numpy()
         decoders = list(self.decoders() if decoders is None else decoders)
@@ -521,6 +522,17 @@ class ModelBundle:
         undecided = np.array([r is None for r in rule]) & ~np.isnan(learned)
         out["applicable"] = np.where(undecided, learned >= 0.5, rule)
         out["outside_training"] = np.repeat([", ".join(self.outside_training(f)) for f in everything.to_dict("records")], k)
+        out["device"] = "cpu core"
+        if gpu:
+            from .gpu import GPU_VERSIONS, gpu_ms
+            if "gpu_time" not in models:
+                raise ValueError("these models have no GPU time model (qec-matchmaker train-gpu)")
+            g = gpu_ms(self, frame.iloc[np.repeat(np.arange(n), k)].reset_index(drop=True), dec)
+            has = ~np.isnan(g[:, 0])
+            for j, quantile in enumerate(q):
+                out.loc[has, _qname("ms", quantile)] = g[has, j]
+            out.loc[has, "decoder"] = [GPU_VERSIONS[d] for d in dec[has]]
+            out.loc[has, "device"] = "gpu"
         return out
 
     def outside_training(self, features: dict) -> list:

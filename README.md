@@ -81,7 +81,8 @@ eccentric matchmaker advise circuit.stim --distance 5      # or: qec-matchmaker 
 
 On codes it never saw in training, it gets the threshold regime right for 97% of circuits, and its decoder
 choice is good enough for 97% at a fraction of always running the most accurate decoder. Replaying ECCentric's
-whole sweep, it reaches the quality of always running Tesseract at 54% of its CPU time.
+whole sweep, it reaches the quality of always running Tesseract at 54% of its CPU time. With `--gpu`, it also
+plans for ECCentric's GPU decoders.
 
 ## Installation
 

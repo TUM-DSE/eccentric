@@ -59,8 +59,8 @@ class Advice:
         """Shots and core-hours each decoder needs to see `errors` logical errors, from the predictions"""
         p = self.predictions
         shots = errors / p.ler_decoder_q50.clip(lower=1e-12)
-        return pd.DataFrame({"decoder": p.decoder, "shots": shots.round(), "core_hours": shots * p.ms_q50 / 3.6e6,
-                             "applicable": p.applicable})
+        return pd.DataFrame({"decoder": p.decoder, "shots": shots.round(), "hours": shots * p.ms_q50 / 3.6e6,
+                             "device": p.device, "applicable": p.applicable})
 
     def summary(self) -> str:
         lo, mid, hi = self.ler
@@ -68,7 +68,7 @@ class Advice:
                  f"logical error rate (best decoder): {mid:.2e} (80% interval {lo:.1e} - {hi:.1e})",
                  f"recommended decoder: {self.decoder} ({self.recommendation.reason})"]
         lines += [f"warning: {w}" for w in self.warnings + list(self.recommendation.warnings)]
-        table = self.predictions[["decoder", "applicable", "ler_decoder_q50", "ms_q50"]].rename(
+        table = self.predictions[["decoder", "applicable", "ler_decoder_q50", "ms_q50", "device"]].rename(
             columns={"ler_decoder_q50": "LER", "ms_q50": "ms/shot"})
         return "\n".join(lines) + "\n\n" + table.to_string(index=False, float_format=lambda v: f"{v:.3g}")
 
@@ -81,12 +81,13 @@ class Advice:
 
 def advise(source, objective: str = "cheapest", budget_ms: float = None, per_round: bool = False,
            model_dir: str = None, speed_factors: dict = None, tolerance: float = 1.25,
-           code_distance: float = None) -> Advice:
+           code_distance: float = None, gpu: bool = False) -> Advice:
     """Predict how decoding `source` will go and recommend a decoder. Objectives: "accurate", "cheapest"
     (cheapest decoder within `tolerance` of the most accurate) and "budget" (most accurate within
     `budget_ms` per shot, or per round with per_round=True). `speed_factors` ({decoder: factor}, see
     qec_matchmaker.calibrate) scales the predicted times to another machine. `code_distance`, if known, lets
-    the LER predictions follow the distance scaling below threshold beyond the training data"""
+    the LER predictions follow the distance scaling below threshold beyond the training data. gpu=True: a GPU is
+    available, so the decoders with GPU versions are predicted (and recommended) as those, on one NVIDIA H200"""
     from .models import ModelBundle
     from .recommend import recommend
 
@@ -95,8 +96,10 @@ def advise(source, objective: str = "cheapest", budget_ms: float = None, per_rou
     frame = pd.DataFrame([{name: features.get(name) for name in FEATURE_NAMES}], dtype=float)
     frame["code_distance"] = math.nan if code_distance is None else float(code_distance)
     frame["circuit_key"] = "input"
-    predictions = bundle.predict(frame)
+    predictions = bundle.predict(frame, gpu=gpu)
     warnings = []
+    if gpu:
+        warnings.append(f"GPU times are for one {bundle.meta['gpu']['device']}; the other decoders' for one CPU core")
     if speed_factors:
         for col in ("ms_q10", "ms_q50", "ms_q90"):
             predictions[col] *= predictions.decoder.map(speed_factors).fillna(1.0)

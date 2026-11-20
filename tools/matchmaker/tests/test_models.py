@@ -100,7 +100,7 @@ def test_prediction_columns_and_consistency(fresh):
     features, pred = fresh
     assert list(pred.columns) == ["circuit_key", "decoder", "p_above", "ler_q10", "ler_q50", "ler_q90", "regret_q50",
                                   "regret_q70", "regret_q80", "regret_q90", "ler_decoder_q50", "ms_q10", "ms_q50", "ms_q90", "p_applicable", "applicable",
-                                  "outside_training"]
+                                  "outside_training", "device"]
     assert len(pred) == 3 * len(features)
     assert (pred.ler_q10 <= pred.ler_q50).all() and (pred.ler_q50 <= pred.ler_q90).all()
     assert (pred.ms_q10 <= pred.ms_q50).all() and (pred.ms_q50 <= pred.ms_q90).all()

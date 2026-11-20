@@ -690,5 +690,84 @@
    "measured_but_inapplicable": {}
   },
   "per_group": {}
+ },
+ "gpu": {
+  "device": "NVIDIA H200 NVL",
+  "versions": {
+   "bposd": "bposd_gpu",
+   "bposd_tuned": "bposd_tuned_gpu",
+   "bplsd": "bplsd_gpu",
+   "belief_find": "belief_find_gpu",
+   "relay_bp": "relay_bp_gpu",
+   "gari": "gari_gpu"
+  },
+  "widen_log10": 0.1951962238952313,
+  "build_seconds": {
+   "belief_find": 0.004,
+   "bplsd": 0.006,
+   "bposd": 0.205,
+   "bposd_tuned": 0.539,
+   "gari": 0.707,
+   "relay_bp": 0.344
+  },
+  "evaluation": {
+   "held_out": "code",
+   "folds": 10,
+   "pilots": 1145,
+   "circuits": 306,
+   "variants": {
+    "law+trees": {
+     "median_abs_log10": 0.16737841177052365,
+     "p90_abs_log10": 0.5359597718591615,
+     "within_3x": 0.8698689956331878,
+     "coverage": 0.4331877729257642
+    },
+    "trees": {
+     "median_abs_log10": 0.21130012067139115,
+     "p90_abs_log10": 0.5827288356304535,
+     "within_3x": 0.8524017467248908,
+     "coverage": 0.4663755458515284
+    }
+   },
+   "chosen": "law+trees",
+   "widen_log10": 0.1951962238952313,
+   "coverage_calibrated": 0.8,
+   "per_decoder": {
+    "belief_find": {
+     "pilots": 160,
+     "within_3x": 0.775,
+     "median_abs_log10": 0.21554568218281833
+    },
+    "bplsd": {
+     "pilots": 159,
+     "within_3x": 0.7924528301886793,
+     "median_abs_log10": 0.20718026185768967
+    },
+    "bposd": {
+     "pilots": 192,
+     "within_3x": 0.9479166666666666,
+     "median_abs_log10": 0.13770739277218802
+    },
+    "bposd_tuned": {
+     "pilots": 181,
+     "within_3x": 0.9668508287292817,
+     "median_abs_log10": 0.10739536953383677
+    },
+    "gari": {
+     "pilots": 226,
+     "within_3x": 0.8407079646017699,
+     "median_abs_log10": 0.21883725417313132
+    },
+    "relay_bp": {
+     "pilots": 227,
+     "within_3x": 0.8766519823788547,
+     "median_abs_log10": 0.15942647059888004
+    }
+   },
+   "reference_measured_cpu_over_median_speedup": {
+    "median_abs_log10": 0.260502109411898,
+    "within_3x": 0.7720524017467248
+   }
+  }
  }
 }

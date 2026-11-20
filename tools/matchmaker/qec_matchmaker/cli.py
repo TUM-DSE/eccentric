@@ -10,6 +10,8 @@ import sys
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _ECCENTRIC_RESULTS = os.path.join(_ROOT, "..", "..", "experiment_results", "Sweep", "results.csv")
 _STORE = os.path.join(_ROOT, "data", "features.jsonl.gz")
+_GPU_PILOTS = os.path.join(_ROOT, "experiments", "gpu", "results")
+_PACKAGED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model")
 
 
 def _read_results(path):
@@ -44,7 +46,8 @@ def _advise(args):
         from .calibrate import load
         speed = load(args.calibration)
     advice = advise(args.input, objective=args.objective, budget_ms=args.budget_ms, per_round=args.per_round,
-                    model_dir=args.models, speed_factors=speed, tolerance=args.tolerance, code_distance=args.distance)
+                    model_dir=args.models, speed_factors=speed, tolerance=args.tolerance, code_distance=args.distance,
+                    gpu=args.gpu)
     print(json.dumps(advice.to_dict(), indent=1, default=str) if args.json else advice.summary())
 
 
@@ -76,11 +79,32 @@ def _train(args):
     from .models import train
     table, manifest = load_dataset(args.data)
     bundle = train(table, manifest=manifest, calibrate=not args.no_calibration)
+    if os.path.isdir(args.gpu_pilots):
+        _add_gpu(bundle, args.gpu_pilots, args.store)
     if args.metrics and os.path.exists(args.metrics):
         with open(args.metrics) as f:
             bundle.meta["metrics"] = json.load(f)
     bundle.save(args.out)
     print(f"trained on {manifest['rows']} rows ({manifest['circuits']} circuits), saved to {args.out}")
+
+
+def _add_gpu(bundle, pilots_dir, store):
+    import re
+    from .gpu import add_gpu_model, load_pilots
+    from .pipeline import features_of_store, load_store
+    pilots = load_pilots(pilots_dir)
+    codes = {k: m.group(1) for k in pilots.circuit_key.unique() if (m := re.search(r"\.code=([^.]+)", k))}
+    report = add_gpu_model(bundle, pilots, features_of_store(load_store(store)), codes)
+    best = report["variants"][report["chosen"]]
+    print(f"GPU time model: {report['pilots']} pilots of {report['circuits']} circuits; on held-out codes "
+          f"{best['within_3x']:.0%} within 3x, median error {10 ** best['median_abs_log10']:.2f}x")
+
+
+def _train_gpu(args):
+    from .models import ModelBundle
+    bundle = ModelBundle.load(args.models)
+    _add_gpu(bundle, args.pilots, args.store)
+    bundle.save(args.models)
 
 
 def _evaluate(args):
@@ -118,6 +142,8 @@ def main(argv=None):
     p.add_argument("--distance", type=float, help="the code's distance, if known: below threshold, the LER prediction then "
                                                    "follows the distance scaling beyond the training data")
     p.add_argument("--calibration", help="speed factors from qec_matchmaker.calibrate")
+    p.add_argument("--gpu", action="store_true", help="a GPU is available: predict and recommend the GPU versions of "
+                   "the decoders that have one (ECCentric's *_gpu decoders; times for one NVIDIA H200)")
     p.add_argument("--models", help="model directory (default: the packaged one)")
     p.add_argument("--json", action="store_true")
     p.set_defaults(run=_advise)
@@ -138,10 +164,18 @@ def main(argv=None):
 
     p = sub.add_parser("train", help="train the models on a training table")
     p.add_argument("--data", default=os.path.join(_ROOT, "data"))
-    p.add_argument("--out", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "model"))
+    p.add_argument("--out", default=_PACKAGED)
     p.add_argument("--metrics", default="reports/metrics.json", help="evaluation metrics to store with the model")
     p.add_argument("--no-calibration", action="store_true", help="skip the conformal widening of the intervals")
+    p.add_argument("--gpu-pilots", default=_GPU_PILOTS, help="GPU pilot results: also train the GPU time model")
+    p.add_argument("--store", default=_STORE)
     p.set_defaults(run=_train)
+
+    p = sub.add_parser("train-gpu", help="add the GPU time model, trained on GPU pilots, to a trained model")
+    p.add_argument("--models", default=_PACKAGED, help="model directory to update (default: the packaged one)")
+    p.add_argument("--pilots", default=_GPU_PILOTS)
+    p.add_argument("--store", default=_STORE)
+    p.set_defaults(run=_train_gpu)
 
     p = sub.add_parser("evaluate", help="cross-validate over held-out codes (or families, devices, noise models, or "
                                          "beyond the training range) and write a report")
