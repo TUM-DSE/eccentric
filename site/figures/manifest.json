@@ -3,8 +3,8 @@
     "dataset": "experiment_results/Sweep/results.csv",
     "schema_version": 1,
     "results": 35374,
-    "commit": "45205ef",
-    "built": "2026-11-19"
+    "commit": "6d85787",
+    "built": "2026-11-20"
   },
   "figures": [
     {
@@ -48,7 +48,7 @@
       "group": "featured",
       "title": "Decoder accuracy against decoding time",
       "finding": "BP-OSD, the usual choice for qLDPC codes, is as accurate as the best decoder on only 39% of configurations; Tesseract on 99.8%, and at 3.2\u00d7 less median time per shot.",
-      "caption": "4,257 configurations below threshold (best logical error rate < 0.4), each decoded by at least three decoders. A decoder counts as good enough when its 95% interval reaches the best decoder's. Decoders with fewer than 100 configurations are left out. Tesseract's timeouts (no result) are not counted, which favours it on the largest circuits.",
+      "caption": "4,257 configurations below threshold (best logical error rate < 0.4), each decoded by at least three decoders. A decoder counts as good enough when its 95% interval reaches the best decoder's. Times are per shot on one CPU core, sampling and building the decoder included; MWPM and correlated MWPM, which take microseconds per shot, are timed with 10^5 shots on the same circuits. Decoders with fewer than 100 configurations are left out. Tesseract's timeouts (no result) are not counted, which favours it on the largest circuits.",
       "files": {
         "svg": "decoders.svg",
         "png": "decoders.png",
