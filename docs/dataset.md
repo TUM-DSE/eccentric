@@ -105,3 +105,12 @@ The `status` column says how far a row's rate can be trusted. Rows with a rate o
 | `pending` | Not decoded yet |
 
 The 95% intervals are Wilson score intervals. Rates are per shot over all `rounds`; `ler_per_round` converts them.
+
+## Re-timed matching decoders
+
+`experiment_results/Sweep/matching_timing.csv` re-times `mwpm` and `mwpm_corr`, which take microseconds per shot:
+for each of their configurations, both decoders on the same circuit, back to back on one host, 10^5 shots each
+(`sweep/retime_matching.py`). `call_seconds` times the whole decode call (sampling, building the decoder and
+checking the predictions, as the sweep times every decoder), `decode_only_seconds` PyMatching's decoding alone,
+and `ms_per_shot` is the call per shot. The sweep table's own `decode_seconds` for these decoders are mostly
+per-batch overhead; `eccentric.dataset.with_matching_times(table)` adds the re-timed `ms_per_shot`.

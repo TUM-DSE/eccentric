@@ -10,9 +10,14 @@ changes meaning. Adding a column does not change the version.
 import os
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 SCHEMA_VERSION = 1
+
+# Re-timing of the matching decoders (mwpm, mwpm_corr) with 10^5 shots per configuration on one host
+# (sweep/retime_matching.py): the sweep's own times for decoders this fast are mostly per-batch overhead
+MATCHING_TIMING_PATH = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) / "experiment_results" / "Sweep" / "matching_timing.csv"
 
 DEFAULT_PATH = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) / "experiment_results" / "Sweep" / "results.csv"
 
@@ -130,6 +135,24 @@ def validate(table: pd.DataFrame):
     unknown = set(table["status"].dropna()) - set(STATUSES)
     if unknown:
         raise ValueError(f"dataset has unknown statuses {sorted(unknown)}")
+
+
+def with_matching_times(table: pd.DataFrame, path=MATCHING_TIMING_PATH) -> pd.DataFrame:
+    """The table with the re-timed ms per shot of mwpm and mwpm_corr in `ms_per_shot` (NaN for the other decoders
+    and configurations not re-timed), if the re-timing exists"""
+    table = table.copy()
+    if not os.path.exists(path):
+        table["ms_per_shot"] = np.nan
+        return table
+    times = pd.read_csv(path, low_memory=False)[KEY + ["ms_per_shot"]]
+    # A column that is empty for every re-timed configuration reads as float: give each key the table's type
+    for col in KEY:
+        if table[col].dtype == object:
+            times[col] = times[col].astype(object).where(times[col].notna(), None)
+            table[col] = table[col].where(table[col].notna(), None)
+        else:
+            times[col] = pd.to_numeric(times[col], errors="coerce").astype(table[col].dtype)
+    return table.merge(times, on=KEY, how="left")
 
 
 def with_rates(table: pd.DataFrame) -> pd.DataFrame:

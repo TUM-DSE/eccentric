@@ -45,3 +45,13 @@ def test_stats_match_the_table(table):
     stats = json.loads((ROOT / "experiment_results" / "Sweep" / "stats.json").read_text())
     assert stats["schema_version"] == dataset.SCHEMA_VERSION
     assert stats["results"] == len(dataset.with_rates(table)), "run python -m sweep.stats"
+
+
+def test_matching_times_cover_every_matching_row(table):
+    """The re-timing (sweep/retime_matching.py) matches each mwpm and mwpm_corr row of the table, and only those"""
+    rates = dataset.with_rates(table)
+    timed = dataset.with_matching_times(rates)
+    assert len(timed) == len(rates)
+    matching = timed["decoder"].isin(["mwpm", "mwpm_corr"])
+    assert timed.loc[matching, "ms_per_shot"].notna().all()
+    assert timed.loc[~matching, "ms_per_shot"].isna().all()

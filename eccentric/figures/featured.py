@@ -69,8 +69,10 @@ def routing_vs_native(t, reg):
 
 def decoders(t, reg):
     """How often each decoder is within statistical error of the best one, against its median time per shot"""
-    t = t.copy()
-    t["seconds_per_shot"] = t["decode_seconds"] / t["shots"]
+    t = dataset.with_matching_times(t)
+    # MWPM and correlated MWPM take microseconds per shot, so the sweep's times for them are mostly per-batch
+    # overhead: they are re-timed with 10^5 shots per configuration (sweep/retime_matching.py)
+    t["seconds_per_shot"] = np.where(t["ms_per_shot"].notna(), t["ms_per_shot"] / 1000, t["decode_seconds"] / t["shots"])
     t["lo"] = t["ler_low"].fillna(0.0)
     keys = list(dataset.CONFIG)
     g = t.groupby(keys, dropna=False)
@@ -110,8 +112,10 @@ def decoders(t, reg):
                      f"of configurations; Tesseract on {tess:.1f}%, and at {speed:.1f}× less median time per shot.",
              caption=f"{n_configs:,} configurations below threshold (best logical error rate < 0.4), each decoded by at "
                      "least three decoders. A decoder counts as good enough when its 95% interval reaches the best "
-                     "decoder's. Decoders with fewer than 100 configurations are left out. Tesseract's timeouts (no "
-                     "result) are not counted, which favours it on the largest circuits.",
+                     "decoder's. Times are per shot on one CPU core, sampling and building the decoder included; "
+                     "MWPM and correlated MWPM, which take microseconds per shot, are timed with 10^5 shots on the "
+                     "same circuits. Decoders with fewer than 100 configurations are left out. Tesseract's timeouts "
+                     "(no result) are not counted, which favours it on the largest circuits.",
              data=df, columns=["decoder", "label", "configurations", "good_enough", "median_ms_per_shot"])
 
 

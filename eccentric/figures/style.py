@@ -57,7 +57,7 @@ def setup():
         "axes.grid": True, "grid.color": GRID, "grid.linewidth": 0.6, "grid.linestyle": "-",
         "xtick.color": MUTED, "ytick.color": MUTED, "xtick.labelcolor": INK_2, "ytick.labelcolor": INK_2,
         "legend.frameon": False, "legend.fontsize": 9, "lines.linewidth": 2, "lines.markersize": 6,
-        "svg.fonttype": "none",
+        "svg.fonttype": "none", "svg.hashsalt": "eccentric",  # stable ids: a rebuild changes only what changed
     })
 
 
@@ -77,8 +77,8 @@ class Registry:
 
     def save(self, fig, fid, *, group, title, finding, caption, data, columns=None):
         """Write <fid>.svg, <fid>.png and <fid>.csv (the plotted values) and record the figure"""
-        fig.savefig(self.out / f"{fid}.svg", bbox_inches="tight")
-        fig.savefig(self.out / f"{fid}.png", dpi=200, bbox_inches="tight")
+        fig.savefig(self.out / f"{fid}.svg", bbox_inches="tight", metadata={"Date": None})
+        fig.savefig(self.out / f"{fid}.png", dpi=200, bbox_inches="tight", metadata={"Software": None})
         plt.close(fig)
         data = data[columns] if columns else data
         data.to_csv(self.out / f"{fid}.csv", index=False, float_format="%.6g")

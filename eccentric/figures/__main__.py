@@ -12,9 +12,11 @@ from . import benchmark, featured, style
 
 
 def _commit():
+    """The last commit that changed the data the figures are built from"""
     try:
-        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True,
-                              check=True).stdout.strip()
+        return subprocess.run(["git", "log", "-1", "--format=%h", "--", str(dataset.DEFAULT_PATH),
+                               str(dataset.MATCHING_TIMING_PATH)], capture_output=True, text=True,
+                              check=True).stdout.strip() or None
     except (OSError, subprocess.CalledProcessError):
         return None
 
