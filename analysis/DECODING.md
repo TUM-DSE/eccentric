@@ -178,8 +178,14 @@ time per shot), set timeouts and skip hopeless configurations before running any
 
 ## Caveats
 
-- Times are single-core Python/C++ library calls including decoder construction, not optimized
-  real-time implementations; compare decoders relative to each other.
+- Times are CPU time per shot of Python/C++ library calls, including decoder construction, not
+  optimized real-time implementations; compare decoders relative to each other. Shots are independent,
+  so every decoder scales across cores by decoding shots in parallel, and the rankings and CPU-hour
+  costs carry over to multi-core machines (wall time ≈ CPU time / cores; construction is paid once per
+  worker). More cores do not shorten a single shot: none of these decoders parallelizes within a shot
+  (ldpc's `omp_thread_count` has no effect in the 2.4.1 build, Tesseract's Python interface has no
+  threads), and Relay-BP's own threading (`parallel=True`, off here) spreads a batch's shots over cores
+  at about twice the CPU time (distance-5 surface code, 8 cores: 3.6× lower wall time, 2.1× the CPU).
 - Not every decoder ran on every slice (Relay-BP, BP-LSD, BeliefFind on qLDPC slices only; MWPM on
   matchable codes; Chromobius on the color code; Tesseract not on the multi-QPU projections), so the
   family table compares the decoders each family had.

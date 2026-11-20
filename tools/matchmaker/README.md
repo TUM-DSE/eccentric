@@ -159,8 +159,12 @@ time within 3× for 87%).
 
 ## Limitations
 
-- Timings are for single-core software decoders, including the decoder's construction; FPGA and ASIC decoders
-  are not modelled.
+- Times are CPU time per shot, including the decoder's construction. Shots are independent, so every decoder
+  scales across cores by decoding shots in parallel, and the rankings and CPU-hour budgets carry over to
+  multi-core machines (wall time ≈ CPU time / cores; construction is paid once per worker). Not modelled: the
+  latency of a single shot, which more cores do not reduce for these software decoders (none parallelizes
+  within a shot; Relay-BP's own threading spreads a batch's shots over cores at about twice the CPU time), and
+  FPGA and ASIC decoders. GPU decoders: `--gpu`.
 - Most of the training data are memory experiments. Predicted from memory alone, logical operations keep their decode times (92% within 3x) but surgery measurements' error rates are off by about 0.5 decades ([experiments/OPERATIONS.md](experiments/OPERATIONS.md)); the packaged model now also trains on the 580 operation circuits, but a new kind of gadget is an extrapolation.
 - Predicted error rates are for planning, not for publication. Beyond the training data the 80% intervals are
   too narrow, and a noise model unlike any in training (atom loss, for example) can mislead the time
