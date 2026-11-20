@@ -56,6 +56,7 @@ advice.expected_cost(errors=100)   # shots and core-hours per decoder
 | `--objective budget --budget-ms 1 [--per-round]` | the most accurate decoder within a time budget |
 | `--distance 11` | the code distance, if you know it: below threshold, LER predictions that follow the distance scaling |
 | `--gpu` | a GPU is available: predict and recommend ECCentric's GPU decoders where they exist ([experiments/gpu](experiments/gpu/README.md)) |
+| `--max-ms 1000` | never recommend a decoder predicted slower than this per shot (default 108,000: it would not finish 100 shots in ECCentric's 3-hour timeout; 0: no limit) |
 | `qec-matchmaker advise trace.h5` | a [decoder-bench](https://github.com/satvikmaurya/decoder-bench) trace instead of a circuit |
 | `qec-matchmaker features circuit.stim` | the features the models see |
 
@@ -79,8 +80,8 @@ the tests.
    logical error rate, each decoder's error rate relative to the best, and each decoder's time per shot. The
    error-rate and time trees sit on top of scaling laws, so larger or quieter circuits than any in training
    are not predicted at the edge of the training data.
-3. **Recommendation.** Among the decoders that apply: the most accurate, the cheapest within a tolerance of
-   the most accurate, or the most accurate within a time budget.
+3. **Recommendation.** Among the decoders that apply and are not predicted to time out: the most accurate, the
+   cheapest within a tolerance of the most accurate, or the most accurate within a time budget.
 
 `qec_matchmaker.runtime.execute` then decodes with the predictions checked as it goes: it skips a circuit
 predicted above threshold, pilots the recommended decoder on its first 100 shots under a time cap, moves to the
@@ -140,15 +141,15 @@ Threshold regime: 97% correct. Matchmaker's "accurate" choice is as good as alwa
 fraction of its time; "cheapest" trades a few percent of accuracy for the cheapest decoder.
 
 Replaying ECCentric's whole sweep with Matchmaker deciding what to decode and with which decoder
-([experiments/END_TO_END.md](experiments/END_TO_END.md)) reaches the quality of always running Tesseract (92% of circuits good enough for both) at 54% of its CPU time
+([experiments/END_TO_END.md](experiments/END_TO_END.md)) reaches the quality of always running Tesseract (91% of circuits good enough for both) at 41% of its CPU time
 and 18% of the sweep's, mostly by skipping 95% of the circuits that are above threshold. Piloting each decode on
-its first 100 shots (`qec_matchmaker.runtime.execute`) then checks each prediction as it runs: 93% good enough at
-43% of always-Tesseract's CPU time (92% at 38% with the cheapest objective), with 99% of the above-threshold
+its first 100 shots (`qec_matchmaker.runtime.execute`) then checks each prediction as it runs: 91% good enough at
+32% of always-Tesseract's CPU time (89% at 30% with the cheapest objective), with 99% of the above-threshold
 circuits caught.
 
 With a GPU (`--gpu`), Matchmaker predicts the GPU versions' times from 1,145 GPU pilots (87% within 3× on
 held-out codes) and moves a fifth to a third of the circuits to a GPU decoder, whose predicted time per shot is
-then a median 130–190× below the CPU choice's ([experiments/gpu](experiments/gpu/README.md)).
+then a median 160–220× below the CPU choice's ([experiments/gpu](experiments/gpu/README.md)).
 
 More: the full report ([reports/REPORT.md](reports/REPORT.md)), whole code families, devices and noise models
 held out ([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)), circuits beyond the training range

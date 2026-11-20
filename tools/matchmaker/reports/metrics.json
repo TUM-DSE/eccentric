@@ -168,34 +168,37 @@
   "circuits": 5116,
   "policies": {
    "recommend, accurate": {
-    "good_enough": 0.9157544956997654,
+    "good_enough": 0.9141907740422205,
     "median_regret": 1.0,
-    "p90_regret": 1.1592920353982301,
-    "median_time_vs_cheapest_good": 1.873435902906587,
-    "fallbacks": 1582,
+    "p90_regret": 1.165886050528176,
+    "median_time_vs_cheapest_good": 1.7459770448277858,
+    "fallbacks": 1511,
     "chosen": {
-     "tesseract": 3992,
+     "tesseract": 3893,
      "gari_pp": 597,
-     "bposd_tuned": 363,
-     "mwpm": 145,
-     "relay_bp": 11,
-     "mwpm_corr": 7,
-     "mwpf": 1
+     "bposd_tuned": 373,
+     "mwpm": 147,
+     "relay_bp": 86,
+     "mwpm_corr": 11,
+     "belief_find": 3,
+     "mwpf": 3,
+     "bposd": 2,
+     "bplsd": 1
     }
    },
    "recommend, cheapest": {
-    "good_enough": 0.8885848318999218,
+    "good_enough": 0.8893666927286943,
     "median_regret": 1.0,
-    "p90_regret": 1.2717318342003692,
-    "median_time_vs_cheapest_good": 1.0712428246370131,
-    "fallbacks": 1505,
+    "p90_regret": 1.2707634455815628,
+    "median_time_vs_cheapest_good": 1.0382112315161134,
+    "fallbacks": 1475,
     "chosen": {
-     "tesseract": 3290,
-     "gari_pp": 746,
-     "bposd_tuned": 525,
-     "mwpm": 384,
-     "mwpm_corr": 113,
-     "relay_bp": 54,
+     "tesseract": 3246,
+     "gari_pp": 762,
+     "bposd_tuned": 535,
+     "mwpm": 389,
+     "mwpm_corr": 115,
+     "relay_bp": 65,
      "mwpf": 2,
      "gari": 2
     }
@@ -232,29 +235,30 @@
    "circuits": 1950,
    "policies": {
     "recommend, accurate": {
-     "good_enough": 0.9523076923076923,
+     "good_enough": 0.9512820512820512,
      "median_regret": 1.0,
-     "p90_regret": 1.061974434611603,
-     "median_time_vs_cheapest_good": 1.8838670602517884,
+     "p90_regret": 1.0630017381462469,
+     "median_time_vs_cheapest_good": 1.879585469373658,
      "fallbacks": 49,
      "chosen": {
-      "tesseract": 1257,
+      "tesseract": 1252,
       "gari_pp": 340,
-      "bposd_tuned": 238,
-      "mwpm": 111,
+      "bposd_tuned": 240,
+      "mwpm": 112,
       "mwpm_corr": 3,
+      "relay_bp": 2,
       "mwpf": 1
      }
     },
     "recommend, cheapest": {
-     "good_enough": 0.9174358974358975,
+     "good_enough": 0.916923076923077,
      "median_regret": 1.0,
-     "p90_regret": 1.1455158324821249,
+     "p90_regret": 1.1460948204987669,
      "median_time_vs_cheapest_good": 1.3036518626494455,
      "fallbacks": 94,
      "chosen": {
-      "tesseract": 1003,
-      "gari_pp": 380,
+      "tesseract": 1002,
+      "gari_pp": 381,
       "bposd_tuned": 300,
       "mwpm": 204,
       "mwpm_corr": 49,

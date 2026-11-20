@@ -47,7 +47,7 @@ def _advise(args):
         speed = load(args.calibration)
     advice = advise(args.input, objective=args.objective, budget_ms=args.budget_ms, per_round=args.per_round,
                     model_dir=args.models, speed_factors=speed, tolerance=args.tolerance, code_distance=args.distance,
-                    gpu=args.gpu)
+                    gpu=args.gpu, max_ms=args.max_ms)
     print(json.dumps(advice.to_dict(), indent=1, default=str) if args.json else advice.summary())
 
 
@@ -145,6 +145,8 @@ def main(argv=None):
     p.add_argument("--budget-ms", type=float, help="time per shot (or per round, with --per-round) for --objective budget")
     p.add_argument("--per-round", action="store_true")
     p.add_argument("--tolerance", type=float, default=1.25, help="LER slack of --objective cheapest")
+    p.add_argument("--max-ms", type=float, help="leave out decoders predicted slower than this per shot (default "
+                   "108000: predicted not to finish 100 shots in 3 hours; 0: no limit)")
     p.add_argument("--distance", type=float, help="the code's distance, if known: below threshold, the LER prediction then "
                                                    "follows the distance scaling beyond the training data")
     p.add_argument("--calibration", help="speed factors from qec_matchmaker.calibrate")

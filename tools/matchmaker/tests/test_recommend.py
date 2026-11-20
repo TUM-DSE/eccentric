@@ -122,3 +122,19 @@ def test_runtime_pilots_then_commits_switches_or_stops():
     calls.clear()
     assert execute(predictions([("bposd", 0.4, 10.0, True)], p_above=0.95), decoder(), "cheapest").status == "skipped"
     assert not calls
+
+
+def test_decoders_predicted_to_time_out_are_left_out():
+    from qec_matchmaker.models import timeout_bound_ms
+    from qec_matchmaker.recommend import MAX_MS
+    assert MAX_MS == float(timeout_bound_ms(3 * 3600))
+    slow = predictions([("tesseract", 1.0e-3, 2 * MAX_MS, True), ("bposd", 1.2e-3, 10.0, True),
+                        ("mwpm", 2.0e-3, 1.0, True)])
+    for objective in ("accurate", "cheapest"):
+        r = recommend(slow, objective)
+        assert r.decoder == "bposd" and "tesseract" not in set(r.table.decoder)
+        assert any("likely to time out" in w and "tesseract" in w for w in r.warnings)
+    assert recommend(slow, "accurate", max_ms=None).decoder == "tesseract"
+    # Every decoder too slow: the fastest, with a warning
+    r = recommend(slow, "accurate", max_ms=0.5)
+    assert r.decoder == "mwpm" and any("every applicable decoder" in w for w in r.warnings)

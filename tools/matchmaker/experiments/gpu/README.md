@@ -47,13 +47,14 @@ training circuits, without and with a GPU.
 
 | | accurate | cheapest |
 | --- | --- | --- |
-| Circuits recommended a GPU decoder | 1,090 (19%) | 1,995 (35%) |
-| of which the same algorithm, on the GPU | 165 | 407 |
-| Recommended decoder's time per shot, CPU choice ÷ GPU choice (median; 10th–90th percentile) | 188× (9–745×) | 133× (6–643×) |
-| Circuits still recommended Tesseract (no GPU version) | 4,449 | 3,398 |
+| Circuits recommended a GPU decoder | 1,087 (19%) | 1,781 (32%) |
+| of which the same algorithm, on the GPU | 248 | 414 |
+| Recommended decoder's time per shot, CPU choice ÷ GPU choice (median; 10th–90th percentile) | 223× (22–773×) | 162× (7–706×) |
+| Circuits still recommended Tesseract (no GPU version) | 4,349 | 3,377 |
 
-Under "accurate", 917 of the 925 changes of algorithm are circuits predicted above threshold, where every
-objective takes the fastest decoder; the other 8 are ties in predicted accuracy. Times compare one GPU against
+Under "accurate", 829 of the 839 changes of algorithm are circuits predicted above threshold, where every
+objective takes the fastest decoder; on the other 10 a GPU decoder's predicted error rate ties with or beats the
+CPU choice's. Decoders predicted to time out (over 108 s per shot) are not recommended, on either device. Times compare one GPU against
 one CPU core, so they are latency per shot, not cost.
 
 Limits: one GPU model (H200), single-GPU runs, and the 43 slowest pilots were skipped, so the model has not seen

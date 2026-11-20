@@ -49,8 +49,8 @@ On 5116 held-out circuits with at least two measured decoders. Good enough: not 
 
 | policy | good enough | median regret | p90 regret | median time vs cheapest good-enough | fallbacks |
 |---|---|---|---|---|---|
-| recommend, accurate | 92% | 1.00 | 1.16 | 1.87 | 1582 |
-| recommend, cheapest | 89% | 1.00 | 1.27 | 1.07 | 1505 |
+| recommend, accurate | 91% | 1.00 | 1.17 | 1.75 | 1511 |
+| recommend, cheapest | 89% | 1.00 | 1.27 | 1.04 | 1475 |
 | always bposd | 72% | 1.02 | 2.02 | 10.62 | 1876 |
 | always tesseract | 94% | 1.00 | 1.08 | 6.40 | 1749 |
 
@@ -63,7 +63,7 @@ On the 1950 of them on which all of belief_find, bplsd, bposd, relay_bp, tessera
 | always bposd | 53% | 1.27 | 2.62 | 20.27 |
 | always tesseract | 100% | 1.00 | 1.02 | 54.63 |
 
-Chosen by recommend, accurate: tesseract 3992, gari_pp 597, bposd_tuned 363, mwpm 145, relay_bp 11, mwpm_corr 7, mwpf 1.
-Chosen by recommend, cheapest: tesseract 3290, gari_pp 746, bposd_tuned 525, mwpm 384, mwpm_corr 113, relay_bp 54, mwpf 2, gari 2.
+Chosen by recommend, accurate: tesseract 3893, gari_pp 597, bposd_tuned 373, mwpm 147, relay_bp 86, mwpm_corr 11, belief_find 3, mwpf 3, bposd 2, bplsd 1.
+Chosen by recommend, cheapest: tesseract 3246, gari_pp 762, bposd_tuned 535, mwpm 389, mwpm_corr 115, relay_bp 65, mwpf 2, gari 2.
 
 Measured decodes that `applicable()` rules out, so never recommended: mwpm_corr 81.

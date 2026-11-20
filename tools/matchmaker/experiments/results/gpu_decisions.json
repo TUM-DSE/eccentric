@@ -1,77 +1,78 @@
 {
  "accurate": {
   "circuits": 5624,
-  "recommends_a_gpu_decoder": 1090,
-  "same_algorithm_on_the_gpu": 165,
-  "different_algorithm": 925,
+  "recommends_a_gpu_decoder": 1087,
+  "same_algorithm_on_the_gpu": 248,
+  "different_algorithm": 839,
   "different_algorithm_examples": [
    "bposd_tuned -> gari_gpu",
    "bposd_tuned -> relay_bp_gpu",
    "gari_pp -> gari_gpu",
    "gari_pp -> relay_bp_gpu",
    "mwpf -> bposd_tuned_gpu",
-   "mwpm -> gari_gpu",
    "mwpm -> relay_bp_gpu",
    "mwpm_corr -> relay_bp_gpu",
+   "relay_bp -> bposd_gpu",
    "relay_bp -> bposd_tuned_gpu"
   ],
-  "speedup_where_gpu_chosen_median": 188.37761902808336,
+  "speedup_where_gpu_chosen_median": 223.10190230449666,
   "speedup_where_gpu_chosen_p10_p90": [
-   9.251823272052913,
-   745.1052985102151
+   21.6957331851125,
+   772.6726951218473
   ],
   "gpu_choices": {
    "bplsd_gpu": 1,
-   "bposd_tuned_gpu": 172,
-   "gari_gpu": 582,
-   "relay_bp_gpu": 335
+   "bposd_gpu": 4,
+   "bposd_tuned_gpu": 195,
+   "gari_gpu": 576,
+   "relay_bp_gpu": 311
   },
   "cpu_choices_kept": {
-   "gari_pp": 13,
-   "mwpf": 3,
-   "mwpm": 58,
-   "mwpm_corr": 11,
-   "tesseract": 4449
+   "gari_pp": 17,
+   "mwpf": 5,
+   "mwpm": 149,
+   "mwpm_corr": 17,
+   "tesseract": 4349
   }
  },
  "cheapest": {
   "circuits": 5624,
-  "recommends_a_gpu_decoder": 1995,
-  "same_algorithm_on_the_gpu": 407,
-  "different_algorithm": 1588,
+  "recommends_a_gpu_decoder": 1781,
+  "same_algorithm_on_the_gpu": 414,
+  "different_algorithm": 1367,
   "different_algorithm_examples": [
    "bposd_tuned -> belief_find_gpu",
    "bposd_tuned -> bplsd_gpu",
    "bposd_tuned -> gari_gpu",
    "bposd_tuned -> relay_bp_gpu",
-   "chromobius -> gari_gpu",
    "gari_pp -> gari_gpu",
    "gari_pp -> relay_bp_gpu",
    "mwpf -> bposd_tuned_gpu",
-   "mwpm -> gari_gpu",
    "mwpm -> relay_bp_gpu",
-   "mwpm_corr -> bposd_tuned_gpu",
-   "mwpm_corr -> gari_gpu"
+   "mwpm_corr -> relay_bp_gpu",
+   "relay_bp -> bposd_gpu",
+   "relay_bp -> bposd_tuned_gpu",
+   "tesseract -> bposd_tuned_gpu"
   ],
-  "speedup_where_gpu_chosen_median": 133.0982581442851,
+  "speedup_where_gpu_chosen_median": 161.9355365197952,
   "speedup_where_gpu_chosen_p10_p90": [
-   5.898970798993283,
-   642.9204191105614
+   7.063038816419971,
+   706.345408226457
   ],
   "gpu_choices": {
    "belief_find_gpu": 6,
    "bplsd_gpu": 1,
-   "bposd_gpu": 1,
-   "bposd_tuned_gpu": 395,
-   "gari_gpu": 768,
-   "relay_bp_gpu": 824
+   "bposd_gpu": 3,
+   "bposd_tuned_gpu": 373,
+   "gari_gpu": 720,
+   "relay_bp_gpu": 678
   },
   "cpu_choices_kept": {
-   "chromobius": 29,
+   "chromobius": 43,
    "mwpf": 5,
-   "mwpm": 135,
-   "mwpm_corr": 62,
-   "tesseract": 3398
+   "mwpm": 354,
+   "mwpm_corr": 64,
+   "tesseract": 3377
   }
  }
 }

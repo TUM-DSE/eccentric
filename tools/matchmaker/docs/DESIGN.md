@@ -124,7 +124,11 @@ training range; predictions name the features of a circuit outside it (`outside_
 Objectives: `accurate` (lowest predicted LER), `cheapest` (cheapest decoder whose predicted LER is
 within `tolerance` (default 1.25×) of the best predicted), `budget` (lowest predicted LER with
 `ms_q50 <= budget_ms`; with `rounds`, or `objective="budget_per_round"`, `ms_q50 / rounds` is compared).
-Ties go to the faster decoder. Only applicable decoders; above
+Ties go to the faster decoder. Only applicable decoders, and only those with `ms_q50 <= max_ms` (default
+`MAX_MS` = 108,000 ms, `models.timeout_bound_ms(3 * 3600)`: predicted not to finish a first batch of 100 shots
+in ECCentric's 3-hour timeout; if no decoder fits, the fastest with a warning). Without this, `accurate`
+recommended Tesseract on 71 held-out circuits where Matchmaker predicted it at a median 142 s per shot and it
+timed out; the limit leaves 19 such timeouts and costs 0.1 points of good-enough choices. Above
 threshold (`p_above > 0.5`) the advice is the cheapest decoder plus a warning that decoding will
 not separate decoders.
 

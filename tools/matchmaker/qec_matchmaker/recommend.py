@@ -3,14 +3,18 @@
 Objectives: `accurate` (lowest predicted LER), `cheapest` (lowest predicted time among the decoders
 predicted within `tolerance` of the lowest LER), `budget` (lowest predicted LER among the decoders whose
 median time fits `budget_ms` per shot, or per round when `rounds` is given; `budget_per_round` requires
-it). Only applicable decoders are candidates. A circuit likely above threshold gets the cheapest decoder
-and a warning, since there the decoders' LERs all approach 0.5.
+it). Only applicable decoders are candidates, and only those not predicted to time out (median time per
+shot over `max_ms`; when every applicable decoder is, the fastest is recommended with a warning). A circuit
+likely above threshold gets the cheapest decoder and a warning, since there the decoders' LERs all approach 0.5.
 """
 from dataclasses import dataclass, field
 
 import pandas as pd
 
 OBJECTIVES = ("accurate", "cheapest", "budget", "budget_per_round")
+# Default max_ms: a decoder this slow per shot does not finish its first batch (100 shots) within ECCentric's
+# 3-hour decode timeout, so it is predicted to time out (models.timeout_bound_ms(3 * 3600))
+MAX_MS = 3 * 3600 * 1000 / 100
 
 
 @dataclass
@@ -23,10 +27,12 @@ class Recommendation:
 
 
 def recommend(predictions: pd.DataFrame, objective: str = "cheapest", budget_ms: float | None = None,
-              rounds: int | None = None, tolerance: float = 1.25, confidence: float = 0.8) -> Recommendation:
+              rounds: int | None = None, tolerance: float = 1.25, confidence: float = 0.8,
+              max_ms: float | None = MAX_MS) -> Recommendation:
     """The decoder to use on one circuit, given its rows of `ModelBundle.predict`. For "cheapest", a decoder is
     eligible if its regret (its LER over the best decoder's) is predicted within the tolerance with the given
-    confidence: the regret quantile at that level (0.5, 0.7, 0.8 or 0.9), not the median, must be within it"""
+    confidence: the regret quantile at that level (0.5, 0.7, 0.8 or 0.9), not the median, must be within it.
+    Decoders whose median predicted time per shot exceeds `max_ms` are left out (None: no limit)"""
     if objective not in OBJECTIVES:
         raise ValueError(f"objective must be one of {', '.join(OBJECTIVES)}")
     if "circuit_key" in predictions.columns and predictions.circuit_key.nunique() > 1:
@@ -44,6 +50,18 @@ def recommend(predictions: pd.DataFrame, objective: str = "cheapest", budget_ms:
         warnings.append(f"left out for lack of predictions (not seen in training): {missing}")
     if candidates.empty:
         return Recommendation(None, objective, "no applicable decoder with predictions", warnings, candidates)
+    if max_ms is not None:
+        slow = candidates.ms_q50 > max_ms
+        if slow.all():
+            table = candidates.sort_values(["ms_q50", "ler_decoder_q50"])
+            top = table.iloc[0]
+            warnings.append(f"every applicable decoder is predicted over {max_ms:g} ms per shot, so likely to time out")
+            return Recommendation(top.decoder, objective, f"fastest applicable decoder ({top.ms_q50:.3g} ms per shot); "
+                                  f"all are predicted over {max_ms:g} ms per shot", warnings, table)
+        if slow.any():
+            warnings.append(f"left out as predicted over {max_ms:g} ms per shot (likely to time out): "
+                            f"{', '.join(sorted(candidates.decoder[slow]))}")
+            candidates = candidates[~slow]
 
     p_above = float(candidates.p_above.iloc[0])
     if p_above > 0.5:

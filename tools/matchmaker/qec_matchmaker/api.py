@@ -81,15 +81,17 @@ class Advice:
 
 def advise(source, objective: str = "cheapest", budget_ms: float = None, per_round: bool = False,
            model_dir: str = None, speed_factors: dict = None, tolerance: float = 1.25,
-           code_distance: float = None, gpu: bool = False) -> Advice:
+           code_distance: float = None, gpu: bool = False, max_ms: float = None) -> Advice:
     """Predict how decoding `source` will go and recommend a decoder. Objectives: "accurate", "cheapest"
     (cheapest decoder within `tolerance` of the most accurate) and "budget" (most accurate within
     `budget_ms` per shot, or per round with per_round=True). `speed_factors` ({decoder: factor}, see
     qec_matchmaker.calibrate) scales the predicted times to another machine. `code_distance`, if known, lets
     the LER predictions follow the distance scaling below threshold beyond the training data. gpu=True: a GPU is
-    available, so the decoders with GPU versions are predicted (and recommended) as those, on one NVIDIA H200"""
+    available, so the decoders with GPU versions are predicted (and recommended) as those, on one NVIDIA H200.
+    `max_ms`: decoders predicted slower per shot are not recommended (default recommend.MAX_MS, predicted to
+    time out in ECCentric's 3-hour limit; 0 for no limit)"""
     from .models import ModelBundle
-    from .recommend import recommend
+    from .recommend import MAX_MS, recommend
 
     features = features_of(source)
     bundle = ModelBundle.load(model_dir or MODEL_DIR)
@@ -119,5 +121,6 @@ def advise(source, objective: str = "cheapest", budget_ms: float = None, per_rou
         warnings.append("without the code distance the LER cannot follow the distance scaling below threshold: "
                         "pass it (--distance, code_distance=) if you know it")
     rounds = features.get("rounds") if per_round else None
-    choice = recommend(predictions, objective=objective, budget_ms=budget_ms, rounds=rounds, tolerance=tolerance)
+    choice = recommend(predictions, objective=objective, budget_ms=budget_ms, rounds=rounds, tolerance=tolerance,
+                       max_ms=MAX_MS if max_ms is None else (max_ms or None))
     return Advice(features, predictions, choice, warnings)
