@@ -1,0 +1,38 @@
+{
+ "circuits": 1950,
+ "codes": 63,
+ "points": {
+  "Always BP-OSD": {
+   "good_enough": 0.5302564102564102,
+   "median_time_vs_cheapest_good": 20.26678240446219
+  },
+  "Always tuned BP-OSD": {
+   "good_enough": 0.7317948717948718,
+   "median_time_vs_cheapest_good": 1.1313826887101228
+  },
+  "Always Relay-BP": {
+   "good_enough": 0.7184615384615385,
+   "median_time_vs_cheapest_good": 2.9127794141758443
+  },
+  "Always Tesseract": {
+   "good_enough": 0.9989743589743589,
+   "median_time_vs_cheapest_good": 54.630164678537014
+  },
+  "Rule of thumb": {
+   "good_enough": 0.6825641025641026,
+   "median_time_vs_cheapest_good": 1.0
+  },
+  "Family's best": {
+   "good_enough": 0.9564102564102565,
+   "median_time_vs_cheapest_good": 6.985300379233951
+  },
+  "Matchmaker (accurate)": {
+   "good_enough": 0.9512820512820512,
+   "median_time_vs_cheapest_good": 1.879585469373658
+  },
+  "Matchmaker (cheapest)": {
+   "good_enough": 0.916923076923077,
+   "median_time_vs_cheapest_good": 1.3036518626494455
+  }
+ }
+}
