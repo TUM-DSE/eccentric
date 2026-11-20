@@ -20,13 +20,13 @@ releases are tagged on GitHub.
   table is built from the sweep table in this repository. With `--gpu`, it predicts and recommends the GPU
   decoders, from a GPU time model trained on 1,145 pilots on an NVIDIA H200.
 - `eccentric.dataset.family()`: the code families, used by the website export and the figures.
-- Re-timing of the matching decoders (`experiment_results/Sweep/matching_timing.csv`, `sweep/retime_matching.py`,
+- Re-timing of the decoders that take microseconds per shot (mwpm, mwpm_corr, chromobius; `experiment_results/Sweep/matching_timing.csv`, `sweep/retime_matching.py`,
   `eccentric.dataset.with_matching_times`): 10^5 shots per configuration on the same circuits.
 
 ### Changed
 
 - `mwpm` keeps its matching graph between batches of the same circuit, as `mwpm_corr` and BP-OSD do, and counts
-  logical errors without a per-shot loop. Same results; the sweep's times for it were mostly this overhead.
+  logical errors without a per-shot loop; `chromobius` keeps its compiled decoder the same way. Same results; the sweep's times for it were mostly this overhead.
 
 ## [1.1.0] – 2026-11
 

@@ -1,14 +1,15 @@
-"""Re-time the matching decoders (mwpm, mwpm_corr) on the sweep's circuits, both on the same circuit, back to back
-in one process, with the same number of shots:
+"""Re-time the decoders that take microseconds per shot (mwpm, mwpm_corr, chromobius) on the sweep's circuits,
+all of a configuration's on the same circuit, back to back in one process, with the same number of shots:
 
     python -m sweep.retime_matching <results.csv> <runs base dir> <out.jsonl> [--shots 100000] [--processes 16]
-    python -m sweep.retime_matching collect <out.jsonl> experiment_results/Sweep/matching_timing.csv
+        [--decoders mwpm mwpm_corr chromobius]
+    python -m sweep.retime_matching collect <out.jsonl> [<out.jsonl> ...] experiment_results/Sweep/matching_timing.csv
 
 The sweep's own times for these decoders are dominated by per-batch overhead (a median of 6,300 shots in several
-batches, and before the fix plain MWPM rebuilt its matching graph every batch), so they cannot compare decoders
+batches, and before the fix plain MWPM and Chromobius rebuilt their decoders every batch), so they cannot compare decoders
 that take microseconds per shot. Per configuration and decoder, this records the seconds of one decode() call
 of `shots` shots (sampling, building the decoder and checking the predictions included, as the sweep times every
-decoder) and of PyMatching's decode_batch alone. Configurations already in out.jsonl are skipped, so it resumes.
+decoder) and of the decoding alone (PyMatching's decode_batch, Chromobius's predict). Configurations already in out.jsonl are skipped, so it resumes.
 """
 import argparse
 import json
@@ -16,7 +17,7 @@ import os
 import time
 from multiprocessing import Pool
 
-DECODERS = ("mwpm", "mwpm_corr")
+DECODERS = ("mwpm", "mwpm_corr", "chromobius")
 
 
 def _circuit_file(base, run, job_id):
@@ -28,7 +29,7 @@ def _circuit_file(base, run, job_id):
 def _time(task):
     import numpy as np
     import stim
-    from eccentric.decoders import correlated_matching, mwpm as plain
+    from eccentric.decoders import chromobius as chromo, correlated_matching, mwpm as plain
     from eccentric.decoders.decode import decode
 
     key, config, decoders, path, shots, order = task
@@ -37,6 +38,7 @@ def _time(task):
     approx = config["backend"].split("_")[0] in ("variance", "real", "native") and (
         config["error_type"] == "variance" or config["error_type"].split("_")[0] == "real")
     dets, _ = circuit.compile_detector_sampler(seed=0).sample(shots, separate_observables=True)
+    packed, _ = circuit.compile_detector_sampler(seed=0).sample(shots, separate_observables=True, bit_packed=True)
     for decoder in (decoders if order == 0 else decoders[::-1]):
         start = time.perf_counter()
         ler = decode(config["code"], circuit, shots, decoder, config["backend"], config["error_type"],
@@ -48,6 +50,10 @@ def _time(task):
                 matcher = plain._matcher(circuit, approx)
                 start = time.perf_counter()
                 matcher.decode_batch(dets)
+            elif decoder == "chromobius":
+                compiled = chromo._decoder(circuit, approx)
+                start = time.perf_counter()
+                compiled.predict_obs_flips_from_dets_bit_packed(packed)
             else:
                 matcher, (det_frame, _) = correlated_matching._matcher(circuit, approx, True)
                 start = time.perf_counter()
@@ -57,14 +63,15 @@ def _time(task):
     return out
 
 
-def collect(jsonl: str, csv: str):
+def collect(*paths: str):
     """One row per configuration and decoder: the sweep's configuration columns, the decoder, the shots timed,
-    the seconds of the whole decode call and of PyMatching alone, and the ms per shot of the call"""
+    the seconds of the whole decode call and of the decoding alone, and the ms per shot of the call"""
     import pandas as pd
     from eccentric import dataset
+    *jsonls, csv = paths
     rows = []
-    with open(jsonl) as f:
-        for line in f:
+    for jsonl in jsonls:
+        for line in open(jsonl):
             r = json.loads(line)
             for decoder in DECODERS:
                 t = r.get(decoder)
@@ -84,7 +91,7 @@ def main(argv=None):
 
     argv = sys.argv[1:] if argv is None else argv
     if argv and argv[0] == "collect":
-        return collect(*argv[1:3])
+        return collect(*argv[1:])
 
     p = argparse.ArgumentParser(prog="python -m sweep.retime_matching")
     p.add_argument("results")
@@ -92,10 +99,11 @@ def main(argv=None):
     p.add_argument("out")
     p.add_argument("--shots", type=int, default=100_000)
     p.add_argument("--processes", type=int, default=16)
+    p.add_argument("--decoders", nargs="+", default=list(DECODERS), choices=DECODERS)
     a = p.parse_args(argv)
 
     table = dataset.with_rates(dataset.load(a.results, check=False))
-    rows = table[table.decoder.isin(DECODERS)]
+    rows = table[table.decoder.isin(a.decoders)]
     done = set()
     if os.path.exists(a.out):
         with open(a.out) as f:
@@ -107,7 +115,7 @@ def main(argv=None):
         if key in done:
             continue
         first = g.iloc[0]
-        tasks.append((key, config, [d for d in DECODERS if d in set(g.decoder)],
+        tasks.append((key, config, [d for d in a.decoders if d in set(g.decoder)],
                       _circuit_file(a.base, first.run, first.job_id), a.shots, i % 2))
     print(f"{len(tasks)} configurations to time ({len(done)} done)", flush=True)
     with open(a.out, "a") as out, Pool(a.processes, maxtasksperchild=50) as pool:

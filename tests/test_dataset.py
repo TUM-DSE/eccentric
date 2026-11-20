@@ -48,10 +48,10 @@ def test_stats_match_the_table(table):
 
 
 def test_matching_times_cover_every_matching_row(table):
-    """The re-timing (sweep/retime_matching.py) matches each mwpm and mwpm_corr row of the table, and only those"""
+    """The re-timing (sweep/retime_matching.py) matches each mwpm, mwpm_corr and chromobius row, and only those"""
     rates = dataset.with_rates(table)
     timed = dataset.with_matching_times(rates)
     assert len(timed) == len(rates)
-    matching = timed["decoder"].isin(["mwpm", "mwpm_corr"])
+    matching = timed["decoder"].isin(["mwpm", "mwpm_corr", "chromobius"])
     assert timed.loc[matching, "ms_per_shot"].notna().all()
     assert timed.loc[~matching, "ms_per_shot"].isna().all()

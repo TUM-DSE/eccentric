@@ -15,7 +15,7 @@ import pandas as pd
 
 SCHEMA_VERSION = 1
 
-# Re-timing of the matching decoders (mwpm, mwpm_corr) with 10^5 shots per configuration on one host
+# Re-timing of the decoders that take microseconds per shot (mwpm, mwpm_corr, chromobius) with 10^5 shots per configuration on one host
 # (sweep/retime_matching.py): the sweep's own times for decoders this fast are mostly per-batch overhead
 MATCHING_TIMING_PATH = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) / "experiment_results" / "Sweep" / "matching_timing.csv"
 
@@ -138,7 +138,7 @@ def validate(table: pd.DataFrame):
 
 
 def with_matching_times(table: pd.DataFrame, path=MATCHING_TIMING_PATH) -> pd.DataFrame:
-    """The table with the re-timed ms per shot of mwpm and mwpm_corr in `ms_per_shot` (NaN for the other decoders
+    """The table with the re-timed ms per shot of mwpm, mwpm_corr and chromobius in `ms_per_shot` (NaN for the other decoders
     and configurations not re-timed), if the re-timing exists"""
     table = table.copy()
     if not os.path.exists(path):
