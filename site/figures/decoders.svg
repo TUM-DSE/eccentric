@@ -603,7 +603,7 @@ z
 " style="stroke: #fcfcfb; stroke-width: 1.5"/>
     </defs>
     <g clip-path="url(#p9e73c11b48)">
-     <use xlink:href="#ma89346f44b" x="155.987836" y="242.930233" style="fill: #2a78d6; stroke: #fcfcfb; stroke-width: 1.5"/>
+     <use xlink:href="#ma89346f44b" x="100.05342" y="242.930233" style="fill: #2a78d6; stroke: #fcfcfb; stroke-width: 1.5"/>
      <use xlink:href="#ma89346f44b" x="403.742928" y="228.720306" style="fill: #2a78d6; stroke: #fcfcfb; stroke-width: 1.5"/>
      <use xlink:href="#ma89346f44b" x="292.390879" y="227.764835" style="fill: #2a78d6; stroke: #fcfcfb; stroke-width: 1.5"/>
      <use xlink:href="#ma89346f44b" x="282.910533" y="222.332291" style="fill: #2a78d6; stroke: #fcfcfb; stroke-width: 1.5"/>
@@ -617,7 +617,7 @@ z
     </g>
    </g>
    <g id="text_14">
-    <text style="fill: #0b0b0b; font: 9px 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="162.987836" y="245.930233" transform="rotate(-0 162.987836 245.930233)">Chromobius</text>
+    <text style="fill: #0b0b0b; font: 9px 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="107.05342" y="245.930233" transform="rotate(-0 107.05342 245.930233)">Chromobius</text>
    </g>
    <g id="text_15">
     <text style="fill: #0b0b0b; font: 9px 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="410.742928" y="231.720306" transform="rotate(-0 410.742928 231.720306)">BeliefFind</text>

@@ -1,5 +1,5 @@
 decoder,label,configurations,good_enough,median_ms_per_shot
-chromobius,Chromobius,166,13.8554,0.0456022
+chromobius,Chromobius,166,13.8554,0.0078784
 belief_find,BeliefFind,2177,19.706,108.793
 gari,GARI,3219,20.0994,3.30029
 gari_pp,GARI++,3219,22.3361,2.4508
