@@ -6,6 +6,7 @@ Held-out predictions come from qec_matchmaker.evaluate.cross_val_predictions (10
 conformalized as in reports/REPORT.md) and are cached in experiments/cache/ under the dataset's hash.
 """
 import argparse
+import math
 import hashlib
 import os
 
@@ -163,9 +164,11 @@ def fig_choice(df, pred, theme, out):
     axes[1].barh(ypos, np.log10(time) - base, left=base, color=colors, height=0.56)
     for yv, v in zip(ypos, time):
         axes[1].text(np.log10(v) + 0.03, yv, f"{v:.1f}×", va="center", fontsize=9.5, color=t["ink"])
-    axes[1].set_xlim(base, 1.35)
-    axes[1].set_xticks([0, 0.5, 1])
-    axes[1].set_xticklabels(["1×", "3×", "10×"])
+    top = max(1.0, math.ceil(np.log10(max(time)) * 2) / 2)  # room for the largest bar and its label
+    axes[1].set_xlim(base, top + 0.35)
+    ticks = np.arange(0, top + 0.01, 0.5)
+    axes[1].set_xticks(ticks)
+    axes[1].set_xticklabels([f"{(1 if x % 1 == 0 else 3) * 10 ** int(x):g}×" for x in ticks])
     axes[1].set_title("Time paid for it", loc="left")
     axes[1].set_xlabel("median time, × the cheapest good-enough decoder")
     axes[0].set_yticks(ypos)

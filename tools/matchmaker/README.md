@@ -133,7 +133,7 @@ code it is predicting.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/figures/choice-dark.png">
-  <img alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 97% at 1.8 times the cheapest good decoder's time, always Tesseract on 100% at 14 times, always BP-OSD on 52% at 18 times" src="docs/figures/choice-light.png">
+  <img alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 95% at 1.9 times the cheapest good decoder's time, its cheapest choice on 92% at 1.3 times, always Tesseract on 100% at 55 times, always BP-OSD on 53% at 20 times" src="docs/figures/choice-light.png">
 </picture>
 
 Threshold regime: 97% correct. Matchmaker's "accurate" choice is as good as always running Tesseract at a

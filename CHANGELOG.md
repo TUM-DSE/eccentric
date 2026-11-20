@@ -19,6 +19,7 @@ releases are tagged on GitHub.
   circuit's logical error rate and decoding times and picks a decoder; `eccentric matchmaker ...`. Its training
   table is built from the sweep table in this repository. With `--gpu`, it predicts and recommends the GPU
   decoders, from a GPU time model trained on 1,145 pilots on an NVIDIA H200.
+  Retrained with the re-timed matching and Chromobius times: their time predictions are now 99% within 3x.
 - `eccentric.dataset.family()`: the code families, used by the website export and the figures.
 - Re-timing of the decoders that take microseconds per shot (mwpm, mwpm_corr, chromobius; `experiment_results/Sweep/matching_timing.csv`, `sweep/retime_matching.py`,
   `eccentric.dataset.with_matching_times`): 10^5 shots per configuration on the same circuits.

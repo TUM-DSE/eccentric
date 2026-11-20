@@ -68,7 +68,7 @@ and in [`analysis/`](analysis/README.md).
 
 ## QEC Matchmaker: pick a decoder before you decode
 
-<p align="center"><img src="tools/matchmaker/docs/figures/choice-light.png" width="640" alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 97% at 1.8 times the cheapest good decoder's time, always Tesseract on 100% at 14 times, always BP-OSD on 52% at 18 times"></p>
+<p align="center"><img src="tools/matchmaker/docs/figures/choice-light.png" width="640" alt="Decoder choice on held-out circuits: Matchmaker's accurate choice is good enough on 95% at 1.9 times the cheapest good decoder's time, its cheapest choice on 92% at 1.3 times, always Tesseract on 100% at 55 times, always BP-OSD on 53% at 20 times"></p>
 
 **[Matchmaker](tools/matchmaker)** is trained on ECCentric's dataset. Given a noisy circuit, it predicts in
 seconds, without decoding a single shot, whether the circuit is above threshold, its logical error rate, each
@@ -80,7 +80,8 @@ eccentric matchmaker advise circuit.stim --distance 5      # or: qec-matchmaker 
 ```
 
 On codes it never saw in training, it gets the threshold regime right for 97% of circuits, and its decoder
-choice is good enough for 97% at a fraction of always running the most accurate decoder. Replaying ECCentric's
+choice is good enough for 95% at 1.9× the time of the cheapest good decoder, where always running the most
+accurate one (Tesseract) costs 55×. Replaying ECCentric's
 whole sweep, it reaches the quality of always running Tesseract at 54% of its CPU time. With `--gpu`, it also
 plans for ECCentric's GPU decoders.
 

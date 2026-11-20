@@ -60,6 +60,23 @@ def _timeout_seconds(note) -> float:
     return float(m.group(1)) * (3600 if m.group(2) == "h" else 1) if m else math.nan
 
 
+def with_retiming(results: pd.DataFrame, timing_path: str) -> pd.DataFrame:
+    """ECCentric's results with `retimed_ms_per_shot` from its re-timing of the decoders that take microseconds per
+    shot (experiment_results/Sweep/matching_timing.csv: mwpm, mwpm_corr, chromobius with 10^5 shots each), whose
+    times in the sweep table are mostly per-batch overhead"""
+    timing = pd.read_csv(timing_path, low_memory=False)
+    keys = [c for c in ECCENTRIC_CONFIG if c in results.columns and c in timing.columns] + ["decoder"]
+    timing = timing[keys + ["ms_per_shot"]].rename(columns={"ms_per_shot": "retimed_ms_per_shot"})
+    results = results.copy()
+    for col in keys:  # a column empty for every re-timed row reads as float: use the results' type
+        if pd.api.types.is_numeric_dtype(results[col]):
+            timing[col] = pd.to_numeric(timing[col], errors="coerce").astype(results[col].dtype)
+        else:  # text (object, or pandas 3's str)
+            timing[col] = timing[col].astype(object).where(timing[col].notna(), None)
+            results[col] = results[col].astype(object).where(results[col].notna(), None)
+    return results.merge(timing, on=keys, how="left")
+
+
 def from_eccentric(results: pd.DataFrame, store: dict) -> tuple[pd.DataFrame, dict]:
     """The training table from ECCentric's collected results and a feature store {circuit key: features};
     also returns counts of rows left out and why"""
@@ -79,6 +96,8 @@ def from_eccentric(results: pd.DataFrame, store: dict) -> tuple[pd.DataFrame, di
     rows["family"] = rows.code.map(family)
     rows["ler"] = np.where(rows.shots > 0, rows.errors / rows.shots, math.nan)
     rows["ms_per_shot"] = np.where(rows.shots > 0, 1000 * rows.decode_seconds / rows.shots, math.nan)
+    if "retimed_ms_per_shot" in rows.columns:  # with_retiming
+        rows["ms_per_shot"] = rows.retimed_ms_per_shot.where(rows.retimed_ms_per_shot.notna(), rows.ms_per_shot)
     rows["timeout_s"] = [_timeout_seconds(n) if s == "timeout" else math.nan for s, n in zip(rows.status, rows.note)]
     known = rows.circuit_key.isin(store.keys())
     features = pd.DataFrame([store[k] for k in rows.circuit_key[known]], index=rows.index[known])

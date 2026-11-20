@@ -147,11 +147,11 @@ def with_matching_times(table: pd.DataFrame, path=MATCHING_TIMING_PATH) -> pd.Da
     times = pd.read_csv(path, low_memory=False)[KEY + ["ms_per_shot"]]
     # A column that is empty for every re-timed configuration reads as float: give each key the table's type
     for col in KEY:
-        if table[col].dtype == object:
-            times[col] = times[col].astype(object).where(times[col].notna(), None)
-            table[col] = table[col].where(table[col].notna(), None)
-        else:
+        if pd.api.types.is_numeric_dtype(table[col]):
             times[col] = pd.to_numeric(times[col], errors="coerce").astype(table[col].dtype)
+        else:  # text (object, or pandas 3's str)
+            times[col] = times[col].astype(object).where(times[col].notna(), None)
+            table[col] = table[col].astype(object).where(table[col].notna(), None)
     return table.merge(times, on=KEY, how="left")
 
 

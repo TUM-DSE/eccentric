@@ -67,9 +67,15 @@ def _ingest(args):
     from .dataset import from_eccentric, write_dataset
     from .pipeline import features_of_store, load_store
     results = _read_results(args.results)
+    timing = os.path.join(os.path.dirname(os.path.abspath(args.results)), "matching_timing.csv")
+    if os.path.exists(timing) and not args.no_retiming:
+        from .dataset import with_retiming
+        results = with_retiming(results, timing)
     table, left_out = from_eccentric(results, features_of_store(load_store(args.store)))
     sources = {"eccentric_results": {"path": os.path.relpath(args.results, _ROOT), "commit": args.eccentric_commit or _eccentric_commit()},
                "feature_store": {"path": os.path.relpath(args.store, _ROOT)}}
+    if "retimed_ms_per_shot" in results.columns:
+        sources["retiming"] = {"path": os.path.relpath(timing, _ROOT), "rows": int(results.retimed_ms_per_shot.notna().sum())}
     manifest = write_dataset(table, args.out, sources, left_out)
     print(json.dumps({k: manifest[k] for k in ("rows", "circuits", "codes", "left_out")}))
 
@@ -160,6 +166,7 @@ def main(argv=None):
     p.add_argument("--store", default=_STORE)
     p.add_argument("--out", default=os.path.join(_ROOT, "data"))
     p.add_argument("--eccentric-commit")
+    p.add_argument("--no-retiming", action="store_true", help="ignore matching_timing.csv next to the results")
     p.set_defaults(run=_ingest)
 
     p = sub.add_parser("train", help="train the models on a training table")
