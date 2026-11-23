@@ -1,0 +1,31 @@
+{
+ "code": "bpc162",
+ "reference_circuit": "circuit.qldpc_ibm_projected.code=bpc162.schedule=cardinal.distance=12.cycles=12.backend=real_loon_3_qpus.error_type=real_flamingo_downscaled.stim",
+ "reference_sha256": "908f4e951d29b099858d3bff88b79b061ff279d4e83e8e2d22402a287b6adb4a",
+ "detectors": 1134,
+ "fit_seconds": 13.3,
+ "fault_mechanisms": 36766,
+ "circuit_key": "sweep_bposd_tuned/circuit.qldpc_ibm_projected.code=bpc162.schedule=cardinal.distance=12.cycles=12.backend=real_loon_3_qpus.error_type=real_flamingo_downscaled",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 0.00047393681508960984,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.008388935339988234,
+  "shots_used": 54253,
+  "bce_baseline": 0.009744725752928953,
+  "holdout_shots": 8138,
+  "ece_model": 3.8817246897955915e-05,
+  "brier_baseline": 0.001803760577348936,
+  "steps_run": 25000,
+  "wall_s": 12.023812477,
+  "brier_model": 0.0016693306046398023,
+  "converged": true,
+  "device_highwater_mib": 4870,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.014101795194817657
+ }
+}

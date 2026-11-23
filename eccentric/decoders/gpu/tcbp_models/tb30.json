@@ -1,0 +1,31 @@
+{
+ "code": "tb30",
+ "reference_circuit": "circuit.qldpc_ibm.code=tb30.schedule=edge_coloring_xz.distance=5.cycles=5.backend=real_flamingo.error_type=real_flamingo.stim",
+ "reference_sha256": "bf0f933ef29e589385d0a918fd19d8e3fc40defdaaf84aed78d40aa240731b56",
+ "detectors": 90,
+ "fit_seconds": 14.2,
+ "fault_mechanisms": 1877,
+ "circuit_key": "sweep_bposd_tuned/circuit.qldpc_ibm.code=tb30.schedule=edge_coloring_xz.distance=5.cycles=5.backend=real_flamingo.error_type=real_flamingo",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 0.0009125331944496475,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.007041470168305399,
+  "shots_used": 1048576,
+  "bce_baseline": 0.009876168535547288,
+  "holdout_shots": 157286,
+  "ece_model": 5.948354720659932e-05,
+  "brier_baseline": 0.0018926856798036262,
+  "steps_run": 25000,
+  "wall_s": 14.148958517,
+  "brier_model": 0.0015507559855897292,
+  "converged": true,
+  "device_highwater_mib": 15100,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.017255131226881344
+ }
+}

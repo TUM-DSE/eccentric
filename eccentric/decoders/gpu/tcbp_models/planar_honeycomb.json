@@ -1,0 +1,31 @@
+{
+ "code": "planar_honeycomb",
+ "reference_circuit": "circuit.noise_scaling.code=planar_honeycomb.distance=7.cycles=14.backend=real_harvard.error_type=real_harvard.stim",
+ "reference_sha256": "19490a7fedebe95b3405753ee922de77feb8b65585b39e1da415b4dc5580f535",
+ "detectors": 3771,
+ "fit_seconds": 12.6,
+ "fault_mechanisms": 25559,
+ "circuit_key": "sweep_bposd_tuned/circuit.noise_scaling.code=planar_honeycomb.distance=7.cycles=14.backend=real_harvard.error_type=real_harvard",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 0.0003914121350014466,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.0029416377623022404,
+  "shots_used": 91081,
+  "bce_baseline": 0.004569178775489923,
+  "holdout_shots": 13662,
+  "ece_model": 6.0853300318868395e-05,
+  "brier_baseline": 0.0008638143026770473,
+  "steps_run": 25000,
+  "wall_s": 12.272819827,
+  "brier_model": 0.0006858521425624422,
+  "converged": true,
+  "device_highwater_mib": 3434,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.014085097652128484
+ }
+}

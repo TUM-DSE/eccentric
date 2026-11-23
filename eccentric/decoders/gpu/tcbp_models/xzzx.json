@@ -1,0 +1,31 @@
+{
+ "code": "xzzx",
+ "reference_circuit": "circuit.basis_x.code=xzzx.distance=7.cycles=7.backend=real_loon.error_type=real_flamingo.basis=X.stim",
+ "reference_sha256": "642e664cdde39fe77706eaaffe943f2970ef4a3ae88435d8241a09919e6a637f",
+ "detectors": 336,
+ "fit_seconds": 11.5,
+ "fault_mechanisms": 13763,
+ "circuit_key": "sweep_basis_x/circuit.basis_x.code=xzzx.distance=7.cycles=7.backend=real_loon.error_type=real_flamingo.basis=X",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 0.00022059435223559476,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.009305227045978116,
+  "shots_used": 169792,
+  "bce_baseline": 0.010145179478130673,
+  "holdout_shots": 25469,
+  "ece_model": 2.7212700123202133e-05,
+  "brier_baseline": 0.0018817351259797289,
+  "steps_run": 25000,
+  "wall_s": 11.385762051,
+  "brier_model": 0.0018041977962267373,
+  "converged": true,
+  "device_highwater_mib": 3872,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.014042849824625307
+ }
+}

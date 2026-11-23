@@ -1,0 +1,31 @@
+{
+ "code": "repetition",
+ "reference_circuit": "circuit.reference.code=repetition.distance=7.cycles=7.backend=custom_full.backend_size=13.error_type=sd6.error_probability=0.0005.stim",
+ "reference_sha256": "2c203cf25b38187aae40b9ace2fed076055cb138de6917b2cacaecb7ead5d8fa",
+ "detectors": 48,
+ "fit_seconds": 7.7,
+ "fault_mechanisms": 133,
+ "circuit_key": "sweep1/circuit.reference.code=repetition.distance=7.cycles=7.backend=custom_full.backend_size=13.error_type=sd6.error_probability=0.0005",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 0.012742999825981472,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.030966959061868176,
+  "shots_used": 1048576,
+  "bce_baseline": 0.05450928319606276,
+  "holdout_shots": 157286,
+  "ece_model": 0.0014747320318045797,
+  "brier_baseline": 0.0147798981272866,
+  "steps_run": 25000,
+  "wall_s": 7.681194529,
+  "brier_model": 0.007983198202591548,
+  "converged": true,
+  "device_highwater_mib": 9242,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.10157313634908222
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "code": "bb98",
+ "reference_circuit": "circuit.basis_x.code=bb98.schedule=zxcoloration.distance=12.cycles=12.backend=real_loon.error_type=real_flamingo_downscaled.basis=X.stim",
+ "reference_sha256": "5537743d6044e4f7aebd4a121bcdb3fe48a128ab68bce553f01e52678b1c76e8",
+ "detectors": 686,
+ "fit_seconds": 12.2,
+ "fault_mechanisms": 19585,
+ "circuit_key": "sweep_basis_all/circuit.basis_x.code=bb98.schedule=zxcoloration.distance=12.cycles=12.backend=real_loon.error_type=real_flamingo_downscaled.basis=X",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 0.0005549608584032973,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.005149199588809301,
+  "shots_used": 119421,
+  "bce_baseline": 0.007078711505063923,
+  "holdout_shots": 17913,
+  "ece_model": 1.8609345347936657e-05,
+  "brier_baseline": 0.0012766865673124344,
+  "steps_run": 25000,
+  "wall_s": 11.571626173,
+  "brier_model": 0.0010862226723772751,
+  "converged": true,
+  "device_highwater_mib": 3724,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.014053321761258043
+ }
+}

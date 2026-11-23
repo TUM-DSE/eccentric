@@ -1,0 +1,31 @@
+{
+ "code": "cbb30",
+ "reference_circuit": "circuit.basis_x.code=cbb30.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_flamingo.error_type=real_flamingo_downscaled.basis=X.stim",
+ "reference_sha256": "4a4356e42f6b9fae9bc4d38cd30e3771f9fbede193fede9d0d6d1abb5fbbdf63",
+ "detectors": 105,
+ "fit_seconds": 16.1,
+ "fault_mechanisms": 2673,
+ "circuit_key": "sweep_basis_all/circuit.basis_x.code=cbb30.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_flamingo.error_type=real_flamingo_downscaled.basis=X",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 0.0006973767284679469,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.007225326629063546,
+  "shots_used": 874124,
+  "bce_baseline": 0.009383422200830356,
+  "holdout_shots": 131119,
+  "ece_model": 0.00012035969816470807,
+  "brier_baseline": 0.001738950096295313,
+  "steps_run": 25000,
+  "wall_s": 15.983538745,
+  "brier_model": 0.0014911158815873761,
+  "converged": true,
+  "device_highwater_mib": 13174,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.015662522342171845
+ }
+}

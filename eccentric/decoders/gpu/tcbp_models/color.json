@@ -1,0 +1,31 @@
+{
+ "code": "color",
+ "reference_circuit": "circuit.paper_topology.code=color.distance=17.cycles=17.backend=real_nsapollo.error_type=real_apollo.stim",
+ "reference_sha256": "9d008169f1dac15282cf54db4c5ff3bc05bc7241f54c0b75b79a413acb3fcd77",
+ "detectors": 3672,
+ "fit_seconds": 21.6,
+ "fault_mechanisms": 273693,
+ "circuit_key": "sweep_bposd_tuned/circuit.paper_topology.code=color.distance=17.cycles=17.backend=real_nsapollo.error_type=real_apollo",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 4.242423984322326e-05,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.01295539765521143,
+  "shots_used": 16384,
+  "bce_baseline": 0.013038089608237938,
+  "holdout_shots": 2458,
+  "ece_model": 2.7596309597004837e-05,
+  "brier_baseline": 0.0021112224964410157,
+  "steps_run": 25000,
+  "wall_s": 18.096205971,
+  "brier_model": 0.0021051986249340585,
+  "converged": true,
+  "device_highwater_mib": 25182,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.014102931345548204
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "code": "hgp_hamming",
+ "reference_circuit": "circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo.operation=transversal_cnot.stim",
+ "reference_sha256": "9c0c721264b5b5bdced8c940825f8b27d82a4dcedcedb59bf06a2f90e6d32385",
+ "detectors": 504,
+ "fit_seconds": 12.6,
+ "fault_mechanisms": 52138,
+ "circuit_key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo.operation=transversal_cnot",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 2.1841937454946963e-06,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.013658837537434963,
+  "shots_used": 44590,
+  "bce_baseline": 0.013683474905137508,
+  "holdout_shots": 6689,
+  "ece_model": 2.3976076986274684e-05,
+  "brier_baseline": 0.0021245511942315815,
+  "steps_run": 25000,
+  "wall_s": 11.805276556,
+  "brier_model": 0.002122733879415813,
+  "converged": true,
+  "device_highwater_mib": 5770,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.014091464413058235
+ }
+}

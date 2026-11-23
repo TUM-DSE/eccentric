@@ -1,0 +1,31 @@
+{
+ "code": "semi_hyperbolic_floquet_64",
+ "reference_circuit": "circuit.floquet_devices.code=semi_hyperbolic_floquet_64.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo_downscaled.stim",
+ "reference_sha256": "24826d7044ed5c82628b32b1008ea9b1eec416cf996e5554671567ab581b30c9",
+ "detectors": 142,
+ "fit_seconds": 14.3,
+ "fault_mechanisms": 4521,
+ "circuit_key": "sweep_bposd_tuned/circuit.floquet_devices.code=semi_hyperbolic_floquet_64.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo_downscaled",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 0.0002529516864058898,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.00946733019805342,
+  "shots_used": 505582,
+  "bce_baseline": 0.010465210240165772,
+  "holdout_shots": 75837,
+  "ece_model": 7.306169115562736e-05,
+  "brier_baseline": 0.0019479421984986694,
+  "steps_run": 25000,
+  "wall_s": 14.196993495,
+  "brier_model": 0.0018469298111324067,
+  "converged": true,
+  "device_highwater_mib": 8178,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.01450015989803187
+ }
+}

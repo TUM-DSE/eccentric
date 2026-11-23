@@ -1,0 +1,31 @@
+{
+ "code": "gross",
+ "reference_circuit": "circuit.fault_tolerant_ops.code=gross.distance=12.cycles=12.backend=real_flamingo.error_type=real_flamingo.operation=measure_z.stim",
+ "reference_sha256": "e6889b59279b626e6031e61f10c513548d8e89dcbcb6255ab860529b4deca859",
+ "detectors": 2404,
+ "fit_seconds": 31.5,
+ "fault_mechanisms": 333323,
+ "circuit_key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=gross.distance=12.cycles=12.backend=real_flamingo.error_type=real_flamingo.operation=measure_z",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 992,
+  "prob_regression_flag": false,
+  "ece_baseline": 4.415292211432682e-06,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.014001614782251993,
+  "shots_used": 16384,
+  "bce_baseline": 0.01400908646684349,
+  "holdout_shots": 2458,
+  "ece_model": 1.534735626823456e-05,
+  "brier_baseline": 0.0021343003081029464,
+  "steps_run": 25000,
+  "wall_s": 24.602871585,
+  "brier_model": 0.0021336177883071934,
+  "converged": true,
+  "device_highwater_mib": 34724,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.014085251827460987
+ }
+}

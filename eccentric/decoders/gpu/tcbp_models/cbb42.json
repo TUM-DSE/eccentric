@@ -1,0 +1,31 @@
+{
+ "code": "cbb42",
+ "reference_circuit": "circuit.fault_tolerant_ops.code=cbb42.distance=6.cycles=6.backend=real_flamingo.error_type=real_flamingo.operation=transversal_cnot.stim",
+ "reference_sha256": "dc2e8c8f96089f6a3e840e818d05462f357f5c9bedc000860f573212daf4a90c",
+ "detectors": 1008,
+ "fit_seconds": 14.2,
+ "fault_mechanisms": 115237,
+ "circuit_key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=cbb42.distance=6.cycles=6.backend=real_flamingo.error_type=real_flamingo.operation=transversal_cnot",
+ "chosen_from": "dataset.csv",
+ "report": {
+  "chunk_used": 1024,
+  "prob_regression_flag": false,
+  "ece_baseline": 6.720610997031795e-06,
+  "device_free_at_entry_mib": 142625.125,
+  "version": 5,
+  "bce_model": 0.013917409884087023,
+  "shots_used": 20246,
+  "bce_baseline": 0.013922924183815948,
+  "holdout_shots": 3037,
+  "ece_model": 3.2859218797802525e-06,
+  "brier_baseline": 0.0021260472645982407,
+  "steps_run": 25000,
+  "wall_s": 12.048096477,
+  "brier_model": 0.0021257068017025145,
+  "converged": true,
+  "device_highwater_mib": 12010,
+  "budget_bytes": 74776641536,
+  "seed": 1,
+  "bce_prior": 0.014051258868617782
+ }
+}
