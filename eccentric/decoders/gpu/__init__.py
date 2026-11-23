@@ -13,6 +13,7 @@ GPU_DECODERS = {
     "union_find_gpu": ("union_find_gpu", "union_find_gpu"),
     "gari_gpu": ("gari_gpu", "gari_gpu"),
     "tcbp_jobs_gpu": ("nvqldpc", "tcbp_jobs_gpu"),
+    "tcbp_jobs_sc_gpu": ("nvqldpc", "tcbp_jobs_sc_gpu"),
 }
 
 

@@ -1,11 +1,12 @@
-"""tcbp_jobs_gpu on one circuit of the GPU slice (../gpu/slice.json): python slice_circuit.py <i>
+"""tcbp_jobs_gpu (or argv[2], e.g. tcbp_jobs_sc_gpu) on one circuit of the GPU slice (../gpu/slice.json):
+python slice_circuit.py <i> [<decoder>]
 
 1. Logical error rate: ECCentric's adaptive decode with the settings and seeds of the sweep's CPU decode jobs of
    the same circuit (target errors, max shots, time budget, batches), so the decoder sees the same shots as the
    CPU decoders did; the code family's TCBP model (eccentric/decoders/gpu/tcbp_models).
 2. GPU time, as the GPU pilots (../gpu/pilot_circuit.py): build (timed), warm up on 64 shots, then batches
    (4,096 shots first, then up to 32,768) until 10^5 shots or 120 s.
-Results: results/<i>.json (written once both parts finish; a part that fails records its error)."""
+Results: results/<i>.json for tcbp_jobs_gpu, results_<decoder>/<i>.json otherwise (written once both parts finish; a part that fails records its error)."""
 import glob, json, os, sys, time
 import numpy as np
 import stim
@@ -14,8 +15,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = "/home/manosgior/eccentric-validation"
 SLICE = os.path.join(HERE, "slice.json")  # a copy of ../gpu/slice.json
 i = int(sys.argv[1])
+DECODER = sys.argv[2] if len(sys.argv) > 2 else "tcbp_jobs_gpu"
+PRESET = {"tcbp_jobs_gpu": "tcbp-jobs", "tcbp_jobs_sc_gpu": "tcbp-jobs-sc"}[DECODER]
+RESULTS = os.path.join(HERE, "results" if DECODER == "tcbp_jobs_gpu" else f"results_{DECODER}")
 o = json.load(open(SLICE))[i]
-out = {"index": i, "key": o["key"], "code": o["code"], "family": o["family"], "decoder": "tcbp_jobs_gpu"}
+out = {"index": i, "key": o["key"], "code": o["code"], "family": o["family"], "decoder": DECODER}
 
 # The CPU decode jobs of this circuit: decode.<circuit id without "circuit">.decoder=<d>.json
 run, _, cid = o["key"].partition("/")
@@ -34,10 +38,10 @@ from eccentric.decoders import decode
 from validation.run_job import decode_adaptively
 circuit = stim.Circuit.from_file(o["file"])
 if "settings" in out:
-    job = {**cpu, "decoder": "tcbp_jobs_gpu"}
+    job = {**cpu, "decoder": DECODER}
     start = time.time()
     try:
-        r = decode_adaptively(job, lambda n: decode(job["code"], circuit, n, "tcbp_jobs_gpu", job["backend"],
+        r = decode_adaptively(job, lambda n: decode(job["code"], circuit, n, DECODER, job["backend"],
                                                     job["error_type"], distance=job.get("distance")))
         out["ler"] = {**r, "wall_seconds": time.time() - start}
     except Exception as e:
@@ -51,7 +55,7 @@ ade = backend.split("_")[0] in ("variance", "real", "native") and (error_type ==
 try:
     import cupy as cp
     sampler = circuit.compile_detector_sampler(seed=i)
-    t = time.time(); g = nvqldpc.tcbp_jobs_decoder(circuit, ade, o["code"]); build_s = time.time() - t
+    t = time.time(); g = nvqldpc.tcbp_jobs_decoder(circuit, ade, o["code"], PRESET); build_s = time.time() - t
     warm = sampler.sample(64, separate_observables=True)[0]
     g.predict(warm)
     batches, total, elapsed, n = [], 0, 0.0, 4096
@@ -70,7 +74,7 @@ try:
 except Exception as e:
     out["timing"] = {"error": repr(e)[:500]}
 
-os.makedirs(os.path.join(HERE, "results"), exist_ok=True)
-with open(os.path.join(HERE, "results", f"{i}.json.tmp"), "w") as f:
+os.makedirs(RESULTS, exist_ok=True)
+with open(os.path.join(RESULTS, f"{i}.json.tmp"), "w") as f:
     json.dump(out, f, indent=1)
-os.replace(os.path.join(HERE, "results", f"{i}.json.tmp"), os.path.join(HERE, "results", f"{i}.json"))
+os.replace(os.path.join(RESULTS, f"{i}.json.tmp"), os.path.join(RESULTS, f"{i}.json"))

@@ -103,11 +103,14 @@ def relay_bp_nvqldpc(circuit: stim.Circuit, num_shots: int, approximate_disjoint
     return logical_error_rate(dec.predict, circuit, num_shots)
 
 
-def tcbp_jobs_decoder(circuit: stim.Circuit, approximate_disjoint_errors: bool, code_name: str = None):
+def tcbp_jobs_decoder(circuit: stim.Circuit, approximate_disjoint_errors: bool, code_name: str = None,
+                      preset: str = "tcbp-jobs"):
     """TCBP-JOBS (Howe, Maurya et al., arXiv:2611.21321, preprint): nv-qldpc's "tcbp-jobs" preset (10 sum-product BP
     iterations, fp32; columns ordered by a TCBP model; JOBS on shots where BP does not converge). With a code name,
     the TCBP model is the code family's (tcbp_models.py: fitted once on the family's reference circuit, reused for
-    its other distances, error rates and devices, as in the paper); without one, it is fitted on this circuit"""
+    its other distances, error rates and devices, as in the paper); without one, it is fitted on this circuit.
+    preset "tcbp-jobs-sc" (tcbp_jobs_sc_gpu) also runs JOBS on the shots BP converges on: BP's converged solution can
+    be a wrong logical class (ls_cnot d7 on Apollo: 47 vs 5 failures in 50,000 shots, Tesseract's rate, same time)"""
     from cudaq_qec.plugins import nv_qldpc
     from . import tcbp_models
     dem = circuit.detector_error_model(approximate_disjoint_errors=approximate_disjoint_errors)
@@ -115,7 +118,7 @@ def tcbp_jobs_decoder(circuit: stim.Circuit, approximate_disjoint_errors: bool, 
     model = tcbp_models.load(code_name) if code_name else nv_qldpc.init_tcbp_model(chk.tocsr())
     priors, syndrome_bias, observables_bias = fold_likely_errors(chk, obs, priors)
     return NvQldpc(chk, obs, priors, syndrome_bias, observables_bias,
-                   **nv_qldpc.preset("tcbp-jobs", tcbp_model=model))
+                   **nv_qldpc.preset(preset, tcbp_model=model))
 
 
 def fold_likely_errors(chk, obs, priors):
@@ -132,7 +135,13 @@ def fold_likely_errors(chk, obs, priors):
 
 
 def tcbp_jobs_gpu(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool,
-                  code_name: str = None) -> float:
-    dec = _cached(("tcbp_jobs", approximate_disjoint_errors, code_name), circuit,
-                  lambda: tcbp_jobs_decoder(circuit, approximate_disjoint_errors, code_name))
+                  code_name: str = None, preset: str = "tcbp-jobs") -> float:
+    dec = _cached(("tcbp_jobs", approximate_disjoint_errors, code_name, preset), circuit,
+                  lambda: tcbp_jobs_decoder(circuit, approximate_disjoint_errors, code_name, preset))
     return logical_error_rate(dec.predict, circuit, num_shots)
+
+
+def tcbp_jobs_sc_gpu(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool,
+                     code_name: str = None) -> float:
+    """TCBP-JOBS with JOBS on every shot (nv-qldpc's "tcbp-jobs-sc")"""
+    return tcbp_jobs_gpu(circuit, num_shots, approximate_disjoint_errors, code_name, preset="tcbp-jobs-sc")

@@ -15,7 +15,7 @@ the same return value (the logical error rate). Matching-type decoders (`mwpm`, 
 | `bposd_gpu`, `bposd_tuned_gpu` | `bposd`, `bposd_tuned` | BP and OSD-CS (NVIDIA nv-qldpc-decoder) | — | 98.1–100% of shots; LER within statistical error |
 | `relay_bp_gpu` | `relay_bp` | Relay-BP (our kernel, port of relay-bp) | — | identical on every shot with the same memory strengths; with per-shot random ones (the default) 84–100% of shots, LER within statistical error |
 | `union_find_gpu` | `union_find` | union-find with inversion (our kernel) | — | 54–99.7% of shots; LER differs by 0.1–2% (relative) on 5 of 7 circuits (see below) |
-| `tcbp_jobs_gpu` | — (GPU only) | TCBP-JOBS (NVIDIA nv-qldpc-decoder's `tcbp-jobs` preset) | — | no CPU counterpart (see TCBP-JOBS below) |
+| `tcbp_jobs_gpu`, `tcbp_jobs_sc_gpu` | — (GPU only) | TCBP-JOBS (NVIDIA nv-qldpc-decoder's `tcbp-jobs`, `tcbp-jobs-sc` presets) | — | no CPU counterpart (see TCBP-JOBS below) |
 
 ## How they work
 
@@ -68,7 +68,11 @@ use, with fused multiply-adds off so that double arithmetic rounds as on the CPU
   slice circuits on steve). `fit-table` takes each code's largest circuit in Matchmaker's whole table, so the
   models do not change when more of the table is decoded. JOBS needs every prior at most 0.5: a mechanism
   above (some device noise models have them) is folded into a certain flip, as syndrome and observable biases,
-  plus one of probability 1 - p (`fold_likely_errors`, exact). Not adopted from the paper: noise
+  plus one of probability 1 - p (`fold_likely_errors`, exact). `tcbp_jobs_gpu` is the paper's default, which
+  runs JOBS only on shots where BP does not converge; `tcbp_jobs_sc_gpu` (`tcbp-jobs-sc`) runs it on every shot,
+  since BP can converge to a wrong logical class: on ls_cnot d7 on Apollo (BP converged on 98.5% of shots), 47
+  vs 5 failures in 50,000 shots at the same 0.055 ms per shot, Tesseract's rate (1.1e-4); the family model and
+  OSD-CS order 1000 instead of JOBS gave 47 either way. Not adopted from the paper: noise
   learning (ECCentric's priors are the simulated noise), rare-event splitting, gap-based postselection.
 
 ## Installing and running
