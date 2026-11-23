@@ -62,8 +62,11 @@ use, with fused multiply-adds off so that double arithmetic rounds as on the CPU
   Called without a code name, the decoder fits a model on the circuit itself. The family's reference circuit is
   its largest (most fault mechanisms): fitted on the smallest (a 55-mechanism surface circuit), the model decoded
   larger circuits worse than their own models (surface d13 7 vs 0 failures, d5 1,366 vs 1,267, in 20,000 shots);
-  fitted on the largest, it matched them (color d7 915 vs 922, d3 679 vs 679, d11 0 vs 0; bb72 on another device
-  1,043 vs 1,036; 23 Nov 2026, Matchmaker slice circuits on steve). JOBS needs every prior at most 0.5: a mechanism
+  fitted on the largest, it matched them on all 12 circuits tested (surface d5 1,267 vs 1,267, d7 and d13 0 vs 0;
+  color d7 915 vs 922, d3 679 vs 679, d11 0 vs 0; bb72 on three devices and schedules 1,043 vs 1,040, 816 vs 813,
+  0 vs 0; gross 0 vs 0, 0 vs 0, 1 vs 1; 20,000 shots each, the same shots for both models; 23 Nov 2026, Matchmaker
+  slice circuits on steve). `fit-table` takes each code's largest circuit in Matchmaker's whole table, so the
+  models do not change when more of the table is decoded. JOBS needs every prior at most 0.5: a mechanism
   above (some device noise models have them) is folded into a certain flip, as syndrome and observable biases,
   plus one of probability 1 - p (`fold_likely_errors`, exact). Not adopted from the paper: noise
   learning (ECCentric's priors are the simulated noise), rare-event splitting, gap-based postselection.

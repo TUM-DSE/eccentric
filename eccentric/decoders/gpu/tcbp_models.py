@@ -11,6 +11,9 @@ own models (23 Nov 2026, Matchmaker slice: surface d13 7 vs 0 failures, d5 1,366
 
     python -m eccentric.decoders.gpu.tcbp_models fit <code>=<circuit.stim> [<code>=<circuit.stim> ...] [--force]
     python -m eccentric.decoders.gpu.tcbp_models fit-slice <slice.json> [--force]   (Matchmaker's slice format)
+    python -m eccentric.decoders.gpu.tcbp_models fit-table <dataset.csv> <runs root> [--force]
+        (Matchmaker's table, tools/matchmaker/data/dataset.csv: the reference of each code is its circuit with the
+        most mechanisms in the table; circuit_key <run>/<circuit> is the file <runs root>/<run>/circuits/<circuit>.stim)
 """
 import argparse
 import hashlib
@@ -57,6 +60,61 @@ def fit(circuit: stim.Circuit):
     return nv_qldpc.init_tcbp_model(check_matrix(circuit, approximate_disjoint_errors=True), return_report=True)
 
 
+def fit_reference(code: str, reference: str, force: bool = False, **note) -> str:
+    """Fit the model of family `code` on its reference circuit file and write it to model_dir()"""
+    out = model_path(code)
+    if os.path.exists(out) and not force:
+        return f"{code}: kept {out}"
+    circuit = stim.Circuit.from_file(reference)
+    start = time.time()
+    model, report = fit(circuit)
+    seconds = time.time() - start
+    os.makedirs(model_dir(), exist_ok=True)
+    with open(out + ".tmp", "wb") as f:
+        f.write(model)
+    os.replace(out + ".tmp", out)
+    with open(os.path.join(model_dir(), f"{code}.json"), "w") as f:
+        json.dump({"code": code, "reference_circuit": os.path.basename(reference),
+                   "reference_sha256": hashlib.sha256(open(reference, "rb").read()).hexdigest(),
+                   "detectors": circuit.num_detectors, "fit_seconds": round(seconds, 1), **note, "report": report},
+                  f, indent=1, default=str)
+    return f"{code}: fitted on {os.path.basename(reference)} in {seconds:.1f} s"
+
+
+def fit_table(table: str, root: str, force: bool = False):
+    """Fit every code of Matchmaker's dataset.csv on its circuit with the most mechanisms"""
+    import csv
+    best = {}
+    with open(table) as f:
+        for row in csv.DictReader(f):
+            if not row.get("mechanisms"):
+                continue
+            key, m = row["circuit_key"], int(float(row["mechanisms"]))
+            if row["code"] not in best or (-m, key) < (-best[row["code"]][0], best[row["code"]][1]):
+                best[row["code"]] = (m, key)
+    for code in sorted(best):
+        m, key = best[code]
+        try:
+            yield fit_reference(code, circuit_file(root, key), force, fault_mechanisms=m, circuit_key=key,
+                                chosen_from=os.path.basename(table))
+        except Exception as e:  # reported, the other codes go on
+            yield f"{code}: FAILED {e!r}"
+
+
+def circuit_file(root: str, key: str) -> str:
+    """The file of circuit_key <run>/<circuit>: in <run>'s circuits, or, for runs that decode other runs' circuits
+    (sweep_bposd_tuned), the same circuit in the first run (sorted) that has it"""
+    import glob
+    run, _, name = key.partition("/")
+    path = os.path.join(root, run, "circuits", name + ".stim")
+    if os.path.exists(path):
+        return path
+    found = sorted(glob.glob(os.path.join(root, "*", "circuits", name + ".stim")))
+    if not found:
+        raise FileNotFoundError(f"no circuit file for {key} under {root}")
+    return found[0]
+
+
 def fit_family(code: str, files, force: bool = False) -> str:
     """Fit the model of family `code` on the reference circuit among `files` and write it to model_dir()"""
     out = model_path(code)
@@ -94,7 +152,15 @@ def main(argv=None):
     many = sub.add_parser("fit-slice", help="fit every family of a Matchmaker slice.json (entries with code, file)")
     many.add_argument("slice")
     many.add_argument("--force", action="store_true")
+    table = sub.add_parser("fit-table", help="fit every code of Matchmaker's dataset.csv")
+    table.add_argument("table")
+    table.add_argument("root", help="directory holding the sweep run directories")
+    table.add_argument("--force", action="store_true")
     args = ap.parse_args(argv)
+    if args.command == "fit-table":
+        for line in fit_table(args.table, args.root, args.force):
+            print(line, flush=True)
+        return
     families = defaultdict(list)
     if args.command == "fit":
         for pair in args.pairs:
