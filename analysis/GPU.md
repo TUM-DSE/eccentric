@@ -15,6 +15,7 @@ the same return value (the logical error rate). Matching-type decoders (`mwpm`, 
 | `bposd_gpu`, `bposd_tuned_gpu` | `bposd`, `bposd_tuned` | BP and OSD-CS (NVIDIA nv-qldpc-decoder) | — | 98.1–100% of shots; LER within statistical error |
 | `relay_bp_gpu` | `relay_bp` | Relay-BP (our kernel, port of relay-bp) | — | identical on every shot with the same memory strengths; with per-shot random ones (the default) 84–100% of shots, LER within statistical error |
 | `union_find_gpu` | `union_find` | union-find with inversion (our kernel) | — | 54–99.7% of shots; LER differs by 0.1–2% (relative) on 5 of 7 circuits (see below) |
+| `tcbp_jobs_gpu` | — (GPU only) | TCBP-JOBS (NVIDIA nv-qldpc-decoder's `tcbp-jobs` preset) | — | no CPU counterpart (see TCBP-JOBS below) |
 
 ## How they work
 
@@ -49,6 +50,23 @@ use, with fused multiply-adds off so that double arithmetic rounds as on the CPU
   ECCentric's settings: min-sum BP with `bposd`'s or `bposd_tuned`'s iterations and scaling, OSD-CS of the same
   order. `relay_bp_gpu` first used nv-qldpc's Relay-BP too; it is kept as `nvqldpc.relay_bp_nvqldpc` for
   comparison (see below).
+- **TCBP-JOBS** (`nvqldpc.tcbp_jobs_gpu`, `tcbp_models.py`): Howe, Maurya et al., "TCBP-JOBS: GPU-Accelerated
+  Quantum Error Correction Decoding and Noise Learning with Near-Optimal Accuracy", arXiv:2611.21321 (preprint,
+  NVIDIA), through nv-qldpc's `tcbp-jobs` preset in CUDA-Q QEC 0.9.0: 10 sum-product BP iterations (fp32); on shots
+  where BP does not converge, a small learned model (TCBP) turns each fault's BP trajectory into a calibrated
+  probability, and JOBS searches 16 jittered OSD orderings with a beam search. The TCBP model is fitted from a check
+  matrix alone (training rates log-uniform in [1e-4, 1e-2], seed 1) and, as in the paper, reused across a code
+  family's distances, error rates and devices: `decode()` loads the family's model (`<code>.tcbp` in
+  `eccentric/decoders/gpu/tcbp_models/` or `$ECCENTRIC_TCBP_MODELS`) and fails if there is none; fit them before a
+  sweep with `python -m eccentric.decoders.gpu.tcbp_models fit-slice <slice.json>` or `fit <code>=<circuit.stim>`.
+  Called without a code name, the decoder fits a model on the circuit itself. The family's reference circuit is
+  its largest (most fault mechanisms): fitted on the smallest (a 55-mechanism surface circuit), the model decoded
+  larger circuits worse than their own models (surface d13 7 vs 0 failures, d5 1,366 vs 1,267, in 20,000 shots);
+  fitted on the largest, it matched them (color d7 915 vs 922, d3 679 vs 679, d11 0 vs 0; bb72 on another device
+  1,043 vs 1,036; 23 Nov 2026, Matchmaker slice circuits on steve). JOBS needs every prior at most 0.5: a mechanism
+  above (some device noise models have them) is folded into a certain flip, as syndrome and observable biases,
+  plus one of probability 1 - p (`fold_likely_errors`, exact). Not adopted from the paper: noise
+  learning (ECCentric's priors are the simulated noise), rare-event splitting, gap-based postselection.
 
 ## Installing and running
 

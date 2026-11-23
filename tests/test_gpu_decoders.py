@@ -136,11 +136,18 @@ def test_hierarchical_previous_mode_follows_the_cpu_decoder():
 
 
 @pytest.mark.parametrize("decoder", sorted(GPU_DECODERS))
-def test_decode_dispatches_gpu_decoders(decoder):
+def test_decode_dispatches_gpu_decoders(decoder, tmp_path, monkeypatch):
     if decoder in ("bposd_gpu", "bposd_tuned_gpu", "tcbp_jobs_gpu"):
         pytest.importorskip("cudaq_qec")
     if decoder.startswith("hier"):
         pytest.skip("needs a concatenated code (tests/test_new_decoders.py builds them; slow)")
     circuit = _surface(3, 0.003)
+    if decoder == "tcbp_jobs_gpu":
+        # the surface family's TCBP model, fitted on another circuit of the family
+        from eccentric.decoders.gpu import tcbp_models
+        monkeypatch.setenv("ECCENTRIC_TCBP_MODELS", str(tmp_path))
+        stim_file = tmp_path / "small.stim"
+        _surface(3, 0.001).to_file(str(stim_file))
+        tcbp_models.fit_family("surface", [str(stim_file)])
     ler = decode("surface", circuit, 4000, decoder, "custom_full", "sd6")
     assert ler is not None and 0 <= ler < 0.1

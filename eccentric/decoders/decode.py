@@ -94,6 +94,9 @@ def decode(
             if decoder in ("hier_bposd_gpu", "hier_bposd_hard_gpu"):
                 return run(circuit, num_shots, approximate_disjoint_errors, code_name, distance,
                            soft=decoder == "hier_bposd_gpu")
+            if decoder == "tcbp_jobs_gpu":
+                # the code family's TCBP model (decoders/gpu/tcbp_models.py)
+                return run(circuit, num_shots, approximate_disjoint_errors, code_name=code_name)
             return run(circuit, num_shots, approximate_disjoint_errors)
         except Exception as e:
             logging.error(f"{decoder} failed: {e}")

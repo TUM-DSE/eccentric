@@ -103,19 +103,36 @@ def relay_bp_nvqldpc(circuit: stim.Circuit, num_shots: int, approximate_disjoint
     return logical_error_rate(dec.predict, circuit, num_shots)
 
 
-def tcbp_jobs_decoder(circuit: stim.Circuit, approximate_disjoint_errors: bool):
+def tcbp_jobs_decoder(circuit: stim.Circuit, approximate_disjoint_errors: bool, code_name: str = None):
     """TCBP-JOBS (Howe, Maurya et al., arXiv:2611.21321, preprint): nv-qldpc's "tcbp-jobs" preset (10 sum-product BP
-    iterations, fp32; columns ordered by a TCBP model; JOBS on shots where BP does not converge). The TCBP model is
-    fitted here per circuit with init_tcbp_model's defaults (from the check matrix alone, about 10 s; the paper fits
-    once per code family and reuses it across distances and error rates)"""
+    iterations, fp32; columns ordered by a TCBP model; JOBS on shots where BP does not converge). With a code name,
+    the TCBP model is the code family's (tcbp_models.py: fitted once on the family's reference circuit, reused for
+    its other distances, error rates and devices, as in the paper); without one, it is fitted on this circuit"""
     from cudaq_qec.plugins import nv_qldpc
+    from . import tcbp_models
     dem = circuit.detector_error_model(approximate_disjoint_errors=approximate_disjoint_errors)
     chk, obs, priors = dem_to_check_matrices(dem, xor_priors=True)
-    model = nv_qldpc.init_tcbp_model(chk.tocsr())
-    return NvQldpc(chk, obs, priors, **nv_qldpc.preset("tcbp-jobs", tcbp_model=model))
+    model = tcbp_models.load(code_name) if code_name else nv_qldpc.init_tcbp_model(chk.tocsr())
+    priors, syndrome_bias, observables_bias = fold_likely_errors(chk, obs, priors)
+    return NvQldpc(chk, obs, priors, syndrome_bias, observables_bias,
+                   **nv_qldpc.preset("tcbp-jobs", tcbp_model=model))
 
 
-def tcbp_jobs_gpu(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool) -> float:
-    dec = _cached(("tcbp_jobs", approximate_disjoint_errors), circuit,
-                  lambda: tcbp_jobs_decoder(circuit, approximate_disjoint_errors))
+def fold_likely_errors(chk, obs, priors):
+    """JOBS needs every prior at most 0.5. A mechanism with p > 0.5 is a certain flip plus one of probability 1 - p:
+    the certain flip goes into the syndrome and observable biases (some device noise models have such mechanisms)"""
+    priors = np.asarray(priors, dtype=np.float64).copy()
+    likely = priors > 0.5
+    syndrome_bias = np.asarray(chk[:, likely].sum(axis=1)).ravel() % 2
+    observables_bias = np.asarray(obs[:, likely].sum(axis=1)).ravel() % 2
+    priors[likely] = 1 - priors[likely]
+    if not likely.any():
+        return priors, None, None
+    return priors, syndrome_bias.astype(np.uint8), observables_bias.astype(np.uint8)
+
+
+def tcbp_jobs_gpu(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool,
+                  code_name: str = None) -> float:
+    dec = _cached(("tcbp_jobs", approximate_disjoint_errors, code_name), circuit,
+                  lambda: tcbp_jobs_decoder(circuit, approximate_disjoint_errors, code_name))
     return logical_error_rate(dec.predict, circuit, num_shots)
