@@ -12,6 +12,7 @@ GPU_DECODERS = {
     "hier_bposd_hard_gpu": ("ldpc_gpu", "hierarchical_gpu"),
     "union_find_gpu": ("union_find_gpu", "union_find_gpu"),
     "gari_gpu": ("gari_gpu", "gari_gpu"),
+    "tcbp_jobs_gpu": ("nvqldpc", "tcbp_jobs_gpu"),
 }
 
 

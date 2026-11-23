@@ -137,7 +137,7 @@ def test_hierarchical_previous_mode_follows_the_cpu_decoder():
 
 @pytest.mark.parametrize("decoder", sorted(GPU_DECODERS))
 def test_decode_dispatches_gpu_decoders(decoder):
-    if decoder in ("bposd_gpu", "bposd_tuned_gpu"):
+    if decoder in ("bposd_gpu", "bposd_tuned_gpu", "tcbp_jobs_gpu"):
         pytest.importorskip("cudaq_qec")
     if decoder.startswith("hier"):
         pytest.skip("needs a concatenated code (tests/test_new_decoders.py builds them; slow)")

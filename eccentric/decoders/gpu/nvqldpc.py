@@ -34,8 +34,9 @@ class NvQldpc:
         self.observables_bias = None if observables_bias is None else np.asarray(observables_bias, dtype=np.uint8)
         dense = np.ascontiguousarray(self.chk.toarray().astype(np.uint8))
         self.chunk = int(max(1, min(CHUNK, (runtime.MEMORY_BUDGET // 2) // max(1, 32 * self.chk.nnz))))
-        self.decoder = qec.get_decoder("nv-qldpc-decoder", dense, error_rate_vec=[float(p) for p in priors],
-                                       use_sparsity=True, proc_float="fp64", bp_batch_size=self.chunk, **options)
+        # options (e.g. an nv-qldpc preset) override these defaults
+        options = {"use_sparsity": True, "proc_float": "fp64", "bp_batch_size": self.chunk, **options}
+        self.decoder = qec.get_decoder("nv-qldpc-decoder", dense, error_rate_vec=[float(p) for p in priors], **options)
         self.converged = 0
         self.shots = 0
 
@@ -99,4 +100,22 @@ def relay_bp_nvqldpc(circuit: stim.Circuit, num_shots: int, approximate_disjoint
     """nv-qldpc's Relay-BP (for comparison; ECCentric's relay_bp_gpu is relay_gpu.relay_bp_gpu)"""
     dec = _cached(("relay", approximate_disjoint_errors), circuit,
                   lambda: relay_decoder(circuit, approximate_disjoint_errors))
+    return logical_error_rate(dec.predict, circuit, num_shots)
+
+
+def tcbp_jobs_decoder(circuit: stim.Circuit, approximate_disjoint_errors: bool):
+    """TCBP-JOBS (Howe, Maurya et al., arXiv:2611.21321, preprint): nv-qldpc's "tcbp-jobs" preset (10 sum-product BP
+    iterations, fp32; columns ordered by a TCBP model; JOBS on shots where BP does not converge). The TCBP model is
+    fitted here per circuit with init_tcbp_model's defaults (from the check matrix alone, about 10 s; the paper fits
+    once per code family and reuses it across distances and error rates)"""
+    from cudaq_qec.plugins import nv_qldpc
+    dem = circuit.detector_error_model(approximate_disjoint_errors=approximate_disjoint_errors)
+    chk, obs, priors = dem_to_check_matrices(dem, xor_priors=True)
+    model = nv_qldpc.init_tcbp_model(chk.tocsr())
+    return NvQldpc(chk, obs, priors, **nv_qldpc.preset("tcbp-jobs", tcbp_model=model))
+
+
+def tcbp_jobs_gpu(circuit: stim.Circuit, num_shots: int, approximate_disjoint_errors: bool) -> float:
+    dec = _cached(("tcbp_jobs", approximate_disjoint_errors), circuit,
+                  lambda: tcbp_jobs_decoder(circuit, approximate_disjoint_errors))
     return logical_error_rate(dec.predict, circuit, num_shots)
