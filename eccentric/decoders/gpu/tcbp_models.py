@@ -103,16 +103,18 @@ def fit_table(table: str, root: str, force: bool = False):
 
 def circuit_file(root: str, key: str) -> str:
     """The file of circuit_key <run>/<circuit>: in <run>'s circuits, or, for runs that decode other runs' circuits
-    (sweep_bposd_tuned), the same circuit in the first run (sorted) that has it"""
+    (sweep_bposd_tuned), the circuit_file its decode jobs name. Not a search by name: runs hold different circuits
+    under the same name (sweep_idle's have idle noise, sweep1's and sweep_bicycle's do not)"""
     import glob
     run, _, name = key.partition("/")
     path = os.path.join(root, run, "circuits", name + ".stim")
     if os.path.exists(path):
         return path
-    found = sorted(glob.glob(os.path.join(root, "*", "circuits", name + ".stim")))
-    if not found:
-        raise FileNotFoundError(f"no circuit file for {key} under {root}")
-    return found[0]
+    jobs = sorted(glob.glob(os.path.join(root, run, "jobs", "decode" + name[len("circuit"):] + ".decoder=*.json")))
+    files = {json.load(open(j)).get("circuit_file") for j in jobs} - {None}
+    if len(files) != 1:
+        raise FileNotFoundError(f"{key}: {len(jobs)} decode jobs name {len(files)} circuit files")
+    return files.pop()
 
 
 def fit_family(code: str, files, force: bool = False) -> str:
