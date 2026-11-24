@@ -59,3 +59,12 @@ one CPU core, so they are latency per shot, not cost.
 
 Limits: one GPU model (H200), single-GPU runs, and the 43 slowest pilots were skipped, so the model has not seen
 the largest circuits on the GPU; `advise` warns when a circuit's features are outside the training range.
+
+## Correction (24 November 2026)
+
+`slice.json` named the wrong circuit for 39 of the 306 circuits: another run's circuit of the same file name
+(sweep1, sweep_bicycle or sweep_atoms, without idle noise) instead of sweep_idle's, which the CPU decoders decoded
+(decode jobs of runs such as sweep_bposd_tuned name their circuit in `circuit_file`). `fix_slice.py` set each
+entry's `file` to its decode jobs' circuit (42 entries changed, 3 of them to an identical copy; the old path is in
+`file_before_fix`). The pilots of the 39 are redone on the corrected file; the first results are kept in
+`results/stale_wrong_circuit/` on the cluster.

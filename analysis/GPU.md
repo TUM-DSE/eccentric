@@ -72,7 +72,10 @@ use, with fused multiply-adds off so that double arithmetic rounds as on the CPU
   runs JOBS only on shots where BP does not converge; `tcbp_jobs_sc_gpu` (`tcbp-jobs-sc`) runs it on every shot,
   since BP can converge to a wrong logical class: on ls_cnot d7 on Apollo (BP converged on 98.5% of shots), 47
   vs 5 failures in 50,000 shots at the same 0.055 ms per shot, Tesseract's rate (1.1e-4); the family model and
-  OSD-CS order 1000 instead of JOBS gave 47 either way. Not adopted from the paper: noise
+  OSD-CS order 1000 instead of JOBS gave 47 either way. On Matchmaker's GPU slice (267 circuits, 24 Nov 2026,
+  `tools/matchmaker/experiments/gpu_tcbp`), `tcbp_jobs_sc_gpu` was never worse than `tcbp_jobs_gpu` or than any CPU
+  decoder (95% intervals), matched Tesseract on all 145 circuits Tesseract measured (the default was worse on 11),
+  at 1.11× the default's GPU time per shot (median; at most 1.85×): it is the variant to use. Not adopted from the paper: noise
   learning (ECCentric's priors are the simulated noise), rare-event splitting, gap-based postselection.
 
 ## Installing and running

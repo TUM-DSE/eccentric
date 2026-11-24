@@ -81,8 +81,8 @@ def fit_reference(code: str, reference: str, force: bool = False, **note) -> str
     return f"{code}: fitted on {os.path.basename(reference)} in {seconds:.1f} s"
 
 
-def fit_table(table: str, root: str, force: bool = False):
-    """Fit every code of Matchmaker's dataset.csv on its circuit with the most mechanisms"""
+def fit_table(table: str, root: str, force: bool = False, codes=None):
+    """Fit every code of Matchmaker's dataset.csv (or those in `codes`) on its circuit with the most mechanisms"""
     import csv
     best = {}
     with open(table) as f:
@@ -93,6 +93,8 @@ def fit_table(table: str, root: str, force: bool = False):
             if row["code"] not in best or (-m, key) < (-best[row["code"]][0], best[row["code"]][1]):
                 best[row["code"]] = (m, key)
     for code in sorted(best):
+        if codes and code not in codes:
+            continue
         m, key = best[code]
         try:
             yield fit_reference(code, circuit_file(root, key), force, fault_mechanisms=m, circuit_key=key,
@@ -158,9 +160,10 @@ def main(argv=None):
     table.add_argument("table")
     table.add_argument("root", help="directory holding the sweep run directories")
     table.add_argument("--force", action="store_true")
+    table.add_argument("--codes", nargs="*", help="only these codes")
     args = ap.parse_args(argv)
     if args.command == "fit-table":
-        for line in fit_table(args.table, args.root, args.force):
+        for line in fit_table(args.table, args.root, args.force, args.codes):
             print(line, flush=True)
         return
     families = defaultdict(list)
