@@ -1,0 +1,49 @@
+{
+ "index": 92,
+ "key": "sweep1/circuit.reference.code=bpc162.distance=12.cycles=12.backend=custom_full.backend_size=324.error_type=sd6.error_probability=0.004",
+ "code": "bpc162",
+ "family": "Balanced product cyclic",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.reference.code=bpc162.distance=12.cycles=12.backend=custom_full.backend_size=324.error_type=sd6.error_probability=0.004.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 3100,
+  "errors": 175,
+  "logical_error_rate": 0.056451612903225805,
+  "seconds": 7.250047922134399,
+  "wall_seconds": 7.250062704086304
+ },
+ "timing": {
+  "build_seconds": 0.33580827713012695,
+  "shots": 100000,
+  "seconds": 122.5345823764801,
+  "batches": [
+   [
+    4096,
+    5.01424241065979
+   ],
+   [
+    32768,
+    40.260040044784546
+   ],
+   [
+    32768,
+    40.11483430862427
+   ],
+   [
+    30368,
+    37.1454656124115
+   ]
+  ],
+  "gpu_shots_per_second": 816.0961424976016,
+  "gpu_ms_per_shot": 1.225345823764801,
+  "bp_converged_fraction": 0.0014990406140070354
+ }
+}

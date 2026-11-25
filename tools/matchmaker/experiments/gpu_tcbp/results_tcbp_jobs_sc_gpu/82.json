@@ -1,0 +1,49 @@
+{
+ "index": 82,
+ "key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=qt72.schedule=edge_coloring_xz.distance=4.cycles=4.backend=real_infleqtion.error_type=real_infleqtion",
+ "code": "qt72",
+ "family": "Quantum Tanner",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.qldpc_atoms.code=qt72.schedule=edge_coloring_xz.distance=4.cycles=4.backend=real_infleqtion.error_type=real_infleqtion.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 117,
+  "logical_error_rate": 0.078,
+  "seconds": 2.7514984607696533,
+  "wall_seconds": 2.7515146732330322
+ },
+ "timing": {
+  "build_seconds": 0.10632777214050293,
+  "shots": 100000,
+  "seconds": 4.305530548095703,
+  "batches": [
+   [
+    4096,
+    0.17799043655395508
+   ],
+   [
+    32768,
+    1.5586543083190918
+   ],
+   [
+    32768,
+    1.294663906097412
+   ],
+   [
+    30368,
+    1.2742218971252441
+   ]
+  ],
+  "gpu_shots_per_second": 23225.941352159047,
+  "gpu_ms_per_shot": 0.04305530548095703,
+  "bp_converged_fraction": 0.6072713463383435
+ }
+}

@@ -1,0 +1,49 @@
+{
+ "index": 289,
+ "key": "sweep_basis_all/circuit.basis_x.code=bb98.schedule=zxcoloration.distance=12.cycles=12.backend=native.error_type=real_flamingo_downscaled.basis=X",
+ "code": "bb98",
+ "family": "Bivariate bicycle",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 1000000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.basis_x.code=bb98.schedule=zxcoloration.distance=12.cycles=12.backend=native.error_type=real_flamingo_downscaled.basis=X.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1000000,
+  "errors": 81,
+  "logical_error_rate": 8.1e-05,
+  "seconds": 124.92236161231995,
+  "wall_seconds": 124.92237377166748
+ },
+ "timing": {
+  "build_seconds": 0.2896304130554199,
+  "shots": 100000,
+  "seconds": 12.989480018615723,
+  "batches": [
+   [
+    4096,
+    0.513930082321167
+   ],
+   [
+    32768,
+    4.519057035446167
+   ],
+   [
+    32768,
+    4.1941094398498535
+   ],
+   [
+    30368,
+    3.762383460998535
+   ]
+  ],
+  "gpu_shots_per_second": 7698.537574767131,
+  "gpu_ms_per_shot": 0.12989480018615723,
+  "bp_converged_fraction": 0.8755496482251359
+ }
+}

@@ -1,0 +1,49 @@
+{
+ "index": 223,
+ "key": "sweep1/circuit.reference.code=bacon.distance=3.cycles=3.backend=custom_full.backend_size=9.error_type=sd6.error_probability=0.002",
+ "code": "bacon",
+ "family": "Bacon-Shor",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.reference.code=bacon.distance=3.cycles=3.backend=custom_full.backend_size=9.error_type=sd6.error_probability=0.002.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 6300,
+  "errors": 142,
+  "logical_error_rate": 0.02253968253968254,
+  "seconds": 2.680419683456421,
+  "wall_seconds": 2.6804330348968506
+ },
+ "timing": {
+  "build_seconds": 0.01314687728881836,
+  "shots": 100000,
+  "seconds": 0.9618384838104248,
+  "batches": [
+   [
+    4096,
+    0.037027597427368164
+   ],
+   [
+    32768,
+    0.34660935401916504
+   ],
+   [
+    32768,
+    0.29508280754089355
+   ],
+   [
+    30368,
+    0.28311872482299805
+   ]
+  ],
+  "gpu_shots_per_second": 103967.55971318534,
+  "gpu_ms_per_shot": 0.009618384838104248,
+  "bp_converged_fraction": 0.9748161176846818
+ }
+}

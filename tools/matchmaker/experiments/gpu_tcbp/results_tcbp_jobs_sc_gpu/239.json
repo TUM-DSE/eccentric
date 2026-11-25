@@ -1,0 +1,49 @@
+{
+ "index": 239,
+ "key": "sweep1/circuit.reference.code=lcs175.distance=7.cycles=7.backend=custom_full.backend_size=343.error_type=sd6.error_probability=0.002",
+ "code": "lcs175",
+ "family": "Lift-connected surface",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.reference.code=lcs175.distance=7.cycles=7.backend=custom_full.backend_size=343.error_type=sd6.error_probability=0.002.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 3100,
+  "errors": 194,
+  "logical_error_rate": 0.06258064516129032,
+  "seconds": 3.34932804107666,
+  "wall_seconds": 3.349339723587036
+ },
+ "timing": {
+  "build_seconds": 0.25574636459350586,
+  "shots": 100000,
+  "seconds": 17.56910276412964,
+  "batches": [
+   [
+    4096,
+    0.7216763496398926
+   ],
+   [
+    32768,
+    6.075856685638428
+   ],
+   [
+    32768,
+    5.68952751159668
+   ],
+   [
+    30368,
+    5.082042217254639
+   ]
+  ],
+  "gpu_shots_per_second": 5691.810295752114,
+  "gpu_ms_per_shot": 0.17569102764129638,
+  "bp_converged_fraction": 0.04087384074192517
+ }
+}

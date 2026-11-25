@@ -1,0 +1,49 @@
+{
+ "index": 278,
+ "key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=golay23.distance=7.cycles=7.backend=custom_full.backend_size=145.error_type=sd6.error_probability=0.001.operation=joint_zz",
+ "code": "golay23",
+ "family": "Quantum Golay",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 1800,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.fault_tolerant_ops.code=golay23.distance=7.cycles=7.backend=custom_full.backend_size=145.error_type=sd6.error_probability=0.001.operation=joint_zz.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 61300,
+  "errors": 105,
+  "logical_error_rate": 0.0017128874388254486,
+  "seconds": 19.01122546195984,
+  "wall_seconds": 19.011255264282227
+ },
+ "timing": {
+  "build_seconds": 0.349778413772583,
+  "shots": 100000,
+  "seconds": 27.299217700958252,
+  "batches": [
+   [
+    4096,
+    1.032726526260376
+   ],
+   [
+    32768,
+    8.769910335540771
+   ],
+   [
+    32768,
+    9.276553392410278
+   ],
+   [
+    30368,
+    8.220027446746826
+   ]
+  ],
+  "gpu_shots_per_second": 3663.1086317352538,
+  "gpu_ms_per_shot": 0.2729921770095825,
+  "bp_converged_fraction": 0.08285697153821554
+ }
+}

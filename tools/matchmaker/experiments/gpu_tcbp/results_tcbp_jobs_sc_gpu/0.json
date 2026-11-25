@@ -1,0 +1,49 @@
+{
+ "index": 0,
+ "key": "sweep_basis_all/circuit.basis_x.code=color.distance=7.cycles=14.backend=real_willow.error_type=real_willow_x0.5.basis=X",
+ "code": "color",
+ "family": "Color",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 1000000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.basis_x.code=color.distance=7.cycles=14.backend=real_willow.error_type=real_willow_x0.5.basis=X.decoder=tesseract",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 16300,
+  "errors": 102,
+  "logical_error_rate": 0.006257668711656441,
+  "seconds": 8.609076499938965,
+  "wall_seconds": 8.609096050262451
+ },
+ "timing": {
+  "build_seconds": 0.4011237621307373,
+  "shots": 100000,
+  "seconds": 40.7711067199707,
+  "batches": [
+   [
+    4096,
+    1.6821541786193848
+   ],
+   [
+    32768,
+    13.200451850891113
+   ],
+   [
+    32768,
+    13.049203872680664
+   ],
+   [
+    30368,
+    12.839296817779541
+   ]
+  ],
+  "gpu_shots_per_second": 2452.7173296234687,
+  "gpu_ms_per_shot": 0.407711067199707,
+  "bp_converged_fraction": 0.04427166613367445
+ }
+}

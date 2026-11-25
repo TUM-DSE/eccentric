@@ -1,0 +1,49 @@
+{
+ "index": 208,
+ "key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=golay23.schedule=edge_coloring.distance=7.cycles=7.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+ "code": "golay23",
+ "family": "Quantum Golay",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.qldpc_bicycle.code=golay23.schedule=edge_coloring.distance=7.cycles=7.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 110,
+  "logical_error_rate": 0.07333333333333333,
+  "seconds": 2.5801050662994385,
+  "wall_seconds": 2.5801141262054443
+ },
+ "timing": {
+  "build_seconds": 0.14701437950134277,
+  "shots": 100000,
+  "seconds": 6.704754829406738,
+  "batches": [
+   [
+    4096,
+    0.28426146507263184
+   ],
+   [
+    32768,
+    2.3123247623443604
+   ],
+   [
+    32768,
+    2.123347520828247
+   ],
+   [
+    30368,
+    1.984821081161499
+   ]
+  ],
+  "gpu_shots_per_second": 14914.788466448425,
+  "gpu_ms_per_shot": 0.06704754829406738,
+  "bp_converged_fraction": 0.2731052126638951
+ }
+}

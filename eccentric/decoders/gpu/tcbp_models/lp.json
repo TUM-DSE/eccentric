@@ -1,7 +1,7 @@
 {
  "code": "lp",
  "reference_circuit": "circuit.qldpc_atoms.code=lp.schedule=edge_coloring.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.stim",
- "reference_sha256": "ac368bc65ebfc1637972379b275036325056b8c208490dfddb716cac8cb827d1",
+ "reference_sha256": "57dc9a5eb1724172d3929407b183e3aa90aba2a84fbe6ce74d15ec90598bf9ed",
  "detectors": 219,
  "fit_seconds": 10.7,
  "fault_mechanisms": 1182,
@@ -11,7 +11,7 @@
   "chunk_used": 1024,
   "prob_regression_flag": false,
   "ece_baseline": 0.001238299312719993,
-  "device_free_at_entry_mib": 142625.125,
+  "device_free_at_entry_mib": 142627.125,
   "version": 5,
   "bce_model": 0.003807103504469058,
   "shots_used": 1048576,
@@ -20,11 +20,11 @@
   "ece_model": 8.606568534445794e-05,
   "brier_baseline": 0.001671947558399268,
   "steps_run": 25000,
-  "wall_s": 10.645380001,
+  "wall_s": 10.649780281,
   "brier_model": 0.0009507329060003274,
   "converged": true,
   "device_highwater_mib": 14320,
-  "budget_bytes": 74776641536,
+  "budget_bytes": 74777690112,
   "seed": 1,
   "bce_prior": 0.01983493368241954
  }

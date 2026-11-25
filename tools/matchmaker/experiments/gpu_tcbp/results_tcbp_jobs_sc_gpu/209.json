@@ -1,0 +1,49 @@
+{
+ "index": 209,
+ "key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=cbb30.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+ "code": "cbb30",
+ "family": "Coprime bivariate bicycle",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.qldpc_bicycle.code=cbb30.schedule=edge_coloring_xz.distance=6.cycles=6.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 3100,
+  "errors": 148,
+  "logical_error_rate": 0.04774193548387097,
+  "seconds": 2.598656177520752,
+  "wall_seconds": 2.5986688137054443
+ },
+ "timing": {
+  "build_seconds": 0.15447306632995605,
+  "shots": 100000,
+  "seconds": 5.592485427856445,
+  "batches": [
+   [
+    4096,
+    0.2542724609375
+   ],
+   [
+    32768,
+    1.9619154930114746
+   ],
+   [
+    32768,
+    1.719400405883789
+   ],
+   [
+    30368,
+    1.6568970680236816
+   ]
+  ],
+  "gpu_shots_per_second": 17881.137338667897,
+  "gpu_ms_per_shot": 0.05592485427856445,
+  "bp_converged_fraction": 0.6735389350815478
+ }
+}

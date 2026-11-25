@@ -1,0 +1,49 @@
+{
+ "index": 66,
+ "key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=gb48.schedule=edge_coloring.distance=8.cycles=8.backend=real_infleqtion.error_type=real_infleqtion",
+ "code": "gb48",
+ "family": "Generalized bicycle",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.qldpc_atoms.code=gb48.schedule=edge_coloring.distance=8.cycles=8.backend=real_infleqtion.error_type=real_infleqtion.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 142,
+  "logical_error_rate": 0.09466666666666666,
+  "seconds": 3.300344705581665,
+  "wall_seconds": 3.3003668785095215
+ },
+ "timing": {
+  "build_seconds": 0.16679143905639648,
+  "shots": 100000,
+  "seconds": 8.908121347427368,
+  "batches": [
+   [
+    4096,
+    0.4018580913543701
+   ],
+   [
+    32768,
+    3.0658137798309326
+   ],
+   [
+    32768,
+    2.836662769317627
+   ],
+   [
+    30368,
+    2.6037867069244385
+   ]
+  ],
+  "gpu_shots_per_second": 11225.711471575274,
+  "gpu_ms_per_shot": 0.08908121347427368,
+  "bp_converged_fraction": 0.21618164374800128
+ }
+}

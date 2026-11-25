@@ -1,0 +1,49 @@
+{
+ "index": 51,
+ "key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=hgp_hamming.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled",
+ "code": "hgp_hamming",
+ "family": "Hypergraph product",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.qldpc_bicycle.code=hgp_hamming.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 184,
+  "logical_error_rate": 0.12266666666666666,
+  "seconds": 3.037205457687378,
+  "wall_seconds": 3.0372276306152344
+ },
+ "timing": {
+  "build_seconds": 0.08668279647827148,
+  "shots": 100000,
+  "seconds": 3.3676278591156006,
+  "batches": [
+   [
+    4096,
+    0.1389758586883545
+   ],
+   [
+    32768,
+    1.241757869720459
+   ],
+   [
+    32768,
+    1.0090839862823486
+   ],
+   [
+    30368,
+    0.9778101444244385
+   ]
+  ],
+  "gpu_shots_per_second": 29694.49243903743,
+  "gpu_ms_per_shot": 0.033676278591156,
+  "bp_converged_fraction": 0.7696874000639591
+ }
+}

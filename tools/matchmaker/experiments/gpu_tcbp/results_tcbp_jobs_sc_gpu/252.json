@@ -1,0 +1,49 @@
+{
+ "index": 252,
+ "key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_merge.distance=3.cycles=3.backend=real_loon.error_type=real_flamingo",
+ "code": "ls_merge",
+ "family": "Lattice surgery",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.lattice_surgery.code=ls_merge.distance=3.cycles=3.backend=real_loon.error_type=real_flamingo.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 700,
+  "errors": 130,
+  "logical_error_rate": 0.18571428571428572,
+  "seconds": 3.1271259784698486,
+  "wall_seconds": 3.127155303955078
+ },
+ "timing": {
+  "build_seconds": 0.12558913230895996,
+  "shots": 100000,
+  "seconds": 5.3795201778411865,
+  "batches": [
+   [
+    4096,
+    0.22366762161254883
+   ],
+   [
+    32768,
+    1.9455420970916748
+   ],
+   [
+    32768,
+    1.6394553184509277
+   ],
+   [
+    30368,
+    1.5708551406860352
+   ]
+  ],
+  "gpu_shots_per_second": 18589.018480107316,
+  "gpu_ms_per_shot": 0.053795201778411864,
+  "bp_converged_fraction": 0.39566677326511035
+ }
+}

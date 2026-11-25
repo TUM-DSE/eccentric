@@ -1,0 +1,49 @@
+{
+ "index": 251,
+ "key": "sweep_bposd_tuned/circuit.noise_scaling.code=hh.distance=5.cycles=5.backend=real_flamingo.error_type=real_flamingo",
+ "code": "hh",
+ "family": "Heavy-hex",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 1000000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.noise_scaling.code=hh.distance=5.cycles=5.backend=real_flamingo.error_type=real_flamingo.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 700,
+  "errors": 203,
+  "logical_error_rate": 0.29,
+  "seconds": 2.3199875354766846,
+  "wall_seconds": 2.3200011253356934
+ },
+ "timing": {
+  "build_seconds": 0.1548154354095459,
+  "shots": 100000,
+  "seconds": 9.364498853683472,
+  "batches": [
+   [
+    4096,
+    0.38341522216796875
+   ],
+   [
+    32768,
+    3.202073574066162
+   ],
+   [
+    32768,
+    2.9677231311798096
+   ],
+   [
+    30368,
+    2.8112869262695312
+   ]
+  ],
+  "gpu_shots_per_second": 10678.628035782776,
+  "gpu_ms_per_shot": 0.09364498853683471,
+  "bp_converged_fraction": 0.0011292772625519666
+ }
+}

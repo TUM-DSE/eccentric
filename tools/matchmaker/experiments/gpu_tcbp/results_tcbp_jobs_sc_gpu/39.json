@@ -1,0 +1,49 @@
+{
+ "index": 39,
+ "key": "sweep_basis_x/circuit.basis_x.code=xzzx.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo",
+ "code": "xzzx",
+ "family": "XZZX surface",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 200000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.basis_x.code=xzzx.distance=3.cycles=3.backend=real_flamingo.error_type=real_flamingo.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 102,
+  "logical_error_rate": 0.068,
+  "seconds": 1.026379108428955,
+  "wall_seconds": 1.0263853073120117
+ },
+ "timing": {
+  "build_seconds": 0.030309677124023438,
+  "shots": 100000,
+  "seconds": 2.0873196125030518,
+  "batches": [
+   [
+    4096,
+    0.08015727996826172
+   ],
+   [
+    32768,
+    0.7507171630859375
+   ],
+   [
+    32768,
+    0.648383378982544
+   ],
+   [
+    30368,
+    0.6080617904663086
+   ]
+  ],
+  "gpu_shots_per_second": 47908.33152766814,
+  "gpu_ms_per_shot": 0.020873196125030517,
+  "bp_converged_fraction": 0.7676387112248161
+ }
+}

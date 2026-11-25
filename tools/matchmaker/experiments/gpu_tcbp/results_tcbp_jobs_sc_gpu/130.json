@@ -1,0 +1,49 @@
+{
+ "index": 130,
+ "key": "sweep_bposd_tuned/circuit.readout_700.code=surface.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700",
+ "code": "surface",
+ "family": "Surface",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.readout_700.code=surface.distance=3.cycles=3.backend=real_loon_1_qpu.error_type=real_flamingo_downscaled_m700.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 71300,
+  "errors": 105,
+  "logical_error_rate": 0.0014726507713884993,
+  "seconds": 1.6650989055633545,
+  "wall_seconds": 1.665111780166626
+ },
+ "timing": {
+  "build_seconds": 0.020629405975341797,
+  "shots": 100000,
+  "seconds": 1.097681999206543,
+  "batches": [
+   [
+    4096,
+    0.03624439239501953
+   ],
+   [
+    32768,
+    0.40577054023742676
+   ],
+   [
+    32768,
+    0.35460329055786133
+   ],
+   [
+    30368,
+    0.30106377601623535
+   ]
+  ],
+  "gpu_shots_per_second": 91101.06576611877,
+  "gpu_ms_per_shot": 0.01097681999206543,
+  "bp_converged_fraction": 0.9939638631275983
+ }
+}

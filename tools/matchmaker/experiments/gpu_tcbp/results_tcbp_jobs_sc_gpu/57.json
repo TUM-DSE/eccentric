@@ -1,0 +1,49 @@
+{
+ "index": 57,
+ "key": "sweep_bposd_tuned/circuit.floquet_devices.code=honeycomb.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo",
+ "code": "honeycomb",
+ "family": "Honeycomb",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 200000,
+  "time_budget": 7200,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.floquet_devices.code=honeycomb.distance=8.cycles=8.backend=real_apollo.error_type=real_apollo.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 200000,
+  "errors": 0,
+  "logical_error_rate": 0.0,
+  "seconds": 15.942963123321533,
+  "wall_seconds": 15.942972898483276
+ },
+ "timing": {
+  "build_seconds": 0.1947329044342041,
+  "shots": 100000,
+  "seconds": 8.199130535125732,
+  "batches": [
+   [
+    4096,
+    0.26352572441101074
+   ],
+   [
+    32768,
+    2.922849416732788
+   ],
+   [
+    32768,
+    2.6994879245758057
+   ],
+   [
+    30368,
+    2.313267469406128
+   ]
+  ],
+  "gpu_shots_per_second": 12196.415165192453,
+  "gpu_ms_per_shot": 0.08199130535125733,
+  "bp_converged_fraction": 0.994163735209466
+ }
+}

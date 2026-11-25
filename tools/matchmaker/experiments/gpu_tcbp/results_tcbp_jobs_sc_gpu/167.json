@@ -1,0 +1,49 @@
+{
+ "index": 167,
+ "key": "sweep_basis_all/circuit.basis_x.code=lcs65.schedule=cardinalNSmerge.distance=5.cycles=5.backend=real_infleqtion.error_type=real_infleqtion.basis=X",
+ "code": "lcs65",
+ "family": "Lift-connected surface",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.basis_x.code=lcs65.schedule=cardinalNSmerge.distance=5.cycles=5.backend=real_infleqtion.error_type=real_infleqtion.basis=X.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 124,
+  "logical_error_rate": 0.08266666666666667,
+  "seconds": 3.0972678661346436,
+  "wall_seconds": 3.0972886085510254
+ },
+ "timing": {
+  "build_seconds": 0.11579251289367676,
+  "shots": 100000,
+  "seconds": 5.325537204742432,
+  "batches": [
+   [
+    4096,
+    0.22029972076416016
+   ],
+   [
+    32768,
+    1.8911449909210205
+   ],
+   [
+    32768,
+    1.641981601715088
+   ],
+   [
+    30368,
+    1.572110891342163
+   ]
+  ],
+  "gpu_shots_per_second": 18777.448387920234,
+  "gpu_ms_per_shot": 0.05325537204742432,
+  "bp_converged_fraction": 0.34755756315957786
+ }
+}

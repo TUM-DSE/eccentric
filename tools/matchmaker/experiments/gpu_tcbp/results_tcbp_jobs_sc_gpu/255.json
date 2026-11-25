@@ -1,0 +1,49 @@
+{
+ "index": 255,
+ "key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_memory.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion",
+ "code": "ls_memory",
+ "family": "Lattice surgery",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.lattice_surgery.code=ls_memory.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 21300,
+  "errors": 118,
+  "logical_error_rate": 0.005539906103286385,
+  "seconds": 2.286928653717041,
+  "wall_seconds": 2.2869369983673096
+ },
+ "timing": {
+  "build_seconds": 0.02196049690246582,
+  "shots": 100000,
+  "seconds": 1.2146029472351074,
+  "batches": [
+   [
+    4096,
+    0.0397489070892334
+   ],
+   [
+    32768,
+    0.43990325927734375
+   ],
+   [
+    32768,
+    0.3987240791320801
+   ],
+   [
+    30368,
+    0.3362267017364502
+   ]
+  ],
+  "gpu_shots_per_second": 82331.43203516636,
+  "gpu_ms_per_shot": 0.012146029472351074,
+  "bp_converged_fraction": 0.9722677486408698
+ }
+}

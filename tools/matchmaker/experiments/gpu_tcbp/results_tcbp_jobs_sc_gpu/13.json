@@ -1,0 +1,49 @@
+{
+ "index": 13,
+ "key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=toric.distance=3.cycles=3.backend=real_apollo.error_type=real_apollo.operation=transversal_cnot",
+ "code": "toric",
+ "family": "Toric",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 1800,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.fault_tolerant_ops.code=toric.distance=3.cycles=3.backend=real_apollo.error_type=real_apollo.operation=transversal_cnot.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 100000,
+  "errors": 7,
+  "logical_error_rate": 7e-05,
+  "seconds": 8.078685998916626,
+  "wall_seconds": 8.078708171844482
+ },
+ "timing": {
+  "build_seconds": 0.15560603141784668,
+  "shots": 100000,
+  "seconds": 7.526361703872681,
+  "batches": [
+   [
+    4096,
+    0.24009299278259277
+   ],
+   [
+    32768,
+    2.646245002746582
+   ],
+   [
+    32768,
+    2.4037938117980957
+   ],
+   [
+    30368,
+    2.23622989654541
+   ]
+  ],
+  "gpu_shots_per_second": 13286.632231420012,
+  "gpu_ms_per_shot": 0.0752636170387268,
+  "bp_converged_fraction": 0.9862488007675088
+ }
+}

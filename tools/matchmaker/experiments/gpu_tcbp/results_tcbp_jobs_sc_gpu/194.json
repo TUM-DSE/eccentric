@@ -1,0 +1,49 @@
+{
+ "index": 194,
+ "key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=tb48.distance=6.cycles=6.backend=custom_full.backend_size=253.error_type=sd6.error_probability=0.001.operation=joint_zz",
+ "code": "tb48",
+ "family": "Trivariate bicycle",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 1800,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.fault_tolerant_ops.code=tb48.distance=6.cycles=6.backend=custom_full.backend_size=253.error_type=sd6.error_probability=0.001.operation=joint_zz.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 100000,
+  "errors": 52,
+  "logical_error_rate": 0.00052,
+  "seconds": 29.791816234588623,
+  "wall_seconds": 29.791839838027954
+ },
+ "timing": {
+  "build_seconds": 0.35483217239379883,
+  "shots": 100000,
+  "seconds": 27.351226568222046,
+  "batches": [
+   [
+    4096,
+    1.1290762424468994
+   ],
+   [
+    32768,
+    8.942907094955444
+   ],
+   [
+    32768,
+    9.006568193435669
+   ],
+   [
+    30368,
+    8.272675037384033
+   ]
+  ],
+  "gpu_shots_per_second": 3656.1431623759336,
+  "gpu_ms_per_shot": 0.2735122656822205,
+  "bp_converged_fraction": 0.05789294851295171
+ }
+}

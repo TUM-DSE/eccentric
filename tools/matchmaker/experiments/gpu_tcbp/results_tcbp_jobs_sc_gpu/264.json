@@ -1,0 +1,49 @@
+{
+ "index": 264,
+ "key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=lp.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled",
+ "code": "lp",
+ "family": "Lifted product",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.qldpc_bicycle.code=lp.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo_downscaled.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 11300,
+  "errors": 175,
+  "logical_error_rate": 0.015486725663716814,
+  "seconds": 2.7942378520965576,
+  "wall_seconds": 2.7942519187927246
+ },
+ "timing": {
+  "build_seconds": 0.0641324520111084,
+  "shots": 100000,
+  "seconds": 2.5489165782928467,
+  "batches": [
+   [
+    4096,
+    0.07805323600769043
+   ],
+   [
+    32768,
+    0.9618358612060547
+   ],
+   [
+    32768,
+    0.8078348636627197
+   ],
+   [
+    30368,
+    0.7011926174163818
+   ]
+  ],
+  "gpu_shots_per_second": 39232.354974510636,
+  "gpu_ms_per_shot": 0.025489165782928466,
+  "bp_converged_fraction": 0.8860529261272786
+ }
+}

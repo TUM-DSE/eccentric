@@ -1,0 +1,49 @@
+{
+ "index": 173,
+ "key": "sweep_lattice_surgery/circuit.lattice_surgery.code=ls_cnot.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard",
+ "code": "ls_cnot",
+ "family": "Lattice surgery",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.lattice_surgery.code=ls_cnot.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 700,
+  "errors": 155,
+  "logical_error_rate": 0.22142857142857142,
+  "seconds": 2.714130163192749,
+  "wall_seconds": 2.714146375656128
+ },
+ "timing": {
+  "build_seconds": 0.812497615814209,
+  "shots": 100000,
+  "seconds": 109.1666169166565,
+  "batches": [
+   [
+    4096,
+    4.690178632736206
+   ],
+   [
+    32768,
+    35.83160185813904
+   ],
+   [
+    32768,
+    35.61594867706299
+   ],
+   [
+    30368,
+    33.02888774871826
+   ]
+  ],
+  "gpu_shots_per_second": 916.0309518096108,
+  "gpu_ms_per_shot": 1.091666169166565,
+  "bp_converged_fraction": 0.0
+ }
+}

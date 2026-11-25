@@ -1,0 +1,49 @@
+{
+ "index": 47,
+ "key": "sweep1/circuit.reference.code=mitten150.distance=8.cycles=8.backend=custom_full.backend_size=270.error_type=sd6.error_probability=0.001",
+ "code": "mitten150",
+ "family": "Mitten",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.reference.code=mitten150.distance=8.cycles=8.backend=custom_full.backend_size=270.error_type=sd6.error_probability=0.001.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 46300,
+  "errors": 100,
+  "logical_error_rate": 0.0021598272138228943,
+  "seconds": 12.90083622932434,
+  "wall_seconds": 12.90085506439209
+ },
+ "timing": {
+  "build_seconds": 0.2917766571044922,
+  "shots": 100000,
+  "seconds": 19.495746612548828,
+  "batches": [
+   [
+    4096,
+    0.8005175590515137
+   ],
+   [
+    32768,
+    6.441667318344116
+   ],
+   [
+    32768,
+    6.383840084075928
+   ],
+   [
+    30368,
+    5.8697216510772705
+   ]
+  ],
+  "gpu_shots_per_second": 5129.32394882651,
+  "gpu_ms_per_shot": 0.19495746612548828,
+  "bp_converged_fraction": 0.14979413175567638
+ }
+}

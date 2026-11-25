@@ -1,0 +1,49 @@
+{
+ "index": 161,
+ "key": "sweep1/circuit.reference.code=rm15.distance=3.cycles=3.backend=custom_full.backend_size=29.error_type=sd6.error_probability=0.002",
+ "code": "rm15",
+ "family": "Quantum Reed-Muller",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.reference.code=rm15.distance=3.cycles=3.backend=custom_full.backend_size=29.error_type=sd6.error_probability=0.002.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 26300,
+  "errors": 117,
+  "logical_error_rate": 0.0044486692015209125,
+  "seconds": 1.3498928546905518,
+  "wall_seconds": 1.3499038219451904
+ },
+ "timing": {
+  "build_seconds": 0.02041792869567871,
+  "shots": 100000,
+  "seconds": 1.4666643142700195,
+  "batches": [
+   [
+    4096,
+    0.05238842964172363
+   ],
+   [
+    32768,
+    0.5216307640075684
+   ],
+   [
+    32768,
+    0.4788088798522949
+   ],
+   [
+    30368,
+    0.4138362407684326
+   ]
+  ],
+  "gpu_shots_per_second": 68181.92753927573,
+  "gpu_ms_per_shot": 0.014666643142700195,
+  "bp_converged_fraction": 0.7718160377358491
+ }
+}

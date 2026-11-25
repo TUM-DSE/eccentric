@@ -1,0 +1,49 @@
+{
+ "index": 237,
+ "key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.basis=X.operation=joint_xx",
+ "code": "hgp_hamming",
+ "family": "Hypergraph product",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 1800,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.fault_tolerant_ops.code=hgp_hamming.distance=3.cycles=3.backend=real_infleqtion.error_type=real_infleqtion.basis=X.operation=joint_xx.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 3100,
+  "errors": 153,
+  "logical_error_rate": 0.04935483870967742,
+  "seconds": 3.6137478351593018,
+  "wall_seconds": 3.6137683391571045
+ },
+ "timing": {
+  "build_seconds": 0.19398760795593262,
+  "shots": 100000,
+  "seconds": 14.93070673942566,
+  "batches": [
+   [
+    4096,
+    0.630687952041626
+   ],
+   [
+    32768,
+    4.916984796524048
+   ],
+   [
+    32768,
+    4.930472135543823
+   ],
+   [
+    30368,
+    4.452561855316162
+   ]
+  ],
+  "gpu_shots_per_second": 6697.606599957016,
+  "gpu_ms_per_shot": 0.1493070673942566,
+  "bp_converged_fraction": 0.07645107131435881
+ }
+}

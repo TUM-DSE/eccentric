@@ -1,0 +1,49 @@
+{
+ "index": 69,
+ "key": "sweep_basis_all/circuit.basis_x.code=lp.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.basis=X",
+ "code": "lp",
+ "family": "Lifted product",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.basis_x.code=lp.schedule=edge_coloring_xz.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.basis=X.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 155,
+  "logical_error_rate": 0.10333333333333333,
+  "seconds": 3.06510853767395,
+  "wall_seconds": 3.065139055252075
+ },
+ "timing": {
+  "build_seconds": 0.08261513710021973,
+  "shots": 100000,
+  "seconds": 4.271750450134277,
+  "batches": [
+   [
+    4096,
+    0.18250393867492676
+   ],
+   [
+    32768,
+    1.5442209243774414
+   ],
+   [
+    32768,
+    1.3047513961791992
+   ],
+   [
+    30368,
+    1.24027419090271
+   ]
+  ],
+  "gpu_shots_per_second": 23409.607177979375,
+  "gpu_ms_per_shot": 0.042717504501342776,
+  "bp_converged_fraction": 0.43788975055964185
+ }
+}

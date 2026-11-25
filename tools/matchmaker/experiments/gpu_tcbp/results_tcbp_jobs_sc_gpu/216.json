@@ -1,0 +1,49 @@
+{
+ "index": 216,
+ "key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=mhc36.distance=4.cycles=4.backend=custom_full.backend_size=65.error_type=sd6.error_probability=0.001.operation=measure_z",
+ "code": "mhc36",
+ "family": "Many-hypercube",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 1800,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.fault_tolerant_ops.code=mhc36.distance=4.cycles=4.backend=custom_full.backend_size=65.error_type=sd6.error_probability=0.001.operation=measure_z.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 6300,
+  "errors": 140,
+  "logical_error_rate": 0.022222222222222223,
+  "seconds": 3.142333745956421,
+  "wall_seconds": 3.1423494815826416
+ },
+ "timing": {
+  "build_seconds": 0.12886929512023926,
+  "shots": 100000,
+  "seconds": 6.150441884994507,
+  "batches": [
+   [
+    4096,
+    0.2551560401916504
+   ],
+   [
+    32768,
+    2.1984896659851074
+   ],
+   [
+    32768,
+    1.8965132236480713
+   ],
+   [
+    30368,
+    1.8002829551696777
+   ]
+  ],
+  "gpu_shots_per_second": 16258.994373066793,
+  "gpu_ms_per_shot": 0.06150441884994507,
+  "bp_converged_fraction": 0.3404621042532779
+ }
+}

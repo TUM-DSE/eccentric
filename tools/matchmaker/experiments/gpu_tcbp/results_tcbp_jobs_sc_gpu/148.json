@@ -1,0 +1,49 @@
+{
+ "index": 148,
+ "key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=steane.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo",
+ "code": "steane",
+ "family": "Concatenated Steane",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.qldpc_bicycle.code=steane.distance=3.cycles=3.backend=real_bicycle.error_type=real_flamingo.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 193,
+  "logical_error_rate": 0.12866666666666668,
+  "seconds": 3.0131661891937256,
+  "wall_seconds": 3.0131723880767822
+ },
+ "timing": {
+  "build_seconds": 0.029614686965942383,
+  "shots": 100000,
+  "seconds": 2.2126100063323975,
+  "batches": [
+   [
+    4096,
+    0.08910799026489258
+   ],
+   [
+    32768,
+    0.7833268642425537
+   ],
+   [
+    32768,
+    0.6898236274719238
+   ],
+   [
+    30368,
+    0.6503515243530273
+   ]
+  ],
+  "gpu_shots_per_second": 45195.49297607991,
+  "gpu_ms_per_shot": 0.022126100063323974,
+  "bp_converged_fraction": 0.6133374640230252
+ }
+}

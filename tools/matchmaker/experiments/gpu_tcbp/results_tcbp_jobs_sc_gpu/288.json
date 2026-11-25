@@ -1,0 +1,45 @@
+{
+ "index": 288,
+ "key": "sweep_bposd_tuned/circuit.paper_topology.code=color.distance=17.cycles=17.backend=real_apollo.error_type=real_apollo",
+ "code": "color",
+ "family": "Color",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.paper_topology.code=color.distance=17.cycles=17.backend=real_apollo.error_type=real_apollo.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 100000,
+  "errors": 0,
+  "logical_error_rate": 0.0,
+  "seconds": 196.05108070373535,
+  "wall_seconds": 196.05110335350037
+ },
+ "timing": {
+  "build_seconds": 3.7890243530273438,
+  "shots": 69632,
+  "seconds": 127.4252679347992,
+  "batches": [
+   [
+    4096,
+    7.5056071281433105
+   ],
+   [
+    32768,
+    59.98090672492981
+   ],
+   [
+    32768,
+    59.938754081726074
+   ]
+  ],
+  "gpu_shots_per_second": 546.4536282994454,
+  "gpu_ms_per_shot": 1.8299814443761373,
+  "bp_converged_fraction": 0.3029729109274564
+ }
+}

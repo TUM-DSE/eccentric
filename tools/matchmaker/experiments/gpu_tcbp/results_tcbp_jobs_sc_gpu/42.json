@@ -1,0 +1,49 @@
+{
+ "index": 42,
+ "key": "sweep1/circuit.reference.code=surface.distance=3.cycles=3.backend=custom_full.backend_size=26.error_type=sd6.error_probability=0.001",
+ "code": "surface",
+ "family": "Surface",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.reference.code=surface.distance=3.cycles=3.backend=custom_full.backend_size=26.error_type=sd6.error_probability=0.001.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 61300,
+  "errors": 110,
+  "logical_error_rate": 0.0017944535073409463,
+  "seconds": 1.5912601947784424,
+  "wall_seconds": 1.5912656784057617
+ },
+ "timing": {
+  "build_seconds": 0.021065473556518555,
+  "shots": 100000,
+  "seconds": 1.1689093112945557,
+  "batches": [
+   [
+    4096,
+    0.036565303802490234
+   ],
+   [
+    32768,
+    0.4217715263366699
+   ],
+   [
+    32768,
+    0.39317822456359863
+   ],
+   [
+    30368,
+    0.3173942565917969
+   ]
+  ],
+  "gpu_shots_per_second": 85549.83610255527,
+  "gpu_ms_per_shot": 0.011689093112945557,
+  "bp_converged_fraction": 0.9913555324592261
+ }
+}

@@ -1,0 +1,49 @@
+{
+ "index": 21,
+ "key": "sweep_bposd_tuned/circuit.qldpc_atoms.code=bpc126.schedule=cardinalNSmerge.distance=10.cycles=10.backend=real_apollo.error_type=real_apollo",
+ "code": "bpc126",
+ "family": "Balanced product cyclic",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.qldpc_atoms.code=bpc126.schedule=cardinalNSmerge.distance=10.cycles=10.backend=real_apollo.error_type=real_apollo.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 100000,
+  "errors": 0,
+  "logical_error_rate": 0.0,
+  "seconds": 13.39664626121521,
+  "wall_seconds": 13.396684408187866
+ },
+ "timing": {
+  "build_seconds": 0.2657144069671631,
+  "shots": 100000,
+  "seconds": 11.552799463272095,
+  "batches": [
+   [
+    4096,
+    0.4618802070617676
+   ],
+   [
+    32768,
+    3.8504459857940674
+   ],
+   [
+    32768,
+    3.7432405948638916
+   ],
+   [
+    30368,
+    3.497232675552368
+   ]
+  ],
+  "gpu_shots_per_second": 8655.910657664705,
+  "gpu_ms_per_shot": 0.11552799463272095,
+  "bp_converged_fraction": 0.99645227054685
+ }
+}

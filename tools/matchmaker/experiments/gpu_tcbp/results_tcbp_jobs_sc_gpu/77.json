@@ -1,0 +1,49 @@
+{
+ "index": 77,
+ "key": "sweep_bposd_tuned/circuit.paper_topology.code=steane.distance=9.cycles=9.backend=real_nsinfleqtion.error_type=modsi1000.error_probability=0.004",
+ "code": "steane",
+ "family": "Concatenated Steane",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.paper_topology.code=steane.distance=9.cycles=9.backend=real_nsinfleqtion.error_type=modsi1000.error_probability=0.004.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 207,
+  "logical_error_rate": 0.138,
+  "seconds": 2.0259389877319336,
+  "wall_seconds": 2.025951862335205
+ },
+ "timing": {
+  "build_seconds": 0.28414130210876465,
+  "shots": 100000,
+  "seconds": 44.49843716621399,
+  "batches": [
+   [
+    4096,
+    1.9233825206756592
+   ],
+   [
+    32768,
+    14.645869731903076
+   ],
+   [
+    32768,
+    14.605717182159424
+   ],
+   [
+    30368,
+    13.32346773147583
+   ]
+  ],
+  "gpu_shots_per_second": 2247.2699350422645,
+  "gpu_ms_per_shot": 0.4449843716621399,
+  "bp_converged_fraction": 0.00011992324912056284
+ }
+}

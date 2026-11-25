@@ -1,0 +1,49 @@
+{
+ "index": 96,
+ "key": "sweep_bposd_tuned/circuit.noise_scaling.code=planar_honeycomb.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_x0.25",
+ "code": "planar_honeycomb",
+ "family": "Planar honeycomb",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 1000000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.noise_scaling.code=planar_honeycomb.distance=5.cycles=5.backend=real_bicycle.error_type=real_flamingo_x0.25.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 3100,
+  "errors": 148,
+  "logical_error_rate": 0.04774193548387097,
+  "seconds": 1.443833589553833,
+  "wall_seconds": 1.4438459873199463
+ },
+ "timing": {
+  "build_seconds": 0.1775979995727539,
+  "shots": 100000,
+  "seconds": 7.859148263931274,
+  "batches": [
+   [
+    4096,
+    0.332364559173584
+   ],
+   [
+    32768,
+    2.7595629692077637
+   ],
+   [
+    32768,
+    2.4409453868865967
+   ],
+   [
+    30368,
+    2.32627534866333
+   ]
+  ],
+  "gpu_shots_per_second": 12724.025128643949,
+  "gpu_ms_per_shot": 0.07859148263931275,
+  "bp_converged_fraction": 0.13018668052446433
+ }
+}

@@ -1,0 +1,49 @@
+{
+ "index": 273,
+ "key": "sweep_bposd_tuned/circuit.qldpc_bicycle.code=tb72.schedule=edge_coloring.distance=8.cycles=8.backend=real_bicycle_lr.error_type=real_flamingo_downscaled",
+ "code": "tb72",
+ "family": "Trivariate bicycle",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.qldpc_bicycle.code=tb72.schedule=edge_coloring.distance=8.cycles=8.backend=real_bicycle_lr.error_type=real_flamingo_downscaled.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 6300,
+  "errors": 174,
+  "logical_error_rate": 0.02761904761904762,
+  "seconds": 4.219989538192749,
+  "wall_seconds": 4.220009088516235
+ },
+ "timing": {
+  "build_seconds": 0.302593469619751,
+  "shots": 100000,
+  "seconds": 15.161378860473633,
+  "batches": [
+   [
+    4096,
+    0.6000959873199463
+   ],
+   [
+    32768,
+    5.024389743804932
+   ],
+   [
+    32768,
+    5.01835298538208
+   ],
+   [
+    30368,
+    4.518540143966675
+   ]
+  ],
+  "gpu_shots_per_second": 6595.706163685699,
+  "gpu_ms_per_shot": 0.15161378860473632,
+  "bp_converged_fraction": 0.34625839462743846
+ }
+}

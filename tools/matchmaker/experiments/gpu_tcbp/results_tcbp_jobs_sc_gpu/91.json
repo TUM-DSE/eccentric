@@ -1,0 +1,49 @@
+{
+ "index": 91,
+ "key": "sweep_basis_all/circuit.basis_x.code=lcs52.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_flamingo_1_qpu.error_type=real_flamingo_downscaled.basis=X",
+ "code": "lcs52",
+ "family": "Lift-connected surface",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.basis_x.code=lcs52.schedule=cardinalNSmerge.distance=4.cycles=4.backend=real_flamingo_1_qpu.error_type=real_flamingo_downscaled.basis=X.decoder=bposd_tuned",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 191,
+  "logical_error_rate": 0.12733333333333333,
+  "seconds": 1.2730262279510498,
+  "wall_seconds": 1.2730391025543213
+ },
+ "timing": {
+  "build_seconds": 0.1704263687133789,
+  "shots": 100000,
+  "seconds": 6.629602432250977,
+  "batches": [
+   [
+    4096,
+    0.2741963863372803
+   ],
+   [
+    32768,
+    2.3051400184631348
+   ],
+   [
+    32768,
+    2.0708892345428467
+   ],
+   [
+    30368,
+    1.9793767929077148
+   ]
+  ],
+  "gpu_shots_per_second": 15083.860762680242,
+  "gpu_ms_per_shot": 0.06629602432250976,
+  "bp_converged_fraction": 0.34705788295490886
+ }
+}

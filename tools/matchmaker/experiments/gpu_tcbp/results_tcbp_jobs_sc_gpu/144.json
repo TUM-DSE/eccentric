@@ -1,0 +1,49 @@
+{
+ "index": 144,
+ "key": "sweep1/circuit.reference.code=semi_hyperbolic_floquet_64.distance=3.cycles=3.backend=custom_full.backend_size=64.error_type=sd6.error_probability=0.0005",
+ "code": "semi_hyperbolic_floquet_64",
+ "family": "Semi-hyperbolic Floquet",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.reference.code=semi_hyperbolic_floquet_64.distance=3.cycles=3.backend=custom_full.backend_size=64.error_type=sd6.error_probability=0.0005.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 100000,
+  "errors": 92,
+  "logical_error_rate": 0.00092,
+  "seconds": 4.7514238357543945,
+  "wall_seconds": 4.75144624710083
+ },
+ "timing": {
+  "build_seconds": 0.10153603553771973,
+  "shots": 100000,
+  "seconds": 3.222067356109619,
+  "batches": [
+   [
+    4096,
+    0.07725310325622559
+   ],
+   [
+    32768,
+    1.2430939674377441
+   ],
+   [
+    32768,
+    0.9705097675323486
+   ],
+   [
+    30368,
+    0.9312105178833008
+   ]
+  ],
+  "gpu_shots_per_second": 31035.974406426365,
+  "gpu_ms_per_shot": 0.03222067356109619,
+  "bp_converged_fraction": 0.9614047009913655
+ }
+}

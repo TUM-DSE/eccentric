@@ -1,7 +1,7 @@
 {
  "code": "lcs15",
  "reference_circuit": "circuit.qldpc_atoms.code=lcs15.schedule=cardinal.distance=3.cycles=3.backend=real_harvard.error_type=real_harvard.stim",
- "reference_sha256": "cf6a2c74d5c248a87cbd97e94eb286d2527ac5a0cda435981d9f8d64477dfe50",
+ "reference_sha256": "e3b8b17b0354a83ae7b1f2b9c37a195d766a86765364cb4ecdefb8733f402e6d",
  "detectors": 93,
  "fit_seconds": 8.5,
  "fault_mechanisms": 464,
@@ -11,7 +11,7 @@
   "chunk_used": 1024,
   "prob_regression_flag": false,
   "ece_baseline": 0.002293995284046092,
-  "device_free_at_entry_mib": 142625.125,
+  "device_free_at_entry_mib": 142627.125,
   "version": 5,
   "bce_model": 0.011066872732946402,
   "shots_used": 1048576,
@@ -20,11 +20,11 @@
   "ece_model": 0.0005852893521796146,
   "brier_baseline": 0.00394246485091256,
   "steps_run": 25000,
-  "wall_s": 8.497909559,
+  "wall_s": 8.465896727,
   "brier_model": 0.0029620151446375347,
   "converged": true,
   "device_highwater_mib": 13994,
-  "budget_bytes": 74776641536,
+  "budget_bytes": 74777690112,
   "seed": 1,
   "bce_prior": 0.036046664733738465
  }

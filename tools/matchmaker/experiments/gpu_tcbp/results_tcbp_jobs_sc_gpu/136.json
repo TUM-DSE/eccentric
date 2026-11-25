@@ -1,0 +1,49 @@
+{
+ "index": 136,
+ "key": "sweep1/circuit.reference.code=repetition.distance=5.cycles=5.backend=custom_full.backend_size=9.error_type=sd6.error_probability=0.0005",
+ "code": "repetition",
+ "family": "Repetition",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 3600,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.reference.code=repetition.distance=5.cycles=5.backend=custom_full.backend_size=9.error_type=sd6.error_probability=0.0005.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 100000,
+  "errors": 0,
+  "logical_error_rate": 0.0,
+  "seconds": 2.4003536701202393,
+  "wall_seconds": 2.400359630584717
+ },
+ "timing": {
+  "build_seconds": 0.010909080505371094,
+  "shots": 100000,
+  "seconds": 0.7854607105255127,
+  "batches": [
+   [
+    4096,
+    0.029137611389160156
+   ],
+   [
+    32768,
+    0.28062868118286133
+   ],
+   [
+    32768,
+    0.24045872688293457
+   ],
+   [
+    30368,
+    0.23523569107055664
+   ]
+  ],
+  "gpu_shots_per_second": 127313.81552247849,
+  "gpu_ms_per_shot": 0.007854607105255127,
+  "bp_converged_fraction": 0.9999300447713464
+ }
+}

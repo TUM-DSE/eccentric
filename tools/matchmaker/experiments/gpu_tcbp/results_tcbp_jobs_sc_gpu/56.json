@@ -1,0 +1,49 @@
+{
+ "index": 56,
+ "key": "sweep_ft_ops/circuit.fault_tolerant_ops.code=surface.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.operation=transversal_cnot",
+ "code": "surface",
+ "family": "Surface",
+ "decoder": "tcbp_jobs_sc_gpu",
+ "settings": {
+  "target_errors": 100,
+  "max_shots": 100000,
+  "time_budget": 1800,
+  "first_batch": 100,
+  "max_batch": 5000
+ },
+ "cpu_job": "decode.fault_tolerant_ops.code=surface.distance=5.cycles=5.backend=real_harvard.error_type=real_harvard.operation=transversal_cnot.decoder=bposd",
+ "settings_differ_across_cpu_jobs": [],
+ "ler": {
+  "shots": 1500,
+  "errors": 200,
+  "logical_error_rate": 0.13333333333333333,
+  "seconds": 1.7476520538330078,
+  "wall_seconds": 1.7476677894592285
+ },
+ "timing": {
+  "build_seconds": 0.29873037338256836,
+  "shots": 100000,
+  "seconds": 29.232221603393555,
+  "batches": [
+   [
+    4096,
+    1.3088879585266113
+   ],
+   [
+    32768,
+    9.640583276748657
+   ],
+   [
+    32768,
+    9.509119987487793
+   ],
+   [
+    30368,
+    8.773630380630493
+   ]
+  ],
+  "gpu_shots_per_second": 3420.882660125669,
+  "gpu_ms_per_shot": 0.29232221603393554,
+  "bp_converged_fraction": 0.0041973137192197
+ }
+}
