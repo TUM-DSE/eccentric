@@ -13,11 +13,14 @@ import stim
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = "/home/manosgior/eccentric-validation"
-SLICE = os.path.join(HERE, "slice.json")  # a copy of ../gpu/slice.json
+# TCBP_LIST / TCBP_RESULTS / TCBP_TIMING=0 (full/nightly.sh): another circuit list (entries with key, code,
+# family, backend, error_type, file), results directory, and no timing part
+SLICE = os.environ.get("TCBP_LIST", os.path.join(HERE, "slice.json"))  # default: a copy of ../gpu/slice.json
+TIMING = os.environ.get("TCBP_TIMING", "1") != "0"
 i = int(sys.argv[1])
 DECODER = sys.argv[2] if len(sys.argv) > 2 else "tcbp_jobs_gpu"
 PRESET = {"tcbp_jobs_gpu": "tcbp-jobs", "tcbp_jobs_sc_gpu": "tcbp-jobs-sc"}[DECODER]
-RESULTS = os.path.join(HERE, "results" if DECODER == "tcbp_jobs_gpu" else f"results_{DECODER}")
+RESULTS = os.environ.get("TCBP_RESULTS") or os.path.join(HERE, "results" if DECODER == "tcbp_jobs_gpu" else f"results_{DECODER}")
 o = json.load(open(SLICE))[i]
 out = {"index": i, "key": o["key"], "code": o["code"], "family": o["family"], "decoder": DECODER}
 
@@ -53,6 +56,8 @@ from eccentric.decoders.gpu.tcbp_models import load as _load_model  # noqa: F401
 backend, error_type = o["backend"], o["error_type"]
 ade = backend.split("_")[0] in ("variance", "real", "native") and (error_type == "variance" or error_type.split("_")[0] == "real")
 try:
+    if not TIMING:
+        raise StopIteration
     import cupy as cp
     sampler = circuit.compile_detector_sampler(seed=i)
     t = time.time(); g = nvqldpc.tcbp_jobs_decoder(circuit, ade, o["code"], PRESET); build_s = time.time() - t
@@ -71,6 +76,8 @@ try:
                          bp_converged_fraction=g.converged / max(g.shots, 1))
     del g
     cp.get_default_memory_pool().free_all_blocks()
+except StopIteration:
+    pass
 except Exception as e:
     out["timing"] = {"error": repr(e)[:500]}
 
