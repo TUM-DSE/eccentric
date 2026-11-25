@@ -147,9 +147,12 @@ its first 100 shots (`qec_matchmaker.runtime.execute`) then checks each predicti
 32% of always-Tesseract's CPU time (89% at 30% with the cheapest objective), with 99% of the above-threshold
 circuits caught.
 
-With a GPU (`--gpu`), Matchmaker predicts the GPU versions' times from 1,145 GPU pilots (87% within 3× on
-held-out codes) and moves a fifth to a third of the circuits to a GPU decoder, whose predicted time per shot is
-then a median 160–220× below the CPU choice's ([experiments/gpu](experiments/gpu/README.md)).
+With a GPU (`--gpu`), Matchmaker predicts the GPU decoders' times from 1,451 GPU pilots (93% within 3× on
+held-out codes), and adds TCBP-JOBS (`tcbp_jobs_sc_gpu`, GPU only; arXiv:2611.21321, preprint), whose accuracy it
+learned from its decodes of 306 circuits (it matched Tesseract's error rate on all 181 of them Tesseract measured).
+With it, 90–94% of the circuits move to a GPU decoder, mostly TCBP-JOBS, whose predicted time per shot is a median
+430–580× below the CPU choice's; its accuracy beyond those 306 circuits is extrapolated
+([experiments/gpu](experiments/gpu/README.md)).
 
 More: the full report ([reports/REPORT.md](reports/REPORT.md)), whole code families, devices and noise models
 held out ([experiments/GENERALIZATION.md](experiments/GENERALIZATION.md)), circuits beyond the training range

@@ -11,6 +11,7 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _ECCENTRIC_RESULTS = os.path.join(_ROOT, "..", "..", "experiment_results", "Sweep", "results.csv")
 _STORE = os.path.join(_ROOT, "data", "features.jsonl.gz")
 _GPU_PILOTS = os.path.join(_ROOT, "experiments", "gpu", "results")
+_GPU_ONLY = os.path.join(_ROOT, "experiments", "gpu_tcbp")
 _PACKAGED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "model")
 
 
@@ -84,9 +85,17 @@ def _train(args):
     from .dataset import load_dataset
     from .models import train
     table, manifest = load_dataset(args.data)
+    gpu_only = os.path.isdir(args.gpu_pilots) and os.path.isdir(args.gpu_only)
+    if gpu_only:
+        # GPU-only decoders' slice decodes join the table (their accuracy); their time is the GPU model's
+        import pandas as pd
+        from .gpu import load_gpu_only_rows
+        extra = load_gpu_only_rows(args.gpu_only, table)
+        table = pd.concat([table, extra], ignore_index=True)
+        manifest = {**manifest, "gpu_only_rows": extra.decoder.value_counts().to_dict()}
     bundle = train(table, manifest=manifest, calibrate=not args.no_calibration)
     if os.path.isdir(args.gpu_pilots):
-        _add_gpu(bundle, args.gpu_pilots, args.store)
+        _add_gpu(bundle, args.gpu_pilots, args.store, args.gpu_only if gpu_only else None)
     if args.metrics and os.path.exists(args.metrics):
         with open(args.metrics) as f:
             bundle.meta["metrics"] = json.load(f)
@@ -94,11 +103,14 @@ def _train(args):
     print(f"trained on {manifest['rows']} rows ({manifest['circuits']} circuits), saved to {args.out}")
 
 
-def _add_gpu(bundle, pilots_dir, store):
+def _add_gpu(bundle, pilots_dir, store, gpu_only_dir=None):
     import re
-    from .gpu import add_gpu_model, load_pilots
+    import pandas as pd
+    from .gpu import add_gpu_model, load_gpu_only_pilots, load_pilots
     from .pipeline import features_of_store, load_store
     pilots = load_pilots(pilots_dir)
+    if gpu_only_dir:
+        pilots = pd.concat([pilots, load_gpu_only_pilots(gpu_only_dir)], ignore_index=True)
     codes = {k: m.group(1) for k in pilots.circuit_key.unique() if (m := re.search(r"\.code=([^.]+)", k))}
     report = add_gpu_model(bundle, pilots, features_of_store(load_store(store)), codes)
     best = report["variants"][report["chosen"]]
@@ -177,6 +189,8 @@ def main(argv=None):
     p.add_argument("--metrics", default="reports/metrics.json", help="evaluation metrics to store with the model")
     p.add_argument("--no-calibration", action="store_true", help="skip the conformal widening of the intervals")
     p.add_argument("--gpu-pilots", default=_GPU_PILOTS, help="GPU pilot results: also train the GPU time model")
+    p.add_argument("--gpu-only", default=_GPU_ONLY, help="slice decodes of the GPU-only decoders (gpu.GPU_ONLY): "
+                   "trained with the GPU time model")
     p.add_argument("--store", default=_STORE)
     p.set_defaults(run=_train)
 

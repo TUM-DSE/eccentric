@@ -476,10 +476,14 @@ class ModelBundle:
         columns, optionally `circuit_key`, else the index is the key), or one circuit's features dict.
         decoders: the decoders to predict for (default: those seen in training); a model that did not see
         a decoder in training predicts NaN for it. gpu: decoders with a GPU version (gpu.GPU_VERSIONS) are
-        replaced by it, named <decoder>_gpu, with the GPU time model's ms per shot; `device` says which"""
+        replaced by it, named <decoder>_gpu, with the GPU time model's ms per shot; `device` says which. The
+        GPU-only decoders (gpu.GPU_ONLY) are left out of the default decoders without gpu"""
+        from .gpu import GPU_ONLY
         frame = pd.DataFrame([features]) if isinstance(features, dict) else pd.DataFrame(features)
         keys = frame["circuit_key"].to_numpy() if "circuit_key" in frame.columns else frame.index.to_numpy()
-        decoders = list(self.decoders() if decoders is None else decoders)
+        if decoders is None:  # without a GPU, not the decoders that run on a GPU only
+            decoders = [d for d in self.decoders() if gpu or d not in GPU_ONLY]
+        decoders = list(decoders)
         n, k = len(frame), len(decoders)
         X = _matrix(frame, self.features)
         q, models = self.quantiles, self.models
@@ -531,7 +535,7 @@ class ModelBundle:
             has = ~np.isnan(g[:, 0])
             for j, quantile in enumerate(q):
                 out.loc[has, _qname("ms", quantile)] = g[has, j]
-            out.loc[has, "decoder"] = [GPU_VERSIONS[d] for d in dec[has]]
+            out.loc[has, "decoder"] = [GPU_VERSIONS.get(d, d) for d in dec[has]]
             out.loc[has, "device"] = "gpu"
         return out
 

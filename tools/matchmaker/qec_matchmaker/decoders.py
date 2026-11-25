@@ -14,6 +14,7 @@ DECODERS = {
     "chromobius": "Chromobius color-code decoder",
     "gari": "GARI: normalized min-sum on the GARI-transformed correlated error model (CSS circuits only)",
     "gari_pp": "GARI++ (ECCentric's beta reimplementation): short GARI plus union-find on its residual",
+    "tcbp_jobs_sc_gpu": "TCBP-JOBS on a GPU (NVIDIA CUDA-Q QEC; arXiv:2611.21321, preprint), JOBS on every shot; GPU only",
 }
 
 

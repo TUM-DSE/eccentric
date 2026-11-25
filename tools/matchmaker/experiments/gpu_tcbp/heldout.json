@@ -1,0 +1,21 @@
+{
+ "slice_circuits": 306,
+ "folds": 10,
+ "held_out": "code",
+ "tcbp_jobs_sc_gpu": {
+  "decodes": 242,
+  "ler_median_abs_log10": 0.15428974562822867,
+  "ler_p90_abs_log10": 0.6342784721632353,
+  "ler_within_3x": 0.8347107438016529,
+  "regret_median_abs_log10": 2.4995983069115503e-06,
+  "regret_p90_abs_log10": 0.011199452736536677
+ },
+ "cpu decoders, same circuits": {
+  "decodes": 1506,
+  "ler_median_abs_log10": 0.16909326770539013,
+  "ler_p90_abs_log10": 0.6441300139954496,
+  "ler_within_3x": 0.8154050464807437,
+  "regret_median_abs_log10": 0.0919171374168479,
+  "regret_p90_abs_log10": 0.5580567757320134
+ }
+}

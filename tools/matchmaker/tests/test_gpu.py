@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from qec_matchmaker.api import MODEL_DIR
-from qec_matchmaker.gpu import GPU_VERSIONS, load_pilots
+from qec_matchmaker.gpu import GPU_ONLY, GPU_VERSIONS, load_gpu_only_pilots, load_gpu_only_rows, load_pilots
 from qec_matchmaker.models import ModelBundle
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -47,7 +47,7 @@ def test_gpu_predictions_rename_and_retime(bundle):
     circuit = _one_circuit(bundle)
     cpu, gpu = bundle.predict(circuit), bundle.predict(circuit, gpu=True)
     assert set(cpu.device) == {"cpu core"}
-    renamed = gpu[gpu.device == "gpu"]
+    renamed = gpu[(gpu.device == "gpu") & ~gpu.decoder.isin(GPU_ONLY)]
     assert set(renamed.decoder) == {GPU_VERSIONS[d] for d in cpu.decoder if d in GPU_VERSIONS}
     by_cpu = cpu.set_index("decoder")
     for _, row in renamed.iterrows():
@@ -66,6 +66,44 @@ def test_gpu_needs_a_gpu_model(bundle):
 
 def test_gpu_model_meta(bundle):
     meta = bundle.meta["gpu"]
-    assert meta["device"] and set(meta["build_seconds"]) == set(GPU_VERSIONS)
+    assert meta["device"] and set(meta["build_seconds"]) == set(GPU_VERSIONS) | set(meta.get("gpu_only", []))
     best = meta["evaluation"]["variants"][meta["evaluation"]["chosen"]]
     assert best["within_3x"] > 0.8
+
+
+def _slice_result(key, errors, shots, target=100, timing=True):
+    out = {"index": 0, "key": key, "settings": {"target_errors": target}, "ler": {"shots": shots, "errors": errors}}
+    if timing:
+        out["timing"] = {"gpu_shots_per_second": 4000.0, "build_seconds": 0.2, "shots": 100000}
+    return out
+
+
+def test_gpu_only_rows_follow_eccentric_status_rules(tmp_path):
+    import pandas as pd
+    d = tmp_path / "results_tcbp_jobs_sc_gpu"
+    d.mkdir()
+    for i, (key, e, n) in enumerate([("a", 120, 5000), ("b", 40, 100000), ("c", 0, 100000), ("unknown", 5, 10)]):
+        (d / f"{i}.json").write_text(json.dumps(_slice_result(key, e, n)))
+    table = pd.DataFrame({"circuit_key": ["a", "a", "b", "c"], "decoder": ["mwpm", "bposd", "mwpm", "mwpm"],
+                          "code": ["surface", "surface", "color", "bb72"], "status": "measured", "ler": 0.01,
+                          "ms_per_shot": 1.0, "detectors": [10, 10, 20, 30]})
+    rows = load_gpu_only_rows(str(tmp_path), table).set_index("circuit_key")
+    assert list(rows.index) == ["a", "b", "c"] and set(rows.decoder) == {"tcbp_jobs_sc_gpu"}
+    assert list(rows.status) == ["measured", "low statistics", "upper bound"]
+    assert rows.loc["a", "ler"] == pytest.approx(120 / 5000) and rows.loc["a", "ler_low"] < rows.loc["a", "ler"] < rows.loc["a", "ler_high"]
+    assert np.isnan(rows.loc["c", "ler"]) and rows.loc["c", "ler_high"] > 0
+    assert rows.ms_per_shot.isna().all()  # no CPU time
+    assert rows.loc["b", "code"] == "color" and rows.loc["b", "detectors"] == 20  # the circuit's columns
+    pilots = load_gpu_only_pilots(str(tmp_path))
+    assert len(pilots) == 4 and pilots.gpu_ms_per_shot.iloc[0] == pytest.approx(0.25) and pilots.cpu_ms_per_shot.isna().all()
+
+
+def test_gpu_only_decoders_only_with_a_gpu(bundle):
+    circuit = _one_circuit(bundle)
+    cpu, gpu = bundle.predict(circuit), bundle.predict(circuit, gpu=True)
+    assert not cpu.decoder.isin(GPU_ONLY).any()
+    only = gpu[gpu.decoder.isin(GPU_ONLY)]
+    if not bundle.meta["gpu"].get("gpu_only"):
+        pytest.skip("packaged model without GPU-only decoders")
+    assert len(only) == len(bundle.meta["gpu"]["gpu_only"]) and set(only.device) == {"gpu"}
+    assert only.ms_q50.notna().all() and only.ler_decoder_q50.notna().all()

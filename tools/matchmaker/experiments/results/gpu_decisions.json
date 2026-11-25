@@ -1,78 +1,75 @@
 {
  "accurate": {
   "circuits": 5624,
-  "recommends_a_gpu_decoder": 1087,
-  "same_algorithm_on_the_gpu": 248,
-  "different_algorithm": 839,
+  "recommends_a_gpu_decoder": 5306,
+  "same_algorithm_on_the_gpu": 66,
+  "different_algorithm": 5240,
   "different_algorithm_examples": [
-   "bposd_tuned -> gari_gpu",
+   "bplsd -> tcbp_jobs_sc_gpu",
+   "bposd -> tcbp_jobs_sc_gpu",
    "bposd_tuned -> relay_bp_gpu",
-   "gari_pp -> gari_gpu",
+   "bposd_tuned -> tcbp_jobs_sc_gpu",
+   "gari -> tcbp_jobs_sc_gpu",
    "gari_pp -> relay_bp_gpu",
-   "mwpf -> bposd_tuned_gpu",
+   "gari_pp -> tcbp_jobs_sc_gpu",
+   "mwpf -> tcbp_jobs_sc_gpu",
    "mwpm -> relay_bp_gpu",
-   "mwpm_corr -> relay_bp_gpu",
-   "relay_bp -> bposd_gpu",
-   "relay_bp -> bposd_tuned_gpu"
+   "mwpm_corr -> tcbp_jobs_sc_gpu",
+   "relay_bp -> tcbp_jobs_sc_gpu",
+   "tesseract -> tcbp_jobs_sc_gpu"
   ],
-  "speedup_where_gpu_chosen_median": 223.10190230449666,
+  "speedup_where_gpu_chosen_median": 583.1876244409143,
   "speedup_where_gpu_chosen_p10_p90": [
-   21.6957331851125,
-   772.6726951218473
+   15.17567836507606,
+   36085.754850354686
   ],
   "gpu_choices": {
-   "bplsd_gpu": 1,
-   "bposd_gpu": 4,
-   "bposd_tuned_gpu": 195,
-   "gari_gpu": 576,
-   "relay_bp_gpu": 311
+   "bposd_tuned_gpu": 65,
+   "relay_bp_gpu": 14,
+   "tcbp_jobs_sc_gpu": 5227
   },
   "cpu_choices_kept": {
-   "gari_pp": 17,
-   "mwpf": 5,
-   "mwpm": 149,
-   "mwpm_corr": 17,
-   "tesseract": 4349
+   "mwpm": 150,
+   "mwpm_corr": 14,
+   "tesseract": 154
   }
  },
  "cheapest": {
   "circuits": 5624,
-  "recommends_a_gpu_decoder": 1781,
-  "same_algorithm_on_the_gpu": 414,
-  "different_algorithm": 1367,
+  "recommends_a_gpu_decoder": 5084,
+  "same_algorithm_on_the_gpu": 77,
+  "different_algorithm": 5009,
   "different_algorithm_examples": [
-   "bposd_tuned -> belief_find_gpu",
    "bposd_tuned -> bplsd_gpu",
-   "bposd_tuned -> gari_gpu",
    "bposd_tuned -> relay_bp_gpu",
-   "gari_pp -> gari_gpu",
+   "bposd_tuned -> tcbp_jobs_sc_gpu",
+   "chromobius -> tcbp_jobs_sc_gpu",
+   "gari -> tcbp_jobs_sc_gpu",
    "gari_pp -> relay_bp_gpu",
+   "gari_pp -> tcbp_jobs_sc_gpu",
    "mwpf -> bposd_tuned_gpu",
+   "mwpf -> tcbp_jobs_sc_gpu",
    "mwpm -> relay_bp_gpu",
-   "mwpm_corr -> relay_bp_gpu",
-   "relay_bp -> bposd_gpu",
-   "relay_bp -> bposd_tuned_gpu",
-   "tesseract -> bposd_tuned_gpu"
+   "mwpm -> tcbp_jobs_sc_gpu",
+   "mwpm_corr -> mwpm"
   ],
-  "speedup_where_gpu_chosen_median": 161.9355365197952,
+  "speedup_where_gpu_chosen_median": 433.02971081992973,
   "speedup_where_gpu_chosen_p10_p90": [
-   7.063038816419971,
-   706.345408226457
+   13.255415757145217,
+   17866.8081894592
   ],
   "gpu_choices": {
-   "belief_find_gpu": 6,
    "bplsd_gpu": 1,
-   "bposd_gpu": 3,
-   "bposd_tuned_gpu": 373,
-   "gari_gpu": 720,
-   "relay_bp_gpu": 678
+   "bposd_tuned_gpu": 16,
+   "relay_bp_gpu": 256,
+   "tcbp_jobs_sc_gpu": 4811
   },
   "cpu_choices_kept": {
-   "chromobius": 43,
-   "mwpf": 5,
-   "mwpm": 354,
-   "mwpm_corr": 64,
-   "tesseract": 3377
+   "chromobius": 31,
+   "mwpf": 4,
+   "mwpm": 352,
+   "mwpm_corr": 30,
+   "tesseract": 123
   }
  }
 }
