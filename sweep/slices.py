@@ -240,6 +240,32 @@ def noise_scaling():
                                    decoders=decoders, decode=dict(max_shots=1_000_000))
 
 
+WILLOW_QLDPC_DECODERS = ["bposd", "bplsd", "relay_bp", "belief_find", "tesseract", "bposd_tuned", "gari", "gari_pp"]
+
+
+def willow_qldpc():
+    """The codes that fit Willow's 315-qubit grid but had no configuration on it (qLDPC, Reed-Muller, toric,
+    repetition), at a tenth of Willow's noise (real_willow_x0.1): at its own noise the qLDPC codes that ran
+    there (noise_scaling) are at a logical error rate of 0.7-1, since the grid needs thousands of SWAPs.
+    Every schedule of each code, d rounds, the decoders these codes have on the other devices. The six
+    qLDPC codes already in noise_scaling are left out"""
+    from eccentric.codes import get_min_n
+
+    size = 315
+    done = {code for code, distances in SCALING_CODES.items() if distances is None}
+    for code in QLDPC_CODES + ["rm15", "toric", "repetition"]:
+        if code in done:
+            continue
+        matchable = code in MATCHABLE
+        decoders = ["bposd", "mwpm", "mwpm_corr", "relay_bp", "tesseract"] if matchable else WILLOW_QLDPC_DECODERS
+        for d in code_distances(code):
+            if get_min_n(code, d) > size:
+                continue
+            for schedule in schedules(code):
+                yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend="real_willow",
+                           error_type="real_willow_x0.1", error_probability=None, decoders=decoders)
+
+
 # The paper's experiments compiled onto sparse devices with circuit qubit i on device qubit i
 PAPER_TOPOLOGY = ["Real_Topology", "Willow", "Connectivity", "Program_stats_topology", "Apollo", "Infleqtion"]
 
@@ -381,4 +407,4 @@ def fault_tolerant_ops():
                            error_probability=None, decoders=decoders, decode=dict(time_budget=1800, max_shots=100_000), **extra)
 
 
-SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices, "noise_scaling": noise_scaling, "basis_x": basis_x, "lattice_surgery": lattice_surgery, "fault_tolerant_ops": fault_tolerant_ops}
+SLICES = {"qldpc_ibm": qldpc_ibm, "qldpc_ibm_projected": qldpc_ibm_projected, "bb_native": bb_native, "paper_dqc": paper_dqc, "willow_surface": willow_surface, "qldpc_bicycle": qldpc_bicycle, "qldpc_bicycle_chain": qldpc_bicycle_chain, "qldpc_atoms": qldpc_atoms, "paper_topology": paper_topology, "readout_700": readout_700, "reference": reference, "floquet_devices": floquet_devices, "noise_scaling": noise_scaling, "basis_x": basis_x, "lattice_surgery": lattice_surgery, "fault_tolerant_ops": fault_tolerant_ops, "willow_qldpc": willow_qldpc}
