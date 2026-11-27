@@ -245,10 +245,10 @@ WILLOW_QLDPC_DECODERS = ["bposd", "bplsd", "relay_bp", "belief_find", "tesseract
 
 def willow_qldpc():
     """The codes that fit Willow's 315-qubit grid but had no configuration on it (qLDPC, Reed-Muller, toric,
-    repetition), at a tenth of Willow's noise (real_willow_x0.1): at its own noise the qLDPC codes that ran
-    there (noise_scaling) are at a logical error rate of 0.7-1, since the grid needs thousands of SWAPs.
-    Every schedule of each code, d rounds, the decoders these codes have on the other devices. The six
-    qLDPC codes already in noise_scaling are left out"""
+    repetition), at Willow's noise scaled by 0.1, 0.25, 0.5 and 1 as in noise_scaling: at its own noise the
+    qLDPC codes that ran there (noise_scaling) are at a logical error rate of 0.7-1, since the grid needs
+    thousands of SWAPs, and they cross over between 0.1 and 0.5. Every schedule of each code, d rounds, the
+    decoders these codes have on the other devices. The six qLDPC codes already in noise_scaling are left out"""
     from eccentric.codes import get_min_n
 
     size = 315
@@ -262,8 +262,10 @@ def willow_qldpc():
             if get_min_n(code, d) > size:
                 continue
             for schedule in schedules(code):
-                yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend="real_willow",
-                           error_type="real_willow_x0.1", error_probability=None, decoders=decoders)
+                for factor in NOISE_SCALES:
+                    yield dict(code=code, schedule=schedule, distance=d, cycles=d, backend="real_willow",
+                               error_type="real_willow" if factor == 1 else f"real_willow_x{factor}",
+                               error_probability=None, decoders=decoders)
 
 
 # The paper's experiments compiled onto sparse devices with circuit qubit i on device qubit i
