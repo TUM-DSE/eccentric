@@ -5,13 +5,13 @@
   "devices": 25,
   "noise_models": 27,
   "decoders": 14,
-  "results": 35374,
-  "configurations": 5580,
-  "shots": 3805447395,
-  "cpu_hours": 24624,
+  "results": 37820,
+  "configurations": 5908,
+  "shots": 3833148549,
+  "cpu_hours": 25387,
   "display": {
-    "results": "35,374",
+    "results": "37,820",
     "shots": "3.8B",
-    "cpu_hours": "24.6k"
+    "cpu_hours": "25.4k"
   }
 }

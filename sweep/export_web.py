@@ -85,6 +85,7 @@ SLICES = {
     "willow_surface": "Surface code on Google Willow",
     "floquet_devices": "Floquet codes on devices",
     "noise_scaling": "Device noise scaled down",
+    "willow_qldpc": "qLDPC and other codes on Google Willow",
     "basis_x": "Memory in the X basis",
     "reference": "Reference: all codes on an all-to-all device",
     "lattice_surgery": "Lattice surgery: memory, merge and CNOT of surface-code patches",
@@ -118,6 +119,10 @@ SLICE_DESCRIPTIONS = {
     "noise_scaling": "Codes at several distances on IBM, Google and neutral-atom devices, with every error "
                      "probability of the device's noise multiplied by 0.1, 0.25, 0.5 or 1: where each device "
                      "crosses threshold, and how much better it must get.",
+    "willow_qldpc": "The codes that fit Willow's 315-qubit grid but were not in the other Willow datasets (qLDPC "
+                    "codes, Reed-Muller, toric, repetition), at every schedule, with Willow's noise multiplied by 0.1, "
+                    "0.25, 0.5 or 1. The grid needs thousands of SWAPs for qLDPC codes: at Willow's own noise most "
+                    "of them fail, at a tenth of it most work.",
     "basis_x": "The same memory experiments with the logical |+> state prepared and measured in the X basis, "
                "paired with their Z-basis results: the Willow surface code, codes on IBM, Google and neutral-atom "
                "devices at their own noise, Bacon-Shor and XZZX in both bases, and asymmetric codes under uniform "
